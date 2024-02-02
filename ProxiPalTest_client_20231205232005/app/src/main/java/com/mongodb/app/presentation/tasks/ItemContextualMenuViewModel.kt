@@ -15,19 +15,7 @@ import kotlinx.coroutines.launch
 class ItemContextualMenuViewModel constructor(
     private val repository: SyncRepository,
     private val taskViewModel: TaskViewModel
-) : ViewModel() {
-
-    private val _visible: MutableState<Boolean> = mutableStateOf(false)
-    val visible: State<Boolean>
-        get() = _visible
-
-    fun open() {
-        _visible.value = true
-    }
-
-    fun close() {
-        _visible.value = false
-    }
+) : ContextualMenuViewModel(repository = repository) {
 
     fun deleteTask(task: Item) {
         CoroutineScope(Dispatchers.IO).launch {

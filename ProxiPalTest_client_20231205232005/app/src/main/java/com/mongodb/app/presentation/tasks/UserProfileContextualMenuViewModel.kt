@@ -16,19 +16,7 @@ import kotlinx.coroutines.launch
 class UserProfileContextualMenuViewModel constructor(
     private val repository: SyncRepository,
     private val userProfileViewModel: UserProfileViewModel
-) : ViewModel() {
-
-    private val _visible: MutableState<Boolean> = mutableStateOf(false)
-    val visible: State<Boolean>
-        get() = _visible
-
-    fun open() {
-        _visible.value = true
-    }
-
-    fun close() {
-        _visible.value = false
-    }
+) : ContextualMenuViewModel(repository = repository) {
 
     fun deleteUserProfile(userProfile: UserProfile) {
         CoroutineScope(Dispatchers.IO).launch {
