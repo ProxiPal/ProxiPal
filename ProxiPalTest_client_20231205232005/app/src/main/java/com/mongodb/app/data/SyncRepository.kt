@@ -2,6 +2,7 @@ package com.mongodb.app.data
 
 import com.mongodb.app.domain.Item
 import com.mongodb.app.app
+import com.mongodb.app.domain.UserProfile
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.User
@@ -115,6 +116,12 @@ class RealmSyncRepository(
             .asFlow()
     }
 
+    fun getUserProfileList(): Flow<ResultsChange<UserProfile>>{
+        return realm.query<UserProfile>()
+            .sort(Pair("_id", Sort.ASCENDING))
+            .asFlow()
+    }
+
     override suspend fun toggleIsComplete(task: Item) {
         realm.write {
             val latestVersion = findLatest(task)
@@ -132,6 +139,16 @@ class RealmSyncRepository(
         }
     }
 
+    suspend fun addUserProfile(userProfileBiography: String){
+        val userProfile = UserProfile().apply{
+            biography = userProfileBiography
+            owner_id = currentUser.id
+        }
+        realm.write {
+            copyToRealm(userProfile)
+        }
+    }
+
     override suspend fun updateSubscriptions(subscriptionType: SubscriptionType) {
         realm.subscriptions.update {
             removeAll()
@@ -146,6 +163,13 @@ class RealmSyncRepository(
     override suspend fun deleteTask(task: Item) {
         realm.write {
             delete(findLatest(task)!!)
+        }
+        realm.subscriptions.waitForSynchronization(10.seconds)
+    }
+
+    suspend fun deleteUserProfile(userProfile: UserProfile){
+        realm.write {
+            delete(findLatest(userProfile)!!)
         }
         realm.subscriptions.waitForSynchronization(10.seconds)
     }
@@ -172,6 +196,8 @@ class RealmSyncRepository(
 
     override fun isTaskMine(task: Item): Boolean = task.owner_id == currentUser.id
 
+    fun isUserProfileMine(userProfile: UserProfile): Boolean = userProfile.owner_id == currentUser.id
+
     override fun close() = realm.close()
 
     private fun getQuery(realm: Realm, subscriptionType: SubscriptionType): RealmQuery<Item> =
@@ -188,12 +214,15 @@ class MockRepository : SyncRepository {
     override fun getTaskList(): Flow<ResultsChange<Item>> = flowOf()
     override suspend fun toggleIsComplete(task: Item) = Unit
     override suspend fun addTask(taskSummary: String) = Unit
+    suspend fun addUserProfile(userProfileBiography: String) = Unit
     override suspend fun updateSubscriptions(subscriptionType: SubscriptionType) = Unit
     override suspend fun deleteTask(task: Item) = Unit
+    suspend fun deleteUserProfile(userProfile: UserProfile) = Unit
     override fun getActiveSubscriptionType(realm: Realm?): SubscriptionType = SubscriptionType.ALL
     override fun pauseSync() = Unit
     override fun resumeSync() = Unit
     override fun isTaskMine(task: Item): Boolean = task.owner_id == MOCK_OWNER_ID_MINE
+    fun isUserProfileMine(userProfile: UserProfile): Boolean = userProfile.owner_id == MOCK_OWNER_ID_MINE
     override fun close() = Unit
 
     companion object {
