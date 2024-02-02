@@ -19,6 +19,9 @@ import com.mongodb.app.presentation.tasks.ContextualMenuViewModel
  * Contains Composable functions to be used multiple times throughout the app (to help reduce redundancy)
  */
 
+/**
+ * The [Composable] function for providing a contextual menu for deleting items in the in-app list and the database (eventually)
+ */
 @Composable
 fun ContextualMenu(
     contextualMenuViewModel: ContextualMenuViewModel,

@@ -17,18 +17,39 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.mongodb.app.R
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.domain.Item
+import com.mongodb.app.domain.UserProfile
 import com.mongodb.app.presentation.tasks.ItemContextualMenuViewModel
 import com.mongodb.app.presentation.tasks.TaskViewModel
+import com.mongodb.app.presentation.tasks.UserProfileContextualMenuViewModel
 import com.mongodb.app.ui.components.ContextualMenu
 import com.mongodb.app.ui.theme.MyApplicationTheme
 
 @Composable
-fun ItemContextualMenu(viewModel: ItemContextualMenuViewModel, task: Item) {
+fun ItemContextualMenu(
+    viewModel: ItemContextualMenuViewModel,
+    task: Item
+) {
     ContextualMenu(
         contextualMenuViewModel = viewModel,
         onClickContextualMenuViewModelOpen = { viewModel.open() },
         onClickContextualMenuViewModelClose = { viewModel.close() },
         onClickContextualMenuViewModelDeleteEntry = { viewModel.deleteTask(task) }
+    )
+}
+
+/**
+ * This should be similar in appearance and functionality to the ItemContextualMenu function above
+ */
+@Composable
+fun UserProfileContextualMenu(
+    viewModel: UserProfileContextualMenuViewModel,
+    userProfile: UserProfile
+) {
+    ContextualMenu(
+        contextualMenuViewModel = viewModel,
+        onClickContextualMenuViewModelOpen = { viewModel.open() },
+        onClickContextualMenuViewModelClose = { viewModel.close() },
+        onClickContextualMenuViewModelDeleteEntry = { viewModel.deleteUserProfile(userProfile) }
     )
 }
 
