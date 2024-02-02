@@ -19,38 +19,17 @@ import com.mongodb.app.data.MockRepository
 import com.mongodb.app.domain.Item
 import com.mongodb.app.presentation.tasks.ItemContextualMenuViewModel
 import com.mongodb.app.presentation.tasks.TaskViewModel
+import com.mongodb.app.ui.components.ContextualMenu
 import com.mongodb.app.ui.theme.MyApplicationTheme
 
 @Composable
 fun ItemContextualMenu(viewModel: ItemContextualMenuViewModel, task: Item) {
-    Box(
-        contentAlignment = Alignment.Center
-    ) {
-        IconButton(
-            onClick = {
-                viewModel.open()
-            }
-        ) {
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = "Open Contextual Menu"
-            )
-        }
-
-        DropdownMenu(
-            expanded = viewModel.visible.value,
-            onDismissRequest = {
-                viewModel.close()
-            }
-        ) {
-            DropdownMenuItem(
-                text = { Text(text = stringResource(R.string.delete)) },
-                onClick = {
-                    viewModel.deleteTask(task)
-                }
-            )
-        }
-    }
+    ContextualMenu(
+        contextualMenuViewModel = viewModel,
+        onClickContextualMenuViewModelOpen = { viewModel.open() },
+        onClickContextualMenuViewModelClose = { viewModel.close() },
+        onClickContextualMenuViewModelDeleteEntry = { viewModel.deleteTask(task) }
+    )
 }
 
 @SuppressLint("UnrememberedMutableState")
