@@ -1,0 +1,9 @@
+<resources>
+    <string name="realm_app_id">proxipaltest-jyqla</string>
+    <string name="realm_app_url">https://realm.mongodb.com/groups/656fa44addc7840fec457ec3/apps/656fb0156d484b55836d118e</string>
+    <string name="realm_base_url">https://realm.mongodb.com</string>
+    <string name="realm_client_api_base_url">https://us-east-1.aws.realm.mongodb.com</string>
+    <string name="realm_data_api_base_url">https://us-east-1.aws.data.mongodb-api.com</string>
+    <string name="realm_data_explorer_link">https://cloud.mongodb.com/links/656fa44addc7840fec457ec3/explorer/Cluster0/database/collection/find</string>
+    <string name="realm_data_source_name">mongodb-atlas</string>
+</resources>
