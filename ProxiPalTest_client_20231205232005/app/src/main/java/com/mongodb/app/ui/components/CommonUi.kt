@@ -31,7 +31,8 @@ fun ContextualMenu(
     modifier: Modifier = Modifier
 ) {
     Box(
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
+        modifier = modifier
     ) {
         IconButton(
             onClick = onClickContextualMenuViewModelOpen
