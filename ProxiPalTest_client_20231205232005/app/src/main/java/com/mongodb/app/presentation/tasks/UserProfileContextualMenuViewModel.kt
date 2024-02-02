@@ -1,30 +1,31 @@
 package com.mongodb.app.presentation.tasks
+// TODO Might need to move this class to a new package to avoid confusion being in the "tasks" package
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.mongodb.app.data.SyncRepository
-import com.mongodb.app.domain.Item
+import com.mongodb.app.domain.UserProfile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
-class ItemContextualMenuViewModel constructor(
+class UserProfileContextualMenuViewModel constructor(
     private val repository: SyncRepository,
-    private val taskViewModel: TaskViewModel
+    private val userProfileViewModel: UserProfileViewModel
 ) : ContextualMenuViewModel(repository = repository) {
 
-    fun deleteTask(task: Item) {
+    fun deleteUserProfile(userProfile: UserProfile) {
         CoroutineScope(Dispatchers.IO).launch {
-            if (repository.isTaskMine(task)) {
+            if (repository.isUserProfileMine(userProfile)) {
                 runCatching {
-                    repository.deleteTask(task)
+                    repository.deleteUserProfile(userProfile)
                 }
             } else {
-                taskViewModel.showPermissionsMessage()
+                userProfileViewModel.showPermissionsMessage()
             }
         }
         close()
