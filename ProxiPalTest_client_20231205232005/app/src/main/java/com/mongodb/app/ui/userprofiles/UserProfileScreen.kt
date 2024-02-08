@@ -54,7 +54,7 @@ Displays the entire user profile screen
 @Composable
 fun UserProfileLayout(
     modifier: Modifier = Modifier,
-    appViewModel: UserProfileViewModel = viewModel()
+    userProfileViewModel: UserProfileViewModel = viewModel()
 ) {
     Scaffold(
         topBar = {
@@ -64,7 +64,7 @@ fun UserProfileLayout(
     ) { innerPadding ->
         UserProfileBody(
             contentPadding = innerPadding,
-            appViewModel = appViewModel
+            userProfileViewModel = userProfileViewModel
         )
     }
 }
@@ -109,7 +109,7 @@ fun UserProfileTopBarPreview() {
 @Composable
 fun UserProfileBody(
     modifier: Modifier = Modifier,
-    appViewModel: UserProfileViewModel = viewModel(),
+    userProfileViewModel: UserProfileViewModel = viewModel(),
     contentPadding: PaddingValues? = null
 ) {
     var isCardExpanded by rememberSaveable { mutableStateOf(false) }
@@ -122,7 +122,7 @@ fun UserProfileBody(
     var cardModifier = Modifier
         .fillMaxHeight()
     // Only allow card expanding/shrinking if not editing the user profile
-    if (!appViewModel.isEditingUserProfile) {
+    if (!userProfileViewModel.isEditingUserProfile) {
         cardModifier = cardModifier.clickable {
             isCardExpanded = !isCardExpanded
         }
@@ -139,41 +139,41 @@ fun UserProfileBody(
         {
             UserProfileLayoutRow(
                 rowInformationHeader = R.string.user_profile_first_name_header,
-                rowInformation = appViewModel.userProfileFirstName,
-                remainingCharacterAmount = appViewModel.getRemainingCharacterAmount(
+                rowInformation = userProfileViewModel.userProfileFirstName,
+                remainingCharacterAmount = userProfileViewModel.getRemainingCharacterAmount(
                     UserProfileInformationType.FirstName
                 ),
                 isInformationExpanded = isCardExpanded,
-                isEditingUserProfile = appViewModel.isEditingUserProfile,
-                onTextChange = { appViewModel.updateUserProfileFirstName(it) }
+                isEditingUserProfile = userProfileViewModel.isEditingUserProfile,
+                onTextChange = { userProfileViewModel.updateUserProfileFirstName(it) }
             )
             UserProfileLayoutRow(
                 rowInformationHeader = R.string.user_profile_last_name_header,
-                rowInformation = appViewModel.userProfileLastName,
-                remainingCharacterAmount = appViewModel.getRemainingCharacterAmount(
+                rowInformation = userProfileViewModel.userProfileLastName,
+                remainingCharacterAmount = userProfileViewModel.getRemainingCharacterAmount(
                     UserProfileInformationType.LastName
                 ),
                 isInformationExpanded = isCardExpanded,
-                isEditingUserProfile = appViewModel.isEditingUserProfile,
-                onTextChange = { appViewModel.updateUserProfileLastName(it) }
+                isEditingUserProfile = userProfileViewModel.isEditingUserProfile,
+                onTextChange = { userProfileViewModel.updateUserProfileLastName(it) }
             )
             UserProfileLayoutRow(
                 rowInformationHeader = R.string.user_profile_biography_header,
-                rowInformation = appViewModel.userProfileBiography,
-                remainingCharacterAmount = appViewModel.getRemainingCharacterAmount(
+                rowInformation = userProfileViewModel.userProfileBiography,
+                remainingCharacterAmount = userProfileViewModel.getRemainingCharacterAmount(
                     UserProfileInformationType.Biography
                 ),
                 isInformationExpanded = isCardExpanded,
-                isEditingUserProfile = appViewModel.isEditingUserProfile,
-                onTextChange = { appViewModel.updateUserProfileBiography(it) }
+                isEditingUserProfile = userProfileViewModel.isEditingUserProfile,
+                onTextChange = { userProfileViewModel.updateUserProfileBiography(it) }
             )
         }
         UserProfileEditButton(
-            appViewModel.isEditingUserProfile,
+            userProfileViewModel.isEditingUserProfile,
             onClick = {
-                appViewModel.toggleUserProfileEditMode()
+                userProfileViewModel.toggleUserProfileEditMode()
                 // Automatically show/hide all information when switching to/from edit mode
-                isCardExpanded = appViewModel.isEditingUserProfile
+                isCardExpanded = userProfileViewModel.isEditingUserProfile
             }
         )
     }
