@@ -1,4 +1,4 @@
-package com.mongodb.app.presentation.tasks
+package com.mongodb.app.presentation.userprofiles
 // TODO Might need to move this class to a new package to avoid confusion being in the "tasks" package
 
 import android.os.Bundle
@@ -14,8 +14,6 @@ import com.mongodb.app.domain.UserProfile
 import io.realm.kotlin.notifications.InitialResults
 import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.notifications.UpdatedResults
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch

@@ -1,4 +1,4 @@
-package com.mongodb.app.presentation.tasks
+package com.mongodb.app.presentation.userprofiles
 // TODO Might need to move this class to a new package to avoid confusion being in the "tasks" package
 
 import android.os.Bundle
@@ -60,7 +60,12 @@ class AddUserProfileViewModel(
                 }
             }.onFailure {
                 withContext(Dispatchers.Main) {
-                    _addUserProfileEvent.emit(AddUserProfileEvent.Error("There was an error while adding the user profile '$userProfileBiography'", it))
+                    _addUserProfileEvent.emit(
+                        AddUserProfileEvent.Error(
+                            "There was an error while adding the user profile '$userProfileBiography'",
+                            it
+                        )
+                    )
                 }
             }
             cleanUpAndClose()
