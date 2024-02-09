@@ -40,6 +40,7 @@ import com.mongodb.app.R
 import com.mongodb.app.data.USER_PROFILE_EDIT_MODE_MAXIMUM_LINE_AMOUNT
 import com.mongodb.app.data.USER_PROFILE_ROW_HEADER_WEIGHT
 import com.mongodb.app.data.UserProfileInformationType
+import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.components.MultiLineText
 import com.mongodb.app.ui.components.SingleLineText
 import com.mongodb.app.ui.theme.MyApplicationTheme

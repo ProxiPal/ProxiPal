@@ -1,5 +1,4 @@
 package com.mongodb.app.presentation.userprofiles
-// TODO Might need to move this class to a new package to avoid confusion being in the "tasks" package
 
 import android.os.Bundle
 import androidx.compose.runtime.MutableState
