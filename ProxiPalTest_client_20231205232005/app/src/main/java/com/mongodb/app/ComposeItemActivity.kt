@@ -59,6 +59,7 @@ import com.mongodb.app.presentation.tasks.TaskViewModel
 import com.mongodb.app.presentation.tasks.ToolbarEvent
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.ui.tasks.AddItemPrompt
+import com.mongodb.app.ui.tasks.ConnectWithOthersScreen
 import com.mongodb.app.ui.tasks.ShowMyOwnTasks
 import com.mongodb.app.ui.tasks.TaskAppToolbar
 import com.mongodb.app.ui.tasks.TaskList
@@ -159,6 +160,11 @@ class ComposeItemActivity : ComponentActivity() {
 
         setContent {
             MyApplicationTheme {
+                // testing connect with others screen
+                ConnectWithOthersScreen(toolbarViewModel = toolbarViewModel)
+                //LocationPermissionScreen()
+
+                /*
                 TaskListScaffold(
                     repository,
                     toolbarViewModel,
@@ -166,6 +172,8 @@ class ComposeItemActivity : ComponentActivity() {
                     subscriptionTypeViewModel,
                     taskViewModel
                 )
+                */
+
             }
         }
     }
@@ -212,7 +220,8 @@ fun TaskListScaffold(
                 containerColor = Color.LightGray
             ) {
                 Box(
-                    modifier = Modifier.align(Alignment.Top)
+                    modifier = Modifier
+                        .align(Alignment.Top)
                         .padding(0.dp, 0.dp, 0.dp, 0.dp),
                 ) {
                     ClickableText(

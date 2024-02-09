@@ -29,43 +29,40 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.ui.components.ProxiPalBottomAppBar
 import com.mongodb.app.ui.components.ProxipalTopAppBar
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
 import com.mongodb.app.ui.theme.Purple500
 
-// TODO location services, find out how to connect nearby users
-
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ConnectWithOthersScreen (
-    navigateToProfile: () -> Unit,
-    navigateToMessages: () -> Unit,
-    navigateToSettings: () -> Unit,
+    toolbarViewModel: ToolbarViewModel,
     modifier: Modifier = Modifier
 ){
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
+        topBar = { TaskAppToolbar(toolbarViewModel) },
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         bottomBar = {
-            ProxiPalBottomAppBar(selectedItem = 0, onClick = {})
+            ProxiPalBottomAppBar(selectedItem = 0)
         }
 
     ) { innerPadding ->
+
     }
 }
 
+/*
 @Preview(showBackground = true)
 @Composable
 fun ConnectWithOthersScreenPreview() {
     MyApplicationTheme {
-        ConnectWithOthersScreen(
-            navigateToProfile = {},
-            navigateToMessages = {},
-            navigateToSettings = {}
-        )
+        ConnectWithOthersScreen()
     }
 }
+*/

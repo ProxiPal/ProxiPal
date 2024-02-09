@@ -64,7 +64,7 @@ fun ProxipalTopAppBar(
  * TODO onClick will be for navigating to other pages
  */
 @Composable
-fun ProxiPalBottomAppBar(selectedItem: Int, onClick: () -> Unit){
+fun ProxiPalBottomAppBar(selectedItem: Int){
     val items = listOf("Profile", "Connect", "Friends")
     val theMap = mapOf(
         0 to Icons.Filled.AccountCircle, 1 to Icons.Filled.PlayArrow,
@@ -79,7 +79,7 @@ fun ProxiPalBottomAppBar(selectedItem: Int, onClick: () -> Unit){
                 icon = { theMap[index]?.let { Icon(it, contentDescription = null) } },
                 label = { Text(item) },
                 selected = selectedItem == index,
-                onClick = {onClick},
+                onClick = {},
                 selectedContentColor = Color.White
             )
         }
