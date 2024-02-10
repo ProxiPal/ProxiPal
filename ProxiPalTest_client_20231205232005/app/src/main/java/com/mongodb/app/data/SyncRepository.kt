@@ -48,9 +48,9 @@ interface SyncRepository {
     suspend fun addTask(taskSummary: String)
 
     /**
-     * Adds a user profile that belongs to the current user using the specified [userProfileBiography]
+     * Adds a user profile that belongs to the current user using the specified parameters
      */
-    suspend fun addUserProfile(userProfileBiography: String)
+    suspend fun addUserProfile(firstName: String, lastName: String, biography: String)
 
     /**
      * Updates the Sync subscriptions based on the specified [SubscriptionType].
@@ -167,9 +167,11 @@ class RealmSyncRepository(
         }
     }
 
-    override suspend fun addUserProfile(userProfileBiography: String){
+    override suspend fun addUserProfile(firstName: String, lastName: String, biography: String){
         val userProfile = UserProfile().apply{
-            biography = userProfileBiography
+            this.firstName = firstName
+            this.lastName = lastName
+            this.biography = biography
             ownerId = currentUser.id
         }
         realm.write {
@@ -260,7 +262,7 @@ class MockRepository : SyncRepository {
     override fun getUserProfileList(): Flow<ResultsChange<UserProfile>> = flowOf()
     override suspend fun toggleIsComplete(task: Item) = Unit
     override suspend fun addTask(taskSummary: String) = Unit
-    override suspend fun addUserProfile(userProfileBiography: String) = Unit
+    override suspend fun addUserProfile(firstName: String, lastName: String, biography: String) = Unit
     override suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType) = Unit
     override suspend fun updateSubscriptionsUserProfiles(subscriptionType: SubscriptionType) = Unit
     override suspend fun deleteTask(task: Item) = Unit

@@ -326,23 +326,42 @@ fun TemporaryUserProfileOwnerIdField(
     modifier: Modifier = Modifier,
     userProfileViewModel: UserProfileViewModel = viewModel()
 ) {
-    Row(
-        horizontalArrangement = Arrangement.Center,
+    Column(
         modifier = modifier
-            .fillMaxWidth()
-    ) {
-        TextField(
-            value = userProfileViewModel.temporaryOwnerId,
-            onValueChange = { userProfileViewModel.updateTemporaryOwnerId(it) },
-            // Make the keyboard action button hide the keyboard instead of entering a new line
-            keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = ImeAction.Done
-            ),
-            singleLine = true,
-            // Only allow updating the owner ID when the user is not updating their profile
-            readOnly = userProfileViewModel.isEditingUserProfile,
+    ){
+        Row(
+            horizontalArrangement = Arrangement.Center,
             modifier = Modifier
-        )
+                .fillMaxWidth()
+        ) {
+            TextField(
+                value = userProfileViewModel.temporaryOwnerId,
+                onValueChange = { userProfileViewModel.updateTemporaryOwnerId(it) },
+                // Make the keyboard action button hide the keyboard instead of entering a new line
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done
+                ),
+                singleLine = true,
+                // Only allow updating the owner ID when the user is not updating their profile
+                readOnly = userProfileViewModel.isEditingUserProfile,
+                modifier = Modifier
+            )
+        }
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+        ){
+            Button(
+                onClick = {},
+                modifier = Modifier
+            ){
+                Text(
+                    text = "Add to database",
+                    modifier = Modifier
+                )
+            }
+        }
     }
 }
 
