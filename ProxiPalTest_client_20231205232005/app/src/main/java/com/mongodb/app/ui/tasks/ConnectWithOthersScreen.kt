@@ -1,7 +1,10 @@
 package com.mongodb.app.ui.tasks
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationDefaults
@@ -29,9 +32,11 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.ui.components.ProxiPalBottomAppBar
-import com.mongodb.app.ui.components.ProxipalTopAppBar
+import com.mongodb.app.ui.components.ProxipalTopAppBarWithBackButton
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
 import com.mongodb.app.ui.theme.Purple500
@@ -41,28 +46,19 @@ import com.mongodb.app.ui.theme.Purple500
 @Composable
 fun ConnectWithOthersScreen (
     toolbarViewModel: ToolbarViewModel,
+    navController: NavHostController,
     modifier: Modifier = Modifier
 ){
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
-        topBar = { TaskAppToolbar(toolbarViewModel) },
+        topBar = { TaskAppToolbar(toolbarViewModel, navController) },
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         bottomBar = {
-            ProxiPalBottomAppBar(selectedItem = 0)
+            ProxiPalBottomAppBar(navController)
         }
 
     ) { innerPadding ->
-
+        LocationUpdatesScreen()
     }
 }
-
-/*
-@Preview(showBackground = true)
-@Composable
-fun ConnectWithOthersScreenPreview() {
-    MyApplicationTheme {
-        ConnectWithOthersScreen()
-    }
-}
-*/

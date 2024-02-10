@@ -4,6 +4,7 @@ package com.mongodb.app
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -48,9 +49,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.SyncRepository
+import com.mongodb.app.navigation.NavigationGraph
+import com.mongodb.app.navigation.Routes
 import com.mongodb.app.presentation.tasks.AddItemEvent
 import com.mongodb.app.presentation.tasks.AddItemViewModel
 import com.mongodb.app.presentation.tasks.SubscriptionTypeEvent
@@ -60,6 +68,8 @@ import com.mongodb.app.presentation.tasks.ToolbarEvent
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.ui.tasks.AddItemPrompt
 import com.mongodb.app.ui.tasks.ConnectWithOthersScreen
+import com.mongodb.app.ui.tasks.LocationPermissionScreen
+import com.mongodb.app.ui.tasks.LocationUpdatesScreen
 import com.mongodb.app.ui.tasks.ShowMyOwnTasks
 import com.mongodb.app.ui.tasks.TaskAppToolbar
 import com.mongodb.app.ui.tasks.TaskList
@@ -161,8 +171,8 @@ class ComposeItemActivity : ComponentActivity() {
         setContent {
             MyApplicationTheme {
                 // testing connect with others screen
-                ConnectWithOthersScreen(toolbarViewModel = toolbarViewModel)
-                //LocationPermissionScreen()
+                NavigationGraph(toolbarViewModel = toolbarViewModel)
+                //LocationUpdatesScreen()
 
                 /*
                 TaskListScaffold(
@@ -191,7 +201,8 @@ fun TaskListScaffold(
     toolbarViewModel: ToolbarViewModel,
     addItemViewModel: AddItemViewModel,
     subscriptionTypeViewModel: SubscriptionTypeViewModel,
-    taskViewModel: TaskViewModel
+    taskViewModel: TaskViewModel,
+    navController: NavHostController
 ) {
     val annotatedLinkString = buildAnnotatedString {
         val linkString = "To see your changes in Atlas, tap here."
@@ -214,7 +225,7 @@ fun TaskListScaffold(
     val uriHandler = LocalUriHandler.current
 
     Scaffold(
-        topBar = { TaskAppToolbar(toolbarViewModel) },
+        topBar = { TaskAppToolbar(toolbarViewModel, navController) },
         bottomBar = {
             BottomAppBar(
                 containerColor = Color.LightGray
@@ -285,6 +296,7 @@ fun TaskListScaffold(
     )
 }
 
+/*
 @Preview(showBackground = true)
 @Composable
 fun ItemActivityPreview() {
@@ -305,3 +317,5 @@ fun ItemActivityPreview() {
         }
     }
 }
+
+*/

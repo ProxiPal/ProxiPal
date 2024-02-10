@@ -17,8 +17,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.mongodb.app.ui.theme.Purple200
 
 /**
@@ -26,20 +29,17 @@ import com.mongodb.app.ui.theme.Purple200
  */
 
 /**
- * Proxipal app bar to display a title of the screen and conditionally display the back navigation.
+ * Proxipal app bar to display a title of the screen and display the back navigation.
  * Not used for the three main screens (connect with others, messages, profile)
  * Can be used for screens where you need a back button, like settings for example
- * Based on this android example app:
- * https://github.com/google-developer-training/basic-android-kotlin-compose-training-inventory-app/tree/main
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProxipalTopAppBar(
+fun ProxipalTopAppBarWithBackButton(
+    navController: NavController,
     title: String,
-    canNavigateBack: Boolean,
     modifier: Modifier = Modifier,
-    scrollBehavior: TopAppBarScrollBehavior? = null,
-    navigateUp: () -> Unit = {}
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     CenterAlignedTopAppBar(
         title = { Text(title) },
@@ -47,42 +47,51 @@ fun ProxipalTopAppBar(
         scrollBehavior = scrollBehavior,
         colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Purple200),
         navigationIcon = {
-            if (canNavigateBack) {
-                IconButton(onClick = navigateUp) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back button"
-                    )
-                }
+            // for navigating back
+            IconButton(onClick = {navController.navigateUp()} ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back button"
+                )
             }
+
         }
     )
 }
 
 /**
- * Selected item is 0 for Profile, 1, for Connect, or 2 for Friends
  * TODO onClick will be for navigating to other pages
  */
 @Composable
-fun ProxiPalBottomAppBar(selectedItem: Int){
-    val items = listOf("Profile", "Connect", "Friends")
-    val theMap = mapOf(
-        0 to Icons.Filled.AccountCircle, 1 to Icons.Filled.PlayArrow,
-        2 to Icons.Filled.Favorite
-    )
+fun ProxiPalBottomAppBar(navController: NavHostController) {
     BottomNavigation(
         windowInsets = BottomNavigationDefaults.windowInsets,
         backgroundColor = Purple200
     ) {
-        items.forEachIndexed { index, item ->
-            BottomNavigationItem(
-                icon = { theMap[index]?.let { Icon(it, contentDescription = null) } },
-                label = { Text(item) },
-                selected = selectedItem == index,
-                onClick = {},
-                selectedContentColor = Color.White
-            )
-        }
+        // Define your navigation items directly within the BottomNavigation composable
+        BottomNavigationItem(
+            icon = { Icon(Icons.Filled.AccountCircle, contentDescription = "Navigate to profile") },
+            label = { Text("Profile") },
+            selected = false,
+            onClick = { /*TODO navigate to profile*/ },
+            selectedContentColor = Color.White
+        )
+        BottomNavigationItem(
+            icon = { Icon(Icons.Filled.PlayArrow, contentDescription = "Navigate to connect") },
+            label = { Text("Connect") },
+            selected = false,
+            onClick = { /*TODO navigate to connect with others*/ },
+            selectedContentColor = Color.White
+        )
+        BottomNavigationItem(
+            icon = { Icon(Icons.Filled.Favorite, contentDescription = "Navigate to friends") },
+            label = { Text("Friends") },
+            selected = false,
+            onClick = { /*TODO navigate to friends*/ },
+            selectedContentColor = Color.White
+        )
     }
 }
+
+
 
