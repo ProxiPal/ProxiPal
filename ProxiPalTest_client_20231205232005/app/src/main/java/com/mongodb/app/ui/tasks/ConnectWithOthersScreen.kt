@@ -34,6 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.mongodb.app.location.LocationUpdatesScreen
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.ui.components.ProxiPalBottomAppBar
 import com.mongodb.app.ui.components.ProxipalTopAppBarWithBackButton

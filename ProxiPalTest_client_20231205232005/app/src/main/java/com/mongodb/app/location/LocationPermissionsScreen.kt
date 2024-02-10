@@ -1,5 +1,4 @@
-package com.mongodb.app.ui.tasks
-
+package com.mongodb.app.location
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -36,7 +35,6 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
-import com.mongodb.app.ui.components.ProxiPalBottomAppBar
 import com.mongodb.app.ui.components.ProxipalTopAppBarWithBackButton
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
@@ -81,11 +79,15 @@ fun LocationPermissionScreen(navController: NavController, modifier: Modifier = 
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 // Show rationale dialog when needed
-                rationaleState?.run { PermissionRationaleDialog(rationaleState = this) }
+                rationaleState?.run {
+                    com.mongodb.app.location.PermissionRationaleDialog(
+                        rationaleState = this
+                    )
+                }
 
                 Spacer(modifier.height(32.dp))
 
-                PermissionRequestButton(
+                com.mongodb.app.location.PermissionRequestButton(
                     isGranted = locationPermissionState.status.isGranted,
                     title = "Approximate location access",
                 ) {
@@ -104,7 +106,7 @@ fun LocationPermissionScreen(navController: NavController, modifier: Modifier = 
                     }
                 }
 
-                PermissionRequestButton(
+                com.mongodb.app.location.PermissionRequestButton(
                     isGranted = fineLocationPermissionState.allPermissionsGranted,
                     title = "Precise location access",
                 ) {

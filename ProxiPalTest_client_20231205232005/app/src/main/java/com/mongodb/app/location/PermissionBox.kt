@@ -1,5 +1,4 @@
-package com.mongodb.app.ui.tasks
-
+package com.mongodb.app.location
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings

@@ -1,4 +1,4 @@
-package com.mongodb.app.ui.tasks
+package com.mongodb.app.location
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

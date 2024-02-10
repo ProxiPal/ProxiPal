@@ -6,7 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.ui.tasks.ConnectWithOthersScreen
-import com.mongodb.app.ui.tasks.LocationPermissionScreen
+import com.mongodb.app.location.LocationPermissionScreen
 
 //TODO add more parameters as needed
 

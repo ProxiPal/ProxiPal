@@ -68,8 +68,8 @@ import com.mongodb.app.presentation.tasks.ToolbarEvent
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.ui.tasks.AddItemPrompt
 import com.mongodb.app.ui.tasks.ConnectWithOthersScreen
-import com.mongodb.app.ui.tasks.LocationPermissionScreen
-import com.mongodb.app.ui.tasks.LocationUpdatesScreen
+import com.mongodb.app.location.LocationPermissionScreen
+import com.mongodb.app.location.LocationUpdatesScreen
 import com.mongodb.app.ui.tasks.ShowMyOwnTasks
 import com.mongodb.app.ui.tasks.TaskAppToolbar
 import com.mongodb.app.ui.tasks.TaskList

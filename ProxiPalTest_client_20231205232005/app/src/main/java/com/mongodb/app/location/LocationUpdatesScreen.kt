@@ -1,5 +1,4 @@
-package com.mongodb.app.ui.tasks
-
+package com.mongodb.app.location
 import android.Manifest
 import android.annotation.SuppressLint
 import android.os.Looper
