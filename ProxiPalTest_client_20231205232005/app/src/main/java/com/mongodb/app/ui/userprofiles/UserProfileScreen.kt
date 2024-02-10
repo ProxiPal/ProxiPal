@@ -31,9 +31,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,20 +42,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mongodb.app.R
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.USER_PROFILE_EDIT_MODE_MAXIMUM_LINE_AMOUNT
 import com.mongodb.app.data.USER_PROFILE_ROW_HEADER_WEIGHT
+import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.components.MultiLineText
 import com.mongodb.app.ui.components.SingleLineText
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import kotlinx.coroutines.launch
-import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 
-class UserProfileScreen : ComponentActivity()
-{
+class UserProfileScreen : ComponentActivity() {
     /*
     ===== Variables =====
      */
@@ -76,7 +74,7 @@ class UserProfileScreen : ComponentActivity()
         }
     }
 
-    private val userProfileViewModel: UserProfileViewModel by viewModels{
+    private val userProfileViewModel: UserProfileViewModel by viewModels {
         UserProfileViewModel.factory(repository, this)
     }
 
@@ -405,7 +403,7 @@ fun TemporaryUserProfileOwnerIdField(
 ) {
     Column(
         modifier = modifier
-    ){
+    ) {
         Row(
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier
@@ -428,11 +426,11 @@ fun TemporaryUserProfileOwnerIdField(
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxWidth()
-        ){
+        ) {
             Button(
                 onClick = {},
                 modifier = Modifier
-            ){
+            ) {
                 Text(
                     text = "Add to database",
                     modifier = Modifier
