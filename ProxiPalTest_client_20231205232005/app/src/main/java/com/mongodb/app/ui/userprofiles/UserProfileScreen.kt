@@ -42,7 +42,8 @@ import com.mongodb.app.data.USER_PROFILE_ROW_HEADER_WEIGHT
 import com.mongodb.app.ui.components.MultiLineText
 import com.mongodb.app.ui.components.SingleLineText
 import com.mongodb.app.ui.theme.MyApplicationTheme
-// Using the other UserProfileViewModel class causes Compose Preview and blank app/app crashing errors
+
+// TODO Using the other UserProfileViewModel class causes Compose Preview and blank app/app crashing errors
 //import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 
 /*
@@ -171,6 +172,10 @@ fun UserProfileBody(
                 isCardExpanded = userProfileViewModel.isEditingUserProfile
             }
         )
+        // TODO Temporary use only (until account registration and database saving is established)
+        TemporaryUserProfileOwnerIdField(
+            userProfileViewModel = userProfileViewModel
+        )
     }
 }
 
@@ -227,13 +232,12 @@ fun UserProfileLayoutRow(
             // Read-only text
             if (!isEditingUserProfile) {
                 // Hide information if the card is not expanded to shorten it if long
-                if (isInformationExpanded){
+                if (isInformationExpanded) {
                     when (rowInformation.isNotEmpty()) {
                         false -> MultiLineText(text = nonEmptyRowInformation, isItalic = true)
                         true -> MultiLineText(text = rowInformation)
                     }
-                }
-                else{
+                } else {
                     when (rowInformation.isNotEmpty()) {
                         false -> SingleLineText(text = nonEmptyRowInformation, isItalic = true)
                         true -> SingleLineText(text = rowInformation)
@@ -314,5 +318,38 @@ fun UserProfileEditButton(
                 modifier = Modifier
             )
         }
+    }
+}
+
+@Composable
+fun TemporaryUserProfileOwnerIdField(
+    modifier: Modifier = Modifier,
+    userProfileViewModel: UserProfileViewModel = viewModel()
+) {
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = modifier
+            .fillMaxWidth()
+    ) {
+        TextField(
+            value = userProfileViewModel.temporaryOwnerId,
+            onValueChange = { userProfileViewModel.updateTemporaryOwnerId(it) },
+            // Make the keyboard action button hide the keyboard instead of entering a new line
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Done
+            ),
+            singleLine = true,
+            // Only allow updating the owner ID when the user is not updating their profile
+            readOnly = userProfileViewModel.isEditingUserProfile,
+            modifier = Modifier
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TemporaryUserProfileOwnerIdFieldPreview() {
+    MyApplicationTheme {
+        TemporaryUserProfileOwnerIdField()
     }
 }

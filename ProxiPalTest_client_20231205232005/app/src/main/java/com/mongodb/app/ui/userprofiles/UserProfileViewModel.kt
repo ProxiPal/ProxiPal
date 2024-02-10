@@ -37,6 +37,9 @@ class UserProfileViewModel : ViewModel() {
     var isEditingUserProfile by mutableStateOf(false)
         private set
 
+    var temporaryOwnerId by mutableStateOf("")
+    private set
+
 
     /*
     ===== Functions =====
@@ -94,5 +97,12 @@ class UserProfileViewModel : ViewModel() {
      */
     fun getRemainingCharacterAmountBiography(): Int{
         return USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT - userProfileBiography.length
+    }
+
+    /**
+     * (Temporary fast way to change current user's "owner ID" to view corresponding user profile)
+     */
+    fun updateTemporaryOwnerId(newOwnerId: String){
+        temporaryOwnerId = newOwnerId
     }
 }
