@@ -138,21 +138,21 @@ class UserProfileViewModel constructor(
     /**
      * Returns how many more characters are allowed before the corresponding character limit is reached
      */
-    fun getRemainingCharactersFirstName(): Int{
+    fun getRemainingCharacterAmountFirstName(): Int{
         return USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT - userProfileFirstName.length
     }
 
     /**
      * Returns how many more characters are allowed before the corresponding character limit is reached
      */
-    fun getRemainingCharactersLastName(): Int{
+    fun getRemainingCharacterAmountLastName(): Int{
         return USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT - userProfileLastName.length
     }
 
     /**
      * Returns how many more characters are allowed before the corresponding character limit is reached
      */
-    fun getRemainingCharactersBiography(): Int{
+    fun getRemainingCharacterAmountBiography(): Int{
         return USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT - userProfileBiography.length
     }
 
