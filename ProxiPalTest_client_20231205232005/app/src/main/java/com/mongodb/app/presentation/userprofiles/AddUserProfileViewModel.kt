@@ -29,6 +29,14 @@ class AddUserProfileViewModel(
     val addUserProfilePopupVisible: State<Boolean>
         get() = _addUserProfilePopupVisible
 
+    private val _userProfileFirstName: MutableState<String> = mutableStateOf("")
+    val userProfileFirstName: State<String>
+        get() = _userProfileFirstName
+
+    private val _userProfileLastName: MutableState<String> = mutableStateOf("")
+    val userProfileLastName: State<String>
+        get() = _userProfileLastName
+
     private val _userProfileBiography: MutableState<String> = mutableStateOf("")
     val userProfileBiography: State<String>
         get() = _userProfileBiography
@@ -52,7 +60,11 @@ class AddUserProfileViewModel(
     fun addUserProfile() {
         CoroutineScope(Dispatchers.IO).launch {
             runCatching {
-                repository.addUserProfile(userProfileBiography.value)
+                repository.addUserProfile(
+                    firstName = userProfileFirstName.value,
+                    lastName = userProfileLastName.value,
+                    biography = userProfileBiography.value
+                )
             }.onSuccess {
                 withContext(Dispatchers.Main) {
                     _addUserProfileEvent.emit(AddUserProfileEvent.Info("User profile '$userProfileBiography' added successfully."))

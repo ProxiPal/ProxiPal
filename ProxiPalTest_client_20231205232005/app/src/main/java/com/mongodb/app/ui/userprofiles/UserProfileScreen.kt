@@ -3,6 +3,11 @@
 package com.mongodb.app.ui.userprofiles
 
 import android.annotation.SuppressLint
+import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,23 +40,75 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mongodb.app.R
+import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.USER_PROFILE_EDIT_MODE_MAXIMUM_LINE_AMOUNT
 import com.mongodb.app.data.USER_PROFILE_ROW_HEADER_WEIGHT
 import com.mongodb.app.ui.components.MultiLineText
 import com.mongodb.app.ui.components.SingleLineText
 import com.mongodb.app.ui.theme.MyApplicationTheme
+import kotlinx.coroutines.launch
 
 // TODO Using the other UserProfileViewModel class causes Compose Preview and blank app/app crashing errors
 //import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 
+class UserProfileScreen : ComponentActivity()
+{
+    /*
+    ===== Variables =====
+     */
+    private val repository = RealmSyncRepository { _, error ->
+        // Sync errors come from a background thread so route the Toast through the UI thread
+        lifecycleScope.launch {
+            // Catch write permission errors and notify user. This is just a 2nd line of defense
+            // since we prevent users from modifying someone else's tasks
+            // TODO the SDK does not have an enum for this type of error yet so make sure to update this once it has been added
+            if (error.message?.contains("CompensatingWrite") == true) {
+                Toast.makeText(
+                    this@UserProfileScreen,
+                    getString(R.string.permissions_error),
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            }
+        }
+    }
+
+//    private val userProfileViewModel: UserProfileViewModel by viewModels{
+//        UserProfileViewModel.factory(repository, this)
+//    }
+
+
+    /*
+    ===== Functions =====
+     */
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContent {
+            MyApplicationTheme {
+                UserProfileLayout()
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        repository.close()
+    }
+}
+
+
 /*
 ===== Functions =====
  */
+
 /**
 Displays the entire user profile screen
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun UserProfileLayout(
