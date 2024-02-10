@@ -39,7 +39,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mongodb.app.R
 import com.mongodb.app.data.USER_PROFILE_EDIT_MODE_MAXIMUM_LINE_AMOUNT
 import com.mongodb.app.data.USER_PROFILE_ROW_HEADER_WEIGHT
-import com.mongodb.app.data.UserProfileInformationType
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.components.MultiLineText
 import com.mongodb.app.ui.components.SingleLineText
@@ -141,9 +140,7 @@ fun UserProfileBody(
             UserProfileLayoutRow(
                 rowInformationHeader = R.string.user_profile_first_name_header,
                 rowInformation = userProfileViewModel.userProfileFirstName,
-                remainingCharacterAmount = userProfileViewModel.getRemainingCharacterAmount(
-                    UserProfileInformationType.FirstName
-                ),
+                remainingCharacterAmount = userProfileViewModel.getRemainingCharactersFirstName(),
                 isInformationExpanded = isCardExpanded,
                 isEditingUserProfile = userProfileViewModel.isEditingUserProfile,
                 onTextChange = { userProfileViewModel.updateUserProfileFirstName(it) }
@@ -151,9 +148,7 @@ fun UserProfileBody(
             UserProfileLayoutRow(
                 rowInformationHeader = R.string.user_profile_last_name_header,
                 rowInformation = userProfileViewModel.userProfileLastName,
-                remainingCharacterAmount = userProfileViewModel.getRemainingCharacterAmount(
-                    UserProfileInformationType.LastName
-                ),
+                remainingCharacterAmount = userProfileViewModel.getRemainingCharactersLastName(),
                 isInformationExpanded = isCardExpanded,
                 isEditingUserProfile = userProfileViewModel.isEditingUserProfile,
                 onTextChange = { userProfileViewModel.updateUserProfileLastName(it) }
@@ -161,9 +156,7 @@ fun UserProfileBody(
             UserProfileLayoutRow(
                 rowInformationHeader = R.string.user_profile_biography_header,
                 rowInformation = userProfileViewModel.userProfileBiography,
-                remainingCharacterAmount = userProfileViewModel.getRemainingCharacterAmount(
-                    UserProfileInformationType.Biography
-                ),
+                remainingCharacterAmount = userProfileViewModel.getRemainingCharactersBiography(),
                 isInformationExpanded = isCardExpanded,
                 isEditingUserProfile = userProfileViewModel.isEditingUserProfile,
                 onTextChange = { userProfileViewModel.updateUserProfileBiography(it) }

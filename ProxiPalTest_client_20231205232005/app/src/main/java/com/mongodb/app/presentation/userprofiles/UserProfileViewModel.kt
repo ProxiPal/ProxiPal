@@ -14,7 +14,6 @@ import androidx.savedstate.SavedStateRegistryOwner
 import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT
 import com.mongodb.app.data.USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT
-import com.mongodb.app.data.UserProfileInformationType
 import com.mongodb.app.domain.UserProfile
 import com.mongodb.app.ui.userprofiles.UserProfileUiState
 import io.realm.kotlin.notifications.InitialResults
@@ -139,12 +138,22 @@ class UserProfileViewModel constructor(
     /**
      * Returns how many more characters are allowed before the corresponding character limit is reached
      */
-    fun getRemainingCharacterAmount(informationType: UserProfileInformationType): Int{
-        return when(informationType){
-            UserProfileInformationType.FirstName -> USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT - userProfileFirstName.length
-            UserProfileInformationType.LastName -> USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT - userProfileLastName.length
-            UserProfileInformationType.Biography -> USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT - userProfileBiography.length
-        }
+    fun getRemainingCharactersFirstName(): Int{
+        return USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT - userProfileFirstName.length
+    }
+
+    /**
+     * Returns how many more characters are allowed before the corresponding character limit is reached
+     */
+    fun getRemainingCharactersLastName(): Int{
+        return USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT - userProfileLastName.length
+    }
+
+    /**
+     * Returns how many more characters are allowed before the corresponding character limit is reached
+     */
+    fun getRemainingCharactersBiography(): Int{
+        return USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT - userProfileBiography.length
     }
 
     // Not in use since toggleIsComplete function is not added/copied for UserProfiles
