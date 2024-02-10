@@ -41,7 +41,9 @@ class SubscriptionTypeViewModel(
     fun updateSubscription(subscriptionType: SubscriptionType) {
         CoroutineScope(Dispatchers.IO).launch {
             runCatching {
-                repository.updateSubscriptions(subscriptionType)
+                repository.updateSubscriptionsItems(subscriptionType)
+
+                repository.updateSubscriptionsUserProfiles(subscriptionType)
                 _subscriptionType.value = subscriptionType
             }.onSuccess {
                 withContext(Dispatchers.Main) {

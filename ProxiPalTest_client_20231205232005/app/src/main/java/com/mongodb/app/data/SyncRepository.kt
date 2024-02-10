@@ -55,7 +55,12 @@ interface SyncRepository {
     /**
      * Updates the Sync subscriptions based on the specified [SubscriptionType].
      */
-    suspend fun updateSubscriptions(subscriptionType: SubscriptionType)
+    suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType)
+
+    /**
+     * Updates the Sync subscription based on the specified [SubscriptionType].
+     */
+    suspend fun updateSubscriptionsUserProfiles(subscriptionType: SubscriptionType)
 
     /**
      * Deletes a given task.
@@ -115,7 +120,9 @@ class RealmSyncRepository(
             .initialSubscriptions { realm ->
                 // Subscribe to the active subscriptionType - first time defaults to MINE
                 val activeSubscriptionType = getActiveSubscriptionType(realm)
-                add(getQuery(realm, activeSubscriptionType), activeSubscriptionType.name)
+                add(getQueryItems(realm, activeSubscriptionType), activeSubscriptionType.name)
+
+                add(getQueryUserProfiles(realm, activeSubscriptionType), activeSubscriptionType.name)
             }
             .errorHandler { session: SyncSession, error: SyncException ->
                 onSyncError.invoke(session, error)
@@ -163,19 +170,30 @@ class RealmSyncRepository(
     override suspend fun addUserProfile(userProfileBiography: String){
         val userProfile = UserProfile().apply{
             biography = userProfileBiography
-            owner_id = currentUser.id
+            ownerId = currentUser.id
         }
         realm.write {
             copyToRealm(userProfile)
         }
     }
 
-    override suspend fun updateSubscriptions(subscriptionType: SubscriptionType) {
+    override suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType) {
         realm.subscriptions.update {
             removeAll()
             val query = when (subscriptionType) {
-                SubscriptionType.MINE -> getQuery(realm, SubscriptionType.MINE)
-                SubscriptionType.ALL -> getQuery(realm, SubscriptionType.ALL)
+                SubscriptionType.MINE -> getQueryItems(realm, SubscriptionType.MINE)
+                SubscriptionType.ALL -> getQueryItems(realm, SubscriptionType.ALL)
+            }
+            add(query, subscriptionType.name)
+        }
+    }
+
+    override suspend fun updateSubscriptionsUserProfiles(subscriptionType: SubscriptionType) {
+        realm.subscriptions.update {
+            removeAll()
+            val query = when (subscriptionType) {
+                SubscriptionType.MINE -> getQueryUserProfiles(realm, SubscriptionType.MINE)
+                SubscriptionType.ALL -> getQueryUserProfiles(realm, SubscriptionType.ALL)
             }
             add(query, subscriptionType.name)
         }
@@ -217,13 +235,19 @@ class RealmSyncRepository(
 
     override fun isTaskMine(task: Item): Boolean = task.owner_id == currentUser.id
 
-    override fun isUserProfileMine(userProfile: UserProfile): Boolean = userProfile.owner_id == currentUser.id
+    override fun isUserProfileMine(userProfile: UserProfile): Boolean = userProfile.ownerId == currentUser.id
 
     override fun close() = realm.close()
 
-    private fun getQuery(realm: Realm, subscriptionType: SubscriptionType): RealmQuery<Item> =
+    private fun getQueryItems(realm: Realm, subscriptionType: SubscriptionType): RealmQuery<Item> =
         when (subscriptionType) {
             SubscriptionType.MINE -> realm.query("owner_id == $0", currentUser.id)
+            SubscriptionType.ALL -> realm.query()
+        }
+
+    private fun getQueryUserProfiles(realm: Realm, subscriptionType: SubscriptionType): RealmQuery<UserProfile> =
+        when (subscriptionType){
+            SubscriptionType.MINE -> realm.query("ownerId == $0", currentUser.id)
             SubscriptionType.ALL -> realm.query()
         }
 }
@@ -237,14 +261,15 @@ class MockRepository : SyncRepository {
     override suspend fun toggleIsComplete(task: Item) = Unit
     override suspend fun addTask(taskSummary: String) = Unit
     override suspend fun addUserProfile(userProfileBiography: String) = Unit
-    override suspend fun updateSubscriptions(subscriptionType: SubscriptionType) = Unit
+    override suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType) = Unit
+    override suspend fun updateSubscriptionsUserProfiles(subscriptionType: SubscriptionType) = Unit
     override suspend fun deleteTask(task: Item) = Unit
     override suspend fun deleteUserProfile(userProfile: UserProfile) = Unit
     override fun getActiveSubscriptionType(realm: Realm?): SubscriptionType = SubscriptionType.ALL
     override fun pauseSync() = Unit
     override fun resumeSync() = Unit
     override fun isTaskMine(task: Item): Boolean = task.owner_id == MOCK_OWNER_ID_MINE
-    override fun isUserProfileMine(userProfile: UserProfile): Boolean = userProfile.owner_id == MOCK_OWNER_ID_MINE
+    override fun isUserProfileMine(userProfile: UserProfile): Boolean = userProfile.ownerId == MOCK_OWNER_ID_MINE
     override fun close() = Unit
 
     companion object {
