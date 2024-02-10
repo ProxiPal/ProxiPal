@@ -291,7 +291,17 @@ class MockRepository : SyncRepository {
             }
         }
 
-        // Probably do not need a function to get a mock user profile, until testing starts (?)
+        fun getMockUserProfile(index: Int): UserProfile = UserProfile().apply{
+            this.firstName = "First Name $index"
+            this.lastName = "Last Name $index"
+            this.biography = "Biography $index"
+            // Make every other user profile mine in preview
+            // For Compose previews only (in reality, a user will have only 1 profile)
+            this.ownerId = when{
+                index % 2 == 0 -> MOCK_OWNER_ID_MINE
+                else -> MOCK_OWNER_ID_OTHER
+            }
+        }
     }
 }
 
