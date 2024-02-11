@@ -1,5 +1,6 @@
 package com.mongodb.app.domain
 
+import com.mongodb.app.location.CustomGeoPoint
 import org.mongodb.kbson.ObjectId
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
@@ -11,6 +12,7 @@ class UserProfile() : RealmObject {
     var lastName: String = ""
     var biography: String = ""
     var owner_id: String = ""
+    var location: CustomGeoPoint? = null
 
     constructor(ownerId: String = "") : this() {
         owner_id = ownerId

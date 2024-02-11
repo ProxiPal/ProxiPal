@@ -68,7 +68,7 @@ fun ProxiPalBottomAppBar(navController: NavHostController) {
         windowInsets = BottomNavigationDefaults.windowInsets,
         backgroundColor = Purple200
     ) {
-        // Define your navigation items directly within the BottomNavigation composable
+        // Define navigation items directly within the BottomNavigation composable
         BottomNavigationItem(
             icon = { Icon(Icons.Filled.AccountCircle, contentDescription = "Navigate to profile") },
             label = { Text("Profile") },

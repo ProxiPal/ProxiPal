@@ -172,7 +172,6 @@ class ComposeItemActivity : ComponentActivity() {
             MyApplicationTheme {
                 // testing connect with others screen
                 NavigationGraph(toolbarViewModel = toolbarViewModel)
-                //LocationUpdatesScreen()
 
                 /*
                 TaskListScaffold(
