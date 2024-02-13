@@ -118,7 +118,13 @@ class RealmSyncRepository(
         get() = app.currentUser!!
 
     init {
-        config = SyncConfiguration.Builder(currentUser, setOf(Item::class))
+        Log.i(TAG(), "RealmSyncRepository: Init start")
+        // This assignment impacts what type of object can be queried
+        // If trying to query A when the sync configuration is set for B,
+        // ... the app will crash if querying anything other than B
+        // This has been debugged and confirmed
+//        config = SyncConfiguration.Builder(currentUser, setOf(Item::class))
+        config = SyncConfiguration.Builder(currentUser, setOf(UserProfile::class))
             .initialSubscriptions { realm ->
                 // Subscribe to the active subscriptionType - first time defaults to MINE
                 val activeSubscriptionType = getActiveSubscriptionType(realm)
@@ -138,18 +144,20 @@ class RealmSyncRepository(
         CoroutineScope(Dispatchers.Main).launch {
             realm.subscriptions.waitForSynchronization()
         }
+        Log.i(TAG(), "RealmSyncRepository: Init end")
     }
 
     override fun getTaskList(): Flow<ResultsChange<Item>> {
+        Log.i(TAG(), "RealmSyncRepository: Querying for task/item list")
         return realm.query<Item>()
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
     }
 
     override fun getUserProfileList(): Flow<ResultsChange<UserProfile>>{
-        Log.i(TAG(), "SyncRepository: Querying for user profile list")
-        Log.i(TAG(), "SyncRepository: The queried list of user profiles is of size " +
-                "\"${realm.query<UserProfile>().count()}\"")
+        Log.i(TAG(), "RealmSyncRepository: Querying for user profile list")
+        Log.i(TAG(), "RealmSyncRepository: The queried list of tasks/items is \"${realm.query<Item>()}\"")
+        Log.i(TAG(), "RealmSyncRepository: The queried list of user profiles is \"${realm.query<UserProfile>()}\"")
         return realm.query<UserProfile>()
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
