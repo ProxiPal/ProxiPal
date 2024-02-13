@@ -12,10 +12,6 @@ class UserProfile() : RealmObject {
     var biography: String = ""
     var ownerId: String = ""
 
-    constructor(ownerId: String = "") : this() {
-        this.ownerId = ownerId
-    }
-
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
         if (other !is UserProfile) return false

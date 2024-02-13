@@ -128,8 +128,7 @@ class RealmSyncRepository(
             .initialSubscriptions { realm ->
                 // Subscribe to the active subscriptionType - first time defaults to MINE
                 val activeSubscriptionType = getActiveSubscriptionType(realm)
-                add(getQueryItems(realm, activeSubscriptionType), activeSubscriptionType.name)
-
+//                add(getQueryItems(realm, activeSubscriptionType), activeSubscriptionType.name)
                 add(getQueryUserProfiles(realm, activeSubscriptionType), activeSubscriptionType.name)
             }
             .errorHandler { session: SyncSession, error: SyncException ->
@@ -156,6 +155,7 @@ class RealmSyncRepository(
         // See config assignment statement in init{} above
 //        Log.i(TAG(), "RealmSyncRepository: The queried list of tasks/items is \"${realm.query<Item>()}\"")
         Log.i(TAG(), "RealmSyncRepository: The queried list of user profiles is \"${realm.query<UserProfile>()}\"")
+        Log.i(TAG(), "RealmSyncRepository: The queried list size of user profiles is \"${realm.query<UserProfile>().count()}\"")
         return realm.query<UserProfile>()
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
@@ -180,10 +180,10 @@ class RealmSyncRepository(
 
     override suspend fun addUserProfile(firstName: String, lastName: String, biography: String){
         val userProfile = UserProfile().apply{
+            ownerId = currentUser.id
             this.firstName = firstName
             this.lastName = lastName
             this.biography = biography
-            ownerId = currentUser.id
         }
         realm.write {
             copyToRealm(userProfile)
