@@ -207,7 +207,7 @@ fun UserProfileBody(
         {
             UserProfileLayoutRow(
                 rowInformationHeader = R.string.user_profile_first_name_header,
-                rowInformation = userProfileViewModel.userProfileFirstName,
+                rowInformation = userProfileViewModel.userProfileFirstName.value,
                 remainingCharacterAmount = userProfileViewModel.getRemainingCharacterAmountFirstName(),
                 isInformationExpanded = isCardExpanded,
                 isEditingUserProfile = userProfileViewModel.isEditingUserProfile,
@@ -215,7 +215,7 @@ fun UserProfileBody(
             )
             UserProfileLayoutRow(
                 rowInformationHeader = R.string.user_profile_last_name_header,
-                rowInformation = userProfileViewModel.userProfileLastName,
+                rowInformation = userProfileViewModel.userProfileLastName.value,
                 remainingCharacterAmount = userProfileViewModel.getRemainingCharacterAmountLastName(),
                 isInformationExpanded = isCardExpanded,
                 isEditingUserProfile = userProfileViewModel.isEditingUserProfile,
@@ -223,7 +223,7 @@ fun UserProfileBody(
             )
             UserProfileLayoutRow(
                 rowInformationHeader = R.string.user_profile_biography_header,
-                rowInformation = userProfileViewModel.userProfileBiography,
+                rowInformation = userProfileViewModel.userProfileBiography.value,
                 remainingCharacterAmount = userProfileViewModel.getRemainingCharacterAmountBiography(),
                 isInformationExpanded = isCardExpanded,
                 isEditingUserProfile = userProfileViewModel.isEditingUserProfile,
@@ -428,7 +428,7 @@ fun TemporaryUserProfileOwnerIdField(
                 .fillMaxWidth()
         ) {
             Button(
-                onClick = {},
+                onClick = { userProfileViewModel.addUserProfile() },
                 modifier = Modifier
             ) {
                 Text(

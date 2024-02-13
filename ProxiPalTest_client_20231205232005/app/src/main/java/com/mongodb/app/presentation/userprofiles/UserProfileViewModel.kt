@@ -1,6 +1,7 @@
 package com.mongodb.app.presentation.userprofiles
 
 import android.os.Bundle
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -19,14 +20,23 @@ import com.mongodb.app.ui.userprofiles.UserProfileUiState
 import io.realm.kotlin.notifications.InitialResults
 import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.notifications.UpdatedResults
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 object UserProfileViewEvent
+
+// From AddItemViewModel
+sealed class AddUserProfileEvent {
+    class Info(val message: String) : AddUserProfileEvent()
+    class Error(val message: String, val throwable: Throwable) : AddUserProfileEvent()
+}
 
 class UserProfileViewModel constructor(
     private val repository: SyncRepository,
@@ -41,6 +51,9 @@ class UserProfileViewModel constructor(
 
     private val _event: MutableSharedFlow<UserProfileViewEvent> = MutableSharedFlow()
 
+    // From AddItemViewModel
+    private val _addUserProfileEvent: MutableSharedFlow<AddUserProfileEvent> = MutableSharedFlow()
+
 
     /*
     ===== Properties =====
@@ -48,13 +61,13 @@ class UserProfileViewModel constructor(
     // Read-only state flow for access outside this class
     val userProfileUiState: StateFlow<UserProfileUiState> = _userProfileUiState.asStateFlow()
 
-    var userProfileFirstName by mutableStateOf("")
+    var userProfileFirstName: MutableState<String> = mutableStateOf("")
         private set
 
-    var userProfileLastName by mutableStateOf("")
+    var userProfileLastName: MutableState<String> = mutableStateOf("")
         private set
 
-    var userProfileBiography by mutableStateOf("")
+    var userProfileBiography: MutableState<String> = mutableStateOf("")
         private set
 
     var isEditingUserProfile by mutableStateOf(false)
@@ -65,6 +78,10 @@ class UserProfileViewModel constructor(
 
     val event: Flow<UserProfileViewEvent>
         get() = _event
+
+    // From AddItemViewModel
+    val addUserProfileEvent: Flow<AddUserProfileEvent>
+        get() = _addUserProfileEvent
 
 
     init {
@@ -109,7 +126,7 @@ class UserProfileViewModel constructor(
      */
     fun updateUserProfileFirstName(newFirstName: String){
         if (newFirstName.length <= USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT) {
-            userProfileFirstName = newFirstName
+            userProfileFirstName.value = newFirstName
         }
     }
 
@@ -118,7 +135,7 @@ class UserProfileViewModel constructor(
      */
     fun updateUserProfileLastName(newLastName: String){
         if (newLastName.length <= USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT) {
-            userProfileLastName = newLastName
+            userProfileLastName.value = newLastName
         }
     }
 
@@ -127,7 +144,7 @@ class UserProfileViewModel constructor(
      */
     fun updateUserProfileBiography(newBiography: String){
         if (newBiography.length <= USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT) {
-            userProfileBiography = newBiography
+            userProfileBiography.value = newBiography
         }
     }
 
@@ -142,21 +159,21 @@ class UserProfileViewModel constructor(
      * Returns how many more characters are allowed before the corresponding character limit is reached
      */
     fun getRemainingCharacterAmountFirstName(): Int{
-        return USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT - userProfileFirstName.length
+        return USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT - userProfileFirstName.value.length
     }
 
     /**
      * Returns how many more characters are allowed before the corresponding character limit is reached
      */
     fun getRemainingCharacterAmountLastName(): Int{
-        return USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT - userProfileLastName.length
+        return USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT - userProfileLastName.value.length
     }
 
     /**
      * Returns how many more characters are allowed before the corresponding character limit is reached
      */
     fun getRemainingCharacterAmountBiography(): Int{
-        return USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT - userProfileBiography.length
+        return USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT - userProfileBiography.value.length
     }
 
     /**
@@ -180,6 +197,37 @@ class UserProfileViewModel constructor(
     }
 
     fun isUserProfileMine(userProfile: UserProfile): Boolean = repository.isUserProfileMine(userProfile)
+
+    /**
+     * Adds a user profile instance to the Realm/Mongo Atlas database
+     */
+    fun addUserProfile() {
+        CoroutineScope(Dispatchers.IO).launch {
+            runCatching {
+                repository.addUserProfile(
+                    firstName = userProfileFirstName.value,
+                    lastName = userProfileLastName.value,
+                    biography = userProfileBiography.value
+                )
+            }.onSuccess {
+                withContext(Dispatchers.Main) {
+                    _addUserProfileEvent.emit(AddUserProfileEvent.Info("User profile \"$userProfileFirstName\"" +
+                            " ; \"$userProfileLastName\" ; \"$userProfileBiography\" added successfully."))
+                }
+            }.onFailure {
+                withContext(Dispatchers.Main) {
+                    _addUserProfileEvent.emit(
+                        AddUserProfileEvent.Error(
+                            "There was an error while adding the user profile " +
+                                    "\"$userProfileFirstName\" ; \"$userProfileLastName\" ; \"$userProfileBiography\"",
+                            it
+                        )
+                    )
+                }
+            }
+//            cleanUpAndClose()
+        }
+    }
 
 
     companion object {

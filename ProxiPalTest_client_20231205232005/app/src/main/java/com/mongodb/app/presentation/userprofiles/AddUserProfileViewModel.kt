@@ -16,11 +16,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-sealed class AddUserProfileEvent {
-    class Info(val message: String) : AddUserProfileEvent()
-    class Error(val message: String, val throwable: Throwable) : AddUserProfileEvent()
-}
-
 class AddUserProfileViewModel(
     private val repository: SyncRepository
 ) : ViewModel() {
