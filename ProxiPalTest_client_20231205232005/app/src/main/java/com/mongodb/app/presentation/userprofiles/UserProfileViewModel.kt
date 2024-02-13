@@ -1,6 +1,7 @@
 package com.mongodb.app.presentation.userprofiles
 
 import android.os.Bundle
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -12,6 +13,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
+import com.mongodb.app.TAG
 import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT
 import com.mongodb.app.data.USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT
@@ -86,6 +88,9 @@ class UserProfileViewModel constructor(
 
     init {
         viewModelScope.launch {
+            Log.i(TAG(), "UPViewModel: User profile view model init start")
+            val userProfileList: Flow<ResultsChange<UserProfile>> = repository.getUserProfileList()
+            Log.i(TAG(), "UPViewModel: User profile list = \"${userProfileList}\"")
             repository.getUserProfileList()
                 .collect { event: ResultsChange<UserProfile> ->
                     when (event) {
@@ -114,6 +119,7 @@ class UserProfileViewModel constructor(
                         else -> Unit // No-op
                     }
                 }
+            Log.i(TAG(), "UPViewModel: User profile view model init end")
         }
     }
 

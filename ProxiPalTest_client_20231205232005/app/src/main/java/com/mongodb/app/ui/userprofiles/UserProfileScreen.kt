@@ -97,6 +97,8 @@ class UserProfileScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        Log.i(TAG(), "UPScreen: User profile view model event")
+
         lifecycleScope.launch {
             userProfileViewModel.event
                 .collect {
@@ -108,6 +110,8 @@ class UserProfileScreen : ComponentActivity() {
                     ).show()
                 }
         }
+
+        Log.i(TAG(), "UPScreen: User profile view model add event")
 
         lifecycleScope.launch {
             userProfileViewModel.addUserProfileEvent
@@ -323,6 +327,7 @@ fun UserProfileBodyPreview() {
 /**
 Displays a single row of information in the user profile screen
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileLayoutRow(
     @StringRes rowInformationHeader: Int,

@@ -1,5 +1,7 @@
 package com.mongodb.app.data
 
+import android.util.Log
+import com.mongodb.app.TAG
 import com.mongodb.app.domain.Item
 import com.mongodb.app.app
 import com.mongodb.app.domain.UserProfile
@@ -145,6 +147,9 @@ class RealmSyncRepository(
     }
 
     override fun getUserProfileList(): Flow<ResultsChange<UserProfile>>{
+        Log.i(TAG(), "SyncRepository: Querying for user profile list")
+        Log.i(TAG(), "SyncRepository: The queried list of user profiles is of size " +
+                "\"${realm.query<UserProfile>().count()}\"")
         return realm.query<UserProfile>()
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
