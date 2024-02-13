@@ -4,6 +4,7 @@ package com.mongodb.app.ui.userprofiles
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -43,10 +44,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
 import com.mongodb.app.R
+import com.mongodb.app.TAG
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.USER_PROFILE_EDIT_MODE_MAXIMUM_LINE_AMOUNT
 import com.mongodb.app.data.USER_PROFILE_ROW_HEADER_WEIGHT
+import com.mongodb.app.presentation.userprofiles.AddUserProfileEvent
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.components.MultiLineText
 import com.mongodb.app.ui.components.SingleLineText
@@ -84,6 +87,30 @@ class UserProfileScreen : ComponentActivity() {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        lifecycleScope.launch {
+            userProfileViewModel.event
+                .collect {
+                    Log.i(TAG(), "Tried to modify or remove a task that doesn't belong to the current user.")
+                    Toast.makeText(
+                        this@UserProfileScreen,
+                        getString(R.string.permissions_warning),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+        }
+
+        lifecycleScope.launch {
+            userProfileViewModel.addUserProfileEvent
+                .collect { fabEvent ->
+                    when (fabEvent) {
+                        is AddUserProfileEvent.Error ->
+                            Log.e(TAG(), "${fabEvent.message}: ${fabEvent.throwable.message}")
+                        is AddUserProfileEvent.Info ->
+                            Log.e(TAG(), fabEvent.message)
+                    }
+                }
+        }
 
         setContent {
             MyApplicationTheme {

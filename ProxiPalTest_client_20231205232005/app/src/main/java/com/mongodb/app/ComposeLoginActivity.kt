@@ -16,6 +16,7 @@ import com.mongodb.app.presentation.login.LoginEvent
 import com.mongodb.app.presentation.login.LoginViewModel
 import com.mongodb.app.ui.login.LoginScaffold
 import com.mongodb.app.ui.theme.MyApplicationTheme
+import com.mongodb.app.ui.userprofiles.UserProfileScreen
 import kotlinx.coroutines.launch
 
 class ComposeLoginActivity : ComponentActivity() {
@@ -28,6 +29,7 @@ class ComposeLoginActivity : ComponentActivity() {
         // Fast-track task list screen if we are logged in
         if (app.currentUser != null) {
             startActivity(Intent(this, ComposeItemActivity::class.java))
+//            startActivity(Intent(this, UserProfileScreen::class.java))
             finish()
             return
         }
@@ -41,6 +43,7 @@ class ComposeLoginActivity : ComponentActivity() {
                             event.process()
 
                             val intent = Intent(this@ComposeLoginActivity, ComposeItemActivity::class.java)
+//                            val intent = Intent(this@ComposeLoginActivity, UserProfileScreen::class.java)
                             startActivity(intent)
                             finish()
                         }
