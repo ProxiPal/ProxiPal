@@ -163,7 +163,7 @@ class RealmSyncRepository(
     override suspend fun addUserProfile(userProfileBiography: String){
         val userProfile = UserProfile().apply{
             biography = userProfileBiography
-            owner_id = currentUser.id
+            ownerId = currentUser.id
         }
         realm.write {
             copyToRealm(userProfile)
@@ -217,7 +217,7 @@ class RealmSyncRepository(
 
     override fun isTaskMine(task: Item): Boolean = task.owner_id == currentUser.id
 
-    override fun isUserProfileMine(userProfile: UserProfile): Boolean = userProfile.owner_id == currentUser.id
+    override fun isUserProfileMine(userProfile: UserProfile): Boolean = userProfile.ownerId == currentUser.id
 
     override fun close() = realm.close()
 
@@ -244,7 +244,7 @@ class MockRepository : SyncRepository {
     override fun pauseSync() = Unit
     override fun resumeSync() = Unit
     override fun isTaskMine(task: Item): Boolean = task.owner_id == MOCK_OWNER_ID_MINE
-    override fun isUserProfileMine(userProfile: UserProfile): Boolean = userProfile.owner_id == MOCK_OWNER_ID_MINE
+    override fun isUserProfileMine(userProfile: UserProfile): Boolean = userProfile.ownerId == MOCK_OWNER_ID_MINE
     override fun close() = Unit
 
     companion object {

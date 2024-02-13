@@ -59,7 +59,7 @@ fun ConnectWithOthersScreen (
             ProxiPalBottomAppBar(navController)
         }
 
-    ) { innerPadding ->
+    ) {
         LocationUpdatesScreen()
     }
 }

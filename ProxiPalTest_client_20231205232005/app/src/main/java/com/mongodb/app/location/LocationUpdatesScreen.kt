@@ -29,7 +29,8 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import java.util.concurrent.TimeUnit
 
-
+// This screen will display a clickable switch that enables location updates for the user
+// when the switch is checked, and then displays a dynamically updating list of nearby users
 @SuppressLint("MissingPermission")
 @Composable
 fun LocationUpdatesScreen() {
@@ -89,7 +90,7 @@ fun LocationUpdatesContent(usePreciseLocation: Boolean) {
             // it's good practice to fetch the current location
             // or get the last known location
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Spacer(Modifier.height(200.dp))
+                Spacer(Modifier.height(150.dp))
                 Text(text = "Enable location updates")
                 Spacer(modifier = Modifier.padding(8.dp))
                 Switch(

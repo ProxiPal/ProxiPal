@@ -11,11 +11,11 @@ class UserProfile() : RealmObject {
     var firstName: String = ""
     var lastName: String = ""
     var biography: String = ""
-    var owner_id: String = ""
+    var ownerId: String = ""
     var location: CustomGeoPoint? = null
 
     constructor(ownerId: String = "") : this() {
-        owner_id = ownerId
+        this.ownerId = ownerId
     }
 
     override fun equals(other: Any?): Boolean {
@@ -25,7 +25,7 @@ class UserProfile() : RealmObject {
         if (this.firstName != other.firstName) return false
         if (this.lastName != other.lastName) return false
         if (this.biography != other.biography) return false
-        if (this.owner_id != other.owner_id) return false
+        if (this.ownerId != other.ownerId) return false
         return true
     }
 
@@ -34,7 +34,7 @@ class UserProfile() : RealmObject {
         result = 31 * result + firstName.hashCode()
         result = 31 * result + lastName.hashCode()
         result = 31 * result + biography.hashCode()
-        result = 31 * result + owner_id.hashCode()
+        result = 31 * result + ownerId.hashCode()
         return result
     }
 }
