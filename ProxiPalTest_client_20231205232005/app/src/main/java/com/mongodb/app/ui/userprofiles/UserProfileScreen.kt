@@ -3,6 +3,7 @@
 package com.mongodb.app.ui.userprofiles
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -43,16 +44,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
+import com.mongodb.app.ComposeLoginActivity
 import com.mongodb.app.R
 import com.mongodb.app.TAG
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.USER_PROFILE_EDIT_MODE_MAXIMUM_LINE_AMOUNT
 import com.mongodb.app.data.USER_PROFILE_ROW_HEADER_WEIGHT
+import com.mongodb.app.presentation.tasks.ToolbarEvent
+import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.presentation.userprofiles.AddUserProfileEvent
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.components.MultiLineText
 import com.mongodb.app.ui.components.SingleLineText
+import com.mongodb.app.ui.tasks.TaskAppToolbar
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import kotlinx.coroutines.launch
 
@@ -79,6 +84,10 @@ class UserProfileScreen : ComponentActivity() {
 
     private val userProfileViewModel: UserProfileViewModel by viewModels {
         UserProfileViewModel.factory(repository, this)
+    }
+
+    private val toolbarViewModel: ToolbarViewModel by viewModels {
+        ToolbarViewModel.factory(repository, this)
     }
 
 
@@ -112,10 +121,27 @@ class UserProfileScreen : ComponentActivity() {
                 }
         }
 
+        lifecycleScope.launch {
+            toolbarViewModel.toolbarEvent
+                .collect { toolbarEvent ->
+                    when (toolbarEvent) {
+                        ToolbarEvent.LogOut -> {
+                            startActivity(Intent(this@UserProfileScreen, ComposeLoginActivity::class.java))
+                            finish()
+                        }
+                        is ToolbarEvent.Info ->
+                            Log.e(TAG(), toolbarEvent.message)
+                        is ToolbarEvent.Error ->
+                            Log.e(TAG(), "${toolbarEvent.message}: ${toolbarEvent.throwable.message}")
+                    }
+                }
+        }
+
         setContent {
             MyApplicationTheme {
                 UserProfileLayout(
-                    userProfileViewModel = userProfileViewModel
+                    userProfileViewModel = userProfileViewModel,
+                    toolbarViewModel = toolbarViewModel
                 )
             }
         }
@@ -140,11 +166,14 @@ Displays the entire user profile screen
 @Composable
 fun UserProfileLayout(
     userProfileViewModel: UserProfileViewModel,
+    toolbarViewModel: ToolbarViewModel,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         topBar = {
-            UserProfileTopBar()
+//            UserProfileTopBar()
+            // This topbar is used because it already has log out functionality implemented
+                 TaskAppToolbar(viewModel = toolbarViewModel)
         },
         modifier = modifier
     ) { innerPadding ->
@@ -167,7 +196,8 @@ fun UserProfileLayoutPreview() {
             userProfileViewModel = UserProfileViewModel(
                 repository = repository,
                 userProfileListState = userProfiles
-            )
+            ),
+            toolbarViewModel = ToolbarViewModel(repository)
         )
     }
 }
@@ -175,6 +205,7 @@ fun UserProfileLayoutPreview() {
 /**
  * The top bar portion of the user profile screen (currently just a title)
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileTopBar(modifier: Modifier = Modifier) {
     CenterAlignedTopAppBar(
