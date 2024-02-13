@@ -97,7 +97,7 @@ class UserProfileScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Log.i(TAG(), "UPScreen: User profile view model event")
+        Log.i(TAG(), "UPScreen: On create")
 
         lifecycleScope.launch {
             userProfileViewModel.event
@@ -110,8 +110,6 @@ class UserProfileScreen : ComponentActivity() {
                     ).show()
                 }
         }
-
-        Log.i(TAG(), "UPScreen: User profile view model add event")
 
         lifecycleScope.launch {
             userProfileViewModel.addUserProfileEvent
