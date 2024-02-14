@@ -470,24 +470,6 @@ fun TemporaryUserProfileOwnerIdField(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            TextField(
-                value = userProfileViewModel.temporaryOwnerId,
-                onValueChange = { userProfileViewModel.updateTemporaryOwnerId(it) },
-                // Make the keyboard action button hide the keyboard instead of entering a new line
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Done
-                ),
-                singleLine = true,
-                // Only allow updating the owner ID when the user is not updating their profile
-                readOnly = userProfileViewModel.isEditingUserProfile,
-                modifier = Modifier
-            )
-        }
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
             Button(
                 onClick = { userProfileViewModel.addUserProfile() },
                 modifier = Modifier

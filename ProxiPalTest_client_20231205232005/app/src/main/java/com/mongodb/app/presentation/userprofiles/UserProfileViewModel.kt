@@ -80,9 +80,6 @@ class UserProfileViewModel constructor(
     var isEditingUserProfile by mutableStateOf(false)
         private set
 
-    var temporaryOwnerId by mutableStateOf("")
-        private set
-
     val event: Flow<UserProfileViewEvent>
         get() = _event
 
@@ -182,13 +179,6 @@ class UserProfileViewModel constructor(
      */
     fun getRemainingCharacterAmountBiography(): Int{
         return USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT - userProfileBiography.value.length
-    }
-
-    /**
-     * (Temporary fast way to change current user's "owner ID" to view corresponding user profile)
-     */
-    fun updateTemporaryOwnerId(newOwnerId: String){
-        temporaryOwnerId = newOwnerId
     }
 
     // Not in use since toggleIsComplete function is not added/copied for UserProfiles

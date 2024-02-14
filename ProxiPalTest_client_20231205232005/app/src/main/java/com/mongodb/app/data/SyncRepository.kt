@@ -196,6 +196,7 @@ class RealmSyncRepository(
     }
 
     override suspend fun addUserProfile(firstName: String, lastName: String, biography: String) {
+        // The "owner ID" added is associated with the user currently logged into the app
         val userProfile = UserProfile().apply {
             ownerId = currentUser.id
             this.firstName = firstName
