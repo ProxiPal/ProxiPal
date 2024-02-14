@@ -123,13 +123,21 @@ class RealmSyncRepository(
         // If trying to query A when the sync configuration is set for B,
         // ... the app will crash if querying anything other than B
         // This has been debugged and confirmed
-//        config = SyncConfiguration.Builder(currentUser, setOf(Item::class))
-        config = SyncConfiguration.Builder(currentUser, setOf(UserProfile::class))
+        val set = if (USE_TASKS_ITEMS) setOf(Item::class) else setOf(UserProfile::class)
+        config = SyncConfiguration.Builder(currentUser, set)
             .initialSubscriptions { realm ->
                 // Subscribe to the active subscriptionType - first time defaults to MINE
                 val activeSubscriptionType = getActiveSubscriptionType(realm)
-//                add(getQueryItems(realm, activeSubscriptionType), activeSubscriptionType.name)
-                add(getQueryUserProfiles(realm, activeSubscriptionType), activeSubscriptionType.name)
+                if (USE_TASKS_ITEMS)
+                    add(
+                        getQueryItems(realm, activeSubscriptionType),
+                        activeSubscriptionType.name
+                    )
+                else
+                    add(
+                        getQueryUserProfiles(realm, activeSubscriptionType),
+                        activeSubscriptionType.name
+                    )
             }
             .errorHandler { session: SyncSession, error: SyncException ->
                 onSyncError.invoke(session, error)
@@ -151,11 +159,19 @@ class RealmSyncRepository(
             .asFlow()
     }
 
-    override fun getUserProfileList(): Flow<ResultsChange<UserProfile>>{
+    override fun getUserProfileList(): Flow<ResultsChange<UserProfile>> {
         // See config assignment statement in init{} above
 //        Log.i(TAG(), "RealmSyncRepository: The queried list of tasks/items is \"${realm.query<Item>()}\"")
-        Log.i(TAG(), "RealmSyncRepository: The queried list of user profiles is \"${realm.query<UserProfile>()}\"")
-        Log.i(TAG(), "RealmSyncRepository: The queried list size of user profiles is \"${realm.query<UserProfile>().count()}\"")
+        Log.i(
+            TAG(),
+            "RealmSyncRepository: The queried list of user profiles is \"${realm.query<UserProfile>()}\""
+        )
+        Log.i(
+            TAG(),
+            "RealmSyncRepository: The queried list size of user profiles is \"${
+                realm.query<UserProfile>().count()
+            }\""
+        )
         return realm.query<UserProfile>()
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
@@ -178,8 +194,8 @@ class RealmSyncRepository(
         }
     }
 
-    override suspend fun addUserProfile(firstName: String, lastName: String, biography: String){
-        val userProfile = UserProfile().apply{
+    override suspend fun addUserProfile(firstName: String, lastName: String, biography: String) {
+        val userProfile = UserProfile().apply {
             ownerId = currentUser.id
             this.firstName = firstName
             this.lastName = lastName
@@ -219,7 +235,7 @@ class RealmSyncRepository(
         realm.subscriptions.waitForSynchronization(10.seconds)
     }
 
-    override suspend fun deleteUserProfile(userProfile: UserProfile){
+    override suspend fun deleteUserProfile(userProfile: UserProfile) {
         realm.write {
             delete(findLatest(userProfile)!!)
         }
@@ -248,7 +264,8 @@ class RealmSyncRepository(
 
     override fun isTaskMine(task: Item): Boolean = task.owner_id == currentUser.id
 
-    override fun isUserProfileMine(userProfile: UserProfile): Boolean = userProfile.ownerId == currentUser.id
+    override fun isUserProfileMine(userProfile: UserProfile): Boolean =
+        userProfile.ownerId == currentUser.id
 
     override fun close() = realm.close()
 
@@ -258,8 +275,11 @@ class RealmSyncRepository(
             SubscriptionType.ALL -> realm.query()
         }
 
-    private fun getQueryUserProfiles(realm: Realm, subscriptionType: SubscriptionType): RealmQuery<UserProfile> =
-        when (subscriptionType){
+    private fun getQueryUserProfiles(
+        realm: Realm,
+        subscriptionType: SubscriptionType
+    ): RealmQuery<UserProfile> =
+        when (subscriptionType) {
             SubscriptionType.MINE -> realm.query("ownerId == $0", currentUser.id)
             SubscriptionType.ALL -> realm.query()
         }
@@ -273,7 +293,9 @@ class MockRepository : SyncRepository {
     override fun getUserProfileList(): Flow<ResultsChange<UserProfile>> = flowOf()
     override suspend fun toggleIsComplete(task: Item) = Unit
     override suspend fun addTask(taskSummary: String) = Unit
-    override suspend fun addUserProfile(firstName: String, lastName: String, biography: String) = Unit
+    override suspend fun addUserProfile(firstName: String, lastName: String, biography: String) =
+        Unit
+
     override suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType) = Unit
     override suspend fun updateSubscriptionsUserProfiles(subscriptionType: SubscriptionType) = Unit
     override suspend fun deleteTask(task: Item) = Unit
@@ -282,7 +304,9 @@ class MockRepository : SyncRepository {
     override fun pauseSync() = Unit
     override fun resumeSync() = Unit
     override fun isTaskMine(task: Item): Boolean = task.owner_id == MOCK_OWNER_ID_MINE
-    override fun isUserProfileMine(userProfile: UserProfile): Boolean = userProfile.ownerId == MOCK_OWNER_ID_MINE
+    override fun isUserProfileMine(userProfile: UserProfile): Boolean =
+        userProfile.ownerId == MOCK_OWNER_ID_MINE
+
     override fun close() = Unit
 
     companion object {
@@ -302,13 +326,13 @@ class MockRepository : SyncRepository {
             }
         }
 
-        fun getMockUserProfile(index: Int): UserProfile = UserProfile().apply{
+        fun getMockUserProfile(index: Int): UserProfile = UserProfile().apply {
             this.firstName = "First Name $index"
             this.lastName = "Last Name $index"
             this.biography = "Biography $index"
             // Make every other user profile mine in preview
             // For Compose previews only (in reality, a user will have only 1 profile)
-            this.ownerId = when{
+            this.ownerId = when {
                 index % 2 == 0 -> MOCK_OWNER_ID_MINE
                 else -> MOCK_OWNER_ID_OTHER
             }
