@@ -16,7 +16,7 @@
             android:screenOrientation="nosensor" />
         <activity
             android:name=".ui.userprofiles.UserProfileScreen"
-            android:screenOrientation="nosensor" />
+            android:screenOrientation="fullSensor" />
         <activity
             android:name=".ComposeLoginActivity"
             android:screenOrientation="nosensor"
