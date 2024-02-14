@@ -25,4 +25,4 @@ const val USER_PROFILE_ROW_HEADER_WEIGHT = 0.25f
 /**
  * A temporary switch value for whether to use the original tasks/items implementation for database connections
  */
-const val USE_TASKS_ITEMS = false
+const val SHOULD_USE_TASKS_ITEMS = false

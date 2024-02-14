@@ -112,6 +112,8 @@ class RealmSyncRepository(
     onSyncError: (session: SyncSession, error: SyncException) -> Unit
 ) : SyncRepository {
 
+    // Does not appear there can be 1 realm of 1 type and another realm of another type
+    // From last attempt, this causes the app to crash
     private val realm: Realm
     private val config: SyncConfiguration
     private val currentUser: User
@@ -123,12 +125,14 @@ class RealmSyncRepository(
         // If trying to query A when the sync configuration is set for B,
         // ... the app will crash if querying anything other than B
         // This has been debugged and confirmed
-        val set = if (USE_TASKS_ITEMS) setOf(Item::class) else setOf(UserProfile::class)
+        val set =
+            if (SHOULD_USE_TASKS_ITEMS) setOf(Item::class)
+            else setOf(UserProfile::class)
         config = SyncConfiguration.Builder(currentUser, set)
             .initialSubscriptions { realm ->
                 // Subscribe to the active subscriptionType - first time defaults to MINE
                 val activeSubscriptionType = getActiveSubscriptionType(realm)
-                if (USE_TASKS_ITEMS)
+                if (SHOULD_USE_TASKS_ITEMS)
                     add(
                         getQueryItems(realm, activeSubscriptionType),
                         activeSubscriptionType.name
@@ -154,23 +158,19 @@ class RealmSyncRepository(
     }
 
     override fun getTaskList(): Flow<ResultsChange<Item>> {
+        Log.i(
+            TAG(),
+            "RealmSyncRepository: The queried list of tasks/items is \"${realm.query<Item>()}\""
+        )
         return realm.query<Item>()
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
     }
 
     override fun getUserProfileList(): Flow<ResultsChange<UserProfile>> {
-        // See config assignment statement in init{} above
-//        Log.i(TAG(), "RealmSyncRepository: The queried list of tasks/items is \"${realm.query<Item>()}\"")
         Log.i(
             TAG(),
             "RealmSyncRepository: The queried list of user profiles is \"${realm.query<UserProfile>()}\""
-        )
-        Log.i(
-            TAG(),
-            "RealmSyncRepository: The queried list size of user profiles is \"${
-                realm.query<UserProfile>().count()
-            }\""
         )
         return realm.query<UserProfile>()
             .sort(Pair("_id", Sort.ASCENDING))

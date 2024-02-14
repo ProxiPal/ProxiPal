@@ -10,7 +10,7 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
-import com.mongodb.app.data.USE_TASKS_ITEMS
+import com.mongodb.app.data.SHOULD_USE_TASKS_ITEMS
 import com.mongodb.app.presentation.login.EventSeverity
 import com.mongodb.app.presentation.login.LoginAction
 import com.mongodb.app.presentation.login.LoginEvent
@@ -29,7 +29,7 @@ class ComposeLoginActivity : ComponentActivity() {
 
         // Fast-track task list screen if we are logged in
         if (app.currentUser != null) {
-            if (USE_TASKS_ITEMS)
+            if (SHOULD_USE_TASKS_ITEMS)
                 startActivity(Intent(this, ComposeItemActivity::class.java))
             else
                 startActivity(Intent(this, UserProfileScreen::class.java))
@@ -45,7 +45,7 @@ class ComposeLoginActivity : ComponentActivity() {
                         is LoginEvent.GoToTasks -> {
                             event.process()
 
-                            val intent = if (USE_TASKS_ITEMS) Intent(
+                            val intent = if (SHOULD_USE_TASKS_ITEMS) Intent(
                                 this@ComposeLoginActivity,
                                 ComposeItemActivity::class.java
                             )
