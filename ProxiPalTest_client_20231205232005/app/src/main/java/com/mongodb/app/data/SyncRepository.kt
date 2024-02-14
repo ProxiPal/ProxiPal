@@ -132,16 +132,17 @@ class RealmSyncRepository(
             .initialSubscriptions { realm ->
                 // Subscribe to the active subscriptionType - first time defaults to MINE
                 val activeSubscriptionType = getActiveSubscriptionType(realm)
-                if (SHOULD_USE_TASKS_ITEMS)
+                if (SHOULD_USE_TASKS_ITEMS) {
                     add(
                         getQueryItems(realm, activeSubscriptionType),
                         activeSubscriptionType.name
                     )
-                else
+                } else {
                     add(
                         getQueryUserProfiles(realm, activeSubscriptionType),
                         activeSubscriptionType.name
                     )
+                }
             }
             .errorHandler { session: SyncSession, error: SyncException ->
                 onSyncError.invoke(session, error)
@@ -249,6 +250,7 @@ class RealmSyncRepository(
         return when (val name = firstOrNull?.name) {
             null,
             SubscriptionType.MINE.name -> SubscriptionType.MINE
+
             SubscriptionType.ALL.name -> SubscriptionType.ALL
             else -> throw IllegalArgumentException("Invalid Realm Sync subscription: '$name'")
         }

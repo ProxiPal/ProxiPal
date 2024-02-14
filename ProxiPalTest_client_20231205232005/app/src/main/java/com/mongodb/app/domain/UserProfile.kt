@@ -4,7 +4,7 @@ import org.mongodb.kbson.ObjectId
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 
-class UserProfile() : RealmObject {
+class UserProfile : RealmObject {
     @PrimaryKey
     var _id: ObjectId = ObjectId()
     var firstName: String = ""

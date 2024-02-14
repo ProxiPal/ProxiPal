@@ -3,6 +3,7 @@ package com.mongodb.app.presentation.userprofiles
 import android.os.Bundle
 import android.util.Log
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -56,6 +57,10 @@ class UserProfileViewModel constructor(
     // From AddItemViewModel
     private val _addUserProfileEvent: MutableSharedFlow<AddUserProfileEvent> = MutableSharedFlow()
 
+    private val _userProfileFirstName: MutableState<String> = mutableStateOf("")
+    private val _userProfileLastName: MutableState<String> = mutableStateOf("")
+    private val _userProfileBiography: MutableState<String> = mutableStateOf("")
+
 
     /*
     ===== Properties =====
@@ -63,14 +68,14 @@ class UserProfileViewModel constructor(
     // Read-only state flow for access outside this class
     val userProfileUiState: StateFlow<UserProfileUiState> = _userProfileUiState.asStateFlow()
 
-    var userProfileFirstName: MutableState<String> = mutableStateOf("")
-        private set
+    val userProfileFirstName: State<String>
+        get() = _userProfileFirstName
 
-    var userProfileLastName: MutableState<String> = mutableStateOf("")
-        private set
+    val userProfileLastName: State<String>
+        get() = _userProfileLastName
 
-    var userProfileBiography: MutableState<String> = mutableStateOf("")
-        private set
+    val userProfileBiography: State<String>
+        get() = _userProfileBiography
 
     var isEditingUserProfile by mutableStateOf(false)
         private set
@@ -129,7 +134,7 @@ class UserProfileViewModel constructor(
      */
     fun updateUserProfileFirstName(newFirstName: String){
         if (newFirstName.length <= USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT) {
-            userProfileFirstName.value = newFirstName
+            _userProfileFirstName.value = newFirstName
         }
     }
 
@@ -138,7 +143,7 @@ class UserProfileViewModel constructor(
      */
     fun updateUserProfileLastName(newLastName: String){
         if (newLastName.length <= USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT) {
-            userProfileLastName.value = newLastName
+            _userProfileLastName.value = newLastName
         }
     }
 
@@ -147,7 +152,7 @@ class UserProfileViewModel constructor(
      */
     fun updateUserProfileBiography(newBiography: String){
         if (newBiography.length <= USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT) {
-            userProfileBiography.value = newBiography
+            _userProfileBiography.value = newBiography
         }
     }
 
@@ -214,15 +219,19 @@ class UserProfileViewModel constructor(
                 )
             }.onSuccess {
                 withContext(Dispatchers.Main) {
-                    _addUserProfileEvent.emit(AddUserProfileEvent.Info("User profile \"$userProfileFirstName\"" +
-                            " ; \"$userProfileLastName\" ; \"$userProfileBiography\" added successfully."))
+                    _addUserProfileEvent.emit(AddUserProfileEvent.Info("UPViewModel: User profile " +
+                            "\"${userProfileFirstName.value}\" ; " +
+                            "\"${userProfileLastName.value}\" ; " +
+                            "\"${userProfileBiography.value}\" added successfully."))
                 }
             }.onFailure {
                 withContext(Dispatchers.Main) {
                     _addUserProfileEvent.emit(
                         AddUserProfileEvent.Error(
-                            "There was an error while adding the user profile " +
-                                    "\"$userProfileFirstName\" ; \"$userProfileLastName\" ; \"$userProfileBiography\"",
+                            "UPViewModel: There was an error while adding the user profile " +
+                                    "\"${userProfileFirstName.value}\" ; " +
+                                    "\"${userProfileLastName.value}\" ; " +
+                                    "\"${userProfileBiography.value}\"",
                             it
                         )
                     )
