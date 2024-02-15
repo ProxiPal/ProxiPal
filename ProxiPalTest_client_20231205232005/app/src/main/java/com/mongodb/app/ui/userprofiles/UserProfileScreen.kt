@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -39,6 +40,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -101,6 +104,7 @@ class UserProfileScreen : ComponentActivity() {
             "UPScreen: Start of OnCreate()"
         )
 
+        // region ViewModel events
         lifecycleScope.launch {
             userProfileViewModel.event
                 .collect {
@@ -154,6 +158,7 @@ class UserProfileScreen : ComponentActivity() {
                     }
                 }
         }
+        // endregion ViewModel events
 
         setContent {
             MyApplicationTheme {
@@ -177,7 +182,7 @@ class UserProfileScreen : ComponentActivity() {
  */
 
 /**
-Displays the entire user profile screen
+ * Displays the entire user profile screen
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -190,7 +195,7 @@ fun UserProfileLayout(
     Scaffold(
         topBar = {
 //            UserProfileTopBar()
-            // This topbar is used because it already has log out functionality implemented
+            // This top bar is used because it already has logging out of account implemented
             TaskAppToolbar(viewModel = toolbarViewModel)
         },
         modifier = modifier
@@ -309,12 +314,15 @@ fun UserProfileBody(
                 onTextChange = { userProfileViewModel.updateUserProfileBiography(it) }
             )
         }
-        UserProfileEditButton(
+        UserProfileEditButtons(
             isEditingUserProfile = userProfileViewModel.isEditingUserProfile.value,
-            onClick = {
+            onEditButtonClick = {
                 userProfileViewModel.toggleUserProfileEditMode()
                 // Automatically show/hide all information when switching to/from edit mode
                 isCardExpanded = userProfileViewModel.isEditingUserProfile.value
+            },
+            onDiscardEditButtonClick = {
+                userProfileViewModel.discardUserProfileChanges()
             }
         )
     }
@@ -338,7 +346,7 @@ fun UserProfileBodyPreview() {
 }
 
 /**
-Displays a single row of information in the user profile screen
+ * Displays a single row of information in the user profile screen
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -430,7 +438,7 @@ fun UserProfileLayoutRowPreview() {
     MyApplicationTheme {
         UserProfileLayoutRow(
             rowInformationHeader = R.string.user_profile_first_name_header,
-            rowInformation = "John",
+            rowInformation = stringResource(id = R.string.app_name),
             remainingCharacterAmount = 99,
             isInformationExpanded = false,
             isEditingUserProfile = false,
@@ -440,12 +448,13 @@ fun UserProfileLayoutRowPreview() {
 }
 
 /**
-Displays the button to toggle user profile editing
+ * Displays the button to toggle user profile editing
  */
 @Composable
-fun UserProfileEditButton(
+fun UserProfileEditButtons(
     isEditingUserProfile: Boolean,
-    onClick: (() -> Unit),
+    onEditButtonClick: (() -> Unit),
+    onDiscardEditButtonClick: (() -> Unit),
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -454,7 +463,7 @@ fun UserProfileEditButton(
             .fillMaxWidth()
     ) {
         Button(
-            onClick = onClick,
+            onClick = onEditButtonClick,
             modifier = Modifier
         ) {
             Text(
@@ -468,6 +477,18 @@ fun UserProfileEditButton(
                 ),
                 modifier = Modifier
             )
+        }
+        // Only display the cancel edits button when editing the user profile
+        if (isEditingUserProfile){
+            Button(
+                onClick = onDiscardEditButtonClick,
+                modifier = Modifier
+            ){
+                Text(
+                    text = stringResource(id = R.string.user_profile_cancel_editing_message),
+                    modifier = Modifier
+                )
+            }
         }
     }
 }

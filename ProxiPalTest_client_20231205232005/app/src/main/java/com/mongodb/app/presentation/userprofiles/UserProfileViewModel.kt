@@ -84,7 +84,6 @@ class UserProfileViewModel constructor(
     val event: Flow<UserProfileViewEvent>
         get() = _event
 
-    // From AddItemViewModel
     val addUserProfileEvent: Flow<AddUserProfileEvent>
         get() = _addUserProfileEvent
 
@@ -169,7 +168,7 @@ class UserProfileViewModel constructor(
     ===== Functions =====
      */
     /**
-    Update the user profile first name
+     * Update the user profile first name
      */
     fun updateUserProfileFirstName(newFirstName: String){
         if (newFirstName.length <= USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT) {
@@ -178,7 +177,7 @@ class UserProfileViewModel constructor(
     }
 
     /**
-    Update the user profile last name
+     * Update the user profile last name
      */
     fun updateUserProfileLastName(newLastName: String){
         if (newLastName.length <= USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT) {
@@ -187,7 +186,7 @@ class UserProfileViewModel constructor(
     }
 
     /**
-    Update the user profile biography
+     * Update the user profile biography
      */
     fun updateUserProfileBiography(newBiography: String){
         if (newBiography.length <= USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT) {
@@ -196,14 +195,14 @@ class UserProfileViewModel constructor(
     }
 
     /**
-    Toggles whether the user is currently updating their user profile
+     * Toggles whether the user is currently updating their user profile
      */
     fun toggleUserProfileEditMode(){
-        // Maybe "CoroutineScope(Dispatchers.IO)" should be used instead of "viewModelScope"
-        viewModelScope.launch {
-            _isEditingUserProfile.value = !isEditingUserProfile.value
-            // If no longer editing the user profile, save the changes to the database
-            if (!isEditingUserProfile.value){
+        _isEditingUserProfile.value = !isEditingUserProfile.value
+        // If no longer editing the user profile, save the changes to the database
+        if (!isEditingUserProfile.value){
+            // Maybe "CoroutineScope(Dispatchers.IO)" should be used instead of "viewModelScope" (?)
+            viewModelScope.launch {
                 repository.updateUserProfile(
                     firstName = userProfileFirstName.value,
                     lastName = userProfileLastName.value,
@@ -211,6 +210,13 @@ class UserProfileViewModel constructor(
                 )
             }
         }
+    }
+
+    /**
+     * Discards any unsaved changes made to the user profile
+     */
+    fun discardUserProfileChanges(){
+        _isEditingUserProfile.value = false
     }
 
     /**
