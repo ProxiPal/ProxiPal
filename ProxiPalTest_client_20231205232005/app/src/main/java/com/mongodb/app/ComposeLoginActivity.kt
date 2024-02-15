@@ -49,7 +49,10 @@ class ComposeLoginActivity : ComponentActivity() {
                                 this@ComposeLoginActivity,
                                 ComposeItemActivity::class.java
                             )
-                            else Intent(this@ComposeLoginActivity, UserProfileScreen::class.java)
+                            else Intent(
+                                this@ComposeLoginActivity,
+                                UserProfileScreen::class.java
+                            )
                             startActivity(intent)
                             finish()
                         }

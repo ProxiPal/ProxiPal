@@ -35,5 +35,6 @@
     <string name="user_profile_characters_remaining">%s character(s) remaining</string>
     <string name="user_profile_start_editing_message">Edit Profile</string>
     <string name="user_profile_finish_editing_message">Save Changes</string>
+    <string name="user_profile_permissions_warning">You can only modify or remove a user profile that belongs to you.</string>
     <!-- End user profile strings-->
 </resources>

@@ -73,8 +73,7 @@ class UserProfileScreen : ComponentActivity() {
             // TODO the SDK does not have an enum for this type of error yet so make sure to update this once it has been added
             if (error.message?.contains("CompensatingWrite") == true) {
                 Toast.makeText(
-                    this@UserProfileScreen,
-                    getString(R.string.permissions_error),
+                    this@UserProfileScreen, getString(R.string.user_profile_permissions_warning),
                     Toast.LENGTH_SHORT
                 )
                     .show()
@@ -97,15 +96,21 @@ class UserProfileScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Log.i(TAG(), "UPScreen: On create")
+        Log.i(
+            TAG(),
+            "UPScreen: Start of OnCreate()"
+        )
 
         lifecycleScope.launch {
             userProfileViewModel.event
                 .collect {
-                    Log.i(TAG(), "Tried to modify or remove a task that doesn't belong to the current user.")
+                    Log.i(
+                        TAG(),
+                        "UPScreen: Tried to modify or remove a user profile that doesn't belong to the current user."
+                    )
                     Toast.makeText(
                         this@UserProfileScreen,
-                        getString(R.string.permissions_warning),
+                        getString(R.string.user_profile_permissions_warning),
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -117,6 +122,7 @@ class UserProfileScreen : ComponentActivity() {
                     when (fabEvent) {
                         is AddUserProfileEvent.Error ->
                             Log.e(TAG(), "${fabEvent.message}: ${fabEvent.throwable.message}")
+
                         is AddUserProfileEvent.Info ->
                             Log.e(TAG(), fabEvent.message)
                     }
@@ -128,13 +134,23 @@ class UserProfileScreen : ComponentActivity() {
                 .collect { toolbarEvent ->
                     when (toolbarEvent) {
                         ToolbarEvent.LogOut -> {
-                            startActivity(Intent(this@UserProfileScreen, ComposeLoginActivity::class.java))
+                            startActivity(
+                                Intent(
+                                    this@UserProfileScreen,
+                                    ComposeLoginActivity::class.java
+                                )
+                            )
                             finish()
                         }
+
                         is ToolbarEvent.Info ->
                             Log.e(TAG(), toolbarEvent.message)
+
                         is ToolbarEvent.Error ->
-                            Log.e(TAG(), "${toolbarEvent.message}: ${toolbarEvent.throwable.message}")
+                            Log.e(
+                                TAG(),
+                                "${toolbarEvent.message}: ${toolbarEvent.throwable.message}"
+                            )
                     }
                 }
         }
@@ -175,7 +191,7 @@ fun UserProfileLayout(
         topBar = {
 //            UserProfileTopBar()
             // This topbar is used because it already has log out functionality implemented
-                 TaskAppToolbar(viewModel = toolbarViewModel)
+            TaskAppToolbar(viewModel = toolbarViewModel)
         },
         modifier = modifier
     ) { innerPadding ->
@@ -205,10 +221,13 @@ fun UserProfileLayoutPreview() {
 }
 
 /**
- * The top bar portion of the user profile screen (currently just a title)
+ * The top bar portion of the user profile screen
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@Deprecated(
+    message = "Unused in favor of the existing template's topbar, which already has account log out functionality implemented"
+)
 fun UserProfileTopBar(modifier: Modifier = Modifier) {
     CenterAlignedTopAppBar(
         title = {
@@ -355,7 +374,7 @@ fun UserProfileLayoutRow(
                 )
             )
         }
-        // Display the corresponding user's information for a specific row
+        // Display the corresponding information for a specific row
         Column(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier
@@ -363,7 +382,7 @@ fun UserProfileLayoutRow(
         ) {
             // Read-only text
             if (!isEditingUserProfile) {
-                // Hide information if the card is not expanded to shorten it if long
+                // If the card is not expanded, hide information to shorten it if it's long
                 if (isInformationExpanded) {
                     when (rowInformation.isNotEmpty()) {
                         false -> MultiLineText(text = nonEmptyRowInformation, isItalic = true)
@@ -376,7 +395,7 @@ fun UserProfileLayoutRow(
                     }
                 }
             }
-            // Text is editable
+            // Editable text
             else {
                 TextField(
                     // Do not replace any empty input with replacements here
@@ -390,7 +409,7 @@ fun UserProfileLayoutRow(
                             )
                         )
                     },
-                    // This line does not seem to change anything currently
+                    // This line does not seem to change anything currently (?)
                     placeholder = { stringResource(id = R.string.user_profile_empty_string_replacement) },
                     onValueChange = onTextChange,
                     // Make the keyboard action button hide the keyboard instead of entering a new line

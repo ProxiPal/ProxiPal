@@ -20,7 +20,8 @@ import com.mongodb.app.presentation.tasks.ContextualMenuViewModel
  */
 
 /**
- * The [Composable] function for providing a contextual menu for deleting items in the in-app list and the database (eventually)
+ * The [Composable] function for providing a contextual menu for deleting items in the in-app list and the database.
+ * (Currently only in use for the original tasks/items template code.)
  */
 @Composable
 fun ContextualMenu(

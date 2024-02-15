@@ -4,6 +4,9 @@ import org.mongodb.kbson.ObjectId
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 
+/**
+ * The user profile object that gets added and saved to the database
+ */
 class UserProfile : RealmObject {
     @PrimaryKey
     var _id: ObjectId = ObjectId()

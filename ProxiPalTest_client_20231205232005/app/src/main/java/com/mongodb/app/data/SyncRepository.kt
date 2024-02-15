@@ -29,57 +29,9 @@ import kotlin.time.Duration.Companion.seconds
  * Working functions and code for Item classes has been copied for UserProfile classes
  */
 interface SyncRepository {
-
-    /**
-     * Returns a flow with the tasks for the current subscription.
+    /*
+    ===== Functions =====
      */
-    fun getTaskList(): Flow<ResultsChange<Item>>
-
-    /**
-     * Returns a flow with the user profiles for the current subscription.
-     */
-    fun getUserProfileList(): Flow<ResultsChange<UserProfile>>
-
-    /**
-     * Update the `isComplete` flag for a specific [Item].
-     */
-    suspend fun toggleIsComplete(task: Item)
-
-    /**
-     * Adds a task that belongs to the current user using the specified [taskSummary].
-     */
-    suspend fun addTask(taskSummary: String)
-
-    /**
-     * Adds a user profile that belongs to the current user using the specified parameters
-     */
-    suspend fun addUserProfile(firstName: String, lastName: String, biography: String)
-
-    /**
-     * Updates a possible existing user profile for the current user in the database using the specified parameters
-     */
-    suspend fun updateUserProfile(firstName: String, lastName: String, biography: String)
-
-    /**
-     * Updates the Sync subscriptions based on the specified [SubscriptionType].
-     */
-    suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType)
-
-    /**
-     * Updates the Sync subscription based on the specified [SubscriptionType].
-     */
-    suspend fun updateSubscriptionsUserProfiles(subscriptionType: SubscriptionType)
-
-    /**
-     * Deletes a given task.
-     */
-    suspend fun deleteTask(task: Item)
-
-    /**
-     * Deletes a given user profile.
-     */
-    suspend fun deleteUserProfile(userProfile: UserProfile)
-
     /**
      * Returns the active [SubscriptionType].
      */
@@ -96,20 +48,81 @@ interface SyncRepository {
     fun resumeSync()
 
     /**
+     * Closes the realm instance held by this repository.
+     */
+    fun close()
+
+    /*
+    These functions are from an existing template
+     */
+    // region Tasks/Items
+    /**
+     * Returns a flow with the tasks for the current subscription.
+     */
+    fun getTaskList(): Flow<ResultsChange<Item>>
+
+    /**
+     * Update the `isComplete` flag for a specific [Item].
+     */
+    suspend fun toggleIsComplete(task: Item)
+
+    /**
+     * Adds a task that belongs to the current user using the specified [taskSummary].
+     */
+    suspend fun addTask(taskSummary: String)
+
+    /**
+     * Updates the Sync subscriptions based on the specified [SubscriptionType].
+     */
+    suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType)
+
+    /**
+     * Deletes a given task.
+     */
+    suspend fun deleteTask(task: Item)
+
+    /**
      * Whether the given [task] belongs to the current user logged in to the app.
      */
     fun isTaskMine(task: Item): Boolean
+    // endregion Tasks/Items
+
+    /*
+    These functions currently handle Creating, Reading, and Updating a user profile
+     */
+    // region User profiles
+    /**
+     * Returns a flow with the user profiles for the current subscription.
+     */
+    fun getUserProfileList(): Flow<ResultsChange<UserProfile>>
+
+    /**
+     * Adds a user profile that belongs to the current user using the specified parameters
+     */
+    suspend fun addUserProfile(firstName: String, lastName: String, biography: String)
+
+    /**
+     * Updates a possible existing user profile for the current user in the database using the specified parameters
+     */
+    suspend fun updateUserProfile(firstName: String, lastName: String, biography: String)
+
+    /**
+     * Updates the Sync subscription based on the specified [SubscriptionType].
+     */
+    suspend fun updateSubscriptionsUserProfiles(subscriptionType: SubscriptionType)
+
+    /**
+     * Deletes a given user profile.
+     */
+    suspend fun deleteUserProfile(userProfile: UserProfile)
 
     /**
      * Whether the given [userProfile] belongs to the current user logged in to the app.
      */
     fun isUserProfileMine(userProfile: UserProfile): Boolean
-
-    /**
-     * Closes the realm instance held by this repository.
-     */
-    fun close()
+    // endregion User profiles
 }
+
 
 /**
  * Repo implementation used in runtime.
@@ -118,21 +131,22 @@ class RealmSyncRepository(
     onSyncError: (session: SyncSession, error: SyncException) -> Unit
 ) : SyncRepository {
 
-    // Does not appear there can be 1 realm of 1 type and another realm of another type
-    // From last attempt, this causes the app to crash
+    // Unsure if there can be more than 1 instance of a Realm
     private val realm: Realm
     private val config: SyncConfiguration
     private val currentUser: User
         get() = app.currentUser!!
 
     init {
-        Log.i(TAG(), "RealmSyncRepository: Init")
-        // This assignment impacts what type of object can be queried
+        Log.i(
+            TAG(),
+            "RealmSyncRepository: Start of Init{}"
+        )
+        // This assignment impacts what type of object can be queried.
         // If trying to query A when the sync configuration is set for B,
-        // ... the app will crash if querying anything other than B
-        // This has been debugged and confirmed
-        val set =
-            if (SHOULD_USE_TASKS_ITEMS) setOf(Item::class)
+        // ... the app will crash if querying anything other than B.
+        // If errors still persist, try deleting and re-running the app.
+        val set = if (SHOULD_USE_TASKS_ITEMS) setOf(Item::class)
             else setOf(UserProfile::class)
         config = SyncConfiguration.Builder(currentUser, set)
             .initialSubscriptions { realm ->
@@ -191,15 +205,11 @@ class RealmSyncRepository(
 
     override fun close() = realm.close()
 
-
     /*
-    ===== Task/Item related functions =====
+    These functions are from an existing template
      */
+    // region Tasks/Items
     override fun getTaskList(): Flow<ResultsChange<Item>> {
-        Log.i(
-            TAG(),
-            "RealmSyncRepository: The queried list of tasks/items is \"${realm.query<Item>()}\""
-        )
         return realm.query<Item>()
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
@@ -247,16 +257,14 @@ class RealmSyncRepository(
             SubscriptionType.MINE -> realm.query("owner_id == $0", currentUser.id)
             SubscriptionType.ALL -> realm.query()
         }
-
+    // endregion Tasks/Items
 
     /*
-    ===== User profile related functions =====
+    These functions currently handle Creating, Reading, and Updating a user profile
+    Deleting has not been testing for functionality and may not be necessary, for now
      */
+    // region User profiles
     override fun getUserProfileList(): Flow<ResultsChange<UserProfile>> {
-        Log.i(
-            TAG(),
-            "RealmSyncRepository: The queried list of user profiles is \"${realm.query<UserProfile>()}\""
-        )
         return realm.query<UserProfile>()
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
@@ -286,6 +294,10 @@ class RealmSyncRepository(
             realm = realm,
             subscriptionType = getActiveSubscriptionType(realm)
         ).find().size) {
+            // Create a new profile for the user if they do not have one already in the database
+            // This may not be necessary as users will get their initial profiles added to the database
+            // ... once they register an account and deleting their profile will only occur when
+            // ... deleting their account (unsure if account deletion will be implemented)
             0 -> {
                 Log.i(
                     TAG(),
@@ -348,6 +360,7 @@ class RealmSyncRepository(
             SubscriptionType.MINE -> realm.query("ownerId == $0", currentUser.id)
             SubscriptionType.ALL -> realm.query()
         }
+    // endregion User profiles
 }
 
 /**

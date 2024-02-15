@@ -35,7 +35,6 @@ import kotlinx.coroutines.withContext
 
 object UserProfileViewEvent
 
-// From AddItemViewModel
 sealed class AddUserProfileEvent {
     class Info(val message: String) : AddUserProfileEvent()
     class Error(val message: String, val throwable: Throwable) : AddUserProfileEvent()
@@ -54,7 +53,6 @@ class UserProfileViewModel constructor(
 
     private val _event: MutableSharedFlow<UserProfileViewEvent> = MutableSharedFlow()
 
-    // From AddItemViewModel
     private val _addUserProfileEvent: MutableSharedFlow<AddUserProfileEvent> = MutableSharedFlow()
 
     private val _userProfileFirstName: MutableState<String> = mutableStateOf("")
@@ -68,7 +66,8 @@ class UserProfileViewModel constructor(
     ===== Properties =====
      */
     // Read-only state flow for access outside this class
-    val userProfileUiState: StateFlow<UserProfileUiState> = _userProfileUiState.asStateFlow()
+    val userProfileUiState: StateFlow<UserProfileUiState>
+        get() = _userProfileUiState.asStateFlow()
 
     val userProfileFirstName: State<String>
         get() = _userProfileFirstName
@@ -92,7 +91,10 @@ class UserProfileViewModel constructor(
 
     init {
         viewModelScope.launch {
-            Log.i(TAG(), "UPViewModel: User profile view model init")
+            Log.i(
+                TAG(),
+                "UPViewModel: Start of Init{}"
+            )
             repository.getUserProfileList()
                 .collect { event: ResultsChange<UserProfile> ->
                     Log.i(
@@ -103,38 +105,43 @@ class UserProfileViewModel constructor(
                         is InitialResults -> {
                             userProfileListState.clear()
                             userProfileListState.addAll(event.list)
-                            // The user should not have more than 1 profile,
+                            // The user should not have more than 1 user profile,
                             // ... but will allow the app to run and not throw an exception for now
-                            if (event.list.size > 1){
-                                Log.i(
-                                    TAG(),
-                                    "UPViewModel: InitialResults; Current user has more than 1 user profile; " +
-                                            "Retrieving only the first user profile instance..."
-                                )
-                                _userProfileFirstName.value = event.list[0].firstName
-                                _userProfileLastName.value = event.list[0].lastName
-                                _userProfileBiography.value = event.list[0].biography
-                            }
-                            else if (event.list.size == 0){
-                                Log.i(
-                                    TAG(),
-                                    "UPViewModel: InitialResults; Current user has no user profile created; " +
-                                            "Creating a new user profile..."
-                                )
-                                repository.addUserProfile(
-                                    firstName = "",
-                                    lastName = "",
-                                    biography = ""
-                                )
-                            }
-                            else{
-                                Log.i(
-                                    TAG(),
-                                    "UPViewModel: InitialResults; Getting current user's user profile..."
-                                )
-                                _userProfileFirstName.value = event.list[0].firstName
-                                _userProfileLastName.value = event.list[0].lastName
-                                _userProfileBiography.value = event.list[0].biography
+                            when (event.list.size){
+                                0 -> {
+                                    Log.i(
+                                        TAG(),
+                                        "UPViewModel: InitialResults; Current user has no user profile created; " +
+                                                "Creating a new user profile..."
+                                    )
+                                    // Create a new user profile
+                                    repository.addUserProfile(
+                                        firstName = "",
+                                        lastName = "",
+                                        biography = ""
+                                    )
+                                }
+                                1 -> {
+                                    Log.i(
+                                        TAG(),
+                                        "UPViewModel: InitialResults; Getting current user's user profile..."
+                                    )
+                                    // Load the saved profile details
+                                    _userProfileFirstName.value = event.list[0].firstName
+                                    _userProfileLastName.value = event.list[0].lastName
+                                    _userProfileBiography.value = event.list[0].biography
+                                }
+                                else -> {
+                                    Log.i(
+                                        TAG(),
+                                        "UPViewModel: InitialResults; Current user has more than 1 user profile; " +
+                                                "Retrieving only the first user profile instance..."
+                                    )
+                                    // Load the saved profile details
+                                    _userProfileFirstName.value = event.list[0].firstName
+                                    _userProfileLastName.value = event.list[0].lastName
+                                    _userProfileBiography.value = event.list[0].biography
+                                }
                             }
                         }
                         is UpdatedResults -> {
@@ -196,6 +203,7 @@ class UserProfileViewModel constructor(
     Toggles whether the user is currently updating their user profile
      */
     fun toggleUserProfileEditMode(){
+        // Maybe "CoroutineScope(Dispatchers.IO)" should be used instead of "viewModelScope"
         viewModelScope.launch {
             _isEditingUserProfile.value = !isEditingUserProfile.value
             // If no longer editing the user profile, save the changes to the database
@@ -230,24 +238,23 @@ class UserProfileViewModel constructor(
         return USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT - userProfileBiography.value.length
     }
 
-    // Not in use since toggleIsComplete function is not added/copied for UserProfiles
-//    fun toggleIsComplete(task: Item) {
-//        CoroutineScope(Dispatchers.IO).launch {
-//            repository.toggleIsComplete(task)
-//        }
-//    }
-
     fun showPermissionsMessage() {
         viewModelScope.launch {
             _event.emit(UserProfileViewEvent)
         }
     }
 
+    @Deprecated(
+        message = "Users should only be able to see and edit their own user profile"
+    )
     fun isUserProfileMine(userProfile: UserProfile): Boolean = repository.isUserProfileMine(userProfile)
 
     /**
-     * Adds a user profile instance to the Realm/Mongo Atlas database
+     * Adds a user profile instance to the database
      */
+    @Deprecated(
+        message = "Adding user profiles will only be done once, around when a user registers and creates their account"
+    )
     fun addUserProfile() {
         CoroutineScope(Dispatchers.IO).launch {
             runCatching {
@@ -258,10 +265,10 @@ class UserProfileViewModel constructor(
                 )
             }.onSuccess {
                 withContext(Dispatchers.Main) {
-                    _addUserProfileEvent.emit(AddUserProfileEvent.Info("UPViewModel: User profile " +
+                    _addUserProfileEvent.emit(AddUserProfileEvent.Info("UPViewModel: Successfully added user profile " +
                             "\"${userProfileFirstName.value}\" ; " +
                             "\"${userProfileLastName.value}\" ; " +
-                            "\"${userProfileBiography.value}\" added successfully."))
+                            "\"${userProfileBiography.value}\""))
                 }
             }.onFailure {
                 withContext(Dispatchers.Main) {
@@ -276,7 +283,6 @@ class UserProfileViewModel constructor(
                     )
                 }
             }
-//            cleanUpAndClose()
         }
     }
 
