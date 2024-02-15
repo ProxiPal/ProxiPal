@@ -111,15 +111,11 @@ class UserProfileViewModel constructor(
                                 0 -> {
                                     Log.i(
                                         TAG(),
-                                        "UPViewModel: InitialResults; Current user has no user profile created; " +
-                                                "Creating a new user profile..."
+                                        "UPViewModel: InitialResults; Current user has no user profile created"
                                     )
-                                    // Create a new user profile
-                                    repository.addUserProfile(
-                                        firstName = "",
-                                        lastName = "",
-                                        biography = ""
-                                    )
+                                    // When trying to update a user profile that is not saved in the database
+                                    // ... the SyncRepository will handle creating a new user profile before
+                                    // ... making the updated changes
                                 }
                                 1 -> {
                                     Log.i(

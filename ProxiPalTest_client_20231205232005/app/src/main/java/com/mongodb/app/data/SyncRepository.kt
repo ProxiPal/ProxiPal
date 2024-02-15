@@ -147,7 +147,7 @@ class RealmSyncRepository(
         // ... the app will crash if querying anything other than B.
         // If errors still persist, try deleting and re-running the app.
         val set = if (SHOULD_USE_TASKS_ITEMS) setOf(Item::class)
-            else setOf(UserProfile::class)
+        else setOf(UserProfile::class)
         config = SyncConfiguration.Builder(currentUser, set)
             .initialSubscriptions { realm ->
                 // Subscribe to the active subscriptionType - first time defaults to MINE
@@ -289,7 +289,28 @@ class RealmSyncRepository(
         val frozenUserProfile = getQueryUserProfiles(
             realm = realm,
             subscriptionType = getActiveSubscriptionType(realm)
-        ).find().first()
+        ).find()
+        // In case the query result list is empty, check first before calling ".first()"
+        val frozenFirstUserProfile = if (frozenUserProfile.size > 0) {
+            frozenUserProfile.first()
+        } else {
+            null
+        }
+        if (frozenFirstUserProfile == null) {
+            Log.i(
+                TAG(),
+                "RealmSyncRepository: Creating a new user profile with the given parameters for " +
+                        "current user ID = \"${currentUser.id}\"...; " +
+                        "Skipping rest of user profile update function..."
+            )
+            // Create a new user profile before applying the updated changes
+            addUserProfile(
+                firstName = firstName,
+                lastName = lastName,
+                biography = biography
+            )
+            return
+        }
         when (getQueryUserProfiles(
             realm = realm,
             subscriptionType = getActiveSubscriptionType(realm)
@@ -301,13 +322,7 @@ class RealmSyncRepository(
             0 -> {
                 Log.i(
                     TAG(),
-                    "RealmSyncRepository: No user profiles found with owner ID \"${currentUser.id}\"; " +
-                            "Creating a new profile for current user..."
-                )
-                addUserProfile(
-                    firstName = "",
-                    lastName = "",
-                    biography = ""
+                    "RealmSyncRepository: No user profiles found with owner ID \"${currentUser.id}\""
                 )
             }
 
@@ -322,7 +337,7 @@ class RealmSyncRepository(
             )
         }
         realm.write {
-            findLatest(frozenUserProfile)?.let { liveUserProfile ->
+            findLatest(frozenFirstUserProfile)?.let { liveUserProfile ->
                 liveUserProfile.firstName = firstName
                 liveUserProfile.lastName = lastName
                 liveUserProfile.biography = biography
