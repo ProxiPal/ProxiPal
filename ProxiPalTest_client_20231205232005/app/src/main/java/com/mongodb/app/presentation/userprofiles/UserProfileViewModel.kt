@@ -93,10 +93,45 @@ class UserProfileViewModel constructor(
             Log.i(TAG(), "UPViewModel: User profile view model init")
             repository.getUserProfileList()
                 .collect { event: ResultsChange<UserProfile> ->
+                    Log.i(
+                        TAG(),
+                        "UPViewModel: Current user's user profile amount = \"${event.list.size}\""
+                    )
                     when (event) {
                         is InitialResults -> {
                             userProfileListState.clear()
                             userProfileListState.addAll(event.list)
+                            if (event.list.size > 1){
+                                Log.i(
+                                    TAG(),
+                                    "UPViewModel: InitialResults; Current user has more than 1 user profile; " +
+                                            "Retrieving only the first user profile instance..."
+                                )
+                                _userProfileFirstName.value = event.list[0].firstName
+                                _userProfileLastName.value = event.list[0].lastName
+                                _userProfileBiography.value = event.list[0].biography
+                            }
+                            else if (event.list.size == 0){
+                                Log.i(
+                                    TAG(),
+                                    "UPViewModel: InitialResults; Current user has no user profile created; " +
+                                            "Creating a new user profile..."
+                                )
+                                repository.addUserProfile(
+                                    firstName = "",
+                                    lastName = "",
+                                    biography = ""
+                                )
+                            }
+                            else{
+                                Log.i(
+                                    TAG(),
+                                    "UPViewModel: InitialResults; Getting current user's user profile..."
+                                )
+                                _userProfileFirstName.value = event.list[0].firstName
+                                _userProfileLastName.value = event.list[0].lastName
+                                _userProfileBiography.value = event.list[0].biography
+                            }
                         }
                         is UpdatedResults -> {
                             if (event.deletions.isNotEmpty() && userProfileListState.isNotEmpty()) {
