@@ -89,11 +89,73 @@ class UserProfileViewModel constructor(
 
 
     init {
+        Log.i(
+            TAG(),
+            "UPViewModel: Start of Init{}"
+        )
+        getUserProfile()
+    }
+
+
+    /*
+    ===== Functions =====
+     */
+    /**
+     * Update the user profile first name
+     */
+    fun updateUserProfileFirstName(newFirstName: String){
+        if (newFirstName.length <= USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT) {
+            _userProfileFirstName.value = newFirstName
+        }
+    }
+
+    /**
+     * Update the user profile last name
+     */
+    fun updateUserProfileLastName(newLastName: String){
+        if (newLastName.length <= USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT) {
+            _userProfileLastName.value = newLastName
+        }
+    }
+
+    /**
+     * Update the user profile biography
+     */
+    fun updateUserProfileBiography(newBiography: String){
+        if (newBiography.length <= USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT) {
+            _userProfileBiography.value = newBiography
+        }
+    }
+
+    /**
+     * Toggles whether the user is currently updating their user profile
+     */
+    fun toggleUserProfileEditMode(){
+        _isEditingUserProfile.value = !isEditingUserProfile.value
+        // If no longer editing the user profile, save the changes to the database
+        if (!isEditingUserProfile.value){
+            setUserProfile()
+        }
+    }
+
+    /**
+     * Updates the current user's user profile, if it exists
+     */
+    private fun setUserProfile(){
         viewModelScope.launch {
-            Log.i(
-                TAG(),
-                "UPViewModel: Start of Init{}"
+            repository.updateUserProfile(
+                firstName = userProfileFirstName.value,
+                lastName = userProfileLastName.value,
+                biography = userProfileBiography.value
             )
+        }
+    }
+
+    /**
+     * Retrieves the current user's user profile, if it exists
+     */
+    private fun getUserProfile(){
+        viewModelScope.launch {
             repository.getUserProfileList()
                 .collect { event: ResultsChange<UserProfile> ->
                     Log.i(
@@ -161,55 +223,51 @@ class UserProfileViewModel constructor(
                     }
                 }
         }
-    }
-
-
-    /*
-    ===== Functions =====
-     */
-    /**
-     * Update the user profile first name
-     */
-    fun updateUserProfileFirstName(newFirstName: String){
-        if (newFirstName.length <= USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT) {
-            _userProfileFirstName.value = newFirstName
-        }
-    }
-
-    /**
-     * Update the user profile last name
-     */
-    fun updateUserProfileLastName(newLastName: String){
-        if (newLastName.length <= USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT) {
-            _userProfileLastName.value = newLastName
-        }
-    }
-
-    /**
-     * Update the user profile biography
-     */
-    fun updateUserProfileBiography(newBiography: String){
-        if (newBiography.length <= USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT) {
-            _userProfileBiography.value = newBiography
-        }
-    }
-
-    /**
-     * Toggles whether the user is currently updating their user profile
-     */
-    fun toggleUserProfileEditMode(){
-        _isEditingUserProfile.value = !isEditingUserProfile.value
-        // If no longer editing the user profile, save the changes to the database
-        if (!isEditingUserProfile.value){
-            // Maybe "CoroutineScope(Dispatchers.IO)" should be used instead of "viewModelScope" (?)
-            viewModelScope.launch {
-                repository.updateUserProfile(
-                    firstName = userProfileFirstName.value,
-                    lastName = userProfileLastName.value,
-                    biography = userProfileBiography.value
-                )
-            }
-        }
+//        viewModelScope.launch {
+//            repository.getUserProfileList()
+//                .collect { event: ResultsChange<UserProfile> ->
+//                    Log.i(
+//                        TAG(),
+//                        "UPViewModel: Current user's user profile amount = \"${event.list.size}\""
+//                    )
+//                    userProfileListState.clear()
+//                    userProfileListState.addAll(event.list)
+//                    // The user should not have more than 1 user profile,
+//                    // ... but will allow the app to run and not throw an exception for now
+//                    when (event.list.size){
+//                        0 -> {
+//                            Log.i(
+//                                TAG(),
+//                                "UPViewModel: InitialResults; Current user has no user profile created"
+//                            )
+//                            // When trying to update a user profile that is not saved in the database
+//                            // ... the SyncRepository will handle creating a new user profile before
+//                            // ... making the updated changes
+//                        }
+//                        1 -> {
+//                            Log.i(
+//                                TAG(),
+//                                "UPViewModel: InitialResults; Getting current user's user profile..."
+//                            )
+//                            // Load the saved profile details
+//                            _userProfileFirstName.value = event.list[0].firstName
+//                            _userProfileLastName.value = event.list[0].lastName
+//                            _userProfileBiography.value = event.list[0].biography
+//                        }
+//                        else -> {
+//                            Log.i(
+//                                TAG(),
+//                                "UPViewModel: InitialResults; Current user has more than 1 user profile; " +
+//                                        "Retrieving only the first user profile instance..."
+//                            )
+//                            // Load the saved profile details
+//                            _userProfileFirstName.value = event.list[0].firstName
+//                            _userProfileLastName.value = event.list[0].lastName
+//                            _userProfileBiography.value = event.list[0].biography
+//                        }
+//                    }
+//                }
+//        }
     }
 
     /**
@@ -217,6 +275,7 @@ class UserProfileViewModel constructor(
      */
     fun discardUserProfileChanges(){
         _isEditingUserProfile.value = false
+        getUserProfile()
     }
 
     /**
