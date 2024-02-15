@@ -16,12 +16,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -40,8 +42,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -231,7 +231,7 @@ fun UserProfileLayoutPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Deprecated(
-    message = "Unused in favor of the existing template's topbar, which already has account log out functionality implemented"
+    message = "Unused in favor of the existing template's top bar, which already has account log out functionality implemented"
 )
 fun UserProfileTopBar(modifier: Modifier = Modifier) {
     CenterAlignedTopAppBar(
@@ -268,6 +268,7 @@ fun UserProfileBody(
     var columnModifier = modifier
         .verticalScroll(rememberScrollState())
         .fillMaxSize()
+        .padding(all = dimensionResource(id = R.dimen.user_profile_spacer_height))
     if (contentPadding != null) {
         columnModifier = columnModifier.padding(contentPadding)
     }
@@ -295,7 +296,7 @@ fun UserProfileBody(
                 remainingCharacterAmount = userProfileViewModel.getRemainingCharacterAmountFirstName(),
                 isInformationExpanded = isCardExpanded,
                 isEditingUserProfile = userProfileViewModel.isEditingUserProfile.value,
-                onTextChange = { userProfileViewModel.updateUserProfileFirstName(it) }
+                onTextChange = { userProfileViewModel.setUserProfileFirstName(it) }
             )
             UserProfileLayoutRow(
                 rowInformationHeader = R.string.user_profile_last_name_header,
@@ -303,7 +304,7 @@ fun UserProfileBody(
                 remainingCharacterAmount = userProfileViewModel.getRemainingCharacterAmountLastName(),
                 isInformationExpanded = isCardExpanded,
                 isEditingUserProfile = userProfileViewModel.isEditingUserProfile.value,
-                onTextChange = { userProfileViewModel.updateUserProfileLastName(it) }
+                onTextChange = { userProfileViewModel.setUserProfileLastName(it) }
             )
             UserProfileLayoutRow(
                 rowInformationHeader = R.string.user_profile_biography_header,
@@ -311,11 +312,17 @@ fun UserProfileBody(
                 remainingCharacterAmount = userProfileViewModel.getRemainingCharacterAmountBiography(),
                 isInformationExpanded = isCardExpanded,
                 isEditingUserProfile = userProfileViewModel.isEditingUserProfile.value,
-                onTextChange = { userProfileViewModel.updateUserProfileBiography(it) }
+                onTextChange = { userProfileViewModel.setUserProfileBiography(it) }
             )
         }
+        Spacer(
+            modifier = Modifier
+                .height(dimensionResource(id = R.dimen.user_profile_spacer_height))
+        )
         UserProfileEditButtons(
             isEditingUserProfile = userProfileViewModel.isEditingUserProfile.value,
+            // Will default to automatic card shrinking when the save or discard changes
+            // ... button is clicked
             onEditButtonClick = {
                 userProfileViewModel.toggleUserProfileEditMode()
                 // Automatically show/hide all information when switching to/from edit mode
@@ -323,6 +330,7 @@ fun UserProfileBody(
             },
             onDiscardEditButtonClick = {
                 userProfileViewModel.discardUserProfileChanges()
+                isCardExpanded = false
             }
         )
     }
@@ -458,13 +466,12 @@ fun UserProfileEditButtons(
     modifier: Modifier = Modifier
 ) {
     Row(
-        horizontalArrangement = Arrangement.Center,
+        horizontalArrangement = Arrangement.SpaceEvenly,
         modifier = modifier
             .fillMaxWidth()
     ) {
         Button(
-            onClick = onEditButtonClick,
-            modifier = Modifier
+            onClick = onEditButtonClick
         ) {
             Text(
                 // Set the text depending on if the user is currently editing their profile
@@ -474,21 +481,30 @@ fun UserProfileEditButtons(
                         false -> R.string.user_profile_start_editing_message
                         true -> R.string.user_profile_finish_editing_message
                     }
-                ),
-                modifier = Modifier
+                )
             )
         }
-        // Only display the cancel edits button when editing the user profile
+        // Only display the edit canceling button when editing the user profile
         if (isEditingUserProfile){
             Button(
-                onClick = onDiscardEditButtonClick,
-                modifier = Modifier
+                onClick = onDiscardEditButtonClick
             ){
                 Text(
-                    text = stringResource(id = R.string.user_profile_cancel_editing_message),
-                    modifier = Modifier
+                    text = stringResource(id = R.string.user_profile_cancel_editing_message)
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UserProfileEditButtonsPreview(){
+    MyApplicationTheme {
+        UserProfileEditButtons(
+            isEditingUserProfile = true,
+            onEditButtonClick = {},
+            onDiscardEditButtonClick = {}
+        )
     }
 }

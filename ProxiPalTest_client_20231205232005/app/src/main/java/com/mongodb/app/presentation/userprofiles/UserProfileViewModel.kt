@@ -96,61 +96,28 @@ class UserProfileViewModel constructor(
         getUserProfile()
     }
 
+    companion object {
+        fun factory(
+            repository: SyncRepository,
+            owner: SavedStateRegistryOwner,
+            defaultArgs: Bundle? = null
+        ): AbstractSavedStateViewModelFactory {
+            return object : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
+                override fun <T : ViewModel> create(
+                    key: String,
+                    modelClass: Class<T>,
+                    handle: SavedStateHandle
+                ): T {
+                    return UserProfileViewModel (repository) as T
+                }
+            }
+        }
+    }
+
 
     /*
     ===== Functions =====
      */
-    /**
-     * Update the user profile first name
-     */
-    fun updateUserProfileFirstName(newFirstName: String){
-        if (newFirstName.length <= USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT) {
-            _userProfileFirstName.value = newFirstName
-        }
-    }
-
-    /**
-     * Update the user profile last name
-     */
-    fun updateUserProfileLastName(newLastName: String){
-        if (newLastName.length <= USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT) {
-            _userProfileLastName.value = newLastName
-        }
-    }
-
-    /**
-     * Update the user profile biography
-     */
-    fun updateUserProfileBiography(newBiography: String){
-        if (newBiography.length <= USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT) {
-            _userProfileBiography.value = newBiography
-        }
-    }
-
-    /**
-     * Toggles whether the user is currently updating their user profile
-     */
-    fun toggleUserProfileEditMode(){
-        _isEditingUserProfile.value = !isEditingUserProfile.value
-        // If no longer editing the user profile, save the changes to the database
-        if (!isEditingUserProfile.value){
-            setUserProfile()
-        }
-    }
-
-    /**
-     * Updates the current user's user profile, if it exists
-     */
-    private fun setUserProfile(){
-        viewModelScope.launch {
-            repository.updateUserProfile(
-                firstName = userProfileFirstName.value,
-                lastName = userProfileLastName.value,
-                biography = userProfileBiography.value
-            )
-        }
-    }
-
     /**
      * Retrieves the current user's user profile, if it exists
      */
@@ -271,11 +238,16 @@ class UserProfileViewModel constructor(
     }
 
     /**
-     * Discards any unsaved changes made to the user profile
+     * Updates the current user's user profile, if it exists
      */
-    fun discardUserProfileChanges(){
-        _isEditingUserProfile.value = false
-        getUserProfile()
+    private fun setUserProfile(){
+        viewModelScope.launch {
+            repository.updateUserProfile(
+                firstName = userProfileFirstName.value,
+                lastName = userProfileLastName.value,
+                biography = userProfileBiography.value
+            )
+        }
     }
 
     /**
@@ -299,6 +271,55 @@ class UserProfileViewModel constructor(
         return USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT - userProfileBiography.value.length
     }
 
+    /**
+     * Updates the user profile first name
+     */
+    fun setUserProfileFirstName(newFirstName: String){
+        if (newFirstName.length <= USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT) {
+            _userProfileFirstName.value = newFirstName
+        }
+    }
+
+    /**
+     * Updates the user profile last name
+     */
+    fun setUserProfileLastName(newLastName: String){
+        if (newLastName.length <= USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT) {
+            _userProfileLastName.value = newLastName
+        }
+    }
+
+    /**
+     * Updates the user profile biography
+     */
+    fun setUserProfileBiography(newBiography: String){
+        if (newBiography.length <= USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT) {
+            _userProfileBiography.value = newBiography
+        }
+    }
+
+    /**
+     * Toggles whether the user is currently updating their user profile
+     */
+    fun toggleUserProfileEditMode(){
+        _isEditingUserProfile.value = !isEditingUserProfile.value
+        // If no longer editing the user profile, save the changes to the database
+        if (!isEditingUserProfile.value){
+            setUserProfile()
+        }
+    }
+
+    /**
+     * Discards any unsaved changes made to the user profile
+     */
+    fun discardUserProfileChanges(){
+        _isEditingUserProfile.value = false
+        getUserProfile()
+    }
+
+    @Deprecated(
+        message = "Users should only be able to see and edit their own user profile, so this is not necessary"
+    )
     fun showPermissionsMessage() {
         viewModelScope.launch {
             _event.emit(UserProfileViewEvent)
@@ -310,11 +331,9 @@ class UserProfileViewModel constructor(
     )
     fun isUserProfileMine(userProfile: UserProfile): Boolean = repository.isUserProfileMine(userProfile)
 
-    /**
-     * Adds a user profile instance to the database
-     */
     @Deprecated(
-        message = "Adding user profiles will only be done once, around when a user registers and creates their account"
+        message = "Adding user profiles will only be done once, around when a user registers and creates their account." +
+                "Account, and in turn user profile deletion, may not be implemented as of now"
     )
     fun addUserProfile() {
         CoroutineScope(Dispatchers.IO).launch {
@@ -342,25 +361,6 @@ class UserProfileViewModel constructor(
                             it
                         )
                     )
-                }
-            }
-        }
-    }
-
-
-    companion object {
-        fun factory(
-            repository: SyncRepository,
-            owner: SavedStateRegistryOwner,
-            defaultArgs: Bundle? = null
-        ): AbstractSavedStateViewModelFactory {
-            return object : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
-                override fun <T : ViewModel> create(
-                    key: String,
-                    modelClass: Class<T>,
-                    handle: SavedStateHandle
-                ): T {
-                    return UserProfileViewModel (repository) as T
                 }
             }
         }

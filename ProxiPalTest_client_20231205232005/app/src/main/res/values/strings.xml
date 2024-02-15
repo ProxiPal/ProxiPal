@@ -24,7 +24,7 @@
     <string name="account_clarification">Please log in or register with a Device Sync user account. This is separate from your Atlas Cloud login.</string>
     <string name="unable_to_switch">Switching subscriptions does not affect Realm data when Sync is offline</string>
     <string name="permissions_warning">You can only modify or remove tasks that belong to you.</string>
-    <!-- User profile strings -->
+    <!-- Start user profile strings -->
     <string name="user_profile_test_string">abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789</string>
     <string name="user_profile_empty_string_replacement">(null)</string>
     <string name="user_profile_header">User Profile</string>
