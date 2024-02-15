@@ -196,7 +196,17 @@ class UserProfileViewModel constructor(
     Toggles whether the user is currently updating their user profile
      */
     fun toggleUserProfileEditMode(){
-        _isEditingUserProfile.value = !isEditingUserProfile.value
+        viewModelScope.launch {
+            _isEditingUserProfile.value = !isEditingUserProfile.value
+            // If no longer editing the user profile, save the changes to the database
+            if (!isEditingUserProfile.value){
+                repository.updateUserProfile(
+                    firstName = userProfileFirstName.value,
+                    lastName = userProfileLastName.value,
+                    biography = userProfileBiography.value
+                )
+            }
+        }
     }
 
     /**

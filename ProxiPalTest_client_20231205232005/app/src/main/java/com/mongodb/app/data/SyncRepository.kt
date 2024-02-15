@@ -6,6 +6,7 @@ import com.mongodb.app.domain.Item
 import com.mongodb.app.app
 import com.mongodb.app.domain.UserProfile
 import io.realm.kotlin.Realm
+import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.User
 import io.realm.kotlin.mongodb.exceptions.SyncException
@@ -53,6 +54,11 @@ interface SyncRepository {
      * Adds a user profile that belongs to the current user using the specified parameters
      */
     suspend fun addUserProfile(firstName: String, lastName: String, biography: String)
+
+    /**
+     * Updates a possible existing user profile for the current user in the database using the specified parameters
+     */
+    suspend fun updateUserProfile(firstName: String, lastName: String, biography: String)
 
     /**
      * Updates the Sync subscriptions based on the specified [SubscriptionType].
@@ -158,92 +164,10 @@ class RealmSyncRepository(
         }
     }
 
-    override fun getTaskList(): Flow<ResultsChange<Item>> {
-        Log.i(
-            TAG(),
-            "RealmSyncRepository: The queried list of tasks/items is \"${realm.query<Item>()}\""
-        )
-        return realm.query<Item>()
-            .sort(Pair("_id", Sort.ASCENDING))
-            .asFlow()
-    }
 
-    override fun getUserProfileList(): Flow<ResultsChange<UserProfile>> {
-        Log.i(
-            TAG(),
-            "RealmSyncRepository: The queried list of user profiles is \"${realm.query<UserProfile>()}\""
-        )
-        return realm.query<UserProfile>()
-            .sort(Pair("_id", Sort.ASCENDING))
-            .asFlow()
-    }
-
-    override suspend fun toggleIsComplete(task: Item) {
-        realm.write {
-            val latestVersion = findLatest(task)
-            latestVersion!!.isComplete = !latestVersion.isComplete
-        }
-    }
-
-    override suspend fun addTask(taskSummary: String) {
-        val task = Item().apply {
-            owner_id = currentUser.id
-            summary = taskSummary
-        }
-        realm.write {
-            copyToRealm(task)
-        }
-    }
-
-    override suspend fun addUserProfile(firstName: String, lastName: String, biography: String) {
-        // The "owner ID" added is associated with the user currently logged into the app
-        val userProfile = UserProfile().apply {
-            ownerId = currentUser.id
-            this.firstName = firstName
-            this.lastName = lastName
-            this.biography = biography
-        }
-        realm.write {
-            copyToRealm(userProfile)
-        }
-    }
-
-    override suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType) {
-        realm.subscriptions.update {
-            removeAll()
-            val query = when (subscriptionType) {
-                SubscriptionType.MINE -> getQueryItems(realm, SubscriptionType.MINE)
-                SubscriptionType.ALL -> getQueryItems(realm, SubscriptionType.ALL)
-            }
-            add(query, subscriptionType.name)
-        }
-    }
-
-    override suspend fun updateSubscriptionsUserProfiles(subscriptionType: SubscriptionType) {
-        realm.subscriptions.update {
-            removeAll()
-            val query = when (subscriptionType) {
-                SubscriptionType.MINE -> getQueryUserProfiles(realm, SubscriptionType.MINE)
-                SubscriptionType.ALL -> getQueryUserProfiles(realm, SubscriptionType.ALL)
-            }
-            add(query, subscriptionType.name)
-        }
-    }
-
-    override suspend fun deleteTask(task: Item) {
-        realm.write {
-            delete(findLatest(task)!!)
-        }
-        realm.subscriptions.waitForSynchronization(10.seconds)
-    }
-
-    override suspend fun deleteUserProfile(userProfile: UserProfile) {
-        realm.write {
-            delete(findLatest(userProfile)!!)
-        }
-        realm.subscriptions.waitForSynchronization(10.seconds)
-    }
-
+    /*
+    ===== Functions =====
+     */
     override fun getActiveSubscriptionType(realm: Realm?): SubscriptionType {
         val realmInstance = realm ?: this.realm
         val subscriptions = realmInstance.subscriptions
@@ -265,12 +189,58 @@ class RealmSyncRepository(
         realm.syncSession.resume()
     }
 
-    override fun isTaskMine(task: Item): Boolean = task.owner_id == currentUser.id
-
-    override fun isUserProfileMine(userProfile: UserProfile): Boolean =
-        userProfile.ownerId == currentUser.id
-
     override fun close() = realm.close()
+
+
+    /*
+    ===== Task/Item related functions =====
+     */
+    override fun getTaskList(): Flow<ResultsChange<Item>> {
+        Log.i(
+            TAG(),
+            "RealmSyncRepository: The queried list of tasks/items is \"${realm.query<Item>()}\""
+        )
+        return realm.query<Item>()
+            .sort(Pair("_id", Sort.ASCENDING))
+            .asFlow()
+    }
+
+    override suspend fun toggleIsComplete(task: Item) {
+        realm.write {
+            val latestVersion = findLatest(task)
+            latestVersion!!.isComplete = !latestVersion.isComplete
+        }
+    }
+
+    override suspend fun addTask(taskSummary: String) {
+        val task = Item().apply {
+            owner_id = currentUser.id
+            summary = taskSummary
+        }
+        realm.write {
+            copyToRealm(task)
+        }
+    }
+
+    override suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType) {
+        realm.subscriptions.update {
+            removeAll()
+            val query = when (subscriptionType) {
+                SubscriptionType.MINE -> getQueryItems(realm, SubscriptionType.MINE)
+                SubscriptionType.ALL -> getQueryItems(realm, SubscriptionType.ALL)
+            }
+            add(query, subscriptionType.name)
+        }
+    }
+
+    override suspend fun deleteTask(task: Item) {
+        realm.write {
+            delete(findLatest(task)!!)
+        }
+        realm.subscriptions.waitForSynchronization(10.seconds)
+    }
+
+    override fun isTaskMine(task: Item): Boolean = task.owner_id == currentUser.id
 
     private fun getQueryItems(realm: Realm, subscriptionType: SubscriptionType): RealmQuery<Item> =
         when (subscriptionType) {
@@ -278,11 +248,103 @@ class RealmSyncRepository(
             SubscriptionType.ALL -> realm.query()
         }
 
+
+    /*
+    ===== User profile related functions =====
+     */
+    override fun getUserProfileList(): Flow<ResultsChange<UserProfile>> {
+        Log.i(
+            TAG(),
+            "RealmSyncRepository: The queried list of user profiles is \"${realm.query<UserProfile>()}\""
+        )
+        return realm.query<UserProfile>()
+            .sort(Pair("_id", Sort.ASCENDING))
+            .asFlow()
+    }
+
+    override suspend fun addUserProfile(firstName: String, lastName: String, biography: String) {
+        // The "owner ID" added is associated with the user currently logged into the app
+        val userProfile = UserProfile().apply {
+            ownerId = currentUser.id
+            this.firstName = firstName
+            this.lastName = lastName
+            this.biography = biography
+        }
+        realm.write {
+            copyToRealm(userProfile, updatePolicy = UpdatePolicy.ALL)
+        }
+    }
+
+    override suspend fun updateUserProfile(firstName: String, lastName: String, biography: String) {
+        // Queries inside write transaction are live objects
+        // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
+        val frozenUserProfile = getQueryUserProfiles(
+            realm = realm,
+            subscriptionType = getActiveSubscriptionType(realm)
+        ).find().first()
+        when (getQueryUserProfiles(
+            realm = realm,
+            subscriptionType = getActiveSubscriptionType(realm)
+        ).find().size) {
+            0 -> {
+                Log.i(
+                    TAG(),
+                    "RealmSyncRepository: No user profiles found with owner ID \"${currentUser.id}\"; " +
+                            "Creating a new profile for current user..."
+                )
+                addUserProfile(
+                    firstName = "",
+                    lastName = "",
+                    biography = ""
+                )
+            }
+
+            1 -> Log.i(
+                TAG(),
+                "RealmSyncRepository: Exactly 1 user profile found with owner ID \"${currentUser.id}\""
+            )
+
+            else -> Log.i(
+                TAG(),
+                "RealmSyncRepository: Multiple user profiles found with owner ID \"${currentUser.id}\""
+            )
+        }
+        realm.write {
+            findLatest(frozenUserProfile)?.let { liveUserProfile ->
+                liveUserProfile.firstName = firstName
+                liveUserProfile.lastName = lastName
+                liveUserProfile.biography = biography
+            }
+        }
+    }
+
+    override suspend fun updateSubscriptionsUserProfiles(subscriptionType: SubscriptionType) {
+        realm.subscriptions.update {
+            removeAll()
+            val query = when (subscriptionType) {
+                SubscriptionType.MINE -> getQueryUserProfiles(realm, SubscriptionType.MINE)
+                SubscriptionType.ALL -> getQueryUserProfiles(realm, SubscriptionType.ALL)
+            }
+            add(query, subscriptionType.name)
+        }
+    }
+
+    override suspend fun deleteUserProfile(userProfile: UserProfile) {
+        realm.write {
+            delete(findLatest(userProfile)!!)
+        }
+        realm.subscriptions.waitForSynchronization(10.seconds)
+    }
+
+    override fun isUserProfileMine(userProfile: UserProfile): Boolean =
+        userProfile.ownerId == currentUser.id
+
     private fun getQueryUserProfiles(
         realm: Realm,
         subscriptionType: SubscriptionType
     ): RealmQuery<UserProfile> =
         when (subscriptionType) {
+            // Make sure the fields referenced in the query exactly match their name in the database
             SubscriptionType.MINE -> realm.query("ownerId == $0", currentUser.id)
             SubscriptionType.ALL -> realm.query()
         }
@@ -297,6 +359,9 @@ class MockRepository : SyncRepository {
     override suspend fun toggleIsComplete(task: Item) = Unit
     override suspend fun addTask(taskSummary: String) = Unit
     override suspend fun addUserProfile(firstName: String, lastName: String, biography: String) =
+        Unit
+
+    override suspend fun updateUserProfile(firstName: String, lastName: String, biography: String) =
         Unit
 
     override suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType) = Unit

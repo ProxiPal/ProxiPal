@@ -291,7 +291,7 @@ fun UserProfileBody(
             )
         }
         UserProfileEditButton(
-            userProfileViewModel.isEditingUserProfile.value,
+            isEditingUserProfile = userProfileViewModel.isEditingUserProfile.value,
             onClick = {
                 userProfileViewModel.toggleUserProfileEditMode()
                 // Automatically show/hide all information when switching to/from edit mode

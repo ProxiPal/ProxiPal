@@ -82,3 +82,9 @@ A new database collection was first created with a dummy object for user profile
 Logged into the Atlas website and went to the "Rules" sub-section of the database's "Data Access" section (on the far left).
 Then, a rule was added to the collection that holds objects of type {className} in the database.
 The rule was (1) applicable always, (2) had insert, delete, and search document permissions, and (3) had read all, write all field permissions.
+
+## "RLM_ERR_WRONG_TRANSACTION_STATE"; "Trying to modify database while in read transaction"
+
+In the update function to update data in the database, if queries are in the realm's write(), consider putting them outside.
+Use the "frozen objects" approach instead of the "live objects" approach using this link:
+    https://www.mongodb.com/docs/realm/sdk/kotlin/realm-database/crud/update/ 
