@@ -250,7 +250,7 @@ fun UserProfileBody(
     var cardModifier = Modifier
         .fillMaxHeight()
     // Only allow card expanding/shrinking if not editing the user profile
-    if (!userProfileViewModel.isEditingUserProfile) {
+    if (!userProfileViewModel.isEditingUserProfile.value) {
         cardModifier = cardModifier.clickable {
             isCardExpanded = !isCardExpanded
         }
@@ -270,7 +270,7 @@ fun UserProfileBody(
                 rowInformation = userProfileViewModel.userProfileFirstName.value,
                 remainingCharacterAmount = userProfileViewModel.getRemainingCharacterAmountFirstName(),
                 isInformationExpanded = isCardExpanded,
-                isEditingUserProfile = userProfileViewModel.isEditingUserProfile,
+                isEditingUserProfile = userProfileViewModel.isEditingUserProfile.value,
                 onTextChange = { userProfileViewModel.updateUserProfileFirstName(it) }
             )
             UserProfileLayoutRow(
@@ -278,7 +278,7 @@ fun UserProfileBody(
                 rowInformation = userProfileViewModel.userProfileLastName.value,
                 remainingCharacterAmount = userProfileViewModel.getRemainingCharacterAmountLastName(),
                 isInformationExpanded = isCardExpanded,
-                isEditingUserProfile = userProfileViewModel.isEditingUserProfile,
+                isEditingUserProfile = userProfileViewModel.isEditingUserProfile.value,
                 onTextChange = { userProfileViewModel.updateUserProfileLastName(it) }
             )
             UserProfileLayoutRow(
@@ -286,21 +286,17 @@ fun UserProfileBody(
                 rowInformation = userProfileViewModel.userProfileBiography.value,
                 remainingCharacterAmount = userProfileViewModel.getRemainingCharacterAmountBiography(),
                 isInformationExpanded = isCardExpanded,
-                isEditingUserProfile = userProfileViewModel.isEditingUserProfile,
+                isEditingUserProfile = userProfileViewModel.isEditingUserProfile.value,
                 onTextChange = { userProfileViewModel.updateUserProfileBiography(it) }
             )
         }
         UserProfileEditButton(
-            userProfileViewModel.isEditingUserProfile,
+            userProfileViewModel.isEditingUserProfile.value,
             onClick = {
                 userProfileViewModel.toggleUserProfileEditMode()
                 // Automatically show/hide all information when switching to/from edit mode
-                isCardExpanded = userProfileViewModel.isEditingUserProfile
+                isCardExpanded = userProfileViewModel.isEditingUserProfile.value
             }
-        )
-        // TODO Temporary use only (until account registration and database saving is established)
-        TemporaryUserProfileOwnerIdField(
-            userProfileViewModel = userProfileViewModel
         )
     }
 }
@@ -454,48 +450,5 @@ fun UserProfileEditButton(
                 modifier = Modifier
             )
         }
-    }
-}
-
-@Composable
-fun TemporaryUserProfileOwnerIdField(
-    userProfileViewModel: UserProfileViewModel,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Button(
-                onClick = { userProfileViewModel.addUserProfile() },
-                modifier = Modifier
-            ) {
-                Text(
-                    text = "Add to database",
-                    modifier = Modifier
-                )
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TemporaryUserProfileOwnerIdFieldPreview() {
-    MyApplicationTheme {
-        val repository = MockRepository()
-        val userProfiles = (1..30).map { index ->
-            MockRepository.getMockUserProfile(index)
-        }.toMutableStateList()
-        TemporaryUserProfileOwnerIdField(
-            userProfileViewModel = UserProfileViewModel(
-                repository = repository,
-                userProfileListState = userProfiles
-            )
-        )
     }
 }

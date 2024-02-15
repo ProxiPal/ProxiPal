@@ -61,6 +61,8 @@ class UserProfileViewModel constructor(
     private val _userProfileLastName: MutableState<String> = mutableStateOf("")
     private val _userProfileBiography: MutableState<String> = mutableStateOf("")
 
+    private val _isEditingUserProfile: MutableState<Boolean> = mutableStateOf(false)
+
 
     /*
     ===== Properties =====
@@ -77,8 +79,8 @@ class UserProfileViewModel constructor(
     val userProfileBiography: State<String>
         get() = _userProfileBiography
 
-    var isEditingUserProfile by mutableStateOf(false)
-        private set
+    val isEditingUserProfile: State<Boolean>
+        get() = _isEditingUserProfile
 
     val event: Flow<UserProfileViewEvent>
         get() = _event
@@ -101,6 +103,8 @@ class UserProfileViewModel constructor(
                         is InitialResults -> {
                             userProfileListState.clear()
                             userProfileListState.addAll(event.list)
+                            // The user should not have more than 1 profile,
+                            // ... but will allow the app to run and not throw an exception for now
                             if (event.list.size > 1){
                                 Log.i(
                                     TAG(),
@@ -192,7 +196,7 @@ class UserProfileViewModel constructor(
     Toggles whether the user is currently updating their user profile
      */
     fun toggleUserProfileEditMode(){
-        isEditingUserProfile = !isEditingUserProfile
+        _isEditingUserProfile.value = !isEditingUserProfile.value
     }
 
     /**
