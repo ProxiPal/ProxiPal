@@ -41,7 +41,7 @@ sealed class AddUserProfileEvent {
 }
 
 class UserProfileViewModel constructor(
-    private val repository: SyncRepository,
+    private var repository: SyncRepository,
     val userProfileListState: SnapshotStateList<UserProfile> = mutableStateListOf()
 ) : ViewModel() {
     /*
@@ -118,6 +118,16 @@ class UserProfileViewModel constructor(
     /*
     ===== Functions =====
      */
+    /**
+     * When a configuration change occurs, this allows updating the current SyncRepository instance
+     * and prevents the app from crashing when trying to communicate with Realm after it has closed.
+     */
+    fun updateRepository(
+        newRepository: SyncRepository
+    ){
+        repository = newRepository
+    }
+
     /**
      * Retrieves the current user's user profile, if it exists
      */

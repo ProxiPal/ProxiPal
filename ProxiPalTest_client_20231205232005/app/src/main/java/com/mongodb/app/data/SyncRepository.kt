@@ -172,6 +172,17 @@ class RealmSyncRepository(
 
         realm = Realm.open(config)
 
+//        // After configuration changes, realm stays the same but config changes every time
+//        // This leads to the app crashing when trying to interact with Realm after a configuration change
+//        Log.i(
+//            TAG(),
+//            "RealmSyncRepository: Realm = \"${realm}\""
+//        )
+//        Log.i(
+//            TAG(),
+//            "RealmSyncRepository: Config = \"${config}\""
+//        )
+
         // Mutable states must be updated on the UI thread
         CoroutineScope(Dispatchers.Main).launch {
             realm.subscriptions.waitForSynchronization()

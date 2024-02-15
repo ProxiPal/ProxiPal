@@ -160,6 +160,12 @@ class UserProfileScreen : ComponentActivity() {
         }
         // endregion ViewModel events
 
+        // Need to update repository when a configuration change occurs
+        // ... otherwise app will crash when trying to access Realm after it has closed
+        userProfileViewModel.updateRepository(
+            newRepository = repository
+        )
+
         setContent {
             MyApplicationTheme {
                 UserProfileLayout(
@@ -172,6 +178,7 @@ class UserProfileScreen : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        // Repository must be closed to free resources
         repository.close()
     }
 }
