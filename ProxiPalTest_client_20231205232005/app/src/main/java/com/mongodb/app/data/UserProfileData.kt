@@ -1,5 +1,12 @@
 package com.mongodb.app.data
 
+
+/*
+Contributions:
+- Kevin Kubota (entire file)
+ */
+
+
 /**
  * The maximum amount of characters the (first and last) name text fields can have
  */

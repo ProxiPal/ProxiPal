@@ -20,6 +20,13 @@ import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.userprofiles.UserProfileScreen
 import kotlinx.coroutines.launch
 
+
+/*
+Contributions:
+- Kevin Kubota (added switch cases for starting or referencing an activity, see below)
+ */
+
+
 class ComposeLoginActivity : ComponentActivity() {
 
     private val loginViewModel: LoginViewModel by viewModels()
@@ -29,6 +36,7 @@ class ComposeLoginActivity : ComponentActivity() {
 
         // Fast-track task list screen if we are logged in
         if (app.currentUser != null) {
+            // Contributed by Kevin Kubota
             if (SHOULD_USE_TASKS_ITEMS)
                 startActivity(Intent(this, ComposeItemActivity::class.java))
             else
@@ -45,6 +53,7 @@ class ComposeLoginActivity : ComponentActivity() {
                         is LoginEvent.GoToTasks -> {
                             event.process()
 
+                            // Contributed by Kevin Kubota
                             val intent = if (SHOULD_USE_TASKS_ITEMS) Intent(
                                 this@ComposeLoginActivity,
                                 ComposeItemActivity::class.java

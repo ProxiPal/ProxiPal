@@ -4,6 +4,13 @@ import org.mongodb.kbson.ObjectId
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 
+
+/*
+Contributions:
+- Kevin Kubota (entire file)
+ */
+
+
 /**
  * The user profile object that gets added and saved to the database
  */

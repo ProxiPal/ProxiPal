@@ -64,6 +64,13 @@ import com.mongodb.app.ui.tasks.TaskAppToolbar
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import kotlinx.coroutines.launch
 
+
+/*
+Contributions:
+- Kevin Kubota (entire file)
+ */
+
+
 class UserProfileScreen : ComponentActivity() {
     /*
     ===== Variables =====

@@ -11,6 +11,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.mongodb.app.R
 import com.mongodb.app.ui.theme.MyApplicationTheme
 
+
+/*
+Contributions:
+- Kevin Kubota (entire file)
+ */
+
+
 /**
  * Used for displaying a single line of text (without text wrapping)
  */

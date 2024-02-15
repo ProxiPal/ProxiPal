@@ -33,6 +33,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+
+/*
+Contributions:
+- Kevin Kubota (entire file)
+ */
+
+
 object UserProfileViewEvent
 
 sealed class AddUserProfileEvent {

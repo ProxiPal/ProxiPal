@@ -24,6 +24,13 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
+
+/*
+Contributions:
+- Kevin Kubota (added functions relating to user profiles, see below)
+ */
+
+
 /**
  * Repository for accessing Realm Sync.
  * Working functions and code for Item classes has been copied for UserProfile classes
@@ -87,6 +94,7 @@ interface SyncRepository {
     fun isTaskMine(task: Item): Boolean
     // endregion Tasks/Items
 
+    // Contributed by Kevin Kubota
     /*
     These functions currently handle Creating, Reading, and Updating a user profile
      */
@@ -142,6 +150,7 @@ class RealmSyncRepository(
             TAG(),
             "RealmSyncRepository: Start of Init{}"
         )
+        // Contributed by Kevin Kubota
         // This assignment impacts what type of object can be queried.
         // If trying to query A when the sync configuration is set for B,
         // ... the app will crash if querying anything other than B.
@@ -270,6 +279,7 @@ class RealmSyncRepository(
         }
     // endregion Tasks/Items
 
+    // Contributed by Kevin Kubota
     /*
     These functions currently handle Creating, Reading, and Updating a user profile
     Deleting has not been testing for functionality and may not be necessary, for now
@@ -393,28 +403,29 @@ class RealmSyncRepository(
  * Mock repo for generating the Compose layout preview.
  */
 class MockRepository : SyncRepository {
-    override fun getTaskList(): Flow<ResultsChange<Item>> = flowOf()
-    override fun getUserProfileList(): Flow<ResultsChange<UserProfile>> = flowOf()
-    override suspend fun toggleIsComplete(task: Item) = Unit
-    override suspend fun addTask(taskSummary: String) = Unit
-    override suspend fun addUserProfile(firstName: String, lastName: String, biography: String) =
-        Unit
-
-    override suspend fun updateUserProfile(firstName: String, lastName: String, biography: String) =
-        Unit
-
-    override suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType) = Unit
-    override suspend fun updateSubscriptionsUserProfiles(subscriptionType: SubscriptionType) = Unit
-    override suspend fun deleteTask(task: Item) = Unit
-    override suspend fun deleteUserProfile(userProfile: UserProfile) = Unit
     override fun getActiveSubscriptionType(realm: Realm?): SubscriptionType = SubscriptionType.ALL
     override fun pauseSync() = Unit
     override fun resumeSync() = Unit
+    override fun close() = Unit
+
+    override fun getTaskList(): Flow<ResultsChange<Item>> = flowOf()
+    override suspend fun toggleIsComplete(task: Item) = Unit
+    override suspend fun addTask(taskSummary: String) = Unit
+    override suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType) = Unit
+    override suspend fun deleteTask(task: Item) = Unit
     override fun isTaskMine(task: Item): Boolean = task.owner_id == MOCK_OWNER_ID_MINE
+
+    // Contributed by Kevin Kubota
+    override fun getUserProfileList(): Flow<ResultsChange<UserProfile>> = flowOf()
+    override suspend fun addUserProfile(firstName: String, lastName: String, biography: String) =
+        Unit
+    override suspend fun updateUserProfile(firstName: String, lastName: String, biography: String) =
+        Unit
+    override suspend fun updateSubscriptionsUserProfiles(subscriptionType: SubscriptionType) = Unit
+    override suspend fun deleteUserProfile(userProfile: UserProfile) = Unit
     override fun isUserProfileMine(userProfile: UserProfile): Boolean =
         userProfile.ownerId == MOCK_OWNER_ID_MINE
 
-    override fun close() = Unit
 
     companion object {
         const val MOCK_OWNER_ID_MINE = "A"
@@ -433,6 +444,7 @@ class MockRepository : SyncRepository {
             }
         }
 
+        // Contributed by Kevin Kubota
         fun getMockUserProfile(index: Int): UserProfile = UserProfile().apply {
             this.firstName = "First Name $index"
             this.lastName = "Last Name $index"
