@@ -4,17 +4,23 @@ import org.mongodb.kbson.ObjectId
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 
-class UserProfile() : RealmObject {
+
+/*
+Contributions:
+- Kevin Kubota (entire file)
+ */
+
+
+/**
+ * The user profile object that gets added and saved to the database
+ */
+class UserProfile : RealmObject {
     @PrimaryKey
     var _id: ObjectId = ObjectId()
     var firstName: String = ""
     var lastName: String = ""
     var biography: String = ""
-    var owner_id: String = ""
-
-    constructor(ownerId: String = "") : this() {
-        owner_id = ownerId
-    }
+    var ownerId: String = ""
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
@@ -23,7 +29,7 @@ class UserProfile() : RealmObject {
         if (this.firstName != other.firstName) return false
         if (this.lastName != other.lastName) return false
         if (this.biography != other.biography) return false
-        if (this.owner_id != other.owner_id) return false
+        if (this.ownerId != other.ownerId) return false
         return true
     }
 
@@ -32,7 +38,7 @@ class UserProfile() : RealmObject {
         result = 31 * result + firstName.hashCode()
         result = 31 * result + lastName.hashCode()
         result = 31 * result + biography.hashCode()
-        result = 31 * result + owner_id.hashCode()
+        result = 31 * result + ownerId.hashCode()
         return result
     }
 }

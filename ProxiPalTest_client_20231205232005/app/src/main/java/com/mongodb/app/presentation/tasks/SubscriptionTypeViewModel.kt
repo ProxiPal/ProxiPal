@@ -9,6 +9,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
+import com.mongodb.app.data.SHOULD_USE_TASKS_ITEMS
 import com.mongodb.app.data.SubscriptionType
 import com.mongodb.app.data.SyncRepository
 import kotlinx.coroutines.CoroutineScope
@@ -41,7 +42,10 @@ class SubscriptionTypeViewModel(
     fun updateSubscription(subscriptionType: SubscriptionType) {
         CoroutineScope(Dispatchers.IO).launch {
             runCatching {
-                repository.updateSubscriptions(subscriptionType)
+                if (SHOULD_USE_TASKS_ITEMS)
+                    repository.updateSubscriptionsItems(subscriptionType)
+                else
+                    repository.updateSubscriptionsUserProfiles(subscriptionType)
                 _subscriptionType.value = subscriptionType
             }.onSuccess {
                 withContext(Dispatchers.Main) {
@@ -49,7 +53,12 @@ class SubscriptionTypeViewModel(
                 }
             }.onFailure {
                 withContext(Dispatchers.Main) {
-                    _subscriptionTypeEvent.emit(SubscriptionTypeEvent.Error("There was an error while switching to '${subscriptionType.name}'", it))
+                    _subscriptionTypeEvent.emit(
+                        SubscriptionTypeEvent.Error(
+                            "There was an error while switching to '${subscriptionType.name}'",
+                            it
+                        )
+                    )
                 }
             }
         }
