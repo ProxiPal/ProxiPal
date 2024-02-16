@@ -7,17 +7,25 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.SHOULD_USE_TASKS_ITEMS
 import com.mongodb.app.presentation.login.EventSeverity
 import com.mongodb.app.presentation.login.LoginAction
 import com.mongodb.app.presentation.login.LoginEvent
 import com.mongodb.app.presentation.login.LoginViewModel
+import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
+import com.mongodb.app.ui.login.HomeDestination
 import com.mongodb.app.ui.login.LoginScaffold
+import com.mongodb.app.ui.login.RegisterScaffold
+import com.mongodb.app.ui.login.RegisterScreen
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.userprofiles.UserProfileScreen
+import io.realm.kotlin.mongodb.User
 import kotlinx.coroutines.launch
 
 
@@ -73,10 +81,25 @@ class ComposeLoginActivity : ComponentActivity() {
 
         setContent {
             MyApplicationTheme {
-                LoginScaffold(loginViewModel)
+                val navController = rememberNavController()
+                NavHost(navController = navController, startDestination = HomeDestination.route){
+                    composable(route = HomeDestination.route){
+                        LoginScaffold(loginViewModel,
+                            navigateToRegister = {navController.navigate(RegisterScreen.route)}
+                        )
+                    }
+                    composable(route = RegisterScreen.route){
+                        RegisterScaffold(loginViewModel = loginViewModel, navigateBack = {
+                            navController.navigate(HomeDestination.route)
+                        })
+                        }
+
+                        }
+                    }
+                }
             }
-        }
-    }
+
+
 
     private fun LoginEvent.process() {
         when (severity) {
@@ -90,15 +113,15 @@ class ComposeLoginActivity : ComponentActivity() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun LoginActivityPreview() {
-    MyApplicationTheme {
-        val viewModel = LoginViewModel().also {
-            it.switchToAction(LoginAction.LOGIN)
-            it.setEmail("test@test.com")
-            it.setPassword("123456")
-        }
-        LoginScaffold(viewModel)
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun LoginActivityPreview() {
+//    MyApplicationTheme {
+//        val viewModel = LoginViewModel().also {
+//            it.switchToAction(LoginAction.LOGIN)
+//            it.setEmail("test@test.com")
+//            it.setPassword("123456")
+//        }
+//        LoginScaffold(viewModel)
+//    }
+//}

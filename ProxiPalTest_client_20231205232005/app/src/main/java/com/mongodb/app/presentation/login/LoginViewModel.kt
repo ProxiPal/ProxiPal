@@ -88,7 +88,6 @@ class LoginViewModel : ViewModel() {
                 authRepository.createAccount(email, password)
             }.onSuccess {
                 _event.emit(LoginEvent.ShowMessage(EventSeverity.INFO, "User created successfully."))
-                login(email, password)
             }.onFailure { ex: Throwable ->
                 _state.value = state.value.copy(enabled = true)
                 val message = when (ex) {
@@ -100,9 +99,11 @@ class LoginViewModel : ViewModel() {
         }
     }
 
+
     fun login(email: String, password: String, fromCreation: Boolean = false) {
         if (!fromCreation) {
             _state.value = state.value.copy(enabled = false)
+
         }
 
         CoroutineScope(Dispatchers.IO).launch {
