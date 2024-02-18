@@ -33,6 +33,10 @@ class TemplateApp: Application() {
         // it does not contain the data explorer link. Download the
         // app template from the Atlas UI to view a link to your data.
         Log.v(TAG(),"To see your data in Atlas, follow this link:" + getString(R.string.realm_data_explorer_link))
+        val service = NewFriendRequestNotificationService(applicationContext)
+        service.showNotification()
+
+
     }
 
     // Creates a new notification channel to handle new friend request notifications
