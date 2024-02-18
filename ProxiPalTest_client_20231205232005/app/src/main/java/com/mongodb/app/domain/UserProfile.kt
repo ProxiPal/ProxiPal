@@ -5,18 +5,24 @@ import org.mongodb.kbson.ObjectId
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 
-class UserProfile() : RealmObject {
+
+/*
+Contributions:
+- Kevin Kubota (entire file)
+ */
+
+
+/**
+ * The user profile object that gets added and saved to the database
+ */
+class UserProfile : RealmObject {
     @PrimaryKey
     var _id: ObjectId = ObjectId()
     var firstName: String = ""
     var lastName: String = ""
     var biography: String = ""
     var ownerId: String = ""
-    var location: CustomGeoPoint? = null
-
-    constructor(ownerId: String = "") : this() {
-        this.ownerId = ownerId
-    }
+    var location: CustomGeoPoint? = null // location added by Marco Pacini
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false

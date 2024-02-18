@@ -6,8 +6,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.tooling.preview.Preview
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.domain.UserProfile
-import com.mongodb.app.presentation.tasks.UserProfileContextualMenuViewModel
-import com.mongodb.app.presentation.tasks.UserProfileViewModel
+import com.mongodb.app.presentation.userprofiles.UserProfileContextualMenuViewModel
+import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.components.ContextualMenu
 import com.mongodb.app.ui.theme.MyApplicationTheme
 
