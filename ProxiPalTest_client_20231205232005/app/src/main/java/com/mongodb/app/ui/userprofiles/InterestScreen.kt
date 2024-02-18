@@ -36,6 +36,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -95,31 +96,6 @@ fun ProfileTopAppBar(){
     )
 }
 
-//@Composable
-//fun GridItem(gridItemData: GridItemData) {
-//    Box(
-//        modifier = Modifier
-//            .padding(10.dp)
-//            .aspectRatio(1f)
-//            .clip(RoundedCornerShape(5.dp))
-//            .background(Color.Gray),
-//        contentAlignment = Alignment.Center
-//    ) {
-//        Image(
-//            painter = painterResource(id = gridItemData.imageId),
-//            contentDescription = null,
-//            contentScale = ContentScale.Fit,
-//            modifier = Modifier
-//                .size(48.dp)
-//                .align(Alignment.TopCenter)
-//        )
-//        Text(
-//            text = gridItemData.text,
-//            modifier = Modifier.align(Alignment.BottomCenter),
-//            color = Color.White
-//        )
-//    }
-//}
 @Composable
 fun Grid(gridItems: List<GridItemData>) {
     LazyVerticalGrid(
@@ -140,7 +116,6 @@ fun GridItem(gridItemData: GridItemData) {
             onClick = { isSelected = !isSelected },
             shape = RoundedCornerShape(5.dp),
             modifier = Modifier.size(200.dp),
-
             colors = ButtonDefaults.buttonColors(
                 containerColor = if (isSelected) Color.LightGray else Color.White
             )
@@ -159,10 +134,8 @@ fun GridItem(gridItemData: GridItemData) {
                     color = if (isSelected) Color.White else Color.Black,
                     textAlign = TextAlign.Center
                 )
-
             }
         }
-
 }
 
 @Composable
@@ -174,26 +147,24 @@ fun PreviousNextBottomAppBar(
 ) {
     BottomAppBar() {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onPreviousClicked) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color(0xFFEF8524))
+            TextButton(onClick = onPreviousClicked){
+                Icon(Icons.Default.ArrowBack,contentDescription = "Back", tint = Color(0xFFEF8524))
+                Text(text = "Back", color = Color(0xFFEF8524), fontSize = 20.sp)
             }
-            Spacer(modifier = Modifier.width(1.dp))
-            Text(text = "Back", color= Color(0xFFEF8524))
             Spacer(modifier = Modifier.weight(1f))
                 repeat(totalPages) { index ->
-                    val isSelected = index == currentPage
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_circle_24),
                         contentDescription = null,
-                        tint = if (isSelected) Color(0xFFEF8524) else Color.Gray
+                        tint = if (index == currentPage -1) Color(0xFFEF8524) else Color.Gray,
+                        modifier= Modifier.size(10.dp)
                     )
                 }
             Spacer(modifier = Modifier.weight(1f))
+            TextButton(onClick = onNextClicked){
+                Text(text = "Next", color = Color(0xFFEF8524), fontSize = 20.sp)
+                Icon(Icons.Default.ArrowForward,contentDescription = "Next", tint = Color(0xFFEF8524))
 
-            Text(text = "Next", color= Color(0xFFEF8524))
-            Spacer(modifier = Modifier.width(1.dp))
-            IconButton(onClick = onNextClicked) {
-                Icon(Icons.Default.ArrowForward, contentDescription = "Next", tint = Color(0xFFEF8524))
             }
         }
     }
@@ -211,8 +182,8 @@ fun PrevNextAppBar(){
             bottomBar = { PreviousNextBottomAppBar(
                 onPreviousClicked = { /*TODO*/ },
                 onNextClicked = { /*TODO*/ },
-                currentPage =3 ,
-                totalPages = 4
+                currentPage = 2,
+                totalPages = 3
             )}
         ){
             innerPadding ->
