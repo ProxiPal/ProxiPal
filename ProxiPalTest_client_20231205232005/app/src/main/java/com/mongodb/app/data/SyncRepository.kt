@@ -252,6 +252,7 @@ class RealmSyncRepository(
         }
     }
 
+
     override suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType) {
         realm.subscriptions.update {
             removeAll()
@@ -414,6 +415,7 @@ class MockRepository : SyncRepository {
     override suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType) = Unit
     override suspend fun deleteTask(task: Item) = Unit
     override fun isTaskMine(task: Item): Boolean = task.owner_id == MOCK_OWNER_ID_MINE
+
 
     // Contributed by Kevin Kubota
     override fun getUserProfileList(): Flow<ResultsChange<UserProfile>> = flowOf()

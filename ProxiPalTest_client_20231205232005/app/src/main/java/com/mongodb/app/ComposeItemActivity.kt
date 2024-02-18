@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
@@ -34,7 +33,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
@@ -51,6 +49,7 @@ import androidx.lifecycle.lifecycleScope
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.SyncRepository
+import com.mongodb.app.navigation.NavigationGraph
 import com.mongodb.app.presentation.tasks.AddItemEvent
 import com.mongodb.app.presentation.tasks.AddItemViewModel
 import com.mongodb.app.presentation.tasks.SubscriptionTypeEvent
@@ -159,6 +158,10 @@ class ComposeItemActivity : ComponentActivity() {
 
         setContent {
             MyApplicationTheme {
+                // testing connect with others screen
+                NavigationGraph(toolbarViewModel = toolbarViewModel)
+
+                /*
                 TaskListScaffold(
                     repository,
                     toolbarViewModel,
@@ -166,6 +169,8 @@ class ComposeItemActivity : ComponentActivity() {
                     subscriptionTypeViewModel,
                     taskViewModel
                 )
+                */
+
             }
         }
     }
@@ -212,7 +217,8 @@ fun TaskListScaffold(
                 containerColor = Color.LightGray
             ) {
                 Box(
-                    modifier = Modifier.align(Alignment.Top)
+                    modifier = Modifier
+                        .align(Alignment.Top)
                         .padding(0.dp, 0.dp, 0.dp, 0.dp),
                 ) {
                     ClickableText(
@@ -276,6 +282,7 @@ fun TaskListScaffold(
     )
 }
 
+
 @Preview(showBackground = true)
 @Composable
 fun ItemActivityPreview() {
@@ -296,3 +303,5 @@ fun ItemActivityPreview() {
         }
     }
 }
+
+

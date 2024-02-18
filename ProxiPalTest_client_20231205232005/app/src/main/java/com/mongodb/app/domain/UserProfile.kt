@@ -1,5 +1,6 @@
 package com.mongodb.app.domain
 
+import com.mongodb.app.location.CustomGeoPoint
 import org.mongodb.kbson.ObjectId
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
@@ -21,6 +22,7 @@ class UserProfile : RealmObject {
     var lastName: String = ""
     var biography: String = ""
     var ownerId: String = ""
+    var location: CustomGeoPoint? = null // location added by Marco Pacini
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
