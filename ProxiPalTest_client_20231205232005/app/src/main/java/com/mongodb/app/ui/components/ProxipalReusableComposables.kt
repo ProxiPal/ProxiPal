@@ -73,6 +73,7 @@ fun ProxipalTopAppBarWithBackButton(
 }
 
 /**
+ * Bottom app bar for navigating between the three main screens of the app
  * TODO onClick will be for navigating to other pages
  */
 @Composable
@@ -86,14 +87,14 @@ fun ProxiPalBottomAppBar(navController: NavHostController) {
             icon = { Icon(Icons.Filled.AccountCircle, contentDescription = "Navigate to profile") },
             label = { Text("Profile") },
             selected = false,
-            onClick = { /*TODO navigate to profile*/ },
+            onClick = { navController.navigate(Routes.UserProfileScreen.route) },
             selectedContentColor = Color.White
         )
         BottomNavigationItem(
             icon = { Icon(Icons.Filled.PlayArrow, contentDescription = "Navigate to connect") },
             label = { Text("Connect") },
             selected = false,
-            onClick = { /*TODO navigate to connect with others*/ },
+            onClick = { navController.navigate(Routes.ConnectWithOthersScreen.route) },
             selectedContentColor = Color.White
         )
         BottomNavigationItem(

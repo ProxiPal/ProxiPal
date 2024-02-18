@@ -47,6 +47,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.mongodb.app.ComposeLoginActivity
 import com.mongodb.app.R
 import com.mongodb.app.TAG
@@ -54,11 +56,13 @@ import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.USER_PROFILE_EDIT_MODE_MAXIMUM_LINE_AMOUNT
 import com.mongodb.app.data.USER_PROFILE_ROW_HEADER_WEIGHT
+import com.mongodb.app.navigation.NavigationGraph
 import com.mongodb.app.presentation.tasks.ToolbarEvent
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.presentation.userprofiles.AddUserProfileEvent
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.components.MultiLineText
+import com.mongodb.app.ui.components.ProxiPalBottomAppBar
 import com.mongodb.app.ui.components.SingleLineText
 import com.mongodb.app.ui.tasks.TaskAppToolbar
 import com.mongodb.app.ui.theme.MyApplicationTheme
@@ -175,10 +179,7 @@ class UserProfileScreen : ComponentActivity() {
 
         setContent {
             MyApplicationTheme {
-                UserProfileLayout(
-                    userProfileViewModel = userProfileViewModel,
-                    toolbarViewModel = toolbarViewModel
-                )
+                NavigationGraph(toolbarViewModel, userProfileViewModel)
             }
         }
     }
@@ -204,6 +205,7 @@ class UserProfileScreen : ComponentActivity() {
 fun UserProfileLayout(
     userProfileViewModel: UserProfileViewModel,
     toolbarViewModel: ToolbarViewModel,
+    navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -212,6 +214,7 @@ fun UserProfileLayout(
             // This top bar is used because it already has logging out of account implemented
             TaskAppToolbar(viewModel = toolbarViewModel)
         },
+        bottomBar = { ProxiPalBottomAppBar(navController) },
         modifier = modifier
     ) { innerPadding ->
         UserProfileBody(
@@ -234,7 +237,8 @@ fun UserProfileLayoutPreview() {
                 repository = repository,
                 userProfileListState = userProfiles
             ),
-            toolbarViewModel = ToolbarViewModel(repository)
+            toolbarViewModel = ToolbarViewModel(repository),
+            navController = rememberNavController()
         )
     }
 }
