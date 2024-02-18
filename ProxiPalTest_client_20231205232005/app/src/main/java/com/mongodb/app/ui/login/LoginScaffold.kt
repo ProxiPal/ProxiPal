@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -35,18 +36,24 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
+import com.google.android.material.bottomappbar.BottomAppBar
 import com.mongodb.app.ComposeLoginActivity
 
 import com.mongodb.app.navigation.NavigationDestination
 import com.mongodb.app.presentation.login.LoginAction
 import com.mongodb.app.presentation.login.LoginViewModel
 import com.mongodb.app.ui.theme.Blue
+import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
+import com.mongodb.app.ui.userprofiles.Grid
+import com.mongodb.app.ui.userprofiles.PreviousNextBottomAppBar
+import com.mongodb.app.ui.userprofiles.ProfileTopAppBar
+import com.mongodb.app.ui.userprofiles.gridItems
 
-private const val USABLE_WIDTH = 0.8F
 
 object HomeDestination : NavigationDestination {
     override val route = "home"
@@ -57,58 +64,80 @@ object HomeDestination : NavigationDestination {
 @Composable
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 fun LoginScaffold(loginViewModel: LoginViewModel, navigateToRegister: ()->Unit) {
-
-
-
     Scaffold(
-        content = {
-            Column(
-                modifier = Modifier.padding(top = 60.dp).padding(horizontal = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(15.dp)
-            ) {
-                Text(
-                    text = "ProxiPal",
-                    fontSize = 60.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.width(500.dp)
-                )
-                Text(
-                    text = "Login to access your bookmarks and personal preferences.",
-                    fontSize = 20.sp,
-                    color = Color.Gray
-                )
-                TextField(value = loginViewModel.state.value.email, onValueChange = { loginViewModel.setEmail(it) }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth())
-                TextField(value = loginViewModel.state.value.password, onValueChange = { loginViewModel.setPassword(it) }, label = { Text("Password") }, visualTransformation = PasswordVisualTransformation(),modifier = Modifier.fillMaxWidth())
+        bottomBar = { LoginBottomBar(navigateToRegister = navigateToRegister) },
+        content ={
+                LoginMain(loginViewModel = loginViewModel)
+        } )
+}
 
-                Button(
-                    onClick = { loginViewModel.login(loginViewModel.state.value.email, loginViewModel.state.value.password) },
-                    colors = ButtonDefaults.buttonColors(Color(0xFFEF8524)),
-                    shape = RoundedCornerShape(5.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text("Login")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LoginMain(loginViewModel: LoginViewModel){
+    Column(
+        modifier = Modifier
+            .padding(top = 60.dp)
+            .padding(horizontal = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(15.dp)
+    ) {
+        Text(
+            text = "ProxiPal",
+            fontSize = 60.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.width(500.dp)
+        )
+        Text(
+            text = "Login to access your bookmarks and personal preferences.",
+            fontSize = 20.sp,
+            color = Color.Gray
+        )
+        TextField(value = loginViewModel.state.value.email, onValueChange = { loginViewModel.setEmail(it) }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth())
+        TextField(value = loginViewModel.state.value.password, onValueChange = { loginViewModel.setPassword(it) }, label = { Text("Password") }, visualTransformation = PasswordVisualTransformation(),modifier = Modifier.fillMaxWidth())
+
+        Button(
+            onClick = { loginViewModel.login(loginViewModel.state.value.email, loginViewModel.state.value.password) },
+            colors = ButtonDefaults.buttonColors(Color(0xFFEF8524)),
+            shape = RoundedCornerShape(5.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("Login")
+        }
+    }
+}
+@Composable
+fun LoginBottomBar(navigateToRegister:()->Unit){
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(60.dp),
+            verticalArrangement = Arrangement.Bottom,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                modifier = Modifier,
+                verticalAlignment = Alignment.CenterVertically
+            )
+            {
+                Text(text = "No account yet?")
+                TextButton(
+                    onClick = navigateToRegister,
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.Gray)
+                )
+                {
+                    Text("Register here")
                 }
-            }
-        },
-        bottomBar = {
-            Column(
-                modifier = Modifier.fillMaxSize().padding(60.dp),
-                verticalArrangement = Arrangement.Bottom,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Row(
-                    modifier = Modifier,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = "No account yet?")
-                    TextButton(
-                        onClick = navigateToRegister,
-                        colors = ButtonDefaults.textButtonColors(contentColor = Color.Gray)
-                    ) {
-                        Text("Register here")
-                    }
-                }
+
             }
         }
-    )
+}
+
+@Composable
+@Preview
+fun LoginPreview(){
+    MyApplicationTheme {
+        LoginScaffold(loginViewModel = LoginViewModel(), navigateToRegister = {})
+        LoginBottomBar(navigateToRegister = {})
+
+
+    }
 }

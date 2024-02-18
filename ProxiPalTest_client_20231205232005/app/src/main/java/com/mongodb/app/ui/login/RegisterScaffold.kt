@@ -52,76 +52,84 @@ object RegisterScreen : NavigationDestination {
 @Composable
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 fun RegisterScaffold(loginViewModel: LoginViewModel,  navigateBack: ()-> Unit) {
-    var isRegistrationButtonEnabled by remember {mutableStateOf(true)}
-
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {Text(text = "Create Account", color = Color.White)},
-                navigationIcon = {
-                    IconButton(onClick = navigateBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription ="back", tint = Color.White )
-                    }
-                },
-                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor =Color(0xFFEF8524) )
-            )
-        },
-        content = {
-            Column(
-                modifier = Modifier.padding(top = 60.dp).padding(horizontal = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(15.dp)
-            ) {
-                Text(
-                    text = "ProxiPal",
-                    fontSize = 70.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .width(500.dp),
-                    color = Color.Black
-                )
-                TextField(value = loginViewModel.state.value.email, onValueChange = { loginViewModel.setEmail(it) }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth())
-                TextField(value = loginViewModel.state.value.password, onValueChange = { loginViewModel.setPassword(it) }, label = { Text("Password") },visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth())
-                Button(
-                    onClick = {
-                        loginViewModel.createAccount(loginViewModel.state.value.email, loginViewModel.state.value.password);
-                        isRegistrationButtonEnabled = false},
-                    enabled = isRegistrationButtonEnabled,
+        topBar = { RegisterTopBar(navigateBack = navigateBack) },
+        content = { RegisterMain(loginViewModel) },
+        )
+}
 
-                    colors = ButtonDefaults.buttonColors(Color(0xFFEF8524)),
-                    shape = RoundedCornerShape(5.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text("Create Account")
-                }
-                if (!isRegistrationButtonEnabled){
-                    Text(
-                        text = "An email has been sent for account confirmation. Click the link finish account creation.",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Button(
-                        onClick = {loginViewModel.login(loginViewModel.state.value.email,loginViewModel.state.value.password, fromCreation = true)},
-                        colors = ButtonDefaults.buttonColors(Color(0xFFEF8524)),
-                        shape = RoundedCornerShape(5.dp),
-                        modifier = Modifier.fillMaxWidth(),
-                    ){
-                        Text(text = "Login")
-                    }
-                }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RegisterMain(loginViewModel: LoginViewModel){
+    var isRegistrationButtonEnabled by remember {mutableStateOf(true)}
+    Column(
+        modifier = Modifier
+            .padding(top = 60.dp)
+            .padding(horizontal = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(15.dp)
+    ) {
+        Text(
+            text = "ProxiPal",
+            fontSize = 70.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .width(500.dp),
+            color = Color.Black
+        )
+        TextField(value = loginViewModel.state.value.email, onValueChange = { loginViewModel.setEmail(it) }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth())
+        TextField(value = loginViewModel.state.value.password, onValueChange = { loginViewModel.setPassword(it) }, label = { Text("Password") },visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth())
+        Button(
+            onClick = {
+                loginViewModel.createAccount(loginViewModel.state.value.email, loginViewModel.state.value.password);
+                isRegistrationButtonEnabled = false},
+            enabled = isRegistrationButtonEnabled,
+
+            colors = ButtonDefaults.buttonColors(Color(0xFFEF8524)),
+            shape = RoundedCornerShape(5.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("Create Account")
+        }
+        if (!isRegistrationButtonEnabled){
+            Text(
+                text = "An email has been sent for account confirmation. Click the link finish account creation.",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Button(
+                onClick = {loginViewModel.login(loginViewModel.state.value.email,loginViewModel.state.value.password, fromCreation = true)},
+                colors = ButtonDefaults.buttonColors(Color(0xFFEF8524)),
+                shape = RoundedCornerShape(5.dp),
+                modifier = Modifier.fillMaxWidth(),
+            ){
+                Text(text = "Login")
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RegisterTopBar(navigateBack:()->Unit){
+    TopAppBar(
+        title = {Text(text = "Create Account", color = Color.White)},
+        navigationIcon = {
+            IconButton(onClick = navigateBack) {
+                Icon(Icons.Filled.ArrowBack, contentDescription ="back", tint = Color.White )
             }
         },
-
-        )
+        colors = TopAppBarDefaults.smallTopAppBarColors(containerColor =Color(0xFFEF8524) )
+    )
 }
 
 @Composable
 @Preview
 fun registerpreview(){
     MyApplicationTheme {
-        RegisterScaffold(loginViewModel = LoginViewModel()) {
+        RegisterScaffold(loginViewModel = LoginViewModel(), navigateBack = {})
 
-        }
+
     }
 }
