@@ -54,12 +54,13 @@ import com.mongodb.app.ui.userprofiles.PreviousNextBottomAppBar
 import com.mongodb.app.ui.userprofiles.ProfileTopAppBar
 import com.mongodb.app.ui.userprofiles.gridItems
 
-
+// navigation details
 object HomeDestination : NavigationDestination {
     override val route = "home"
     override val title = "ProxiPal"
 }
 
+// builds login scaffold with the bottom bar and login main
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -71,6 +72,7 @@ fun LoginScaffold(loginViewModel: LoginViewModel, navigateToRegister: ()->Unit) 
         } )
 }
 
+// Main content of login scaffold, takes user's email and password input and logs them in if they have an account
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginMain(loginViewModel: LoginViewModel){
@@ -104,6 +106,8 @@ fun LoginMain(loginViewModel: LoginViewModel){
         }
     }
 }
+
+// Bottom bar for login scaffold, directs user to register page
 @Composable
 fun LoginBottomBar(navigateToRegister:()->Unit){
         Column(
@@ -131,6 +135,7 @@ fun LoginBottomBar(navigateToRegister:()->Unit){
         }
 }
 
+// preview of login scaffold
 @Composable
 @Preview
 fun LoginPreview(){

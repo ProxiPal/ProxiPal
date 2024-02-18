@@ -32,6 +32,8 @@ import kotlinx.coroutines.launch
 /*
 Contributions:
 - Kevin Kubota (added switch cases for starting or referencing an activity, see below)
+
+- Vichet Chim (added navigation between login page and sign up page)
  */
 
 
@@ -81,6 +83,7 @@ class ComposeLoginActivity : ComponentActivity() {
 
         setContent {
             MyApplicationTheme {
+                // Vichet Chim - navigation between login and sign up
                 val navController = rememberNavController()
                 NavHost(navController = navController, startDestination = HomeDestination.route){
                     composable(route = HomeDestination.route){

@@ -60,11 +60,14 @@ import com.mongodb.app.presentation.login.LoginViewModel
 import com.mongodb.app.ui.login.RegisterScaffold
 import com.mongodb.app.ui.theme.MyApplicationTheme
 
+// data class for item data: id of image , and name
 data class GridItemData(
     val imageId: Int,
     val text: String
 )
 
+
+// list of items, contains image, item name
 val gridItems = listOf(
     GridItemData(R.drawable.culture, "Arts & Culture"),
     GridItemData(R.drawable.food, "Food & Drinks"),
@@ -79,7 +82,7 @@ val gridItems = listOf(
 )
 
 
-
+// top bar, contains title and sub heading
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileTopAppBar(){
@@ -96,6 +99,7 @@ fun ProfileTopAppBar(){
     )
 }
 
+// 3x3 grid of items from gridItems
 @Composable
 fun Grid(gridItems: List<GridItemData>) {
     LazyVerticalGrid(
@@ -109,9 +113,12 @@ fun Grid(gridItems: List<GridItemData>) {
         }
     }
 }
+
+// item in grid
 @Composable
 fun GridItem(gridItemData: GridItemData) {
     var isSelected by remember { mutableStateOf(false) }
+    // butt that displays the image and name of corresponding item , button changes color when clicked to show selected
         Button(
             onClick = { isSelected = !isSelected },
             shape = RoundedCornerShape(5.dp),
@@ -138,6 +145,7 @@ fun GridItem(gridItemData: GridItemData) {
         }
 }
 
+// bottom bar, contains previous buttons, next button, and display of which page user is on
 @Composable
 fun PreviousNextBottomAppBar(
     onPreviousClicked: () -> Unit,
@@ -152,6 +160,7 @@ fun PreviousNextBottomAppBar(
                 Text(text = "Back", color = Color(0xFFEF8524), fontSize = 20.sp)
             }
             Spacer(modifier = Modifier.weight(1f))
+            // loop to create indication of which page user is on
                 repeat(totalPages) { index ->
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_circle_24),
@@ -164,13 +173,12 @@ fun PreviousNextBottomAppBar(
             TextButton(onClick = onNextClicked){
                 Text(text = "Next", color = Color(0xFFEF8524), fontSize = 20.sp)
                 Icon(Icons.Default.ArrowForward,contentDescription = "Next", tint = Color(0xFFEF8524))
-
             }
         }
     }
 }
 
-
+// scaffold of interest screen
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable

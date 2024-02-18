@@ -43,11 +43,13 @@ import com.mongodb.app.presentation.login.LoginViewModel
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.theme.MyApplicationTheme
 
-
+// navigation details
 object RegisterScreen : NavigationDestination {
     override val route = "register_scaffold"
     override val title = "Create Account"
 }
+
+// builds the registration scaffold with topbar and registermain
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -58,6 +60,7 @@ fun RegisterScaffold(loginViewModel: LoginViewModel,  navigateBack: ()-> Unit) {
         )
 }
 
+// main contain of register scaffold, takes user's email and password to create an account
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterMain(loginViewModel: LoginViewModel){
@@ -78,6 +81,7 @@ fun RegisterMain(loginViewModel: LoginViewModel){
         )
         TextField(value = loginViewModel.state.value.email, onValueChange = { loginViewModel.setEmail(it) }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth())
         TextField(value = loginViewModel.state.value.password, onValueChange = { loginViewModel.setPassword(it) }, label = { Text("Password") },visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth())
+        // when clicked, disables register button
         Button(
             onClick = {
                 loginViewModel.createAccount(loginViewModel.state.value.email, loginViewModel.state.value.password);
@@ -90,6 +94,7 @@ fun RegisterMain(loginViewModel: LoginViewModel){
         ) {
             Text("Create Account")
         }
+        // enables login button and prompts a message to confirm account creation through email
         if (!isRegistrationButtonEnabled){
             Text(
                 text = "An email has been sent for account confirmation. Click the link finish account creation.",
@@ -110,6 +115,7 @@ fun RegisterMain(loginViewModel: LoginViewModel){
     }
 }
 
+// top bar for register to navigate back to login screen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterTopBar(navigateBack:()->Unit){
@@ -124,6 +130,7 @@ fun RegisterTopBar(navigateBack:()->Unit){
     )
 }
 
+// preview of registerscaffold
 @Composable
 @Preview
 fun registerpreview(){
