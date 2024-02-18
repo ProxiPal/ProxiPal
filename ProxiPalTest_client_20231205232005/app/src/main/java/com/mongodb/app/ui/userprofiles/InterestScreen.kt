@@ -35,6 +35,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -56,9 +57,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mongodb.app.R
+import com.mongodb.app.navigation.NavigationDestination
 import com.mongodb.app.presentation.login.LoginViewModel
 import com.mongodb.app.ui.login.RegisterScaffold
 import com.mongodb.app.ui.theme.MyApplicationTheme
+// navigation details
+object InterestDestination : NavigationDestination {
+    override val route = "interest"
+    override val title = "Interests"
+}
 
 // data class for item data: id of image , and name
 data class GridItemData(
@@ -92,8 +99,12 @@ fun ProfileTopAppBar(){
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Choose your Interests", color = Color.Black, fontSize= 30.sp)
-                Text(text = "You can always change this later.", color = Color.Gray, fontSize = 15.sp)
+                Text(text = "Choose your Interests",
+                    color = Color.Black,
+                    fontSize= 30.sp)
+                Text(text = "You can always change this later.",
+                    color = Color.Gray,
+                    fontSize = 15.sp)
             }
         }
     )
@@ -118,31 +129,36 @@ fun Grid(gridItems: List<GridItemData>) {
 @Composable
 fun GridItem(gridItemData: GridItemData) {
     var isSelected by remember { mutableStateOf(false) }
-    // butt that displays the image and name of corresponding item , button changes color when clicked to show selected
-        Button(
-            onClick = { isSelected = !isSelected },
-            shape = RoundedCornerShape(5.dp),
-            modifier = Modifier.size(200.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (isSelected) Color.LightGray else Color.White
-            )
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally
 
-            ) {
-                Image(
-                    painter = painterResource(id = gridItemData.imageId),
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.size(102.dp)
-                )
-                Text(
-                    text = gridItemData.text,
-                    color = if (isSelected) Color.White else Color.Black,
-                    textAlign = TextAlign.Center
-                )
-            }
+    // button that displays the image and name of corresponding item , button changes color when clicked to show selected
+    Button(
+        onClick = { isSelected = !isSelected },
+        shape = RoundedCornerShape(5.dp),
+        modifier = Modifier.size(200.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (isSelected) Color.LightGray else Color.White
+        )
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
+
+        ) {
+            Image(
+                painter = painterResource(id = gridItemData.imageId),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.size(150.dp)
+            )
+            Text(
+                text = gridItemData.text,
+                color = if (isSelected) Color.White else Color.Black,
+                textAlign = TextAlign.Center, fontSize = 12.sp
+            )
         }
+    }
+
 }
 
 // bottom bar, contains previous buttons, next button, and display of which page user is on
@@ -156,8 +172,11 @@ fun PreviousNextBottomAppBar(
     BottomAppBar() {
         Row(verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = onPreviousClicked){
-                Icon(Icons.Default.ArrowBack,contentDescription = "Back", tint = Color(0xFFEF8524))
-                Text(text = "Back", color = Color(0xFFEF8524), fontSize = 20.sp)
+                Icon(Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color(0xFFEF8524))
+                Text(text = "Back",
+                    color = Color(0xFFEF8524), fontSize = 20.sp)
             }
             Spacer(modifier = Modifier.weight(1f))
             // loop to create indication of which page user is on
@@ -171,8 +190,12 @@ fun PreviousNextBottomAppBar(
                 }
             Spacer(modifier = Modifier.weight(1f))
             TextButton(onClick = onNextClicked){
-                Text(text = "Next", color = Color(0xFFEF8524), fontSize = 20.sp)
-                Icon(Icons.Default.ArrowForward,contentDescription = "Next", tint = Color(0xFFEF8524))
+                Text(text = "Next",
+                    color = Color(0xFFEF8524),
+                    fontSize = 20.sp)
+                Icon(Icons.Default.ArrowForward,
+                    contentDescription = "Next",
+                    tint = Color(0xFFEF8524))
             }
         }
     }
