@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit
 
 // This screen will display a clickable switch that enables location updates for the user
 // when the switch is checked, and then displays a dynamically updating list of nearby users
+// Based on example from https://github.com/android/platform-samples/tree/main/samples/location
 @SuppressLint("MissingPermission")
 @Composable
 fun LocationUpdatesScreen() {

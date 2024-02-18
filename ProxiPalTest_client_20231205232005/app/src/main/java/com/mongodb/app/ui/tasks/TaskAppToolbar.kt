@@ -1,8 +1,5 @@
 package com.mongodb.app.ui.tasks
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -15,13 +12,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavHostController
 import com.mongodb.app.R
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.presentation.tasks.ToolbarEvent
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.app
-import com.mongodb.app.navigation.Routes
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
 import kotlinx.coroutines.CoroutineScope
@@ -30,7 +25,7 @@ import kotlinx.coroutines.launch
 
 @ExperimentalMaterial3Api
 @Composable
-fun TaskAppToolbar(viewModel: ToolbarViewModel, navController: NavHostController) {
+fun TaskAppToolbar(viewModel: ToolbarViewModel) {
     TopAppBar(
         title = {
             Text(
@@ -61,16 +56,6 @@ fun TaskAppToolbar(viewModel: ToolbarViewModel, navController: NavHostController
                 )
             }
 
-            // LOCATION SETTINGS
-            IconButton(
-                onClick = {
-                          navController.navigate(Routes.LocationPermissionsScreen.route)
-                },
-                colors = IconButtonDefaults.iconButtonColors(contentColor = Color.White)
-            ) {
-                Icon(Icons.Outlined.Place, contentDescription = null)
-            }
-
             // Log out
             IconButton(
                 onClick = {
@@ -94,7 +79,7 @@ fun TaskAppToolbar(viewModel: ToolbarViewModel, navController: NavHostController
         })
 }
 
-/*
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
@@ -107,4 +92,4 @@ fun TaskAppToolbarPreview() {
         }
     }
 }
-*/
+

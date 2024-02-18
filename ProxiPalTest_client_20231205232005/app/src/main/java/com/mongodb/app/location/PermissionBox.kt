@@ -38,6 +38,8 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
  * is revoked or the provided [onGranted] content if the permission is granted.
  *
  * This composable follows the permission request flow
+ *
+ * Based on example from https://github.com/android/platform-samples/tree/main/samples/location
  */
 @Composable
 fun PermissionBox(

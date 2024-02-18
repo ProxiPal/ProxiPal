@@ -4,7 +4,6 @@ package com.mongodb.app
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
@@ -35,7 +33,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
@@ -49,16 +46,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.navigation.NavigationGraph
-import com.mongodb.app.navigation.Routes
 import com.mongodb.app.presentation.tasks.AddItemEvent
 import com.mongodb.app.presentation.tasks.AddItemViewModel
 import com.mongodb.app.presentation.tasks.SubscriptionTypeEvent
@@ -67,9 +58,6 @@ import com.mongodb.app.presentation.tasks.TaskViewModel
 import com.mongodb.app.presentation.tasks.ToolbarEvent
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.ui.tasks.AddItemPrompt
-import com.mongodb.app.ui.tasks.ConnectWithOthersScreen
-import com.mongodb.app.location.LocationPermissionScreen
-import com.mongodb.app.location.LocationUpdatesScreen
 import com.mongodb.app.ui.tasks.ShowMyOwnTasks
 import com.mongodb.app.ui.tasks.TaskAppToolbar
 import com.mongodb.app.ui.tasks.TaskList
@@ -200,8 +188,7 @@ fun TaskListScaffold(
     toolbarViewModel: ToolbarViewModel,
     addItemViewModel: AddItemViewModel,
     subscriptionTypeViewModel: SubscriptionTypeViewModel,
-    taskViewModel: TaskViewModel,
-    navController: NavHostController
+    taskViewModel: TaskViewModel
 ) {
     val annotatedLinkString = buildAnnotatedString {
         val linkString = "To see your changes in Atlas, tap here."
@@ -224,7 +211,7 @@ fun TaskListScaffold(
     val uriHandler = LocalUriHandler.current
 
     Scaffold(
-        topBar = { TaskAppToolbar(toolbarViewModel, navController) },
+        topBar = { TaskAppToolbar(toolbarViewModel) },
         bottomBar = {
             BottomAppBar(
                 containerColor = Color.LightGray
@@ -295,7 +282,7 @@ fun TaskListScaffold(
     )
 }
 
-/*
+
 @Preview(showBackground = true)
 @Composable
 fun ItemActivityPreview() {
@@ -317,4 +304,4 @@ fun ItemActivityPreview() {
     }
 }
 
-*/
+

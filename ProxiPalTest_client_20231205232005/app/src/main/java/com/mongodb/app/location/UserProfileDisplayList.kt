@@ -34,7 +34,7 @@ fun UserProfileList(userProfiles: MutableList<UserProfile>) {
     }
 }
 
-// a card to display a single user profile in a clean UI
+// A card to display a single user profile in a clean UI
 @Composable
 fun UserProfileCard(userProfile: UserProfile) {
     Card(

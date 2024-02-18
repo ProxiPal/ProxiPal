@@ -31,6 +31,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
 /**
  * Simple screen that manages the location permission state
+ * Based on example from https://github.com/android/platform-samples/tree/main/samples/location
  */
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable

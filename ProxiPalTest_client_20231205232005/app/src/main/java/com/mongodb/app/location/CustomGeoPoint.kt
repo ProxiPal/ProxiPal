@@ -3,6 +3,8 @@ import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.EmbeddedRealmObject
 import io.realm.kotlin.types.RealmList
 
+// Custom data class that conforms to the GeoJSON spec
+// Used to store latitude and longitude for a user
 class CustomGeoPoint : EmbeddedRealmObject {
     constructor(latitude: Double, longitude: Double) {
         coordinates.apply {
