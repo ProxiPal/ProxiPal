@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ProxiPal</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Mot de passe</string>
+    <string name="create_account">Créer un compte</string>
+    <string name="log_in">Se connecter</string>
+    <string name="already_have_account">Vous avez déjà un compte? Se connecter</string>
+    <string name="does_not_have_account">Vous n\'avez pas de compte ? Créer un compte</string>
+    <string name="log_out">Se déconnecter</string>
+    <string name="airplane_mode">Mode avion</string>
+    <string name="show_completed_tasks_only">Afficher uniquement les tâches terminées</string>
+    <string name="mine">Le mien</string>
+    <string name="delete">Supprimer</string>
+    <string name="add_item">Ajouter un item</string>
+    <string name="enter_item_name">Entrez le nom de l\'article :</string>
+    <string name="cancel">Annuler</string>
+    <string name="create">Créer</string>
+    <string name="item_summary">Résumé de l\'article</string>
+    <string name="permissions_error">Vous n\'êtes pas autorisé à supprimer ou modifier des tâches qui ne vous appartiennent pas.</string>
+    <string name="show_all_tasks">Afficher toutes les tâches</string>
+    <string name="sync_message">Connectez-vous avec le même compte sur un autre appareil ou simulateur pour voir votre liste se synchroniser en temps réel.</string>
+    <string name="account_clarification">Veuillez vous connecter ou vous inscrire avec un compte utilisateur Device Sync. Ceci est distinct de votre connexion Atlas Cloud.</string>
+    <string name="unable_to_switch">Changer d\'abonnement n\'affecte pas les données du domaine lorsque la synchronisation est hors ligne</string>
+    <string name="permissions_warning">Vous pouvez uniquement modifier ou supprimer les tâches qui vous appartiennent.</string>
+    <string name="user_profile_header">Profil de l\'utilisateur</string>
+    <string name="user_profile_first_name_header">Prénom</string>
+    <string name="user_profile_last_name_header">Nom de famille</string>
+    <string name="user_profile_biography_header">Biographie</string>
+    <string name="user_profile_characters_remaining">%s caractère(s) restant</string>
+    <string name="user_profile_start_editing_message">Editer le profil</string>
+    <string name="user_profile_finish_editing_message">Sauvegarder les modifications</string>
+    <string name="user_profile_cancel_editing_message">Annuler les modifications</string>
+    <string name="user_profile_permissions_warning">Vous pouvez uniquement modifier ou supprimer un profil utilisateur qui vous appartient.</string>
+    <string name="new_friend_request_notification_service_content_body">Vous avez une nouvelle demande d\'ami !</string>
+</resources>
