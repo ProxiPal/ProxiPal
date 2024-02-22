@@ -32,5 +32,9 @@
     <string name="user_profile_finish_editing_message">Guardar cambios</string>
     <string name="user_profile_cancel_editing_message">Descartar los cambios</string>
     <string name="user_profile_permissions_warning">Sólo puedes modificar o eliminar un perfil de usuario que te pertenezca.</string>
+    <string name="compass_screen_bearing_message">Ángulo de rodamiento (en grados): %.3f</string>
+    <string name="compass_screen_distance_message">Distancia desde el partido (en km): %.3f</string>
+    <string name="compass_screen_cancel_message">Cancelar partido</string>
+    <string name="compass_screen_top_bar_header">¡Coincidencia encontrada!</string>
     <string name="new_friend_request_notification_service_content_body">¡Tienes una nueva solicitud de amistad!</string>
 </resources>
