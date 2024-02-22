@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ProxiPal</string>
+    <string name="prompt_email">Correo electrónico</string>
+    <string name="prompt_password">Contraseña</string>
+    <string name="create_account">Crear una cuenta</string>
+    <string name="log_in">Acceso</string>
+    <string name="already_have_account">¿Ya tienes una cuenta? Acceso</string>
+    <string name="does_not_have_account">¿No tienes una cuenta? Crear una cuenta</string>
+    <string name="log_out">Cerrar sesión</string>
+    <string name="airplane_mode">Modo avión</string>
+    <string name="show_completed_tasks_only">Mostrar sólo las tareas completadas</string>
+    <string name="mine">Mío</string>
+    <string name="new_friend_request_notification_service_content_body">¡Tienes una nueva solicitud de amistad!</string>
+</resources>
