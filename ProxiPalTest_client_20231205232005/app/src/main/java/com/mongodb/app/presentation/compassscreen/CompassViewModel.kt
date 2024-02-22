@@ -1,10 +1,16 @@
 package com.mongodb.app.presentation.compassscreen
 
+import android.os.Bundle
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.AbstractSavedStateViewModelFactory
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.savedstate.SavedStateRegistryOwner
+import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.compassscreen.UserLocation
+import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.compassscreen.CompassUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -60,6 +66,24 @@ class CompassViewModel : ViewModel() {
     init{
         // Start the compass screen with the user currently meeting up with their match
         _isMeetingWithMatch.value = true
+    }
+
+    companion object {
+        fun factory(
+            repository: SyncRepository,
+            owner: SavedStateRegistryOwner,
+            defaultArgs: Bundle? = null
+        ): AbstractSavedStateViewModelFactory {
+            return object : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
+                override fun <T : ViewModel> create(
+                    key: String,
+                    modelClass: Class<T>,
+                    handle: SavedStateHandle
+                ): T {
+                    return UserProfileViewModel (repository) as T
+                }
+            }
+        }
     }
 
 

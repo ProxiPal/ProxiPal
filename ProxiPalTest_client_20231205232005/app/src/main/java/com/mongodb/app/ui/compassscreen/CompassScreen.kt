@@ -2,7 +2,12 @@
 
 package com.mongodb.app.ui.compassscreen
 
+import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -33,16 +38,74 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mongodb.app.R
+import com.mongodb.app.TAG
+import com.mongodb.app.data.MockRepository
+import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.compassscreen.KM_PER_ONE_LATITUDE_DIFF
 import com.mongodb.app.data.compassscreen.KM_PER_ONE_LONGITUDE_DIFF
 import com.mongodb.app.presentation.compassscreen.CompassViewModel
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
+import kotlinx.coroutines.launch
 import kotlin.math.atan2
 import kotlin.math.pow
 import kotlin.math.sqrt
+
+
+class CompassScreen : ComponentActivity(){
+    /*
+    ===== Variables =====
+     */
+    private val repository = RealmSyncRepository { _, error ->
+        // Sync errors come from a background thread so route the Toast through the UI thread
+        lifecycleScope.launch {
+            // Catch write permission errors and notify user. This is just a 2nd line of defense
+            // since we prevent users from modifying someone else's tasks
+            // TODO the SDK does not have an enum for this type of error yet so make sure to update this once it has been added
+            if (error.message?.contains("CompensatingWrite") == true) {
+//                Toast.makeText(
+//                    this@CompassScreen, getString(R.string.user_profile_permissions_warning),
+//                    Toast.LENGTH_SHORT
+//                )
+//                    .show()
+            }
+        }
+    }
+
+    private val compassViewModel: CompassViewModel by viewModels{
+        CompassViewModel.factory(repository, this)
+    }
+
+
+    /*
+    ===== Functions =====
+     */
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        Log.i(
+            TAG(),
+            "CompassScreen: Start of OnCreate()"
+        )
+
+        setContent{
+            MyApplicationTheme {
+                CompassScreenLayout(
+                    compassViewModel = compassViewModel
+                )
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Repository must be closed to free resources
+        repository.close()
+    }
+}
 
 
 /*
@@ -54,17 +117,12 @@ import kotlin.math.sqrt
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CompassScreenLayout(
+    compassViewModel: CompassViewModel,
     modifier: Modifier = Modifier
 ) {
-    // Temporary way of accessing view model
-    // TODO Update when integrating into the main code
-    val compassViewModel: CompassViewModel = viewModel()
-
     Scaffold(
         topBar = {
-            CompassScreenTopBar(
-
-            )
+            CompassScreenTopBar()
         },
         modifier = modifier
         // Pad the body of content so it does not get cut off by the scaffold top bar
@@ -347,6 +405,7 @@ fun TempCompassScreenLocationUpdating(
 /**
  * Displays a temporary text field for updating a user's location
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TempCompassScreenLocationUpdater(
     userLocationParameterValue: String,
@@ -439,6 +498,9 @@ fun TempCompassScreenLogMessages(
 @Composable
 fun CompassScreenLayoutPreview() {
     MyApplicationTheme {
-        CompassScreenLayout()
+        val repository = MockRepository()
+        CompassScreenLayout(
+            compassViewModel = CompassViewModel()
+        )
     }
 }
