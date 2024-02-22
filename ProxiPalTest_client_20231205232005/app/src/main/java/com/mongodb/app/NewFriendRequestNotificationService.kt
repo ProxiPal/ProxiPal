@@ -11,6 +11,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import androidx.core.app.NotificationCompat
 
 class NewFriendRequestNotificationService(
@@ -32,11 +33,13 @@ class NewFriendRequestNotificationService(
             PendingIntent.FLAG_IMMUTABLE // Flags for the pending intent
         )
 
+
+
         // Build the notification with basic information
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.baseline_3p_24) // Icon to display in the notification bar
             .setContentTitle("ProxiPal") // Title of the notification
-            .setContentText("You have a new friend request!") // Body text of the notification
+            .setContentText(context.getString(R.string.new_friend_request_notification_service_content_body)) // Body text of the notification
             .setContentIntent(activityPendingIntent) // Intent to execute when the notification is tapped
             .build()
 

@@ -38,4 +38,9 @@
     <string name="user_profile_cancel_editing_message">Discard Changes</string>
     <string name="user_profile_permissions_warning">You can only modify or remove a user profile that belongs to you.</string>
     <!-- End user profile strings-->
+
+
+    <!-- NewFriendRequestNotificationService strings
+         Programmer:Brian Poon 2/21/24   -->
+    <string name="new_friend_request_notification_service_content_body">You have a new friend request!</string>
 </resources>
