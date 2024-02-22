@@ -12,31 +12,31 @@
     <string name="show_completed_tasks_only">Show completed tasks only</string>
     <string name="mine">Mine</string>
     <string name="more" translatable="false">\u22EE</string>
-    <string name="delete" translatable="false">Delete</string>
-    <string name="add_item" translatable="false">Add Item</string>
-    <string name="enter_item_name" translatable="false">Enter Item Name:</string>
-    <string name="cancel" translatable="false">Cancel</string>
-    <string name="create" translatable="false">Create</string>
-    <string name="item_summary" translatable="false">Item Summary</string>
-    <string name="permissions_error" translatable="false">You are not allowed to delete or modify tasks that don\'t belong to you.</string>
-    <string name="show_all_tasks" translatable="false">Show all tasks</string>
-    <string name="sync_message" translatable="false">Log in with the same account on another device or simulator to see your list sync in real-time.</string>
-    <string name="account_clarification" translatable="false">Please log in or register with a Device Sync user account. This is separate from your Atlas Cloud login.</string>
-    <string name="unable_to_switch" translatable="false">Switching subscriptions does not affect Realm data when Sync is offline</string>
-    <string name="permissions_warning" translatable="false">You can only modify or remove tasks that belong to you.</string>
+    <string name="delete">Delete</string>
+    <string name="add_item">Add Item</string>
+    <string name="enter_item_name">Enter Item Name:</string>
+    <string name="cancel">Cancel</string>
+    <string name="create">Create</string>
+    <string name="item_summary">Item Summary</string>
+    <string name="permissions_error">You are not allowed to delete or modify tasks that don\'t belong to you.</string>
+    <string name="show_all_tasks">Show all tasks</string>
+    <string name="sync_message">Log in with the same account on another device or simulator to see your list sync in real-time.</string>
+    <string name="account_clarification">Please log in or register with a Device Sync user account. This is separate from your Atlas Cloud login.</string>
+    <string name="unable_to_switch">Switching subscriptions does not affect Realm data when Sync is offline</string>
+    <string name="permissions_warning">You can only modify or remove tasks that belong to you.</string>
     <!-- Start user profile strings -->
     <string name="user_profile_test_string" translatable="false">abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789</string>
     <string name="user_profile_empty_string_replacement" translatable="false">(null)</string>
-    <string name="user_profile_header" translatable="false">User Profile</string>
+    <string name="user_profile_header">User Profile</string>
     <string name="user_profile_row_header" translatable="false">%s:</string>
-    <string name="user_profile_first_name_header" translatable="false">First name</string>
-    <string name="user_profile_last_name_header" translatable="false">Last name</string>
-    <string name="user_profile_biography_header" translatable="false">Biography</string>
-    <string name="user_profile_characters_remaining" translatable="false">%s character(s) remaining</string>
-    <string name="user_profile_start_editing_message" translatable="false">Edit Profile</string>
-    <string name="user_profile_finish_editing_message" translatable="false">Save Changes</string>
-    <string name="user_profile_cancel_editing_message" translatable="false">Discard Changes</string>
-    <string name="user_profile_permissions_warning" translatable="false">You can only modify or remove a user profile that belongs to you.</string>
+    <string name="user_profile_first_name_header">First name</string>
+    <string name="user_profile_last_name_header">Last name</string>
+    <string name="user_profile_biography_header">Biography</string>
+    <string name="user_profile_characters_remaining">%s character(s) remaining</string>
+    <string name="user_profile_start_editing_message">Edit Profile</string>
+    <string name="user_profile_finish_editing_message">Save Changes</string>
+    <string name="user_profile_cancel_editing_message">Discard Changes</string>
+    <string name="user_profile_permissions_warning">You can only modify or remove a user profile that belongs to you.</string>
     <!-- End user profile strings-->
 
 
