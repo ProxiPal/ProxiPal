@@ -1,4 +1,4 @@
-package com.mongodb.app.data
+package com.mongodb.app.data.compassscreen
 
 // Using https://gps-coordinates.org/distance-between-coordinates.php
 // Using https://latlongdata.com/distance-calculator/

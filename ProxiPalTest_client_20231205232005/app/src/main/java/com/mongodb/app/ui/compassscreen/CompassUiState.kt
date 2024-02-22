@@ -1,6 +1,6 @@
 package com.mongodb.app.ui.compassscreen
 
-import com.mongodb.app.data.UserLocation
+import com.mongodb.app.data.compassscreen.UserLocation
 
 data class CompassUiState (
     val currentUserLocation: UserLocation = UserLocation(0.0, 0.0),

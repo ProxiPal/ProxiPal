@@ -1,4 +1,4 @@
-package com.mongodb.app.data
+package com.mongodb.app.data.compassscreen
 
 /**
  * A temporary data class that contains a user's location data

@@ -4,7 +4,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.mongodb.app.data.UserLocation
+import com.mongodb.app.data.compassscreen.UserLocation
 import com.mongodb.app.ui.compassscreen.CompassUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

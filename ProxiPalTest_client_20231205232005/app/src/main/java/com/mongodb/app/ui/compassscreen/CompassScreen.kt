@@ -35,8 +35,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mongodb.app.R
-import com.mongodb.app.data.KM_PER_ONE_LATITUDE_DIFF
-import com.mongodb.app.data.KM_PER_ONE_LONGITUDE_DIFF
+import com.mongodb.app.data.compassscreen.KM_PER_ONE_LATITUDE_DIFF
+import com.mongodb.app.data.compassscreen.KM_PER_ONE_LONGITUDE_DIFF
 import com.mongodb.app.presentation.compassscreen.CompassViewModel
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
