@@ -171,18 +171,17 @@ fun CompassScreenBodyContent(
     compassViewModel: CompassViewModel,
     modifier: Modifier = Modifier
 ) {
-    val compassState = compassViewModel.userLocations.collectAsState()
     val bearing = calculateBearingBetweenPoints(
-        startLatitude = compassState.value.currentUserLocation.latitude,
-        startLongitude = compassState.value.currentUserLocation.longitude,
-        endLatitude = compassState.value.matchedUserLocation.latitude,
-        endLongitude = compassState.value.matchedUserLocation.longitude
+        startLatitude = compassViewModel.currentUserLocation.value.latitude,
+        startLongitude = compassViewModel.currentUserLocation.value.longitude,
+        endLatitude = compassViewModel.matchedUserLocation.value.latitude,
+        endLongitude = compassViewModel.matchedUserLocation.value.longitude
     )
     val distance = calculateDistanceBetweenPoints(
-        startLatitude = compassState.value.currentUserLocation.latitude,
-        startLongitude = compassState.value.currentUserLocation.longitude,
-        endLatitude = compassState.value.matchedUserLocation.latitude,
-        endLongitude = compassState.value.matchedUserLocation.longitude
+        startLatitude = compassViewModel.currentUserLocation.value.latitude,
+        startLongitude = compassViewModel.currentUserLocation.value.longitude,
+        endLatitude = compassViewModel.matchedUserLocation.value.latitude,
+        endLongitude = compassViewModel.matchedUserLocation.value.longitude
     )
 
     Column(
@@ -222,7 +221,6 @@ fun CompassScreenCompassVisual(
     compassViewModel: CompassViewModel,
     modifier: Modifier = Modifier
 ) {
-    val compassState = compassViewModel.userLocations.collectAsState()
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = modifier
@@ -234,10 +232,10 @@ fun CompassScreenCompassVisual(
                 // Image rotation is clockwise
                 .rotate(
                     degrees = calculateBearingBetweenPoints(
-                        startLatitude = compassState.value.currentUserLocation.latitude,
-                        startLongitude = compassState.value.currentUserLocation.longitude,
-                        endLatitude = compassState.value.matchedUserLocation.latitude,
-                        endLongitude = compassState.value.matchedUserLocation.longitude
+                        startLatitude = compassViewModel.currentUserLocation.value.latitude,
+                        startLongitude = compassViewModel.currentUserLocation.value.longitude,
+                        endLatitude = compassViewModel.matchedUserLocation.value.latitude,
+                        endLongitude = compassViewModel.matchedUserLocation.value.longitude
                     ).toFloat()
                 )
         )
@@ -435,8 +433,6 @@ fun TempCompassScreenLogMessages(
     compassViewModel: CompassViewModel,
     modifier: Modifier = Modifier
 ) {
-    val compassState = compassViewModel.userLocations.collectAsState()
-
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = modifier
@@ -453,35 +449,15 @@ fun TempCompassScreenLogMessages(
                             "${compassViewModel.matchedUserLatitude.value} ; " +
                             "${compassViewModel.matchedUserLongitude.value} ; "
                 )
-//                Log.i(
-//                    "tempTag",
-//                    "Mutable state bearing = " +
-//                            "${calculateBearingBetweenPoints(
-//                                compassViewModel.currentUserLatitude.value,
-//                                compassViewModel.currentUserLongitude.value,
-//                                compassViewModel.matchedUserLatitude.value,
-//                                compassViewModel.matchedUserLongitude.value
-//                            )}"
-//                )
                 Log.i(
                     "tempTag",
-                    "UI state data = " +
-                            "${compassState.value.currentUserLocation.latitude} ; " +
-                            "${compassState.value.currentUserLocation.longitude} ; " +
-                            "${compassState.value.matchedUserLocation.latitude} ; " +
-                            "${compassState.value.matchedUserLocation.longitude} ; "
-                )
-                Log.i(
-                    "tempTag",
-                    "UI state bearing = " +
-                            "${
-                                calculateBearingBetweenPoints(
-                                    compassState.value.currentUserLocation.latitude,
-                                    compassState.value.currentUserLocation.longitude,
-                                    compassState.value.matchedUserLocation.latitude,
-                                    compassState.value.matchedUserLocation.longitude
-                                )
-                            }"
+                    "Mutable state bearing = " +
+                            "${calculateBearingBetweenPoints(
+                                compassViewModel.currentUserLocation.value.latitude,
+                                compassViewModel.currentUserLocation.value.longitude,
+                                compassViewModel.matchedUserLocation.value.latitude,
+                                compassViewModel.matchedUserLocation.value.longitude
+                            )}"
                 )
             },
             modifier = Modifier

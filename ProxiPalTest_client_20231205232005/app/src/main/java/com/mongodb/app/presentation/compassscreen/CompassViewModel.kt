@@ -21,14 +21,17 @@ class CompassViewModel : ViewModel() {
     /*
     ===== Variables =====
      */
-    private val _userLocations = MutableStateFlow(CompassUiState())
-
     private val _currentUserLatitude: MutableState<String> = mutableStateOf(
         "0.0"
     )
 
     private val _currentUserLongitude: MutableState<String> = mutableStateOf(
         "0.0"
+    )
+
+    // TODO Replace this with the actual location data
+    private val _currentUserLocation: MutableState<UserLocation> = mutableStateOf(
+        UserLocation(0.0, 0.0)
     )
 
     private val _matchedUserLatitude: MutableState<String> = mutableStateOf(
@@ -39,25 +42,36 @@ class CompassViewModel : ViewModel() {
         "0.0"
     )
 
+    // TODO Replace this with the actual location data
+    private val _matchedUserLocation: MutableState<UserLocation> = mutableStateOf(
+        UserLocation(0.0, 0.0)
+    )
+
     private val _isMeetingWithMatch: MutableState<Boolean> = mutableStateOf(true)
 
 
     /*
     ===== Properties =====
      */
-    val userLocations: StateFlow<CompassUiState> = _userLocations.asStateFlow()
-
     val currentUserLatitude: State<String>
         get() = _currentUserLatitude
 
     val currentUserLongitude: State<String>
         get() = _currentUserLongitude
 
+    // TODO Replace this with the actual location data
+    val currentUserLocation: State<UserLocation>
+        get() = _currentUserLocation
+
     val matchedUserLatitude: State<String>
         get() = _matchedUserLatitude
 
     val matchedUserLongitude: State<String>
         get() = _matchedUserLongitude
+
+    // TODO Replace this with the actual location data
+    val matchedUserLocation: State<UserLocation>
+        get() = _matchedUserLocation
 
     val isMeetingWithMatch: State<Boolean>
         get() = _isMeetingWithMatch
@@ -104,14 +118,7 @@ class CompassViewModel : ViewModel() {
     fun updateCurrentUserLatitude(newLatitude: String){
         _currentUserLatitude.value = newLatitude
         if (newLatitude.toDoubleOrNull() != null && isValidLatitude(newLatitude.toDouble())){
-            _userLocations.update { currentState ->
-                currentState.copy(
-                    currentUserLocation = UserLocation(
-                        latitude = newLatitude.toDouble(),
-                        longitude = userLocations.value.currentUserLocation.longitude
-                    )
-                )
-            }
+            _currentUserLocation.value.latitude = newLatitude.toDouble()
         }
     }
 
@@ -121,14 +128,7 @@ class CompassViewModel : ViewModel() {
     fun updateCurrentUserLongitude(newLongitude: String){
         _currentUserLongitude.value = newLongitude
         if (newLongitude.toDoubleOrNull() != null && isValidLongitude(newLongitude.toDouble())){
-            _userLocations.update { currentState ->
-                currentState.copy(
-                    currentUserLocation = UserLocation(
-                        latitude = userLocations.value.currentUserLocation.latitude,
-                        longitude = newLongitude.toDouble()
-                    )
-                )
-            }
+            _currentUserLocation.value.longitude = newLongitude.toDouble()
         }
     }
 
@@ -138,14 +138,7 @@ class CompassViewModel : ViewModel() {
     fun updateMatchedUserLatitude(newLatitude: String) {
         _matchedUserLatitude.value = newLatitude
         if (newLatitude.toDoubleOrNull() != null && isValidLatitude(newLatitude.toDouble())){
-            _userLocations.update { currentState ->
-                currentState.copy(
-                    matchedUserLocation = UserLocation(
-                        latitude = newLatitude.toDouble(),
-                        longitude = userLocations.value.matchedUserLocation.longitude
-                    )
-                )
-            }
+            _matchedUserLocation.value.latitude = newLatitude.toDouble()
         }
     }
 
@@ -155,14 +148,7 @@ class CompassViewModel : ViewModel() {
     fun updateMatchedUserLongitude(newLongitude: String) {
         _matchedUserLongitude.value = newLongitude
         if (newLongitude.toDoubleOrNull() != null && isValidLongitude(newLongitude.toDouble())){
-            _userLocations.update { currentState ->
-                currentState.copy(
-                    matchedUserLocation = UserLocation(
-                        latitude = userLocations.value.matchedUserLocation.latitude,
-                        longitude = newLongitude.toDouble()
-                    )
-                )
-            }
+            _matchedUserLocation.value.longitude = newLongitude.toDouble()
         }
     }
 
