@@ -15,6 +15,7 @@ import com.mongodb.app.presentation.login.EventSeverity
 import com.mongodb.app.presentation.login.LoginAction
 import com.mongodb.app.presentation.login.LoginEvent
 import com.mongodb.app.presentation.login.LoginViewModel
+import com.mongodb.app.ui.compassscreen.CompassScreen
 import com.mongodb.app.ui.login.LoginScaffold
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.userprofiles.UserProfileScreen
@@ -40,7 +41,11 @@ class ComposeLoginActivity : ComponentActivity() {
             if (SHOULD_USE_TASKS_ITEMS)
                 startActivity(Intent(this, ComposeItemActivity::class.java))
             else
-                startActivity(Intent(this, UserProfileScreen::class.java))
+                startActivity(Intent(
+                    this,
+                    CompassScreen::class.java
+//                    UserProfileScreen::class.java
+                ))
             finish()
             return
         }
@@ -60,7 +65,8 @@ class ComposeLoginActivity : ComponentActivity() {
                             )
                             else Intent(
                                 this@ComposeLoginActivity,
-                                UserProfileScreen::class.java
+                                CompassScreen::class.java
+//                                UserProfileScreen::class.java
                             )
                             startActivity(intent)
                             finish()

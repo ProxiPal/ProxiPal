@@ -91,6 +91,12 @@ class CompassScreen : ComponentActivity(){
             "CompassScreen: Start of OnCreate()"
         )
 
+        // Need to update repository when a configuration change occurs
+        // ... otherwise app will crash when trying to access Realm after it has closed
+        compassViewModel.updateRepository(
+            newRepository = repository
+        )
+
         setContent{
             MyApplicationTheme {
                 CompassScreenLayout(
@@ -508,7 +514,9 @@ fun CompassScreenLayoutPreview() {
     MyApplicationTheme {
         val repository = MockRepository()
         CompassScreenLayout(
-            compassViewModel = CompassViewModel()
+            compassViewModel = CompassViewModel(
+                repository = repository
+            )
         )
     }
 }

@@ -17,7 +17,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class CompassViewModel : ViewModel() {
+class CompassViewModel constructor(
+    private var repository: SyncRepository
+    ): ViewModel() {
     /*
     ===== Variables =====
      */
@@ -94,7 +96,7 @@ class CompassViewModel : ViewModel() {
                     modelClass: Class<T>,
                     handle: SavedStateHandle
                 ): T {
-                    return UserProfileViewModel (repository) as T
+                    return CompassViewModel (repository) as T
                 }
             }
         }
@@ -104,6 +106,16 @@ class CompassViewModel : ViewModel() {
     /*
     ===== Functions =====
      */
+    /**
+     * When a configuration change occurs, this allows updating the current SyncRepository instance
+     * and prevents the app from crashing when trying to communicate with Realm after it has closed.
+     */
+    fun updateRepository(
+        newRepository: SyncRepository
+    ){
+        repository = newRepository
+    }
+
     private fun isValidLatitude(latitude: Double): Boolean{
         return latitude in -90.0..90.0
     }

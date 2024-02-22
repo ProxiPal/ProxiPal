@@ -26,6 +26,9 @@
             android:name=".ui.userprofiles.UserProfileScreen"
             android:screenOrientation="fullSensor" />
         <activity
+            android:name=".ui.compassscreen.CompassScreen"
+            android:screenOrientation="fullSensor" />
+        <activity
             android:name=".ComposeLoginActivity"
             android:screenOrientation="nosensor"
             android:exported="true">
