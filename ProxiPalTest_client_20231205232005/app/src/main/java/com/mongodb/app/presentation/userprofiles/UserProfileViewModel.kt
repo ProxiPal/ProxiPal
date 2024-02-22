@@ -36,7 +36,7 @@ import kotlinx.coroutines.withContext
 
 /*
 Contributions:
-- Kevin Kubota (entire file)
+- Kevin Kubota (all user profile UI, except for navigation between screens)
  */
 
 
