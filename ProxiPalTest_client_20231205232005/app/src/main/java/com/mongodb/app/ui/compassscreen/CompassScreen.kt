@@ -112,7 +112,7 @@ class CompassScreen : ComponentActivity(){
 ===== Functions =====
  */
 /**
- * Displays the entire connection with others screen
+ * Displays the screen that points matching users toward each other
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -135,6 +135,9 @@ fun CompassScreenLayout(
     }
 }
 
+/**
+ * Displays the top bar for the compass screen
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CompassScreenTopBar(
@@ -242,6 +245,9 @@ fun CompassScreenCompassVisual(
     }
 }
 
+/**
+ * Displays text listing some measurement (currently either the bearing or distance)
+ */
 @Composable
 fun CompassScreenMeasurementText(
     @StringRes measurementText: Int,
@@ -311,6 +317,9 @@ private fun calculateDistanceBetweenPoints(
 }
 
 // TODO Need to make sure this cancels the matching process for both users
+/**
+ * Displays a button for canceling directing matches toward each other
+ */
 @Composable
 fun CompassScreenCancelButton(
     compassViewModel: CompassViewModel,
@@ -428,6 +437,9 @@ fun TempCompassScreenLocationUpdater(
     )
 }
 
+/**
+ * Displays a temporary button for printing log messages (for debugging only)
+ */
 @Composable
 fun TempCompassScreenLogMessages(
     compassViewModel: CompassViewModel,
@@ -451,13 +463,33 @@ fun TempCompassScreenLogMessages(
                 )
                 Log.i(
                     "tempTag",
-                    "Mutable state bearing = " +
+                    "Mutable location state data = " +
+                            "${compassViewModel.currentUserLocation.value.latitude} ; " +
+                            "${compassViewModel.currentUserLocation.value.longitude} ; " +
+                            "${compassViewModel.matchedUserLocation.value.latitude} ; " +
+                            "${compassViewModel.matchedUserLocation.value.longitude} ; "
+                )
+                Log.i(
+                    "tempTag",
+                    "Mutable location state bearing = " +
                             "${calculateBearingBetweenPoints(
                                 compassViewModel.currentUserLocation.value.latitude,
                                 compassViewModel.currentUserLocation.value.longitude,
                                 compassViewModel.matchedUserLocation.value.latitude,
                                 compassViewModel.matchedUserLocation.value.longitude
                             )}"
+                )
+                Log.i(
+                    "tempTag",
+                    "Mutable location state distance = " +
+                            "${
+                                calculateDistanceBetweenPoints(
+                                compassViewModel.currentUserLocation.value.latitude,
+                                compassViewModel.currentUserLocation.value.longitude,
+                                compassViewModel.matchedUserLocation.value.latitude,
+                                compassViewModel.matchedUserLocation.value.longitude
+                            )
+                            }"
                 )
             },
             modifier = Modifier
