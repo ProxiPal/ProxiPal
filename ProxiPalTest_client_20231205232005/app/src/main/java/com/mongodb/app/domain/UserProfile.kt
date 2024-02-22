@@ -8,7 +8,7 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 
 /*
 Contributions:
-- Kevin Kubota (entire file)
+- Kevin Kubota (first name, last name, and biography fields)
  */
 
 

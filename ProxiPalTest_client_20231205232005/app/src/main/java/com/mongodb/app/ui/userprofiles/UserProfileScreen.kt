@@ -71,7 +71,7 @@ import kotlinx.coroutines.launch
 
 /*
 Contributions:
-- Kevin Kubota (entire file)
+- Kevin Kubota (all user profile UI, except for navigation between screens)
  */
 
 
