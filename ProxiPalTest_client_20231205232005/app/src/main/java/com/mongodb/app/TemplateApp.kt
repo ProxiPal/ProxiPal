@@ -5,6 +5,8 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.util.Log
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import io.realm.kotlin.mongodb.App
 import io.realm.kotlin.mongodb.AppConfiguration
 
@@ -21,6 +23,9 @@ class TemplateApp: Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+
+
         createNotificationChannel() // Create notification channel for push notifications
         app = App.create(
             AppConfiguration.Builder(getString(R.string.realm_app_id))
