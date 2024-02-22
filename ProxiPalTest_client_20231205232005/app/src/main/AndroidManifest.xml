@@ -15,7 +15,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:screenOrientation="portrait"
-        android:theme="@style/Theme.App">
+        android:theme="@style/Theme.App"
+        android:localeConfig="@xml/locales_config"
+        >
+
         <activity
             android:name=".ComposeItemActivity"
             android:screenOrientation="nosensor" />
