@@ -158,9 +158,6 @@ class ComposeItemActivity : ComponentActivity() {
 
         setContent {
             MyApplicationTheme {
-                // testing connect with others screen
-                //NavigationGraph(toolbarViewModel = toolbarViewModel)
-
                 TaskListScaffold(
                     repository,
                     toolbarViewModel,
@@ -168,9 +165,6 @@ class ComposeItemActivity : ComponentActivity() {
                     subscriptionTypeViewModel,
                     taskViewModel
                 )
-
-
-
             }
         }
     }

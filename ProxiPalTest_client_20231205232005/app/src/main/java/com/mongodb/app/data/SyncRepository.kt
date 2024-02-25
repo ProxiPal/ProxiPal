@@ -5,6 +5,7 @@ import com.mongodb.app.TAG
 import com.mongodb.app.domain.Item
 import com.mongodb.app.app
 import com.mongodb.app.domain.UserProfile
+import com.mongodb.app.location.CustomGeoPoint
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
@@ -156,7 +157,7 @@ class RealmSyncRepository(
         // ... the app will crash if querying anything other than B.
         // If errors still persist, try deleting and re-running the app.
         val set = if (SHOULD_USE_TASKS_ITEMS) setOf(Item::class)
-        else setOf(UserProfile::class)
+        else setOf(UserProfile::class, CustomGeoPoint::class)
         config = SyncConfiguration.Builder(currentUser, set)
             .initialSubscriptions { realm ->
                 // Subscribe to the active subscriptionType - first time defaults to MINE
@@ -299,6 +300,7 @@ class RealmSyncRepository(
             this.firstName = firstName
             this.lastName = lastName
             this.biography = biography
+            this.location = CustomGeoPoint(0.0,0.0)
         }
         realm.write {
             copyToRealm(userProfile, updatePolicy = UpdatePolicy.ALL)

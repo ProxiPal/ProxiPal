@@ -22,7 +22,7 @@ class UserProfile : RealmObject {
     var lastName: String = ""
     var biography: String = ""
     var ownerId: String = ""
-    //var location: CustomGeoPoint? = null // location added by Marco Pacini
+    var location: CustomGeoPoint? = null // location added by Marco Pacini
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
