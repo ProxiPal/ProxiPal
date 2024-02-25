@@ -223,7 +223,7 @@ fun CompassScreenCompassVisual(
     ) {
         Image(
             painter = painterResource(id = R.drawable.tempcompass),
-            contentDescription = "Compass pointing you to your matching user",
+            contentDescription = null,
             modifier = Modifier
                 // Image rotation is clockwise
                 .rotate(
