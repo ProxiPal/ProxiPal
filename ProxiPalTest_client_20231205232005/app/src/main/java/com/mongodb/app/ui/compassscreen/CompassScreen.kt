@@ -180,19 +180,6 @@ fun CompassScreenBodyContent(
     compassViewModel: CompassViewModel,
     modifier: Modifier = Modifier
 ) {
-    val bearing = calculateBearingBetweenPoints(
-        startLatitude = compassViewModel.currentUserLocation.value.latitude,
-        startLongitude = compassViewModel.currentUserLocation.value.longitude,
-        endLatitude = compassViewModel.matchedUserLocation.value.latitude,
-        endLongitude = compassViewModel.matchedUserLocation.value.longitude
-    )
-    val distance = calculateDistanceBetweenPoints(
-        startLatitude = compassViewModel.currentUserLocation.value.latitude,
-        startLongitude = compassViewModel.currentUserLocation.value.longitude,
-        endLatitude = compassViewModel.matchedUserLocation.value.latitude,
-        endLongitude = compassViewModel.matchedUserLocation.value.longitude
-    )
-
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -202,11 +189,11 @@ fun CompassScreenBodyContent(
         )
         CompassScreenMeasurementText(
             measurementText = R.string.compass_screen_bearing_message,
-            measurement = bearing
+            measurement = compassViewModel.bearing.value
         )
         CompassScreenMeasurementText(
             measurementText = R.string.compass_screen_distance_message,
-            measurement = distance
+            measurement = compassViewModel.distance.value
         )
         if (compassViewModel.isMeetingWithMatch.value) {
             CompassScreenCancelButton(
@@ -240,12 +227,7 @@ fun CompassScreenCompassVisual(
             modifier = Modifier
                 // Image rotation is clockwise
                 .rotate(
-                    degrees = calculateBearingBetweenPoints(
-                        startLatitude = compassViewModel.currentUserLocation.value.latitude,
-                        startLongitude = compassViewModel.currentUserLocation.value.longitude,
-                        endLatitude = compassViewModel.matchedUserLocation.value.latitude,
-                        endLongitude = compassViewModel.matchedUserLocation.value.longitude
-                    ).toFloat()
+                    degrees = compassViewModel.bearing.value.toFloat()
                 )
         )
     }
@@ -269,57 +251,6 @@ fun CompassScreenMeasurementText(
             text = stringResource(id = measurementText, measurement)
         )
     }
-}
-
-/**
- * Calculates the bearing angle, in degrees, between two points
- * (Bearing angle should be 0 degrees in the +y direction and increase clockwise)
- */
-private fun calculateBearingBetweenPoints(
-    startLatitude: Double,
-    startLongitude: Double,
-    endLatitude: Double,
-    endLongitude: Double
-): Double {
-    val deltaLatitude = endLatitude - startLatitude
-    val deltaLongitude = endLongitude - startLongitude
-    // The user is at the same location as their match
-    if (deltaLatitude == 0.0 && deltaLongitude == 0.0) {
-        return 0.0
-    }
-    var theta = atan2(deltaLatitude, deltaLongitude)
-    // Convert the angle to degrees
-    theta = Math.toDegrees(theta)
-    // Subtract 90 to make 0 degrees point north instead of east
-    theta -= 90
-    // Make the theta non-negative
-    if (theta < 0) {
-        theta += 360
-    }
-    // Reverse the direction the bearing increases, from counter-clockwise to clockwise
-    theta = 360 - theta
-    // Convert 360 degrees to 0
-    // Theta should never be above 360, but >= check is used anyway
-    if (theta >= 360) {
-        theta -= 360
-    }
-    return theta
-}
-
-/**
- * Calculates the distance, in km, between two points
- */
-private fun calculateDistanceBetweenPoints(
-    startLatitude: Double,
-    startLongitude: Double,
-    endLatitude: Double,
-    endLongitude: Double
-): Double {
-    // Using the distance formula
-    // Make sure to take into account the actual distance between points
-    val deltaLatitude = (endLatitude - startLatitude) * KM_PER_ONE_LATITUDE_DIFF
-    val deltaLongitude = (endLongitude - startLongitude) * KM_PER_ONE_LONGITUDE_DIFF
-    return sqrt(deltaLatitude.pow(2) + deltaLongitude.pow(2))
 }
 
 // TODO Need to make sure this cancels the matching process for both users
@@ -478,24 +409,12 @@ fun TempCompassScreenLogMessages(
                 Log.i(
                     "tempTag",
                     "Mutable location state bearing = " +
-                            "${calculateBearingBetweenPoints(
-                                compassViewModel.currentUserLocation.value.latitude,
-                                compassViewModel.currentUserLocation.value.longitude,
-                                compassViewModel.matchedUserLocation.value.latitude,
-                                compassViewModel.matchedUserLocation.value.longitude
-                            )}"
+                            "${compassViewModel.bearing.value}"
                 )
                 Log.i(
                     "tempTag",
                     "Mutable location state distance = " +
-                            "${
-                                calculateDistanceBetweenPoints(
-                                compassViewModel.currentUserLocation.value.latitude,
-                                compassViewModel.currentUserLocation.value.longitude,
-                                compassViewModel.matchedUserLocation.value.latitude,
-                                compassViewModel.matchedUserLocation.value.longitude
-                            )
-                            }"
+                            "${compassViewModel.distance.value}"
                 )
             },
             modifier = Modifier
