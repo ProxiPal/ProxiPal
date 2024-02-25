@@ -37,6 +37,7 @@ import kotlinx.coroutines.withContext
 /*
 Contributions:
 - Kevin Kubota (entire file)
+- Marco Pacini (location related tasks)
  */
 
 
@@ -68,6 +69,10 @@ class UserProfileViewModel constructor(
 
     private val _isEditingUserProfile: MutableState<Boolean> = mutableStateOf(false)
 
+    // for location, added by Marco Pacini
+    private val _userProfileLatitude :MutableState<Double> = mutableStateOf(0.0)
+    private val _userProfileLongitude :MutableState<Double> = mutableStateOf(0.0)
+
 
     /*
     ===== Properties =====
@@ -93,6 +98,13 @@ class UserProfileViewModel constructor(
 
     val addUserProfileEvent: Flow<AddUserProfileEvent>
         get() = _addUserProfileEvent
+
+    // For location, added by Marco Pacini
+    val userProfileLatitude: State<Double>
+        get() = _userProfileLatitude
+
+    val userProfileLongitude: State<Double>
+        get() = _userProfileLongitude
 
 
     init {
@@ -171,6 +183,8 @@ class UserProfileViewModel constructor(
                                     _userProfileFirstName.value = event.list[0].firstName
                                     _userProfileLastName.value = event.list[0].lastName
                                     _userProfileBiography.value = event.list[0].biography
+                                    _userProfileLatitude.value = event.list[0].location?.latitude!!
+                                    _userProfileLatitude.value = event.list[0].location?.longitude!!
                                 }
                                 else -> {
                                     Log.i(
@@ -182,6 +196,8 @@ class UserProfileViewModel constructor(
                                     _userProfileFirstName.value = event.list[0].firstName
                                     _userProfileLastName.value = event.list[0].lastName
                                     _userProfileBiography.value = event.list[0].biography
+                                    _userProfileLatitude.value = event.list[0].location?.latitude!!
+                                    _userProfileLatitude.value = event.list[0].location?.longitude!!
                                 }
                             }
                         }
@@ -268,6 +284,21 @@ class UserProfileViewModel constructor(
     }
 
     /**
+     * Updates the user profile's location
+     */
+    fun setUserProfileLocation(latitude: Double, longitude: Double){
+        _userProfileLatitude.value = latitude
+        _userProfileLongitude.value = longitude
+
+        viewModelScope.launch {
+            repository.updateUserProfileLocation(
+                latitude = userProfileLatitude.value,
+                longitude = userProfileLongitude.value
+            )
+        }
+    }
+
+    /**
      * Returns how many more characters are allowed before the corresponding character limit is reached
      */
     fun getRemainingCharacterAmountFirstName(): Int{
@@ -325,6 +356,8 @@ class UserProfileViewModel constructor(
             setUserProfile()
         }
     }
+
+
 
     /**
      * Discards any unsaved changes made to the user profile

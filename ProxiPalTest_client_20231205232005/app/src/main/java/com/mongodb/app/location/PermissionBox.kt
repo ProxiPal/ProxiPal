@@ -33,6 +33,7 @@ import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
+// Contribution: Marco Pacini
 /**
  * The PermissionBox uses a [Box] to show a simple permission request UI when the provided [permission]
  * is revoked or the provided [onGranted] content if the permission is granted.

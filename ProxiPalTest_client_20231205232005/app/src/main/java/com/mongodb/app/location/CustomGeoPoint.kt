@@ -4,8 +4,12 @@ import io.realm.kotlin.types.EmbeddedRealmObject
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.annotations.Ignore
 
-// Custom data class that conforms to the GeoJSON spec
-// Used to store latitude and longitude for a user
+// Contribution: Marco Pacini
+/**
+ * Custom data class that conforms to the GeoJSON spec
+ * Used to store latitude and longitude for a user
+ * Based on https://www.mongodb.com/docs/realm/sdk/kotlin/realm-database/schemas/geospatials/#std-label-kotlin-geospatial
+ */
 class CustomGeoPoint : EmbeddedRealmObject {
     constructor(latitude: Double, longitude: Double) {
         coordinates.apply {
@@ -22,6 +26,9 @@ class CustomGeoPoint : EmbeddedRealmObject {
     // Name, type, and value required by Realm
     private var type: String = "Point"
 
+    // Keep in mind, the latitude is the second element of the coordinates list and longitude is the first,
+    // even though it is passed to the constructor in a different order
+    // in order to conform to the GeoJSON spec
     @Ignore
     var latitude: Double
         get() = coordinates[1]

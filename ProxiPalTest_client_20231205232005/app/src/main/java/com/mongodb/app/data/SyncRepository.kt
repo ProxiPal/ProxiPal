@@ -29,6 +29,7 @@ import kotlin.time.Duration.Companion.seconds
 /*
 Contributions:
 - Kevin Kubota (added functions relating to user profiles, see below)
+- Marco Pacini (location related tasks only)
  */
 
 
@@ -114,6 +115,11 @@ interface SyncRepository {
      * Updates a possible existing user profile for the current user in the database using the specified parameters
      */
     suspend fun updateUserProfile(firstName: String, lastName: String, biography: String)
+
+    /**
+     * Updates a possible existing user profile's location for the current user in the database using the specified latitude and longitude
+     */
+    suspend fun updateUserProfileLocation(latitude: Double, longitude: Double)
 
     /**
      * Updates the Sync subscription based on the specified [SubscriptionType].
@@ -300,6 +306,9 @@ class RealmSyncRepository(
             this.firstName = firstName
             this.lastName = lastName
             this.biography = biography
+
+            // Added by Marco Pacini, to make sure there is an initial location
+            // it will be updated by the connect screen
             this.location = CustomGeoPoint(0.0,0.0)
         }
         realm.write {
@@ -369,6 +378,68 @@ class RealmSyncRepository(
         }
     }
 
+    // Added by Marco Pacini, for updating location
+    override suspend fun updateUserProfileLocation(latitude: Double, longitude: Double) {
+        // Queries inside write transaction are live objects
+        // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
+        val frozenUserProfile = getQueryUserProfiles(
+            realm = realm,
+            subscriptionType = getActiveSubscriptionType(realm)
+        ).find()
+        // In case the query result list is empty, check first before calling ".first()"
+        val frozenFirstUserProfile = if (frozenUserProfile.size > 0) {
+            frozenUserProfile.first()
+        } else {
+            null
+        }
+        if (frozenFirstUserProfile == null) {
+            Log.i(
+                TAG(),
+                "RealmSyncRepository: Creating a new user profile with the given parameters for " +
+                        "current user ID = \"${currentUser.id}\"...; " +
+                        "Skipping rest of user profile update function..."
+            )
+            // Create a new user profile before applying the updated changes
+            addUserProfile(
+                firstName = "empty",
+                lastName = "empty",
+                biography = "empty"
+            )
+            return
+        }
+        when (getQueryUserProfiles(
+            realm = realm,
+            subscriptionType = getActiveSubscriptionType(realm)
+        ).find().size) {
+            // Create a new profile for the user if they do not have one already in the database
+            // This may not be necessary as users will get their initial profiles added to the database
+            // ... once they register an account and deleting their profile will only occur when
+            // ... deleting their account (unsure if account deletion will be implemented)
+            0 -> {
+                Log.i(
+                    TAG(),
+                    "RealmSyncRepository: No user profiles found with owner ID \"${currentUser.id}\""
+                )
+            }
+
+            1 -> Log.i(
+                TAG(),
+                "RealmSyncRepository: Exactly 1 user profile found with owner ID \"${currentUser.id}\""
+            )
+
+            else -> Log.i(
+                TAG(),
+                "RealmSyncRepository: Multiple user profiles found with owner ID \"${currentUser.id}\""
+            )
+        }
+        realm.write {
+            findLatest(frozenFirstUserProfile)?.let { liveUserProfile ->
+                liveUserProfile.location?.latitude = latitude
+                liveUserProfile.location?.longitude = longitude
+            }
+        }
+    }
+
     override suspend fun updateSubscriptionsUserProfiles(subscriptionType: SubscriptionType) {
         realm.subscriptions.update {
             removeAll()
@@ -424,6 +495,8 @@ class MockRepository : SyncRepository {
     override suspend fun addUserProfile(firstName: String, lastName: String, biography: String) =
         Unit
     override suspend fun updateUserProfile(firstName: String, lastName: String, biography: String) =
+        Unit
+    override suspend fun updateUserProfileLocation(latitude: Double, longitude: Double) =
         Unit
     override suspend fun updateSubscriptionsUserProfiles(subscriptionType: SubscriptionType) = Unit
     override suspend fun deleteUserProfile(userProfile: UserProfile) = Unit

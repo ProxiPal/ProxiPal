@@ -45,6 +45,7 @@ import com.mongodb.app.location.LocationUpdatesScreen
 import com.mongodb.app.navigation.Routes
 import com.mongodb.app.presentation.tasks.ToolbarEvent
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
+import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.components.ProxiPalBottomAppBar
 import com.mongodb.app.ui.components.ProxipalTopAppBarWithBackButton
 import com.mongodb.app.ui.theme.MyApplicationTheme
@@ -54,15 +55,19 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-// Connect with others screen which will have a switch to enable or disable connection
-// Will display an updating list of nearby users
+// Contribution: Marco Pacini
+/**
+ * Connect with others screen which will have a switch to enable or disable connection
+ * Will display a dynamically updating list of nearby users
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ConnectWithOthersScreen (
     toolbarViewModel: ToolbarViewModel,
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    userProfileViewModel: UserProfileViewModel
 ){
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -74,7 +79,7 @@ fun ConnectWithOthersScreen (
         }
 
     ) {
-        LocationUpdatesScreen()
+        LocationUpdatesScreen(userProfileViewModel = userProfileViewModel)
     }
 }
 

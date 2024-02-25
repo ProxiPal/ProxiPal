@@ -37,8 +37,11 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.mongodb.app.ui.components.ProxipalTopAppBarWithBackButton
 
-// Displays a screen that has a button to go to locations settings and also displays current location permissions
-// Based on example from https://github.com/android/platform-samples/tree/main/samples/location
+// Contribution: Marco Pacini
+/**
+ * Displays a screen that has a button to go to locations settings and also displays current location permissions
+ * Based on example from https://github.com/android/platform-samples/tree/main/samples/location
+ */
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable

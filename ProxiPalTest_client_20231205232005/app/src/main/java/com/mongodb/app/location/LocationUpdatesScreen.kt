@@ -27,14 +27,19 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import java.util.concurrent.TimeUnit
 
-// This screen will display a clickable switch that enables location updates for the user
-// when the switch is checked, and then displays a dynamically updating list of nearby users
-// Based on example from https://github.com/android/platform-samples/tree/main/samples/location
+// Contribution: Marco Pacini
+/**
+ * This screen displays a clickable switch that enables location updates for the user
+ * when the switch is checked, displays a dynamically updating list of nearby users
+ * Location gathering based on example from https://github.com/android/platform-samples/tree/main/samples/location
+ */
+
 @SuppressLint("MissingPermission")
 @Composable
-fun LocationUpdatesScreen() {
+fun LocationUpdatesScreen(userProfileViewModel: UserProfileViewModel) {
     val permissions = listOf(
         Manifest.permission.ACCESS_COARSE_LOCATION,
         Manifest.permission.ACCESS_FINE_LOCATION,
@@ -46,6 +51,7 @@ fun LocationUpdatesScreen() {
     ) {
         LocationUpdatesContent(
             usePreciseLocation = it.contains(Manifest.permission.ACCESS_FINE_LOCATION),
+            userProfileViewModel = userProfileViewModel
         )
     }
 }
@@ -54,7 +60,7 @@ fun LocationUpdatesScreen() {
     anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
 )
 @Composable
-fun LocationUpdatesContent(usePreciseLocation: Boolean) {
+fun LocationUpdatesContent(usePreciseLocation: Boolean, userProfileViewModel: UserProfileViewModel) {
     // The location request that defines the location updates
     var locationRequest by remember {
         mutableStateOf<LocationRequest?>(null)
@@ -69,11 +75,14 @@ fun LocationUpdatesContent(usePreciseLocation: Boolean) {
         LocationUpdatesEffect(locationRequest!!) { result ->
             // For each result update the text
             for (currentLocation in result.locations) {
-                locationUpdates = "${System.currentTimeMillis()}:\n" +
-                        "- @lat: ${currentLocation.latitude}\n" +
-                        "- @lng: ${currentLocation.longitude}\n" +
-                        "- Accuracy: ${currentLocation.accuracy}\n\n" +
-                        locationUpdates
+                locationUpdates = "System time: ${System.currentTimeMillis()}:\n" +
+                        "Latitude: ${currentLocation.latitude}\n" +
+                        "Longitude: ${currentLocation.longitude}\n" +
+                        "Accuracy: ${currentLocation.accuracy}\n\n" //+
+                        //locationUpdates
+
+                // Update the user's the latitude and longitude
+                userProfileViewModel.setUserProfileLocation(currentLocation.latitude, currentLocation.longitude)
             }
         }
     }

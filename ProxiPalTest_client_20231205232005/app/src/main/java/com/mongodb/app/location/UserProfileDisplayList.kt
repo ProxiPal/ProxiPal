@@ -19,8 +19,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mongodb.app.domain.UserProfile
 
-// This will be for displaying a dynamically updating list of user profiles
-// as they are queried from a specified radius around the current device
+// Contribution: Marco Pacini
+/**
+ * Composable function for displaying a dynamically updating list of user profiles
+ * as they are queried from a specified radius around the current device
+ */
 @Composable
 fun UserProfileList(userProfiles: MutableList<UserProfile>) {
     LazyColumn(
