@@ -53,6 +53,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     implementation("io.realm.kotlin:library-sync:1.13.0") // DON'T FORGET TO UPDATE VERSION IN PROJECT GRADLE
+    implementation("io.realm.kotlin:gradle-plugin:1.13.0")
 
     implementation ("androidx.core:core-ktx:1.12.0")
     implementation ("androidx.compose.ui:ui:1.6.1")
