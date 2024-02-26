@@ -44,6 +44,8 @@ import com.mongodb.app.TAG
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.presentation.compassscreen.CompassViewModel
+import com.mongodb.app.ui.components.SingleButtonRow
+import com.mongodb.app.ui.components.SingleTextRow
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
 import kotlinx.coroutines.launch
@@ -241,16 +243,24 @@ fun CompassScreenBodyErrorContent(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
+        // The current or matched user canceled the connection
         if (compassViewModel.isMeetingWithMatch.value){
-            // The current or matched user canceled the connection
-            CompassScreenConnectionDroppedMessage()
+            SingleTextRow(
+                textId = R.string.compass_screen_canceled_error_message
+            )
             CompassScreenReturnButton()
         }
+        // Could not establish connection with matched user
+        // Show options to go back or try again
         else{
-            // Could not establish connection with matched user
-            // Show options to go back or try again
-            CompassScreenConnectionUnsuccessfulMessage()
-            CompassScreenRetryButton()
+            SingleTextRow(
+                textId = R.string.compass_screen_connection_error_message
+            )
+            SingleButtonRow(
+                onButtonClick = { /*TODO*/ },
+                textId = R.string.compass_screen_retry_button,
+                modifier = modifier
+            )
             CompassScreenReturnButton()
         }
     }
@@ -309,70 +319,17 @@ fun CompassScreenCancelButton(
     compassViewModel: CompassViewModel,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        modifier = modifier
-            .fillMaxWidth()
-    ) {
-        Button(
-            onClick = {
-                compassViewModel.toggleMeetingWithMatch()
-                Log.i(
-                    "tempTag",
-                    "User has canceled meeting with match"
-                )
-            }
-        ) {
-            Text(
-                text = stringResource(
-                    id = R.string.compass_screen_cancel_message
-                )
+    SingleButtonRow(
+        onButtonClick = {
+            compassViewModel.toggleMeetingWithMatch()
+            Log.i(
+                "tempTag",
+                "User has canceled meeting with match"
             )
-        }
-    }
-}
-
-// region ErrorUI
-/**
- * Displays a message when the connection between a user and their match
- * could not be established
- */
-@Composable
-fun CompassScreenConnectionUnsuccessfulMessage(
-    modifier: Modifier = Modifier
-){
-    Row(
-        horizontalArrangement = Arrangement.Center,
+        },
+        textId = R.string.compass_screen_cancel_message,
         modifier = modifier
-            .fillMaxWidth()
-    ){
-        Text(
-            text = stringResource(id = R.string.compass_screen_connection_error_message)
-        )
-    }
-}
-
-/**
- * Displays the retry button for retrying connecting with a matched user
- */
-@Composable
-fun CompassScreenRetryButton(
-    modifier: Modifier = Modifier
-){
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        modifier = modifier
-            .fillMaxWidth()
-    ){
-        // Retry the connection with match
-        Button(
-            onClick = { /*TODO*/ }
-        ) {
-            Text(
-                text = stringResource(id = R.string.compass_screen_retry_button)
-            )
-        }
-    }
+    )
 }
 
 /**
@@ -382,40 +339,12 @@ fun CompassScreenRetryButton(
 fun CompassScreenReturnButton(
     modifier: Modifier = Modifier
 ){
-    Row(
-        horizontalArrangement = Arrangement.Center,
+    SingleButtonRow(
+        onButtonClick = { /*TODO*/ },
+        textId = R.string.compass_screen_return_button,
         modifier = modifier
-            .fillMaxWidth()
-    ){
-        // Return to the connect with others screen
-        Button(
-            onClick = { /*TODO*/ }
-        ) {
-            Text(
-                text = stringResource(id = R.string.compass_screen_return_button)
-            )
-        }
-    }
+    )
 }
-
-/**
- * Displays a message when a matching user cancels the connection
- */
-@Composable
-fun CompassScreenConnectionDroppedMessage(
-    modifier: Modifier = Modifier
-){
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        modifier = modifier
-            .fillMaxWidth()
-    ){
-        Text(
-            text = stringResource(id = R.string.compass_screen_canceled_error_message)
-        )
-    }
-}
-// endregion ErrorUI
 
 // region TemporaryUI
 /**
