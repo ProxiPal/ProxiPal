@@ -36,5 +36,9 @@
     <string name="compass_screen_distance_message">Distancia desde el partido (en km): %.3f</string>
     <string name="compass_screen_cancel_message">Cancelar partido</string>
     <string name="compass_screen_top_bar_header">¡Coincidencia encontrada!</string>
+    <string name="compass_screen_connection_error_message">No se pudo conectar para que coincida</string>
+    <string name="compass_screen_canceled_error_message">Se ha interrumpido la conexión</string>
+    <string name="compass_screen_return_button">Volver</string>
+    <string name="compass_screen_retry_button">Reintentar</string>
     <string name="new_friend_request_notification_service_content_body">¡Tienes una nueva solicitud de amistad!</string>
 </resources>

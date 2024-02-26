@@ -44,6 +44,10 @@
     <string name="compass_screen_distance_message">Distance from match (in km): %.3f</string>
     <string name="compass_screen_cancel_message">Cancel match</string>
     <string name="compass_screen_top_bar_header">Match found!</string>
+    <string name="compass_screen_connection_error_message">Could not connect to match</string>
+    <string name="compass_screen_canceled_error_message">The connection was dropped</string>
+    <string name="compass_screen_return_button">Return</string>
+    <string name="compass_screen_retry_button">Retry</string>
 <!--    End compass screen strings-->
 
     <!-- NewFriendRequestNotificationService strings

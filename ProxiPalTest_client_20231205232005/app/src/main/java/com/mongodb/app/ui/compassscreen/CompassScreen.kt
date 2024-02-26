@@ -4,7 +4,6 @@ package com.mongodb.app.ui.compassscreen
 
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -17,7 +16,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,7 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -39,22 +39,35 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mongodb.app.R
 import com.mongodb.app.TAG
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
-import com.mongodb.app.data.compassscreen.KM_PER_ONE_LATITUDE_DIFF
-import com.mongodb.app.data.compassscreen.KM_PER_ONE_LONGITUDE_DIFF
 import com.mongodb.app.presentation.compassscreen.CompassViewModel
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
 import kotlinx.coroutines.launch
-import kotlin.math.atan2
-import kotlin.math.pow
-import kotlin.math.sqrt
 
-
+/*
+TODO Current plan for order of events (See CompassConnectionType.kt for more)
+(1) Use case #8: Connect with others functionality happens first
+(2) 2 matched users are brought to this screen
+(3) Send a request to meet with your match
+(4) If your match is offline or does not respond to your request within some
+... time limit, show an error saying this profile could not be connected to.
+... Show some buttons to either retry or cancel the connection
+(Ex: Person A tries to connect to person B, but person B is offline. Person B
+... could get a notification saying person A tried to connect with them. Let's
+... say later person A is now offline but person B is online. Person B would see
+... the notification from person A and could try to re-connect with them. Since
+... person A is offline, person B would send a notification to person A. This
+... process could loop until eventually persons A and B are online at the same
+... time.)
+(5) If you could connect to your match, show the compass screen for both users
+(6) If a user cancels the meeting, stop showing the compass screen for both users
+(7) If the distance between 2 matches is close enough, automatically cancel the
+... connection
+ */
 class CompassScreen : ComponentActivity(){
     /*
     ===== Variables =====
@@ -133,11 +146,21 @@ fun CompassScreenLayout(
         modifier = modifier
         // Pad the body of content so it does not get cut off by the scaffold top bar
     ) { innerPadding ->
-        CompassScreenBodyContent(
-            compassViewModel = compassViewModel,
-            modifier = Modifier
-                .padding(innerPadding)
-        )
+        if (compassViewModel.isMeetingWithMatch.value){
+            CompassScreenBodyContent(
+                compassViewModel = compassViewModel,
+                modifier = Modifier
+                    .padding(innerPadding)
+            )
+        }
+        // If canceling the meeting with a matched user
+        else{
+            CompassScreenBodyErrorContent(
+                compassViewModel = compassViewModel,
+                modifier = Modifier
+                    .padding(innerPadding)
+            )
+        }
     }
 }
 
@@ -183,6 +206,7 @@ fun CompassScreenBodyContent(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
     ) {
         CompassScreenCompassVisual(
             compassViewModel = compassViewModel
@@ -195,17 +219,40 @@ fun CompassScreenBodyContent(
             measurementText = R.string.compass_screen_distance_message,
             measurement = compassViewModel.distance.value
         )
-        if (compassViewModel.isMeetingWithMatch.value) {
-            CompassScreenCancelButton(
-                compassViewModel = compassViewModel
-            )
-        }
+        CompassScreenCancelButton(
+            compassViewModel = compassViewModel
+        )
         TempCompassScreenLocationUpdating(
             compassViewModel = compassViewModel
         )
         TempCompassScreenLogMessages(
             compassViewModel = compassViewModel
         )
+    }
+}
+
+@Composable
+fun CompassScreenBodyErrorContent(
+    compassViewModel: CompassViewModel,
+    modifier: Modifier = Modifier
+){
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
+        if (compassViewModel.isMeetingWithMatch.value){
+            // The current or matched user canceled the connection
+            CompassScreenConnectionDroppedMessage()
+            CompassScreenReturnButton()
+        }
+        else{
+            // Could not establish connection with matched user
+            // Show options to go back or try again
+            CompassScreenConnectionUnsuccessfulMessage()
+            CompassScreenRetryButton()
+            CompassScreenReturnButton()
+        }
     }
 }
 
@@ -284,6 +331,91 @@ fun CompassScreenCancelButton(
         }
     }
 }
+
+// region ErrorUI
+/**
+ * Displays a message when the connection between a user and their match
+ * could not be established
+ */
+@Composable
+fun CompassScreenConnectionUnsuccessfulMessage(
+    modifier: Modifier = Modifier
+){
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = modifier
+            .fillMaxWidth()
+    ){
+        Text(
+            text = stringResource(id = R.string.compass_screen_connection_error_message)
+        )
+    }
+}
+
+/**
+ * Displays the retry button for retrying connecting with a matched user
+ */
+@Composable
+fun CompassScreenRetryButton(
+    modifier: Modifier = Modifier
+){
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = modifier
+            .fillMaxWidth()
+    ){
+        // Retry the connection with match
+        Button(
+            onClick = { /*TODO*/ }
+        ) {
+            Text(
+                text = stringResource(id = R.string.compass_screen_retry_button)
+            )
+        }
+    }
+}
+
+/**
+ * Displays the back button for returning to the connect with others screen
+ */
+@Composable
+fun CompassScreenReturnButton(
+    modifier: Modifier = Modifier
+){
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = modifier
+            .fillMaxWidth()
+    ){
+        // Return to the connect with others screen
+        Button(
+            onClick = { /*TODO*/ }
+        ) {
+            Text(
+                text = stringResource(id = R.string.compass_screen_return_button)
+            )
+        }
+    }
+}
+
+/**
+ * Displays a message when a matching user cancels the connection
+ */
+@Composable
+fun CompassScreenConnectionDroppedMessage(
+    modifier: Modifier = Modifier
+){
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = modifier
+            .fillMaxWidth()
+    ){
+        Text(
+            text = stringResource(id = R.string.compass_screen_canceled_error_message)
+        )
+    }
+}
+// endregion ErrorUI
 
 // region TemporaryUI
 /**
@@ -433,6 +565,19 @@ fun CompassScreenLayoutPreview() {
     MyApplicationTheme {
         val repository = MockRepository()
         CompassScreenLayout(
+            compassViewModel = CompassViewModel(
+                repository = repository
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CompassScreenConnectionErrorPreview(){
+    MyApplicationTheme {
+        val repository = MockRepository()
+        CompassScreenBodyErrorContent(
             compassViewModel = CompassViewModel(
                 repository = repository
             )

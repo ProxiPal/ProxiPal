@@ -12,12 +12,6 @@ import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.compassscreen.KM_PER_ONE_LATITUDE_DIFF
 import com.mongodb.app.data.compassscreen.KM_PER_ONE_LONGITUDE_DIFF
 import com.mongodb.app.data.compassscreen.UserLocation
-import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
-import com.mongodb.app.ui.compassscreen.CompassUiState
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlin.math.atan2
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -184,9 +178,16 @@ class CompassViewModel constructor(
     }
 
     /**
+     * Toggles whether the current user is meeting up with their matched user
+     */
+    fun toggleMeetingWithMatch(){
+        _isMeetingWithMatch.value = !_isMeetingWithMatch.value
+    }
+
+    /**
      * Updates both the bearing and distance measurements
      */
-    fun updateMeasurements(){
+    private fun updateMeasurements(){
         _bearing.value = calculateBearingBetweenPoints(
             startLatitude = currentUserLocation.value.latitude,
             startLongitude = currentUserLocation.value.longitude,
@@ -199,13 +200,6 @@ class CompassViewModel constructor(
             endLatitude = matchedUserLocation.value.latitude,
             endLongitude = matchedUserLocation.value.longitude
         )
-    }
-
-    /**
-     * Toggles whether the current user is meeting up with their matched user
-     */
-    fun toggleMeetingWithMatch(){
-        _isMeetingWithMatch.value = !_isMeetingWithMatch.value
     }
 
     /**
