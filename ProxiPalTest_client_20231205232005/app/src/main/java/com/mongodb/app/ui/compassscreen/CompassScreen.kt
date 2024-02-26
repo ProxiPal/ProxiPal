@@ -258,8 +258,7 @@ fun CompassScreenBodyErrorContent(
             )
             SingleButtonRow(
                 onButtonClick = { /*TODO*/ },
-                textId = R.string.compass_screen_retry_button,
-                modifier = modifier
+                textId = R.string.compass_screen_retry_button
             )
             CompassScreenReturnButton()
         }
