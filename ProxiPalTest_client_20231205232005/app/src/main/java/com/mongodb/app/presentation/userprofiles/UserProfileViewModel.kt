@@ -37,7 +37,7 @@ import kotlinx.coroutines.withContext
 /*
 Contributions:
 - Kevin Kubota (entire file)
-- Marco Pacini (location related tasks)
+- Marco Pacini (location related tasks only)
  */
 
 

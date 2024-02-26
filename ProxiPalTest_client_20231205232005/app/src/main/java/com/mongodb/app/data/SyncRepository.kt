@@ -117,11 +117,6 @@ interface SyncRepository {
     suspend fun updateUserProfile(firstName: String, lastName: String, biography: String)
 
     /**
-     * Updates a possible existing user profile's location for the current user in the database using the specified latitude and longitude
-     */
-    suspend fun updateUserProfileLocation(latitude: Double, longitude: Double)
-
-    /**
      * Updates the Sync subscription based on the specified [SubscriptionType].
      */
     suspend fun updateSubscriptionsUserProfiles(subscriptionType: SubscriptionType)
@@ -136,6 +131,15 @@ interface SyncRepository {
      */
     fun isUserProfileMine(userProfile: UserProfile): Boolean
     // endregion User profiles
+
+    /*
+    These functions currently handle user location related tasks
+     */
+    // region Location
+    /**
+     * Updates a possible existing user profile's location for the current user in the database using the specified latitude and longitude
+     */
+    suspend fun updateUserProfileLocation(latitude: Double, longitude: Double)
 }
 
 
@@ -378,7 +382,43 @@ class RealmSyncRepository(
         }
     }
 
-    // Added by Marco Pacini, for updating location
+    override suspend fun updateSubscriptionsUserProfiles(subscriptionType: SubscriptionType) {
+        realm.subscriptions.update {
+            removeAll()
+            val query = when (subscriptionType) {
+                SubscriptionType.MINE -> getQueryUserProfiles(realm, SubscriptionType.MINE)
+                SubscriptionType.ALL -> getQueryUserProfiles(realm, SubscriptionType.ALL)
+            }
+            add(query, subscriptionType.name)
+        }
+    }
+
+    override suspend fun deleteUserProfile(userProfile: UserProfile) {
+        realm.write {
+            delete(findLatest(userProfile)!!)
+        }
+        realm.subscriptions.waitForSynchronization(10.seconds)
+    }
+
+    override fun isUserProfileMine(userProfile: UserProfile): Boolean =
+        userProfile.ownerId == currentUser.id
+
+    private fun getQueryUserProfiles(
+        realm: Realm,
+        subscriptionType: SubscriptionType
+    ): RealmQuery<UserProfile> =
+        when (subscriptionType) {
+            // Make sure the fields referenced in the query exactly match their name in the database
+            SubscriptionType.MINE -> realm.query("ownerId == $0", currentUser.id)
+            SubscriptionType.ALL -> realm.query()
+        }
+    // endregion User profiles
+
+    // Contribution: Marco Pacini
+    /*
+    These functions primarily handle user location related tasks
+     */
+    // region Location
     override suspend fun updateUserProfileLocation(latitude: Double, longitude: Double) {
         // Queries inside write transaction are live objects
         // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
@@ -439,38 +479,6 @@ class RealmSyncRepository(
             }
         }
     }
-
-    override suspend fun updateSubscriptionsUserProfiles(subscriptionType: SubscriptionType) {
-        realm.subscriptions.update {
-            removeAll()
-            val query = when (subscriptionType) {
-                SubscriptionType.MINE -> getQueryUserProfiles(realm, SubscriptionType.MINE)
-                SubscriptionType.ALL -> getQueryUserProfiles(realm, SubscriptionType.ALL)
-            }
-            add(query, subscriptionType.name)
-        }
-    }
-
-    override suspend fun deleteUserProfile(userProfile: UserProfile) {
-        realm.write {
-            delete(findLatest(userProfile)!!)
-        }
-        realm.subscriptions.waitForSynchronization(10.seconds)
-    }
-
-    override fun isUserProfileMine(userProfile: UserProfile): Boolean =
-        userProfile.ownerId == currentUser.id
-
-    private fun getQueryUserProfiles(
-        realm: Realm,
-        subscriptionType: SubscriptionType
-    ): RealmQuery<UserProfile> =
-        when (subscriptionType) {
-            // Make sure the fields referenced in the query exactly match their name in the database
-            SubscriptionType.MINE -> realm.query("ownerId == $0", currentUser.id)
-            SubscriptionType.ALL -> realm.query()
-        }
-    // endregion User profiles
 }
 
 /**
@@ -496,12 +504,13 @@ class MockRepository : SyncRepository {
         Unit
     override suspend fun updateUserProfile(firstName: String, lastName: String, biography: String) =
         Unit
-    override suspend fun updateUserProfileLocation(latitude: Double, longitude: Double) =
-        Unit
     override suspend fun updateSubscriptionsUserProfiles(subscriptionType: SubscriptionType) = Unit
     override suspend fun deleteUserProfile(userProfile: UserProfile) = Unit
     override fun isUserProfileMine(userProfile: UserProfile): Boolean =
         userProfile.ownerId == MOCK_OWNER_ID_MINE
+
+    override suspend fun updateUserProfileLocation(latitude: Double, longitude: Double) =
+        Unit
 
 
     companion object {

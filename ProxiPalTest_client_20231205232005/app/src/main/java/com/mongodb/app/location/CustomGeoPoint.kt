@@ -26,7 +26,7 @@ class CustomGeoPoint : EmbeddedRealmObject {
     // Name, type, and value required by Realm
     private var type: String = "Point"
 
-    // Keep in mind, the latitude is the second element of the coordinates list and longitude is the first,
+    // Latitude is added as the second element of the coordinates list and longitude is the first,
     // even though it is passed to the constructor in a different order
     // in order to conform to the GeoJSON spec
     @Ignore
