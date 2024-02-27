@@ -2,11 +2,15 @@
 
 package com.mongodb.app.ui.compassscreen
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.CallSuper
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +43,8 @@ import com.mongodb.app.R
 import com.mongodb.app.TAG
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
+import com.mongodb.app.data.compassscreen.UserLocation
+import com.mongodb.app.presentation.compassscreen.CompassCommunication
 import com.mongodb.app.presentation.compassscreen.CompassViewModel
 import com.mongodb.app.ui.components.SingleButtonRow
 import com.mongodb.app.ui.components.SingleTextRow
@@ -90,6 +96,16 @@ class CompassScreen : ComponentActivity(){
         CompassViewModel.factory(repository, this)
     }
 
+    private val compassCommunication: CompassCommunication = CompassCommunication(
+        compassViewModel = compassViewModel,
+        packageName = packageName
+    )
+
+    /**
+     * Request code for verifying call to [requestPermissions]
+     */
+    private val REQUEST_CODE_REQUIRED_PERMISSIONS = 1
+
 
     /*
     ===== Functions =====
@@ -108,6 +124,9 @@ class CompassScreen : ComponentActivity(){
             newRepository = repository
         )
 
+        // Need to create connections client in compass screen communication class
+        compassCommunication.setConnectionsClient(this)
+
         setContent{
             MyApplicationTheme {
                 CompassScreenLayout(
@@ -115,6 +134,48 @@ class CompassScreen : ComponentActivity(){
                 )
             }
         }
+    }
+
+    @CallSuper
+    override fun onStart() {
+        super.onStart()
+        // Check that the required permissions are allowed by the user
+        // Ask user to grant permissions if they are not allowed already
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+            requestPermissions(
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                REQUEST_CODE_REQUIRED_PERMISSIONS
+            )
+        }
+    }
+
+    @Deprecated("Deprecated in Java")
+    @CallSuper
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        // If user does not grant any required app permissions, show error that app cannot function without them
+        val errMsg = "Cannot start without required permissions"
+        if (requestCode == REQUEST_CODE_REQUIRED_PERMISSIONS) {
+            grantResults.forEach {
+                if (it == PackageManager.PERMISSION_DENIED) {
+                    Toast.makeText(this, errMsg, Toast.LENGTH_LONG).show()
+                    finish()
+                    return
+                }
+            }
+            recreate()
+        }
+    }
+
+    @CallSuper
+    override fun onStop() {
+        // Release all assets when the Nearby API is no longer necessary
+        compassCommunication.releaseAssets()
+        super.onStop()
     }
 
     override fun onDestroy() {

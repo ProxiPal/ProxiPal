@@ -168,7 +168,7 @@ class CompassViewModel constructor(
     /**
      * Updates the matched user's latitude
      */
-    private fun updateMatchedUserLatitude(newLatitude: Double) {
+    fun updateMatchedUserLatitude(newLatitude: Double) {
         if (isValidLatitude(newLatitude)){
             _matchedUserLocation.value.latitude = newLatitude
             updateMeasurements()
@@ -178,7 +178,7 @@ class CompassViewModel constructor(
     /**
      * Updates the matched user's longitude
      */
-    private fun updateMatchedUserLongitude(newLongitude: Double) {
+    fun updateMatchedUserLongitude(newLongitude: Double) {
         if (isValidLongitude(newLongitude)){
             _matchedUserLocation.value.longitude = newLongitude
             updateMeasurements()
