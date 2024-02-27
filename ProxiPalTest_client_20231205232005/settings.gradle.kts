@@ -6,5 +6,5 @@ pluginManagement {
     }
 }
 
-rootProject.name = "KotlinTemplateApp"
+rootProject.name = "Proxipal"
 include(":app")

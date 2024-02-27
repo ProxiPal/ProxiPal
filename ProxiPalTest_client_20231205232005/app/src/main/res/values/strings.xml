@@ -11,7 +11,7 @@
     <string name="airplane_mode">Airplane Mode</string>
     <string name="show_completed_tasks_only">Show completed tasks only</string>
     <string name="mine">Mine</string>
-    <string name="more">\u22EE</string>
+    <string name="more" translatable="false">\u22EE</string>
     <string name="delete">Delete</string>
     <string name="add_item">Add Item</string>
     <string name="enter_item_name">Enter Item Name:</string>
@@ -25,10 +25,10 @@
     <string name="unable_to_switch">Switching subscriptions does not affect Realm data when Sync is offline</string>
     <string name="permissions_warning">You can only modify or remove tasks that belong to you.</string>
     <!-- Start user profile strings -->
-    <string name="user_profile_test_string">abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789</string>
-    <string name="user_profile_empty_string_replacement">(null)</string>
+    <string name="user_profile_test_string" translatable="false">abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789</string>
+    <string name="user_profile_empty_string_replacement" translatable="false">(null)</string>
     <string name="user_profile_header">User Profile</string>
-    <string name="user_profile_row_header">%s:</string>
+    <string name="user_profile_row_header" translatable="false">%s:</string>
     <string name="user_profile_first_name_header">First name</string>
     <string name="user_profile_last_name_header">Last name</string>
     <string name="user_profile_biography_header">Biography</string>
@@ -38,4 +38,10 @@
     <string name="user_profile_cancel_editing_message">Discard Changes</string>
     <string name="user_profile_permissions_warning">You can only modify or remove a user profile that belongs to you.</string>
     <!-- End user profile strings-->
+
+
+    <!-- NewFriendRequestNotificationService strings
+         Programmer:Brian Poon 2/21/24   -->
+    <string name="new_friend_request_notification_service_content_body">You have a new friend request!</string>
+
 </resources>

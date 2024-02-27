@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ProxiPal</string>
+    <string name="prompt_email">Correo electrónico</string>
+    <string name="prompt_password">Contraseña</string>
+    <string name="create_account">Crear una cuenta</string>
+    <string name="log_in">Acceso</string>
+    <string name="already_have_account">¿Ya tienes una cuenta? Acceso</string>
+    <string name="does_not_have_account">¿No tienes una cuenta? Crear una cuenta</string>
+    <string name="log_out">Cerrar sesión</string>
+    <string name="airplane_mode">Modo avión</string>
+    <string name="show_completed_tasks_only">Mostrar sólo las tareas completadas</string>
+    <string name="mine">Mío</string>
+    <string name="delete">Borrar</string>
+    <string name="add_item">Añadir artículo</string>
+    <string name="enter_item_name">Ingrese el nombre del artículo:</string>
+    <string name="cancel">Cancelar</string>
+    <string name="create">Crear</string>
+    <string name="item_summary">Resumen del artículo</string>
+    <string name="permissions_error">No se le permite eliminar o modificar tareas que no le pertenecen.</string>
+    <string name="show_all_tasks">Mostrar todas las tareas</string>
+    <string name="sync_message">Inicie sesión con la misma cuenta en otro dispositivo o simulador para ver su lista sincronizada en tiempo real.</string>
+    <string name="account_clarification">Inicie sesión o regístrese con una cuenta de usuario de Device Sync. Esto es independiente de su inicio de sesión en Atlas Cloud.</string>
+    <string name="unable_to_switch">Cambiar de suscripción no afecta los datos de Realm cuando Sync está fuera de línea</string>
+    <string name="permissions_warning">Sólo puedes modificar o eliminar tareas que te pertenecen.</string>
+    <string name="user_profile_header">Perfil del usuario</string>
+    <string name="user_profile_first_name_header">Nombre</string>
+    <string name="user_profile_last_name_header">Apellido</string>
+    <string name="user_profile_biography_header">Biografía</string>
+    <string name="user_profile_characters_remaining">%s caracteres restantes</string>
+    <string name="user_profile_start_editing_message">Editar perfil</string>
+    <string name="user_profile_finish_editing_message">Guardar cambios</string>
+    <string name="user_profile_cancel_editing_message">Descartar los cambios</string>
+    <string name="user_profile_permissions_warning">Sólo puedes modificar o eliminar un perfil de usuario que te pertenezca.</string>
+    <string name="new_friend_request_notification_service_content_body">¡Tienes una nueva solicitud de amistad!</string>
+</resources>
