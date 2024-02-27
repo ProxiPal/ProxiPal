@@ -132,6 +132,21 @@ class CompassScreen : ComponentActivity(){
                 REQUEST_CODE_REQUIRED_PERMISSIONS
             )
         }
+        // Ask for permissions before allowing device connections
+        if (checkSelfPermission(Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED
+            || checkSelfPermission(Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED
+            || checkSelfPermission(Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED
+            || checkSelfPermission(Manifest.permission.CHANGE_WIFI_STATE) != PackageManager.PERMISSION_GRANTED){
+            requestPermissions(
+                arrayOf(
+                    Manifest.permission.BLUETOOTH,
+                    Manifest.permission.BLUETOOTH_ADMIN,
+                    Manifest.permission.ACCESS_WIFI_STATE,
+                    Manifest.permission.CHANGE_WIFI_STATE
+                ),
+                REQUEST_CODE_REQUIRED_PERMISSIONS
+            )
+        }
 
         // This screen is entered only when the matched user accepts the connection
         // ... so as soon as this screen is shown, start the connection process
