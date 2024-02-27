@@ -136,10 +136,11 @@ interface SyncRepository {
     fun isUserProfileMine(userProfile: UserProfile): Boolean
     // endregion User profiles
 
+    // Contribution: Marco Pacini
     /*
     These functions currently handle user location related tasks
      */
-    // region Location
+    // region location
     /**
      * Updates a possible existing user profile's location for the current user in the database using the specified latitude and longitude
      */
@@ -149,6 +150,8 @@ interface SyncRepository {
      * Returns a flow with nearby user profiles within a specified radius
      */
     fun getNearbyUserProfileList(userLocation: CustomGeoPoint, radiusInMiles: Double): Flow<ResultsChange<UserProfile>>
+
+    // endregion location
 }
 
 
@@ -427,7 +430,7 @@ class RealmSyncRepository(
     /*
     These functions primarily handle user location related tasks
      */
-    // region Location
+    // region location
     override suspend fun updateUserProfileLocation(latitude: Double, longitude: Double) {
         // Queries inside write transaction are live objects
         // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
@@ -490,7 +493,8 @@ class RealmSyncRepository(
     }
 
     /**
-     * Returns a flow with nearby user profiles within a specified radius
+     * Returns a flow with nearby user profiles within a specified radius, at the time of the query.
+     * Because the query returns frozen objects, this will likely be used consecutively in intervals to get consistently updated locations.
      */
     @OptIn(ExperimentalGeoSpatialApi::class)
     override fun getNearbyUserProfileList(userLocation: CustomGeoPoint, radiusInMiles: Double): Flow<ResultsChange<UserProfile>>{
@@ -498,12 +502,9 @@ class RealmSyncRepository(
             center = GeoPoint.create(userLocation.latitude, userLocation.longitude),
             radius = Distance.fromMiles(radiusInMiles)
         )
-        return realm.query<UserProfile>("location GEOWITHIN $circleAroundUser")
-            .query("ownerId != $0", currentUser.id)
-            .find()
-            .asFlow()
+        return realm.query<UserProfile>("location GEOWITHIN $circleAroundUser").query("ownerId != $0", currentUser.id).find().asFlow()
     }
-    //endregion user location
+    //endregion location
 }
 
 /**
