@@ -2,6 +2,9 @@ package com.mongodb.app.presentation.compassscreen
 
 import android.app.Activity
 import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.AdvertisingOptions
 import com.google.android.gms.nearby.connection.ConnectionInfo
@@ -15,6 +18,7 @@ import com.google.android.gms.nearby.connection.Payload
 import com.google.android.gms.nearby.connection.PayloadCallback
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate
 import com.google.android.gms.nearby.connection.Strategy
+import com.mongodb.app.data.compassscreen.CompassConnectionType
 
 class CompassCommunication constructor(
     private val userId: String,
@@ -37,6 +41,16 @@ class CompassCommunication constructor(
      * Used to track data of matched user
      */
     private var matchedUserEndpointId: String? = null
+
+    private val _connectionType: MutableState<CompassConnectionType> =
+        mutableStateOf(CompassConnectionType.OFFLINE)
+
+
+    /*
+    ===== Properties =====
+     */
+    val connectionType: State<CompassConnectionType>
+        get() = _connectionType
 
 
     /*
@@ -182,7 +196,7 @@ class CompassCommunication constructor(
     /**
      * Starts advertising, or allowing other users nearby the possibility to connect with you
      */
-    fun startAdvertising() {
+    private fun startAdvertising() {
         val options = AdvertisingOptions.Builder().setStrategy(strategy).build()
         // TODO Advertising may fail, so need to handle cases when it does
         connectionsClient.startAdvertising(
@@ -196,12 +210,12 @@ class CompassCommunication constructor(
     /**
      * Starts discovering, or finding other users nearby to connect to
      */
-    fun startDiscovery() {
+    private fun startDiscovery() {
         val options = DiscoveryOptions.Builder().setStrategy(strategy).build()
         connectionsClient.startDiscovery(packageName, endpointDiscoveryCallback, options)
     }
 
-    fun disconnect() {
+    private fun disconnect() {
         connectionsClient.disconnectFromEndpoint(matchedUserEndpointId.toString())
         resetCompassMatchData()
     }
@@ -211,5 +225,38 @@ class CompassCommunication constructor(
      */
     private fun resetCompassMatchData() {
         matchedUserEndpointId = null
+    }
+
+    fun updateConnectionType(newConnectionType: CompassConnectionType) {
+        _connectionType.value = newConnectionType
+        when (connectionType.value) {
+            CompassConnectionType.OFFLINE -> {
+                Log.i(
+                    "tempTag",
+                    "CompassCommunication: Now OFFLINE"
+                )
+                disconnect()
+            }
+            CompassConnectionType.WAITING -> {
+                Log.i(
+                    "tempTag",
+                    "CompassCommunication: Now WAITING"
+                )
+                startDiscovery()
+                startAdvertising()
+            }
+            CompassConnectionType.MEETING -> {
+                Log.i(
+                    "tempTag",
+                    "CompassCommunication: Now MEETING"
+                )
+            }
+            else -> {
+                Log.i(
+                    "tempTag",
+                    "CompassCommunication: Unknown connection type \"${connectionType.value}\""
+                )
+            }
+        }
     }
 }

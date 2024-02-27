@@ -43,6 +43,7 @@ import com.mongodb.app.R
 import com.mongodb.app.TAG
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
+import com.mongodb.app.data.compassscreen.CompassConnectionType
 import com.mongodb.app.data.compassscreen.UserLocation
 import com.mongodb.app.presentation.compassscreen.CompassCommunication
 import com.mongodb.app.presentation.compassscreen.CompassViewModel
@@ -150,8 +151,7 @@ class CompassScreen : ComponentActivity(){
 
         // This screen is entered only when the matched user accepts the connection
         // ... so as soon as this screen is shown, start the connection process
-        compassCommunication!!.startDiscovery()
-        compassCommunication!!.startAdvertising()
+        compassCommunication!!.updateConnectionType(CompassConnectionType.WAITING)
     }
 
     @Deprecated("Deprecated in Java")
@@ -178,6 +178,7 @@ class CompassScreen : ComponentActivity(){
 
     @CallSuper
     override fun onStop() {
+        compassCommunication!!.updateConnectionType(CompassConnectionType.OFFLINE)
         // Release all assets when the Nearby API is no longer necessary
         compassCommunication!!.releaseAssets()
         super.onStop()
@@ -313,19 +314,12 @@ fun CompassScreenBodyErrorContent(
             )
             CompassScreenReturnButton()
         }
-        // Could not establish connection with matched user
-        // Show options to go back or try again
+        // Connection is not yet established with matched user
+        // Show button to go back
         else{
             SingleTextRow(
                 textId = R.string.compass_screen_connection_error_message
             )
-            // Retry button not needed
-            // Will infinitely loop to continue waiting for match to accept connection
-            // Cancel button will be the only way to stop loop
-//            SingleButtonRow(
-//                onButtonClick = { /*TODO*/ },
-//                textId = R.string.compass_screen_retry_button
-//            )
             CompassScreenReturnButton()
         }
     }
@@ -392,7 +386,7 @@ fun CompassScreenCancelButton(
                 "User has canceled meeting with match"
             )
             compassViewModel.toggleMeetingWithMatch()
-            compassCommunication.disconnect()
+            compassCommunication.updateConnectionType(CompassConnectionType.OFFLINE)
         },
         textId = R.string.compass_screen_cancel_message,
         modifier = modifier
