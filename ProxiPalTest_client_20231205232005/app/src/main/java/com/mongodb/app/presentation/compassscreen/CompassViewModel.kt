@@ -1,20 +1,26 @@
 package com.mongodb.app.presentation.compassscreen
 
 import android.os.Bundle
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.compassscreen.KM_PER_ONE_LATITUDE_DIFF
 import com.mongodb.app.data.compassscreen.KM_PER_ONE_LONGITUDE_DIFF
+import com.mongodb.app.data.compassscreen.MS_BETWEEN_LOCATION_UPDATES
 import com.mongodb.app.data.compassscreen.UserLocation
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.atan2
 import kotlin.math.pow
 import kotlin.math.sqrt
+import kotlin.random.Random
 
 class CompassViewModel constructor(
     private var repository: SyncRepository
@@ -89,8 +95,26 @@ class CompassViewModel constructor(
 
 
     init{
+        // TODO Temporary setting, replace this with actual values later
+        _currentUserLocation.value.latitude = Random.nextDouble() * 180 - 90
+        _currentUserLocation.value.longitude = Random.nextDouble() * 360 - 180
+        _matchedUserLocation.value.latitude = Random.nextDouble() * 180 - 90
+        _matchedUserLocation.value.longitude = Random.nextDouble() * 360 - 180
+
         // Start the compass screen with the user currently meeting up with their match
         _isMeetingWithMatch.value = true
+
+        // TODO Temporary updating of user locations, replace this with actual values later
+        viewModelScope.launch{
+            Log.i(
+                "tempTag",
+                "Start of coroutine launch{}"
+            )
+            while (isMeetingWithMatch.value){
+                updateUserLocations()
+                delay(MS_BETWEEN_LOCATION_UPDATES)
+            }
+        }
     }
 
     companion object {
@@ -125,10 +149,31 @@ class CompassViewModel constructor(
         repository = newRepository
     }
 
+    /**
+     * Temporary function for updating matching users' locations
+     */
+    private fun updateUserLocations(){
+        Log.i(
+            "tempTag",
+            "User locations updated"
+        )
+        // Update user location values by a random value in range [-1, 1]
+        _currentUserLocation.value.latitude += Random.nextDouble(-1.0, 1.0)
+        _currentUserLocation.value.longitude += Random.nextDouble(-1.0, 1.0)
+        _matchedUserLocation.value.latitude += Random.nextDouble(-1.0, 1.0)
+        _matchedUserLocation.value.longitude += Random.nextDouble(-1.0, 1.0)
+    }
+
+    /**
+     * Checks if a value is a valid latitude value
+     */
     private fun isValidLatitude(latitude: Double): Boolean{
         return latitude in -90.0..90.0
     }
 
+    /**
+     * Checks if a value is a valid longitude value
+     */
     private fun isValidLongitude(longitude: Double): Boolean{
         return longitude in -180.0..180.0
     }
