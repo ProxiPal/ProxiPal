@@ -7,6 +7,14 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+<!--    For compass screen connections (Need a way to communicate with another device nearby) -->
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+<!--    ACCESS_FINE_LOCATION is also needed but is already listed above -->
+    <!--    For compass screen connections (Need a way to communicate with another device nearby) -->
+
     <application
         android:name=".TemplateApp"
         android:allowBackup="true"

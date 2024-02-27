@@ -27,6 +27,10 @@ android {
 }
 
 dependencies {
+//    For compass screen connections between devices
+//    implementation ("com.google.android.gms:play-services-nearby:LATEST_VERSION")
+    implementation("com.google.android.gms:play-services-nearby:19.1.0")
+
     implementation("com.google.android.gms:play-services-location:21.0.1")
     implementation("androidx.navigation:navigation-compose:2.6.0")
     implementation ("androidx.datastore:datastore-preferences:1.0.0")

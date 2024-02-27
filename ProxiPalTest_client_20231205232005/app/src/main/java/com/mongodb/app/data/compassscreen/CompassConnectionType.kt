@@ -1,5 +1,8 @@
 package com.mongodb.app.data.compassscreen
 
+@Deprecated(
+    message = "Not currently in use"
+)
 enum class CompassConnectionType{
     // When a user is not currently waiting for or meeting with another user
     OFFLINE,
