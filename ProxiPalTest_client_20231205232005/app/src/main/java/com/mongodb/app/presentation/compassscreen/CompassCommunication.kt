@@ -15,9 +15,9 @@ import com.google.android.gms.nearby.connection.Payload
 import com.google.android.gms.nearby.connection.PayloadCallback
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate
 import com.google.android.gms.nearby.connection.Strategy
-import com.mongodb.app.app
 
 class CompassCommunication constructor(
+    private val userId: String,
     private val packageName: String
 ) {
     /*
@@ -37,8 +37,6 @@ class CompassCommunication constructor(
      * Used to track data of matched user
      */
     private var matchedUserEndpointId: String? = null
-
-    private val currentUserId = if (app.currentUser != null) app.currentUser!!.id else "(null)"
 
 
     /*
@@ -118,7 +116,7 @@ class CompassCommunication constructor(
                 "CompassCommunication: Start of OnEndpointFound()"
             )
             connectionsClient.requestConnection(
-                currentUserId,
+                userId,
                 packageName,
                 connectionLifecycleCallback
             )
@@ -188,7 +186,7 @@ class CompassCommunication constructor(
         val options = AdvertisingOptions.Builder().setStrategy(strategy).build()
         // TODO Advertising may fail, so need to handle cases when it does
         connectionsClient.startAdvertising(
-            currentUserId,
+            userId,
             packageName,
             connectionLifecycleCallback,
             options

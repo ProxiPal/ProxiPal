@@ -104,6 +104,7 @@ class CompassScreen : ComponentActivity(){
         )
 
         compassCommunication = CompassCommunication(
+            userId = repository.getCurrentUserId(),
             packageName = packageName
         )
         // Need to create connections client in compass screen communication class
@@ -439,7 +440,8 @@ fun CompassScreenLayoutPreview() {
         CompassScreenLayout(
             compassViewModel = compassViewModel,
             compassCommunication = CompassCommunication(
-                "fakePackageName"
+                userId = "fakeUserId",
+                packageName = "fakePackageName"
             )
         )
     }
