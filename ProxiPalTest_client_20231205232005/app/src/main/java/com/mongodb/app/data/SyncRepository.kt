@@ -8,6 +8,7 @@ import com.mongodb.app.domain.UserProfile
 import com.mongodb.app.location.CustomGeoPoint
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
+import io.realm.kotlin.annotations.ExperimentalGeoSpatialApi
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.User
 import io.realm.kotlin.mongodb.exceptions.SyncException
@@ -18,6 +19,9 @@ import io.realm.kotlin.mongodb.syncSession
 import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.query.RealmQuery
 import io.realm.kotlin.query.Sort
+import io.realm.kotlin.types.geo.Distance
+import io.realm.kotlin.types.geo.GeoCircle
+import io.realm.kotlin.types.geo.GeoPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -140,6 +144,11 @@ interface SyncRepository {
      * Updates a possible existing user profile's location for the current user in the database using the specified latitude and longitude
      */
     suspend fun updateUserProfileLocation(latitude: Double, longitude: Double)
+
+    /**
+     * Returns a flow with nearby user profiles within a specified radius
+     */
+    fun getNearbyUserProfileList(userLocation: CustomGeoPoint, radiusInMiles: Double): Flow<ResultsChange<UserProfile>>
 }
 
 
@@ -479,6 +488,22 @@ class RealmSyncRepository(
             }
         }
     }
+
+    /**
+     * Returns a flow with nearby user profiles within a specified radius
+     */
+    @OptIn(ExperimentalGeoSpatialApi::class)
+    override fun getNearbyUserProfileList(userLocation: CustomGeoPoint, radiusInMiles: Double): Flow<ResultsChange<UserProfile>>{
+        val circleAroundUser = GeoCircle.create(
+            center = GeoPoint.create(userLocation.latitude, userLocation.longitude),
+            radius = Distance.fromMiles(radiusInMiles)
+        )
+        return realm.query<UserProfile>("location GEOWITHIN $circleAroundUser")
+            .query("ownerId != $0", currentUser.id)
+            .find()
+            .asFlow()
+    }
+    //endregion user location
 }
 
 /**
@@ -511,6 +536,8 @@ class MockRepository : SyncRepository {
 
     override suspend fun updateUserProfileLocation(latitude: Double, longitude: Double) =
         Unit
+
+    override fun getNearbyUserProfileList(userLocation: CustomGeoPoint, radiusInMiles: Double): Flow<ResultsChange<UserProfile>> = flowOf()
 
 
     companion object {

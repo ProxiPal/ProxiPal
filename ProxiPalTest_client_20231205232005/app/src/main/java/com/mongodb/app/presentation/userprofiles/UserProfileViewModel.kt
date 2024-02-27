@@ -69,9 +69,9 @@ class UserProfileViewModel constructor(
 
     private val _isEditingUserProfile: MutableState<Boolean> = mutableStateOf(false)
 
-    // for location, added by Marco Pacini
-    private val _userProfileLatitude :MutableState<Double> = mutableStateOf(0.0)
-    private val _userProfileLongitude :MutableState<Double> = mutableStateOf(0.0)
+    // for current user's location, added by Marco Pacini
+    private val _userProfileLatitude: MutableState<Double> = mutableStateOf(0.0)
+    private val _userProfileLongitude: MutableState<Double> = mutableStateOf(0.0)
 
 
     /*
@@ -99,7 +99,7 @@ class UserProfileViewModel constructor(
     val addUserProfileEvent: Flow<AddUserProfileEvent>
         get() = _addUserProfileEvent
 
-    // For location, added by Marco Pacini
+    // For current user's location, added by Marco Pacini
     val userProfileLatitude: State<Double>
         get() = _userProfileLatitude
 
@@ -184,7 +184,7 @@ class UserProfileViewModel constructor(
                                     _userProfileLastName.value = event.list[0].lastName
                                     _userProfileBiography.value = event.list[0].biography
                                     _userProfileLatitude.value = event.list[0].location?.latitude!!
-                                    _userProfileLatitude.value = event.list[0].location?.longitude!!
+                                    _userProfileLongitude.value = event.list[0].location?.longitude!!
                                 }
                                 else -> {
                                     Log.i(
@@ -197,7 +197,7 @@ class UserProfileViewModel constructor(
                                     _userProfileLastName.value = event.list[0].lastName
                                     _userProfileBiography.value = event.list[0].biography
                                     _userProfileLatitude.value = event.list[0].location?.latitude!!
-                                    _userProfileLatitude.value = event.list[0].location?.longitude!!
+                                    _userProfileLongitude.value = event.list[0].location?.longitude!!
                                 }
                             }
                         }
