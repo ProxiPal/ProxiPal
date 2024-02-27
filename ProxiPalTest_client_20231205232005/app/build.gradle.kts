@@ -51,6 +51,10 @@ dependencies {
     implementation("com.google.android.material:material:1.7.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+
+
+    implementation("com.google.android.gms:play-services-maps:18.2.0")// DON'T FORGET TO UPDATE VERSION IN PROJECT GRADLE
+
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     implementation("io.realm.kotlin:library-sync:1.13.0") // DON'T FORGET TO UPDATE VERSION IN PROJECT GRADLE
     implementation("io.realm.kotlin:gradle-plugin:1.13.0")
@@ -67,4 +71,5 @@ dependencies {
     androidTestImplementation ("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation ("androidx.compose.ui:ui-test-junit4:1.6.1")
     debugImplementation ("androidx.compose.ui:ui-tooling:1.6.1")
+
 }
