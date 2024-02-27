@@ -54,41 +54,21 @@ import kotlinx.coroutines.launch
 
 /*
 TODO Current plan for order of events (See CompassConnectionType.kt for more)
-(1) Use case #8: Connect with others functionality happens first
-(2) 2 matched users are brought to this screen
-(3) Send a request to meet with your match
-(4) If your match is offline or does not respond to your request within some
-... time limit, show an error saying this profile could not be connected to.
-... Show some buttons to either retry or cancel the connection
-(Ex: Person A tries to connect to person B, but person B is offline. Person B
-... could get a notification saying person A tried to connect with them. Let's
-... say later person A is now offline but person B is online. Person B would see
-... the notification from person A and could try to re-connect with them. Since
-... person A is offline, person B would send a notification to person A. This
-... process could loop until eventually persons A and B are online at the same
-... time.)
-(5) If you could connect to your match, show the compass screen for both users
-(6) If a user cancels the meeting, stop showing the compass screen for both users
-(7) If the distance between 2 matches is close enough, automatically cancel the
-... connection
+(1) When searching for other users to connect to
+(a) Use case #8
+(2) When selecting a user to connect to
+(a) Start discovering and advertising
+(b) Have a variable set to other user's ID and only connect to a device with that ID
+(c) If successful, use connection lifecycle object to show each other's location
+(3) If a user cancels the connection
+(a) Show the cancellation message to both users
  */
 class CompassScreen : ComponentActivity(){
     /*
     ===== Variables =====
      */
-    private val repository = RealmSyncRepository { _, error ->
-        // Sync errors come from a background thread so route the Toast through the UI thread
+    private val repository = RealmSyncRepository { _, _ ->
         lifecycleScope.launch {
-            // Catch write permission errors and notify user. This is just a 2nd line of defense
-            // since we prevent users from modifying someone else's tasks
-            // TODO the SDK does not have an enum for this type of error yet so make sure to update this once it has been added
-            if (error.message?.contains("CompensatingWrite") == true) {
-//                Toast.makeText(
-//                    this@CompassScreen, getString(R.string.user_profile_permissions_warning),
-//                    Toast.LENGTH_SHORT
-//                )
-//                    .show()
-            }
         }
     }
 
@@ -154,7 +134,8 @@ class CompassScreen : ComponentActivity(){
 
         // This screen is entered only when the matched user accepts the connection
         // ... so as soon as this screen is shown, start the connection process
-        // TODO
+        compassCommunication!!.startDiscovery()
+        compassCommunication!!.startAdvertising()
     }
 
     @Deprecated("Deprecated in Java")
@@ -322,10 +303,13 @@ fun CompassScreenBodyErrorContent(
             SingleTextRow(
                 textId = R.string.compass_screen_connection_error_message
             )
-            SingleButtonRow(
-                onButtonClick = { /*TODO*/ },
-                textId = R.string.compass_screen_retry_button
-            )
+            // Retry button not needed
+            // Will infinitely loop to continue waiting for match to accept connection
+            // Cancel button will be the only way to stop loop
+//            SingleButtonRow(
+//                onButtonClick = { /*TODO*/ },
+//                textId = R.string.compass_screen_retry_button
+//            )
             CompassScreenReturnButton()
         }
     }

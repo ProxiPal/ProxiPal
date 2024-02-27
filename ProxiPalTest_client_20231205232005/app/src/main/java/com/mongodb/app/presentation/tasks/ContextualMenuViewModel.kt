@@ -1,5 +1,4 @@
 package com.mongodb.app.presentation.tasks
-// TODO Might need to move this class to a new package to avoid confusion being in the "tasks" package
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
