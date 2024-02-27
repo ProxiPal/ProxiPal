@@ -342,6 +342,7 @@ fun CompassScreenCompassVisual(
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = modifier
+            .fillMaxWidth()
     ) {
         Image(
             painter = painterResource(id = R.drawable.tempcompass),
