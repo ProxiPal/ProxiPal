@@ -130,7 +130,8 @@ class CompassScreen : ComponentActivity(){
         setContent{
             MyApplicationTheme {
                 CompassScreenLayout(
-                    compassViewModel = compassViewModel
+                    compassViewModel = compassViewModel,
+                    compassCommunication = compassCommunication
                 )
             }
         }
@@ -147,6 +148,10 @@ class CompassScreen : ComponentActivity(){
                 REQUEST_CODE_REQUIRED_PERMISSIONS
             )
         }
+
+        // This screen is entered only when the matched user accepts the connection
+        // ... so as soon as this screen is shown, start the connection process
+        // TODO
     }
 
     @Deprecated("Deprecated in Java")
@@ -196,6 +201,7 @@ class CompassScreen : ComponentActivity(){
 @Composable
 fun CompassScreenLayout(
     compassViewModel: CompassViewModel,
+    compassCommunication: CompassCommunication,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -208,6 +214,7 @@ fun CompassScreenLayout(
         if (compassViewModel.isMeetingWithMatch.value){
             CompassScreenBodyContent(
                 compassViewModel = compassViewModel,
+                compassCommunication = compassCommunication,
                 modifier = Modifier
                     .padding(innerPadding)
             )
@@ -260,6 +267,7 @@ fun CompassScreenTopBar(
 @Composable
 fun CompassScreenBodyContent(
     compassViewModel: CompassViewModel,
+    compassCommunication: CompassCommunication,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -279,7 +287,8 @@ fun CompassScreenBodyContent(
             measurement = compassViewModel.distance.value
         )
         CompassScreenCancelButton(
-            compassViewModel = compassViewModel
+            compassViewModel = compassViewModel,
+            compassCommunication = compassCommunication
         )
         TempCompassScreenLocationUpdating(
             compassViewModel = compassViewModel
@@ -363,22 +372,23 @@ fun CompassScreenMeasurementText(
     }
 }
 
-// TODO Need to make sure this cancels the matching process for both users
 /**
  * Displays a button for canceling directing matches toward each other
  */
 @Composable
 fun CompassScreenCancelButton(
     compassViewModel: CompassViewModel,
+    compassCommunication: CompassCommunication,
     modifier: Modifier = Modifier
 ) {
     SingleButtonRow(
         onButtonClick = {
-            compassViewModel.toggleMeetingWithMatch()
             Log.i(
                 "tempTag",
                 "User has canceled meeting with match"
             )
+            compassViewModel.toggleMeetingWithMatch()
+            compassCommunication.disconnect()
         },
         textId = R.string.compass_screen_cancel_message,
         modifier = modifier
@@ -438,9 +448,12 @@ fun TempCompassScreenLocationUpdating(
 fun CompassScreenLayoutPreview() {
     MyApplicationTheme {
         val repository = MockRepository()
+        val compassViewModel = CompassViewModel(repository = repository)
         CompassScreenLayout(
-            compassViewModel = CompassViewModel(
-                repository = repository
+            compassViewModel = compassViewModel,
+            compassCommunication = CompassCommunication(
+                compassViewModel = compassViewModel,
+                "fakePackageName"
             )
         )
     }

@@ -36,6 +36,11 @@ class CompassCommunication constructor(
      */
     private var matchedUserEndpointId: String? = null
 
+
+    /*
+    ===== Callback Objects =====
+     */
+    // region CallbackObjects
     /**
      * Callback for receiving payloads
      */
@@ -86,6 +91,7 @@ class CompassCommunication constructor(
             TODO("Not yet implemented")
         }
     }
+    // endregion CallbackObjects
 
 
     /*
@@ -142,6 +148,11 @@ class CompassCommunication constructor(
     fun startDiscovery(){
         val options = DiscoveryOptions.Builder().setStrategy(strategy).build()
         connectionsClient.startDiscovery(packageName, endpointDiscoveryCallback, options)
+    }
+
+    fun disconnect(){
+        connectionsClient.disconnectFromEndpoint(matchedUserEndpointId.toString())
+        resetCompassMatchData()
     }
 
     /**
