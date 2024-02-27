@@ -227,8 +227,12 @@ class CompassCommunication constructor(
         matchedUserEndpointId = null
     }
 
+    /**
+     * Updates the current connection type
+     */
     fun updateConnectionType(newConnectionType: CompassConnectionType) {
         _connectionType.value = newConnectionType
+        compassViewModel.updateConnectionType(newConnectionType)
         when (connectionType.value) {
             CompassConnectionType.OFFLINE -> {
                 Log.i(

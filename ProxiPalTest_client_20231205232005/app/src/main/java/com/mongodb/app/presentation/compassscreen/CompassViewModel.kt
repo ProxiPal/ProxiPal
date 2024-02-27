@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.mongodb.app.data.SyncRepository
+import com.mongodb.app.data.compassscreen.CompassConnectionType
 import com.mongodb.app.data.compassscreen.KM_PER_ONE_LATITUDE_DIFF
 import com.mongodb.app.data.compassscreen.KM_PER_ONE_LONGITUDE_DIFF
 import com.mongodb.app.data.compassscreen.MS_BETWEEN_LOCATION_UPDATES
@@ -42,7 +43,8 @@ class CompassViewModel constructor(
 
     private val _distance: MutableState<Double> = mutableStateOf(0.0)
 
-    private val _isMeetingWithMatch: MutableState<Boolean> = mutableStateOf(true)
+    private val _connectionType: MutableState<CompassConnectionType> =
+        mutableStateOf(CompassConnectionType.OFFLINE)
 
 
     /*
@@ -62,8 +64,8 @@ class CompassViewModel constructor(
     val distance: State<Double>
         get() = _distance
 
-    val isMeetingWithMatch: State<Boolean>
-        get() = _isMeetingWithMatch
+    val connectionType: State<CompassConnectionType>
+        get() = _connectionType
 
 
     init{
@@ -73,16 +75,7 @@ class CompassViewModel constructor(
         _matchedUserLocation.value.latitude = 0.0
         _matchedUserLocation.value.longitude = 0.0
 
-        // Start the compass screen with the user currently meeting up with their match
-        _isMeetingWithMatch.value = true
-
-        // TODO Temporary updating of user locations, replace this with actual values later
-        viewModelScope.launch{
-            while (isMeetingWithMatch.value){
-                updateUserLocations()
-                delay(MS_BETWEEN_LOCATION_UPDATES)
-            }
-        }
+        updateConnectionType(CompassConnectionType.OFFLINE)
     }
 
     companion object {
@@ -113,7 +106,7 @@ class CompassViewModel constructor(
      */
     fun updateRepository(
         newRepository: SyncRepository
-    ){
+    ) {
         repository = newRepository
     }
 
@@ -186,13 +179,6 @@ class CompassViewModel constructor(
     }
 
     /**
-     * Toggles whether the current user is meeting up with their matched user
-     */
-    fun toggleMeetingWithMatch(){
-        _isMeetingWithMatch.value = !_isMeetingWithMatch.value
-    }
-
-    /**
      * Updates both the bearing and distance measurements
      */
     private fun updateMeasurements(){
@@ -259,5 +245,18 @@ class CompassViewModel constructor(
         val deltaLatitude = (endLatitude - startLatitude) * KM_PER_ONE_LATITUDE_DIFF
         val deltaLongitude = (endLongitude - startLongitude) * KM_PER_ONE_LONGITUDE_DIFF
         return sqrt(deltaLatitude.pow(2) + deltaLongitude.pow(2))
+    }
+
+    fun updateConnectionType(newCompassConnectionType: CompassConnectionType){
+        _connectionType.value = newCompassConnectionType
+        if (connectionType.value == CompassConnectionType.MEETING){
+            // TODO Temporary updating of user locations, replace this with actual values later
+            viewModelScope.launch{
+                while (connectionType.value != CompassConnectionType.OFFLINE){
+                    updateUserLocations()
+                    delay(MS_BETWEEN_LOCATION_UPDATES)
+                }
+            }
+        }
     }
 }

@@ -212,22 +212,12 @@ fun CompassScreenLayout(
         modifier = modifier
         // Pad the body of content so it does not get cut off by the scaffold top bar
     ) { innerPadding ->
-        if (compassViewModel.isMeetingWithMatch.value){
-            CompassScreenBodyContent(
-                compassViewModel = compassViewModel,
-                compassCommunication = compassCommunication,
-                modifier = Modifier
-                    .padding(innerPadding)
-            )
-        }
-        // If canceling the meeting with a matched user
-        else{
-            CompassScreenBodyErrorContent(
-                compassViewModel = compassViewModel,
-                modifier = Modifier
-                    .padding(innerPadding)
-            )
-        }
+        CompassScreenBodyContent(
+            compassViewModel = compassViewModel,
+            compassCommunication = compassCommunication,
+            modifier = Modifier
+                .padding(innerPadding)
+        )
     }
 }
 
@@ -276,51 +266,51 @@ fun CompassScreenBodyContent(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        CompassScreenCompassVisual(
-            compassViewModel = compassViewModel
-        )
-        CompassScreenMeasurementText(
-            measurementText = R.string.compass_screen_bearing_message,
-            measurement = compassViewModel.bearing.value
-        )
-        CompassScreenMeasurementText(
-            measurementText = R.string.compass_screen_distance_message,
-            measurement = compassViewModel.distance.value
-        )
-        CompassScreenCancelButton(
-            compassViewModel = compassViewModel,
-            compassCommunication = compassCommunication
-        )
-        TempCompassScreenLocationUpdating(
-            compassViewModel = compassViewModel
-        )
-    }
-}
-
-@Composable
-fun CompassScreenBodyErrorContent(
-    compassViewModel: CompassViewModel,
-    modifier: Modifier = Modifier
-){
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-    ) {
-        // The current or matched user canceled the connection
-        if (compassViewModel.isMeetingWithMatch.value){
-            SingleTextRow(
-                textId = R.string.compass_screen_canceled_error_message
-            )
-            CompassScreenReturnButton()
-        }
-        // Connection is not yet established with matched user
-        // Show button to go back
-        else{
-            SingleTextRow(
-                textId = R.string.compass_screen_connection_error_message
-            )
-            CompassScreenReturnButton()
+        when (compassCommunication.connectionType.value){
+            CompassConnectionType.MEETING -> {
+                CompassScreenCompassVisual(
+                    compassViewModel = compassViewModel
+                )
+                CompassScreenMeasurementText(
+                    measurementText = R.string.compass_screen_bearing_message,
+                    measurement = compassViewModel.bearing.value
+                )
+                CompassScreenMeasurementText(
+                    measurementText = R.string.compass_screen_distance_message,
+                    measurement = compassViewModel.distance.value
+                )
+                CompassScreenReturnButton(
+                    onButtonClick = {
+                        compassCommunication.updateConnectionType(CompassConnectionType.OFFLINE)
+                    }
+                )
+                TempCompassScreenLocationUpdating(
+                    compassViewModel = compassViewModel
+                )
+            }
+            // Connection is not yet established with matched user
+            // Show button to go back
+            CompassConnectionType.WAITING -> {
+                SingleTextRow(
+                    textId = R.string.compass_screen_connection_error_message
+                )
+                CompassScreenReturnButton(
+                    onButtonClick = {
+                        compassCommunication.updateConnectionType(CompassConnectionType.OFFLINE)
+                    }
+                )
+            }
+            // The current or matched user canceled the connection
+            CompassConnectionType.OFFLINE -> {
+                SingleTextRow(
+                    textId = R.string.compass_screen_canceled_error_message
+                )
+                CompassScreenReturnButton(
+                    onButtonClick = {
+                        compassCommunication.updateConnectionType(CompassConnectionType.OFFLINE)
+                    }
+                )
+            }
         }
     }
 }
@@ -371,37 +361,17 @@ fun CompassScreenMeasurementText(
 }
 
 /**
- * Displays a button for canceling directing matches toward each other
- */
-@Composable
-fun CompassScreenCancelButton(
-    compassViewModel: CompassViewModel,
-    compassCommunication: CompassCommunication,
-    modifier: Modifier = Modifier
-) {
-    SingleButtonRow(
-        onButtonClick = {
-            Log.i(
-                "tempTag",
-                "User has canceled meeting with match"
-            )
-            compassViewModel.toggleMeetingWithMatch()
-            compassCommunication.updateConnectionType(CompassConnectionType.OFFLINE)
-        },
-        textId = R.string.compass_screen_cancel_message,
-        modifier = modifier
-    )
-}
-
-/**
  * Displays the back button for returning to the connect with others screen
  */
 @Composable
 fun CompassScreenReturnButton(
+    onButtonClick: (() -> Unit),
     modifier: Modifier = Modifier
 ){
     SingleButtonRow(
-        onButtonClick = { /*TODO*/ },
+        onButtonClick = {
+            onButtonClick()
+        },
         textId = R.string.compass_screen_return_button,
         modifier = modifier
     )
@@ -452,19 +422,6 @@ fun CompassScreenLayoutPreview() {
             compassCommunication = CompassCommunication(
                 userId = "fakeUserId",
                 packageName = "fakePackageName"
-            )
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun CompassScreenConnectionErrorPreview(){
-    MyApplicationTheme {
-        val repository = MockRepository()
-        CompassScreenBodyErrorContent(
-            compassViewModel = CompassViewModel(
-                repository = repository
             )
         )
     }
