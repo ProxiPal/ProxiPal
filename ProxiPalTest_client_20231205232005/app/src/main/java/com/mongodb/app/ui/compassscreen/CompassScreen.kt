@@ -96,10 +96,9 @@ class CompassScreen : ComponentActivity(){
         CompassViewModel.factory(repository, this)
     }
 
-    private val compassCommunication: CompassCommunication = CompassCommunication(
-        compassViewModel = compassViewModel,
-        packageName = packageName
-    )
+    // App will crash if trying to set package name at this point
+    // ... so set it later
+    private var compassCommunication: CompassCommunication? = null
 
     /**
      * Request code for verifying call to [requestPermissions]
@@ -124,14 +123,18 @@ class CompassScreen : ComponentActivity(){
             newRepository = repository
         )
 
+        compassCommunication = CompassCommunication(
+            packageName = packageName
+        )
         // Need to create connections client in compass screen communication class
-        compassCommunication.setConnectionsClient(this)
+        compassCommunication!!.setConnectionsClient(this)
+        compassCommunication!!.setCompassViewModel(compassViewModel)
 
         setContent{
             MyApplicationTheme {
                 CompassScreenLayout(
                     compassViewModel = compassViewModel,
-                    compassCommunication = compassCommunication
+                    compassCommunication = compassCommunication!!
                 )
             }
         }
@@ -179,7 +182,7 @@ class CompassScreen : ComponentActivity(){
     @CallSuper
     override fun onStop() {
         // Release all assets when the Nearby API is no longer necessary
-        compassCommunication.releaseAssets()
+        compassCommunication!!.releaseAssets()
         super.onStop()
     }
 
@@ -452,7 +455,6 @@ fun CompassScreenLayoutPreview() {
         CompassScreenLayout(
             compassViewModel = compassViewModel,
             compassCommunication = CompassCommunication(
-                compassViewModel = compassViewModel,
                 "fakePackageName"
             )
         )

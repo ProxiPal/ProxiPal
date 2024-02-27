@@ -17,7 +17,6 @@ import com.google.android.gms.nearby.connection.PayloadTransferUpdate
 import com.google.android.gms.nearby.connection.Strategy
 
 class CompassCommunication constructor(
-    private val compassViewModel: CompassViewModel,
     private val packageName: String
 ){
     /*
@@ -30,6 +29,8 @@ class CompassCommunication constructor(
     private val strategy: Strategy = Strategy.P2P_STAR
 
     private lateinit var connectionsClient: ConnectionsClient
+
+    private lateinit var compassViewModel: CompassViewModel
 
     /**
      * Used to track data of matched user
@@ -103,6 +104,14 @@ class CompassCommunication constructor(
      */
     fun setConnectionsClient(activity: Activity){
         connectionsClient = Nearby.getConnectionsClient(activity)
+    }
+
+    /**
+     * Sets the compass view model (app crashes if assigning in constructor using CompassScreen's
+     * "by viewModels{}")
+     */
+    fun setCompassViewModel(compassViewModel: CompassViewModel){
+        this.compassViewModel = compassViewModel
     }
 
     /**
