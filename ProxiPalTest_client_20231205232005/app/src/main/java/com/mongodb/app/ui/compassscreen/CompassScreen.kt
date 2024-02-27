@@ -227,9 +227,6 @@ fun CompassScreenBodyContent(
         TempCompassScreenLocationUpdating(
             compassViewModel = compassViewModel
         )
-        TempCompassScreenLogMessages(
-            compassViewModel = compassViewModel
-        )
     }
 }
 
@@ -345,9 +342,8 @@ fun CompassScreenReturnButton(
     )
 }
 
-// region TemporaryUI
 /**
- * Displays temporary text fields for inputting and changing matching users' locations
+ * Displays temporary text showing users' locations
  */
 @Composable
 fun TempCompassScreenLocationUpdating(
@@ -358,134 +354,27 @@ fun TempCompassScreenLocationUpdating(
         modifier = modifier
     ) {
         Row(
-            horizontalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxWidth()
         ) {
             Text(
-                text = "Current location:",
-                modifier = Modifier
-                    .weight(0.33f)
-            )
-            TempCompassScreenLocationUpdater(
-                userLocationParameterValue = compassViewModel.currentUserLatitude.value,
-                updateUserLocationParameter = { compassViewModel.updateCurrentUserLatitude(it) },
-                modifier = Modifier
-                    .weight(0.33f)
-            )
-            TempCompassScreenLocationUpdater(
-                userLocationParameterValue = compassViewModel.currentUserLongitude.value,
-                updateUserLocationParameter = { compassViewModel.updateCurrentUserLongitude(it) },
-                modifier = Modifier
-                    .weight(0.33f)
+                text = "Current location:\n" +
+                        "\t\t${compassViewModel.currentUserLocation.value.latitude}\n" +
+                        "\t\t${compassViewModel.currentUserLocation.value.longitude}"
             )
         }
         Row(
-            horizontalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxWidth()
         ) {
             Text(
-                text = "Match location:",
-                modifier = Modifier
-                    .weight(0.33f)
-            )
-            TempCompassScreenLocationUpdater(
-                userLocationParameterValue = compassViewModel.matchedUserLatitude.value,
-                updateUserLocationParameter = { compassViewModel.updateMatchedUserLatitude(it) },
-                modifier = Modifier
-                    .weight(0.33f)
-            )
-            TempCompassScreenLocationUpdater(
-                userLocationParameterValue = compassViewModel.matchedUserLongitude.value,
-                updateUserLocationParameter = { compassViewModel.updateMatchedUserLongitude(it) },
-                modifier = Modifier
-                    .weight(0.33f)
+                text = "Match location:\n" +
+                        "\t\t${compassViewModel.matchedUserLocation.value.latitude}\n" +
+                        "\t\t${compassViewModel.matchedUserLocation.value.longitude}"
             )
         }
     }
 }
-
-/**
- * Displays a temporary text field for updating a user's location
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TempCompassScreenLocationUpdater(
-    userLocationParameterValue: String,
-    updateUserLocationParameter: ((String) -> Unit),
-    modifier: Modifier = Modifier
-) {
-    TextField(
-        value = userLocationParameterValue,
-        onValueChange = {
-            updateUserLocationParameter(it)
-        },
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Decimal,
-            imeAction = ImeAction.Done
-        ),
-        singleLine = true,
-        // Invalid location data will be shown as an error in the text box
-        isError = userLocationParameterValue.toDoubleOrNull() == null,
-        modifier = modifier
-            .padding(all = 4.dp)
-            .width(100.dp)
-    )
-}
-
-/**
- * Displays a temporary button for printing log messages (for debugging only)
- */
-@Composable
-fun TempCompassScreenLogMessages(
-    compassViewModel: CompassViewModel,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        modifier = modifier
-            .fillMaxWidth()
-    ) {
-        // For debugging purposes only
-        Button(
-            onClick = {
-                Log.i(
-                    "tempTag",
-                    "Mutable state data = " +
-                            "${compassViewModel.currentUserLatitude.value} ; " +
-                            "${compassViewModel.currentUserLongitude.value} ; " +
-                            "${compassViewModel.matchedUserLatitude.value} ; " +
-                            "${compassViewModel.matchedUserLongitude.value} ; "
-                )
-                Log.i(
-                    "tempTag",
-                    "Mutable location state data = " +
-                            "${compassViewModel.currentUserLocation.value.latitude} ; " +
-                            "${compassViewModel.currentUserLocation.value.longitude} ; " +
-                            "${compassViewModel.matchedUserLocation.value.latitude} ; " +
-                            "${compassViewModel.matchedUserLocation.value.longitude} ; "
-                )
-                Log.i(
-                    "tempTag",
-                    "Mutable location state bearing = " +
-                            "${compassViewModel.bearing.value}"
-                )
-                Log.i(
-                    "tempTag",
-                    "Mutable location state distance = " +
-                            "${compassViewModel.distance.value}"
-                )
-            },
-            modifier = Modifier
-        ) {
-            Text(
-                text = "Print log message showing currently saved data"
-            )
-        }
-    }
-}
-// endregion TemporaryUI
 
 @Preview(showBackground = true)
 @Composable

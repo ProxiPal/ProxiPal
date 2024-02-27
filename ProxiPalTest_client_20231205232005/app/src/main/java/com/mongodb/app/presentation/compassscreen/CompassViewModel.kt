@@ -28,25 +28,9 @@ class CompassViewModel constructor(
     /*
     ===== Variables =====
      */
-    private val _currentUserLatitude: MutableState<String> = mutableStateOf(
-        "0.0"
-    )
-
-    private val _currentUserLongitude: MutableState<String> = mutableStateOf(
-        "0.0"
-    )
-
     // TODO Replace this with the actual location data
     private val _currentUserLocation: MutableState<UserLocation> = mutableStateOf(
         UserLocation(0.0, 0.0)
-    )
-
-    private val _matchedUserLatitude: MutableState<String> = mutableStateOf(
-        "0.0"
-    )
-
-    private val _matchedUserLongitude: MutableState<String> = mutableStateOf(
-        "0.0"
     )
 
     // TODO Replace this with the actual location data
@@ -64,21 +48,9 @@ class CompassViewModel constructor(
     /*
     ===== Properties =====
      */
-    val currentUserLatitude: State<String>
-        get() = _currentUserLatitude
-
-    val currentUserLongitude: State<String>
-        get() = _currentUserLongitude
-
     // TODO Replace this with the actual location data
     val currentUserLocation: State<UserLocation>
         get() = _currentUserLocation
-
-    val matchedUserLatitude: State<String>
-        get() = _matchedUserLatitude
-
-    val matchedUserLongitude: State<String>
-        get() = _matchedUserLongitude
 
     // TODO Replace this with the actual location data
     val matchedUserLocation: State<UserLocation>
@@ -96,20 +68,16 @@ class CompassViewModel constructor(
 
     init{
         // TODO Temporary setting, replace this with actual values later
-        _currentUserLocation.value.latitude = Random.nextDouble() * 180 - 90
-        _currentUserLocation.value.longitude = Random.nextDouble() * 360 - 180
-        _matchedUserLocation.value.latitude = Random.nextDouble() * 180 - 90
-        _matchedUserLocation.value.longitude = Random.nextDouble() * 360 - 180
+        _currentUserLocation.value.latitude = 0.0
+        _currentUserLocation.value.longitude = 0.0
+        _matchedUserLocation.value.latitude = 0.0
+        _matchedUserLocation.value.longitude = 0.0
 
         // Start the compass screen with the user currently meeting up with their match
         _isMeetingWithMatch.value = true
 
         // TODO Temporary updating of user locations, replace this with actual values later
         viewModelScope.launch{
-            Log.i(
-                "tempTag",
-                "Start of coroutine launch{}"
-            )
             while (isMeetingWithMatch.value){
                 updateUserLocations()
                 delay(MS_BETWEEN_LOCATION_UPDATES)
@@ -153,15 +121,14 @@ class CompassViewModel constructor(
      * Temporary function for updating matching users' locations
      */
     private fun updateUserLocations(){
-        Log.i(
-            "tempTag",
-            "User locations updated"
-        )
-        // Update user location values by a random value in range [-1, 1]
-        _currentUserLocation.value.latitude += Random.nextDouble(-1.0, 1.0)
-        _currentUserLocation.value.longitude += Random.nextDouble(-1.0, 1.0)
-        _matchedUserLocation.value.latitude += Random.nextDouble(-1.0, 1.0)
-        _matchedUserLocation.value.longitude += Random.nextDouble(-1.0, 1.0)
+        // Update user location values by a random value in range [-10, 10]
+        val minimum = -10.0
+        val maximum = 10.0
+        updateCurrentUserLatitude(Random.nextDouble(minimum, maximum))
+        updateCurrentUserLongitude(Random.nextDouble(minimum, maximum) * 2)
+        updateMatchedUserLatitude(Random.nextDouble(minimum, maximum))
+        updateMatchedUserLongitude(Random.nextDouble(minimum, maximum) * 2)
+        updateMeasurements()
     }
 
     /**
@@ -181,10 +148,9 @@ class CompassViewModel constructor(
     /**
      * Updates the current user's latitude
      */
-    fun updateCurrentUserLatitude(newLatitude: String){
-        _currentUserLatitude.value = newLatitude
-        if (newLatitude.toDoubleOrNull() != null && isValidLatitude(newLatitude.toDouble())){
-            _currentUserLocation.value.latitude = newLatitude.toDouble()
+    private fun updateCurrentUserLatitude(newLatitude: Double){
+        if (isValidLatitude(newLatitude)){
+            _currentUserLocation.value.latitude = newLatitude
             updateMeasurements()
         }
     }
@@ -192,10 +158,9 @@ class CompassViewModel constructor(
     /**
      * Updates the current user's longitude
      */
-    fun updateCurrentUserLongitude(newLongitude: String){
-        _currentUserLongitude.value = newLongitude
-        if (newLongitude.toDoubleOrNull() != null && isValidLongitude(newLongitude.toDouble())){
-            _currentUserLocation.value.longitude = newLongitude.toDouble()
+    private fun updateCurrentUserLongitude(newLongitude: Double){
+        if (isValidLongitude(newLongitude)){
+            _currentUserLocation.value.longitude = newLongitude
             updateMeasurements()
         }
     }
@@ -203,10 +168,9 @@ class CompassViewModel constructor(
     /**
      * Updates the matched user's latitude
      */
-    fun updateMatchedUserLatitude(newLatitude: String) {
-        _matchedUserLatitude.value = newLatitude
-        if (newLatitude.toDoubleOrNull() != null && isValidLatitude(newLatitude.toDouble())){
-            _matchedUserLocation.value.latitude = newLatitude.toDouble()
+    private fun updateMatchedUserLatitude(newLatitude: Double) {
+        if (isValidLatitude(newLatitude)){
+            _matchedUserLocation.value.latitude = newLatitude
             updateMeasurements()
         }
     }
@@ -214,10 +178,9 @@ class CompassViewModel constructor(
     /**
      * Updates the matched user's longitude
      */
-    fun updateMatchedUserLongitude(newLongitude: String) {
-        _matchedUserLongitude.value = newLongitude
-        if (newLongitude.toDoubleOrNull() != null && isValidLongitude(newLongitude.toDouble())){
-            _matchedUserLocation.value.longitude = newLongitude.toDouble()
+    private fun updateMatchedUserLongitude(newLongitude: Double) {
+        if (isValidLongitude(newLongitude)){
+            _matchedUserLocation.value.longitude = newLongitude
             updateMeasurements()
         }
     }
