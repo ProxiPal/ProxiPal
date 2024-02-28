@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -38,24 +39,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mongodb.app.navigation.NavigationDestination
+//import com.mongodb.app.navigation.NavigationDestination
 import com.mongodb.app.presentation.login.LoginViewModel
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.theme.MyApplicationTheme
 
 // navigation details
-object RegisterScreen : NavigationDestination {
-    override val route = "register_scaffold"
-    override val title = "Create Account"
-}
+//object RegisterScreen : NavigationDestination {
+//    override val route = "register_scaffold"
+//    override val title = "Create Account"
+//}
 
 // builds the registration scaffold with topbar and registermain
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-fun RegisterScaffold(loginViewModel: LoginViewModel,  navigateBack: ()-> Unit) {
+fun RegisterScaffold(loginViewModel: LoginViewModel, toggleRegistrationScreen: () -> Unit) {
     Scaffold(
-        topBar = { RegisterTopBar(navigateBack = navigateBack) },
+        topBar = { RegisterTopBar(toggleRegistrationScreen = toggleRegistrationScreen) },
         content = { RegisterMain(loginViewModel) },
         )
 }
@@ -118,12 +119,12 @@ fun RegisterMain(loginViewModel: LoginViewModel){
 // top bar for register to navigate back to login screen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterTopBar(navigateBack:()->Unit){
+fun RegisterTopBar(toggleRegistrationScreen:  ()->Unit){
     TopAppBar(
         title = {Text(text = "Create Account", color = Color.White)},
         navigationIcon = {
-            IconButton(onClick = navigateBack) {
-                Icon(Icons.Filled.ArrowBack, contentDescription ="back", tint = Color.White )
+            IconButton(onClick = toggleRegistrationScreen) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription ="back", tint = Color.White )
             }
         },
         colors = TopAppBarDefaults.smallTopAppBarColors(containerColor =Color(0xFFEF8524) )
@@ -131,12 +132,12 @@ fun RegisterTopBar(navigateBack:()->Unit){
 }
 
 // preview of registerscaffold
-@Composable
-@Preview
-fun registerpreview(){
-    MyApplicationTheme {
-        RegisterScaffold(loginViewModel = LoginViewModel(), navigateBack = {})
-
-
-    }
-}
+//@Composable
+//@Preview
+//fun registerpreview(){
+//    MyApplicationTheme {
+//        RegisterScaffold(loginViewModel = LoginViewModel(), navigateBack = {})
+//
+//
+//    }
+//}

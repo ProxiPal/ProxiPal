@@ -43,7 +43,7 @@ import androidx.core.content.ContextCompat.startActivity
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.mongodb.app.ComposeLoginActivity
 
-import com.mongodb.app.navigation.NavigationDestination
+//import com.mongodb.app.navigation.NavigationDestination
 import com.mongodb.app.presentation.login.LoginAction
 import com.mongodb.app.presentation.login.LoginViewModel
 import com.mongodb.app.ui.theme.Blue
@@ -55,22 +55,30 @@ import com.mongodb.app.ui.userprofiles.ProfileTopAppBar
 import com.mongodb.app.ui.userprofiles.gridItems
 
 // navigation details
-object HomeDestination : NavigationDestination {
-    override val route = "home"
-    override val title = "ProxiPal"
-}
+//object HomeDestination : NavigationDestination {
+//    override val route = "home"
+//    override val title = "ProxiPal"
+//}
 
-// builds login scaffold with the bottom bar and login main
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-fun LoginScaffold(loginViewModel: LoginViewModel, navigateToRegister: ()->Unit) {
-    Scaffold(
-        bottomBar = { LoginBottomBar(navigateToRegister = navigateToRegister) },
-        content ={
-                LoginMain(loginViewModel = loginViewModel)
-        } )
+fun AccountScaffold(loginViewModel: LoginViewModel) {
+    var isRegistrationScreen by remember { mutableStateOf(false) }
+
+    if (!isRegistrationScreen) {
+        LoginScaffold(loginViewModel = loginViewModel) {
+            isRegistrationScreen = true
+        }
+    } else {
+        RegisterScaffold(loginViewModel=loginViewModel){
+            isRegistrationScreen = false
+        }
+    }
 }
+// builds login scaffold with the bottom bar and login main
+
 
 // Main content of login scaffold, takes user's email and password input and logs them in if they have an account
 @OptIn(ExperimentalMaterial3Api::class)
@@ -109,40 +117,52 @@ fun LoginMain(loginViewModel: LoginViewModel){
 
 // Bottom bar for login scaffold, directs user to register page
 @Composable
-fun LoginBottomBar(navigateToRegister:()->Unit){
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(60.dp),
-            verticalArrangement = Arrangement.Bottom,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row(
-                modifier = Modifier,
-                verticalAlignment = Alignment.CenterVertically
+fun LoginBottomBar(toggleRegistrationScreen: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(60.dp),
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier,
+            verticalAlignment = Alignment.CenterVertically
+        )
+        {
+            Text(text = "No account yet?")
+            TextButton(
+                onClick = { toggleRegistrationScreen() },
+                colors = ButtonDefaults.textButtonColors(contentColor = Color.Gray)
             )
             {
-                Text(text = "No account yet?")
-                TextButton(
-                    onClick = navigateToRegister,
-                    colors = ButtonDefaults.textButtonColors(contentColor = Color.Gray)
-                )
-                {
-                    Text("Register here")
-                }
-
+                Text("Register here")
             }
+
         }
-}
-
-// preview of login scaffold
-@Composable
-@Preview
-fun LoginPreview(){
-    MyApplicationTheme {
-        LoginScaffold(loginViewModel = LoginViewModel(), navigateToRegister = {})
-        LoginBottomBar(navigateToRegister = {})
-
-
     }
 }
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+    fun LoginScaffold(loginViewModel: LoginViewModel, toggleRegistrationScreen: () -> Unit) {
+        Scaffold(
+            bottomBar = { LoginBottomBar(toggleRegistrationScreen) },
+            content = {
+                LoginMain(loginViewModel = loginViewModel)
+            }
+        )
+    }
+
+
+// preview of login scaffold
+//@Composable
+//@Preview
+//fun LoginPreview(){
+//    MyApplicationTheme {
+//        LoginScaffold(loginViewModel = LoginViewModel(), navigateToRegister = {})
+//        LoginBottomBar(navigateToRegister = {})
+//
+//
+//    }
+//}

@@ -57,15 +57,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mongodb.app.R
-import com.mongodb.app.navigation.NavigationDestination
+
 import com.mongodb.app.presentation.login.LoginViewModel
 import com.mongodb.app.ui.login.RegisterScaffold
 import com.mongodb.app.ui.theme.MyApplicationTheme
 // navigation details
-object InterestDestination : NavigationDestination {
-    override val route = "interest"
-    override val title = "Interests"
-}
+
 
 // data class for item data: id of image , and name
 data class GridItemData(
