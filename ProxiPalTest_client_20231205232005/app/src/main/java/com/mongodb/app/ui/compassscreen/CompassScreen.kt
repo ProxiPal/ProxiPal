@@ -2,7 +2,6 @@
 
 package com.mongodb.app.ui.compassscreen
 
-import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -20,16 +19,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -48,7 +44,6 @@ import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.compassscreen.CompassConnectionType
 import com.mongodb.app.data.compassscreen.PERMISSIONS_FOR_DEVICE_CONNECTIONS
-import com.mongodb.app.data.compassscreen.UserLocation
 import com.mongodb.app.presentation.compassscreen.CompassCommunication
 import com.mongodb.app.presentation.compassscreen.CompassViewModel
 import com.mongodb.app.ui.components.SingleButtonRow
@@ -192,7 +187,7 @@ class CompassScreen : ComponentActivity() {
         // Ask user to grant permissions if they are not allowed already
         if (!hasAllPermissionsGranted) {
             Log.i(
-                "tempTag",
+                TAG(),
                 "CompassScreen: Not all permissions are granted, asking now"
             )
 //            ActivityCompat.requestPermissions(
@@ -201,7 +196,7 @@ class CompassScreen : ComponentActivity() {
         }
         else{
             Log.i(
-                "tempTag",
+                TAG(),
                 "CompassScreen: It seems permissions are already granted, but asking anyway"
             )
 //            ActivityCompat.requestPermissions(
@@ -214,7 +209,7 @@ class CompassScreen : ComponentActivity() {
         val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()){
                 isGranted: Boolean ->
             Log.i(
-                "tempTag",
+                TAG(),
                 "CompassScreen: Permission launcher granted? = \"$isGranted\""
             )
         }
@@ -224,7 +219,7 @@ class CompassScreen : ComponentActivity() {
                 ContextCompat.checkSelfPermission(this, permission)
                         == PackageManager.PERMISSION_GRANTED -> {
                     Log.i(
-                        "tempTag",
+                        TAG(),
                         "CompassScreen: Permission granted = \"$permission\""
                     )
                 }
@@ -233,14 +228,14 @@ class CompassScreen : ComponentActivity() {
                     this, permission
                 ) -> {
                     Log.i(
-                        "tempTag",
+                        TAG(),
                         "CompassScreen: Permission not granted = \"$permission\""
                     )
                 }
 
                 else -> {
                     Log.i(
-                        "tempTag",
+                        TAG(),
                         "CompassScreen: Permission not asked = \"$permission\""
                     )
                     requestPermissionLauncher.launch(

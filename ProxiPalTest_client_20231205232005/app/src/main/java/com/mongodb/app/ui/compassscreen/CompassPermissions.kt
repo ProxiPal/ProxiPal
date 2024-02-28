@@ -26,6 +26,7 @@ import androidx.core.content.ContextCompat
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.mongodb.app.R
+import com.mongodb.app.TAG
 import com.mongodb.app.data.compassscreen.PERMISSIONS_FOR_DEVICE_CONNECTIONS
 import com.mongodb.app.ui.theme.MyApplicationTheme
 
@@ -42,7 +43,7 @@ class CompassPermissions : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         Log.i(
-            "tempTag",
+            TAG(),
             "CompassPermissions: All permissions allowed? = \"${areAllPermissionsGranted()}\""
         )
 

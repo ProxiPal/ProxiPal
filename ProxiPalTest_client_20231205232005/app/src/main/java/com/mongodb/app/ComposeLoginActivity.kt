@@ -44,7 +44,7 @@ class ComposeLoginActivity : ComponentActivity() {
             else
                 startActivity(Intent(
                     this,
-                    CompassPermissions::class.java
+                    CompassScreen::class.java
 //                    UserProfileScreen::class.java
                 ))
             finish()
@@ -66,7 +66,7 @@ class ComposeLoginActivity : ComponentActivity() {
                             )
                             else Intent(
                                 this@ComposeLoginActivity,
-                                CompassPermissions::class.java
+                                CompassScreen::class.java
 //                                UserProfileScreen::class.java
                             )
                             startActivity(intent)

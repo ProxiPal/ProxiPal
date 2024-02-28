@@ -18,6 +18,7 @@ import com.google.android.gms.nearby.connection.Payload
 import com.google.android.gms.nearby.connection.PayloadCallback
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate
 import com.google.android.gms.nearby.connection.Strategy
+import com.mongodb.app.TAG
 import com.mongodb.app.data.compassscreen.CompassConnectionType
 
 class CompassCommunication constructor(
@@ -63,7 +64,7 @@ class CompassCommunication constructor(
     private val payloadCallback: PayloadCallback = object : PayloadCallback() {
         override fun onPayloadReceived(endpointId: String, payload: Payload) {
             Log.i(
-                "tempTag",
+                TAG(),
                 "CompassCommunication: Start of OnPayloadReceived()"
             )
             payload.asBytes()?.let {
@@ -75,12 +76,12 @@ class CompassCommunication constructor(
 
         override fun onPayloadTransferUpdate(endpointId: String, update: PayloadTransferUpdate) {
             Log.i(
-                "tempTag",
+                TAG(),
                 "CompassCommunication: Start of OnPayloadTransferUpdate()"
             )
             if (update.status == PayloadTransferUpdate.Status.SUCCESS) {
                 Log.i(
-                    "tempTag",
+                    TAG(),
                     "CompassCommunication: Payload transfer success"
                 )
                 // TODO Logic for after the payload transfer update between users goes here
@@ -92,7 +93,7 @@ class CompassCommunication constructor(
     private val connectionLifecycleCallback = object : ConnectionLifecycleCallback() {
         override fun onConnectionInitiated(endpointId: String, info: ConnectionInfo) {
             Log.i(
-                "tempTag",
+                TAG(),
                 "CompassCommunication: Start of OnConnectionInitiated()"
             )
             connectionsClient.acceptConnection(endpointId, payloadCallback)
@@ -101,12 +102,12 @@ class CompassCommunication constructor(
 
         override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {
             Log.i(
-                "tempTag",
+                TAG(),
                 "CompassCommunication: Start of OnConnectionResult()"
             )
             if (result.status.isSuccess) {
                 Log.i(
-                    "tempTag",
+                    TAG(),
                     "CompassCommunication: Connection success"
                 )
                 connectionsClient.stopAdvertising()
@@ -117,7 +118,7 @@ class CompassCommunication constructor(
 
         override fun onDisconnected(endpointId: String) {
             Log.i(
-                "tempTag",
+                TAG(),
                 "CompassCommunication: Start of OnDisconnected()"
             )
         }
@@ -126,7 +127,7 @@ class CompassCommunication constructor(
     private val endpointDiscoveryCallback = object : EndpointDiscoveryCallback() {
         override fun onEndpointFound(endpointId: String, info: DiscoveredEndpointInfo) {
             Log.i(
-                "tempTag",
+                TAG(),
                 "CompassCommunication: Start of OnEndpointFound()"
             )
             connectionsClient.requestConnection(
@@ -138,7 +139,7 @@ class CompassCommunication constructor(
 
         override fun onEndpointLost(endpointId: String) {
             Log.i(
-                "tempTag",
+                TAG(),
                 "CompassCommunication: Start of OnEndpointLost()"
             )
         }
@@ -244,14 +245,14 @@ class CompassCommunication constructor(
         when (connectionType.value) {
             CompassConnectionType.OFFLINE -> {
                 Log.i(
-                    "tempTag",
+                    TAG(),
                     "CompassCommunication: Now OFFLINE"
                 )
                 disconnect()
             }
             CompassConnectionType.WAITING -> {
                 Log.i(
-                    "tempTag",
+                    TAG(),
                     "CompassCommunication: Now WAITING"
                 )
                 startDiscovery()
@@ -259,13 +260,13 @@ class CompassCommunication constructor(
             }
             CompassConnectionType.MEETING -> {
                 Log.i(
-                    "tempTag",
+                    TAG(),
                     "CompassCommunication: Now MEETING"
                 )
             }
             else -> {
                 Log.i(
-                    "tempTag",
+                    TAG(),
                     "CompassCommunication: Unknown connection type \"${connectionType.value}\""
                 )
             }
