@@ -1,6 +1,5 @@
 package com.mongodb.app.ui.compassscreen
 
-import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -9,7 +8,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Text
@@ -27,7 +25,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.mongodb.app.R
 import com.mongodb.app.TAG
-import com.mongodb.app.data.compassscreen.PERMISSIONS_FOR_DEVICE_CONNECTIONS
+import com.mongodb.app.data.compassscreen.ALL_NEARBY_API_PERMISSIONS
 import com.mongodb.app.ui.theme.MyApplicationTheme
 
 // TODO Should navigate to CompassScreen.kt after a user accepts permissions here
@@ -50,7 +48,7 @@ class CompassPermissions : ComponentActivity() {
         setContent {
             MyApplicationTheme {
                 CompassPermissionsLayout(
-                    requiredPermissions = PERMISSIONS_FOR_DEVICE_CONNECTIONS
+                    requiredPermissions = ALL_NEARBY_API_PERMISSIONS
                 )
             }
         }
@@ -60,7 +58,7 @@ class CompassPermissions : ComponentActivity() {
      * Checks if all necessary permissions are granted or not
      */
     private fun areAllPermissionsGranted(): Boolean {
-        for (permission in PERMISSIONS_FOR_DEVICE_CONNECTIONS) {
+        for (permission in ALL_NEARBY_API_PERMISSIONS) {
             if (ContextCompat.checkSelfPermission(this, permission)
                 != PackageManager.PERMISSION_GRANTED
             ) {
@@ -185,13 +183,8 @@ fun CompassPermissionsPopup(
 @Composable
 fun CompassPermissionsPopupPreview() {
     MyApplicationTheme {
-        val dummyPermissions = listOf(
-            "dummyPermission0",
-            "dummyPermission1",
-            Manifest.permission.BLUETOOTH
-        )
         CompassPermissionsPopup(
-            requiredPermissions = dummyPermissions,
+            requiredPermissions = ALL_NEARBY_API_PERMISSIONS,
             shouldShowPopup = true,
             onPermissionsAllowed = {},
             onPermissionsDenied = {}

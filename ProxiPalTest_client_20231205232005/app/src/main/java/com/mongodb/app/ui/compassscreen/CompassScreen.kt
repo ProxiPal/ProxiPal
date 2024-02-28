@@ -42,9 +42,9 @@ import com.mongodb.app.R
 import com.mongodb.app.TAG
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
+import com.mongodb.app.data.compassscreen.ALL_NEARBY_API_PERMISSIONS
+import com.mongodb.app.data.compassscreen.ALL_NEARBY_API_PERMISSIONS_ARRAY
 import com.mongodb.app.data.compassscreen.CompassConnectionType
-import com.mongodb.app.data.compassscreen.PERMISSIONS_FOR_DEVICE_CONNECTIONS
-import com.mongodb.app.data.compassscreen.PERMISSIONS_FOR_DEVICE_CONNECTIONS_ARRAY
 import com.mongodb.app.presentation.compassscreen.CompassCommunication
 import com.mongodb.app.presentation.compassscreen.CompassViewModel
 import com.mongodb.app.ui.components.SingleButtonRow
@@ -177,7 +177,7 @@ class CompassScreen : ComponentActivity() {
         // Ask for permissions before allowing device connections
         // Check that the required permissions are allowed by the user
         var hasAllPermissionsGranted = true
-        for (permission in PERMISSIONS_FOR_DEVICE_CONNECTIONS) {
+        for (permission in ALL_NEARBY_API_PERMISSIONS) {
             if (ContextCompat.checkSelfPermission(this, permission)
                 != PackageManager.PERMISSION_GRANTED
             ) {
@@ -192,7 +192,7 @@ class CompassScreen : ComponentActivity() {
                 "CompassScreen: Not all permissions are granted, asking now"
             )
             ActivityCompat.requestPermissions(
-                this, PERMISSIONS_FOR_DEVICE_CONNECTIONS_ARRAY, REQUEST_CODE_REQUIRED_PERMISSIONS
+                this, ALL_NEARBY_API_PERMISSIONS_ARRAY, REQUEST_CODE_REQUIRED_PERMISSIONS
             )
         }
         else{
@@ -201,7 +201,7 @@ class CompassScreen : ComponentActivity() {
                 "CompassScreen: It seems permissions are already granted, but asking anyway"
             )
             ActivityCompat.requestPermissions(
-                this, PERMISSIONS_FOR_DEVICE_CONNECTIONS_ARRAY, REQUEST_CODE_REQUIRED_PERMISSIONS
+                this, ALL_NEARBY_API_PERMISSIONS_ARRAY, REQUEST_CODE_REQUIRED_PERMISSIONS
             )
         }
     }
@@ -215,7 +215,7 @@ class CompassScreen : ComponentActivity() {
             )
         }
 
-        for (permission in PERMISSIONS_FOR_DEVICE_CONNECTIONS){
+        for (permission in ALL_NEARBY_API_PERMISSIONS){
             when {
                 ContextCompat.checkSelfPermission(this, permission)
                         == PackageManager.PERMISSION_GRANTED -> {
@@ -242,6 +242,12 @@ class CompassScreen : ComponentActivity() {
                     )
                     requestPermissionLauncher.launch(
                         permission
+                    )
+                    val temp = (ContextCompat.checkSelfPermission(this, permission)
+                    == PackageManager.PERMISSION_GRANTED)
+                    Log.i(
+                        TAG(),
+                        "CompassScreen: Permission after asking = \"$temp\""
                     )
                 }
             }

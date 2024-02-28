@@ -16,6 +16,8 @@
 <!--    ACCESS_COARSE_LOCATION is also needed but is already listed above -->
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <!--    For compass screen connections (Need a way to communicate with another device nearby) -->
 
     <application
