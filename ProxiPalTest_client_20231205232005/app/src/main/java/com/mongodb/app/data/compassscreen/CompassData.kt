@@ -33,3 +33,17 @@ val PERMISSIONS_FOR_DEVICE_CONNECTIONS = listOf(
     Manifest.permission.BLUETOOTH_SCAN,
     Manifest.permission.ACCESS_COARSE_LOCATION
 )
+
+/**
+ * Same as [PERMISSIONS_FOR_DEVICE_CONNECTIONS] but as an array instead of a list
+ */
+val PERMISSIONS_FOR_DEVICE_CONNECTIONS_ARRAY = arrayOf(
+    Manifest.permission.BLUETOOTH,
+    Manifest.permission.BLUETOOTH_ADMIN,
+    Manifest.permission.ACCESS_WIFI_STATE,
+    Manifest.permission.CHANGE_WIFI_STATE,
+    Manifest.permission.ACCESS_FINE_LOCATION,
+    Manifest.permission.NEARBY_WIFI_DEVICES,
+    Manifest.permission.BLUETOOTH_SCAN,
+    Manifest.permission.ACCESS_COARSE_LOCATION
+)

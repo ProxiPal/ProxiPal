@@ -44,6 +44,7 @@ import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.compassscreen.CompassConnectionType
 import com.mongodb.app.data.compassscreen.PERMISSIONS_FOR_DEVICE_CONNECTIONS
+import com.mongodb.app.data.compassscreen.PERMISSIONS_FOR_DEVICE_CONNECTIONS_ARRAY
 import com.mongodb.app.presentation.compassscreen.CompassCommunication
 import com.mongodb.app.presentation.compassscreen.CompassViewModel
 import com.mongodb.app.ui.components.SingleButtonRow
@@ -190,18 +191,18 @@ class CompassScreen : ComponentActivity() {
                 TAG(),
                 "CompassScreen: Not all permissions are granted, asking now"
             )
-//            ActivityCompat.requestPermissions(
-//                this, PERMISSIONS_FOR_DEVICE_CONNECTIONS, REQUEST_CODE_REQUIRED_PERMISSIONS
-//            )
+            ActivityCompat.requestPermissions(
+                this, PERMISSIONS_FOR_DEVICE_CONNECTIONS_ARRAY, REQUEST_CODE_REQUIRED_PERMISSIONS
+            )
         }
         else{
             Log.i(
                 TAG(),
                 "CompassScreen: It seems permissions are already granted, but asking anyway"
             )
-//            ActivityCompat.requestPermissions(
-//                this, PERMISSIONS_FOR_DEVICE_CONNECTIONS, REQUEST_CODE_REQUIRED_PERMISSIONS
-//            )
+            ActivityCompat.requestPermissions(
+                this, PERMISSIONS_FOR_DEVICE_CONNECTIONS_ARRAY, REQUEST_CODE_REQUIRED_PERMISSIONS
+            )
         }
     }
 
@@ -231,6 +232,7 @@ class CompassScreen : ComponentActivity() {
                         TAG(),
                         "CompassScreen: Permission denied = \"$permission\""
                     )
+                    // TODO Show some UI for rationale behind requesting a permission
                 }
 
                 else -> {
