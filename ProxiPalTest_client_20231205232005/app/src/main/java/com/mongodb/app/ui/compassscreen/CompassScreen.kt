@@ -9,6 +9,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.CallSuper
 import androidx.annotation.StringRes
@@ -38,6 +39,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.mongodb.app.R
 import com.mongodb.app.TAG
@@ -64,7 +67,7 @@ TODO Current plan for order of events (See CompassConnectionType.kt for more)
 (3) If a user cancels the connection
 (a) Show the cancellation message to both users
  */
-class CompassScreen : ComponentActivity(){
+class CompassScreen : ComponentActivity() {
     /*
     ===== Variables =====
      */
@@ -73,7 +76,7 @@ class CompassScreen : ComponentActivity(){
         }
     }
 
-    private val compassViewModel: CompassViewModel by viewModels{
+    private val compassViewModel: CompassViewModel by viewModels {
         CompassViewModel.factory(repository, this)
     }
 
@@ -98,6 +101,8 @@ class CompassScreen : ComponentActivity(){
             "CompassScreen: Start of OnCreate()"
         )
 
+        verifyPermissions2()
+
         // Need to update repository when a configuration change occurs
         // ... otherwise app will crash when trying to access Realm after it has closed
         compassViewModel.updateRepository(
@@ -112,7 +117,7 @@ class CompassScreen : ComponentActivity(){
         compassCommunication!!.setConnectionsClient(this)
         compassCommunication!!.setCompassViewModel(compassViewModel)
 
-        setContent{
+        setContent {
             MyApplicationTheme {
                 CompassScreenLayout(
                     compassViewModel = compassViewModel,
@@ -125,29 +130,6 @@ class CompassScreen : ComponentActivity(){
     @CallSuper
     override fun onStart() {
         super.onStart()
-        // Check that the required permissions are allowed by the user
-        // Ask user to grant permissions if they are not allowed already
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-            requestPermissions(
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                REQUEST_CODE_REQUIRED_PERMISSIONS
-            )
-        }
-        // Ask for permissions before allowing device connections
-        if (checkSelfPermission(Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED
-            || checkSelfPermission(Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED
-            || checkSelfPermission(Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED
-            || checkSelfPermission(Manifest.permission.CHANGE_WIFI_STATE) != PackageManager.PERMISSION_GRANTED){
-            requestPermissions(
-                arrayOf(
-                    Manifest.permission.BLUETOOTH,
-                    Manifest.permission.BLUETOOTH_ADMIN,
-                    Manifest.permission.ACCESS_WIFI_STATE,
-                    Manifest.permission.CHANGE_WIFI_STATE
-                ),
-                REQUEST_CODE_REQUIRED_PERMISSIONS
-            )
-        }
 
         // This screen is entered only when the matched user accepts the connection
         // ... so as soon as this screen is shown, start the connection process
@@ -188,6 +170,86 @@ class CompassScreen : ComponentActivity(){
         super.onDestroy()
         // Repository must be closed to free resources
         repository.close()
+    }
+
+    private fun verifyPermissions(){
+        // Ask for permissions before allowing device connections
+        val permissions = arrayOf(
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN,
+            Manifest.permission.ACCESS_WIFI_STATE,
+            Manifest.permission.CHANGE_WIFI_STATE,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.NEARBY_WIFI_DEVICES,
+            Manifest.permission.BLUETOOTH_SCAN
+        )
+        // Check that the required permissions are allowed by the user
+        var hasAllPermissionsGranted = true
+        for (permission in permissions) {
+            if (ContextCompat.checkSelfPermission(this, permission)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                hasAllPermissionsGranted = false
+                break
+            }
+        }
+        // Ask user to grant permissions if they are not allowed already
+        if (!hasAllPermissionsGranted) {
+            Log.i(
+                "tempTag",
+                "CompassScreen: Not all permissions are granted, asking now"
+            )
+            ActivityCompat.requestPermissions(
+                this, permissions, REQUEST_CODE_REQUIRED_PERMISSIONS
+            )
+        }
+        else{
+            Log.i(
+                "tempTag",
+                "CompassScreen: It seems permissions are already granted, but asking anyway"
+            )
+            ActivityCompat.requestPermissions(
+                this, permissions, REQUEST_CODE_REQUIRED_PERMISSIONS
+            )
+        }
+    }
+
+    private fun verifyPermissions2(){
+        val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()){
+                isGranted: Boolean ->
+            Log.i(
+                "tempTag",
+                "CompassScreen: Permission launcher granted? = \"$isGranted\""
+            )
+        }
+        when {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH)
+                    == PackageManager.PERMISSION_GRANTED -> {
+                Log.i(
+                    "tempTag",
+                    "CompassScreen: Permission granted"
+                )
+            }
+
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                this, Manifest.permission.BLUETOOTH
+            ) -> {
+                Log.i(
+                    "tempTag",
+                    "CompassScreen: Permission not granted"
+                )
+            }
+
+            else -> {
+                Log.i(
+                    "tempTag",
+                    "CompassScreen: Permission not asked"
+                )
+                requestPermissionLauncher.launch(
+                    Manifest.permission.BLUETOOTH
+                )
+            }
+        }
     }
 }
 
@@ -266,7 +328,7 @@ fun CompassScreenBodyContent(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        when (compassCommunication.connectionType.value){
+        when (compassCommunication.connectionType.value) {
             CompassConnectionType.MEETING -> {
                 CompassScreenCompassVisual(
                     compassViewModel = compassViewModel
@@ -367,7 +429,7 @@ fun CompassScreenMeasurementText(
 fun CompassScreenReturnButton(
     onButtonClick: (() -> Unit),
     modifier: Modifier = Modifier
-){
+) {
     SingleButtonRow(
         onButtonClick = {
             onButtonClick()
