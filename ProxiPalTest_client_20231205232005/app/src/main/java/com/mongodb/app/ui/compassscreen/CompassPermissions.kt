@@ -6,7 +6,9 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
@@ -17,13 +19,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.mongodb.app.R
 import com.mongodb.app.ui.theme.MyApplicationTheme
 
+/**
+ * Displays the screen for the user to accept or deny permissions needed for communicating
+ * with their matched user
+ */
 class CompassPermissions : ComponentActivity() {
     /*
     ===== Variables =====
@@ -37,7 +45,6 @@ class CompassPermissions : ComponentActivity() {
         Manifest.permission.NEARBY_WIFI_DEVICES,
         Manifest.permission.BLUETOOTH_SCAN
     )
-    var areAllPermissionsGranted = true
 
 
     /*
@@ -46,11 +53,9 @@ class CompassPermissions : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        checkPermissions()
-
         Log.i(
             "tempTag",
-            "CompassPermissions: All permissions allowed? = \"$areAllPermissionsGranted\""
+            "CompassPermissions: All permissions allowed? = \"${areAllPermissionsGranted()}\""
         )
 
         setContent {
@@ -62,17 +67,24 @@ class CompassPermissions : ComponentActivity() {
         }
     }
 
-    private fun checkPermissions() {
+    /**
+     * Checks if all necessary permissions are granted or not
+     */
+    private fun areAllPermissionsGranted(): Boolean {
         for (permission in requiredPermissions) {
             if (ContextCompat.checkSelfPermission(this, permission)
                 != PackageManager.PERMISSION_GRANTED
             ) {
-                areAllPermissionsGranted = false
+                return false
             }
         }
+        return true
     }
 }
 
+/**
+ * Displays the main permissions screen
+ */
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun CompassPermissionsLayout(
@@ -149,11 +161,12 @@ fun CompassPermissionsPopup(
     modifier: Modifier = Modifier
 ) {
     var permissionsString = ""
+    val permissionDelimiter = "android.permission."
     for (permission in requiredPermissions) {
         permissionsString += "\n* "
         // Shorten permission names when printed out, if possible
-        permissionsString += if (permission.indexOf("android.permission.") != -1) {
-            permission.substringAfter("android.permission.")
+        permissionsString += if (permission.indexOf(permissionDelimiter) != -1) {
+            permission.substringAfter(permissionDelimiter)
         } else {
             permission
         }
@@ -168,13 +181,17 @@ fun CompassPermissionsPopup(
             },
             title = {
                 Text(
-                    text = "Required permissions: $permissionsString"
+                    text = stringResource(
+                        id = R.string.compass_permissions_required_permissions_list,
+                        permissionsString
+                    )
                 )
             },
             text = {
                 Text(
-                    text = "To be able to detect and connect with other nearby devices, " +
-                            "these permissions are required"
+                    text = stringResource(
+                        id = R.string.compass_permissions_required_permissions_rationale
+                    )
                 )
             },
             confirmButton = {
@@ -182,7 +199,9 @@ fun CompassPermissionsPopup(
                     onClick = { onPermissionsAllowed() }
                 ) {
                     Text(
-                        text = "Confirm"
+                        text = stringResource(
+                            id = R.string.compass_permissions_confirm_permissions_button
+                        )
                     )
                 }
             },
@@ -194,7 +213,9 @@ fun CompassPermissionsPopup(
                     }
                 ) {
                     Text(
-                        text = "Dismiss"
+                        text = stringResource(
+                            id = R.string.compass_permissions_dismiss_permissions_button
+                        )
                     )
                 }
             },
@@ -202,7 +223,7 @@ fun CompassPermissionsPopup(
         )
     }
     if (!shouldShowPopup && shouldShowPermissionsDeniedMessage) {
-        CompassPermissionsNotGrantedMessage()
+        CompassPermissionsDenied()
     }
 }
 
@@ -228,24 +249,28 @@ fun CompassPermissionsPopupPreview() {
  * Displays a simple message when the user does not allow the required permissions
  */
 @Composable
-fun CompassPermissionsNotGrantedMessage(
+fun CompassPermissionsDenied(
     modifier: Modifier = Modifier
 ) {
     Column(
+        verticalArrangement = Arrangement.Center,
         modifier = modifier
-            .fillMaxWidth()
+            .fillMaxSize()
     ) {
         Text(
-            text = "Cannot connect to other devices without required permissions",
-            textAlign = TextAlign.Center
+            text = stringResource(
+                id = R.string.compass_permissions_screen_permissions_denied
+            ),
+            textAlign = TextAlign.Center,
+            softWrap = true
         )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun CompassPermissionsNotGrantedMessagePreview() {
+fun CompassPermissionsDeniedPreview() {
     MyApplicationTheme {
-        CompassPermissionsNotGrantedMessage()
+        CompassPermissionsDenied()
     }
 }

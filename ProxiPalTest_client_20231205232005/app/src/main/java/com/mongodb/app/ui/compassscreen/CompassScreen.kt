@@ -363,7 +363,7 @@ fun CompassScreenBodyContent(
             // Show button to go back
             CompassConnectionType.WAITING -> {
                 SingleTextRow(
-                    textId = R.string.compass_screen_connection_error_message
+                    textId = R.string.compass_screen_awaiting_connection_message
                 )
                 CompassScreenReturnButton(
                     onButtonClick = {
@@ -374,7 +374,7 @@ fun CompassScreenBodyContent(
             // The current or matched user canceled the connection
             CompassConnectionType.OFFLINE -> {
                 SingleTextRow(
-                    textId = R.string.compass_screen_canceled_error_message
+                    textId = R.string.compass_screen_canceled_connection_message
                 )
                 CompassScreenReturnButton(
                     onButtonClick = {
