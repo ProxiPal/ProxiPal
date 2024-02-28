@@ -220,11 +220,13 @@ fun UserProfileLayout(
         bottomBar = { ProxiPalBottomAppBar(navController) },
         modifier = modifier
     ) { innerPadding ->
-        HomeScreen(navController = navController, viewModel = homeViewModel)
-        UserProfileBody(
-            contentPadding = innerPadding,
-            userProfileViewModel = userProfileViewModel
-        )
+        Column {
+            UserProfileBody(
+                contentPadding = innerPadding,
+                userProfileViewModel = userProfileViewModel
+            )
+            HomeScreen(navController = navController, viewModel = homeViewModel)
+        }
     }
 }
 
