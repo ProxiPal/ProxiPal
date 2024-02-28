@@ -26,27 +26,15 @@ import androidx.core.content.ContextCompat
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.mongodb.app.R
+import com.mongodb.app.data.compassscreen.PERMISSIONS_FOR_DEVICE_CONNECTIONS
 import com.mongodb.app.ui.theme.MyApplicationTheme
 
+// TODO Should navigate to CompassScreen.kt after a user accepts permissions here
 /**
  * Displays the screen for the user to accept or deny permissions needed for communicating
  * with their matched user
  */
 class CompassPermissions : ComponentActivity() {
-    /*
-    ===== Variables =====
-     */
-    private val requiredPermissions = listOf(
-        Manifest.permission.BLUETOOTH,
-        Manifest.permission.BLUETOOTH_ADMIN,
-        Manifest.permission.ACCESS_WIFI_STATE,
-        Manifest.permission.CHANGE_WIFI_STATE,
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.NEARBY_WIFI_DEVICES,
-        Manifest.permission.BLUETOOTH_SCAN
-    )
-
-
     /*
     ===== Functions =====
      */
@@ -61,7 +49,7 @@ class CompassPermissions : ComponentActivity() {
         setContent {
             MyApplicationTheme {
                 CompassPermissionsLayout(
-                    requiredPermissions = requiredPermissions
+                    requiredPermissions = PERMISSIONS_FOR_DEVICE_CONNECTIONS
                 )
             }
         }
@@ -71,7 +59,7 @@ class CompassPermissions : ComponentActivity() {
      * Checks if all necessary permissions are granted or not
      */
     private fun areAllPermissionsGranted(): Boolean {
-        for (permission in requiredPermissions) {
+        for (permission in PERMISSIONS_FOR_DEVICE_CONNECTIONS) {
             if (ContextCompat.checkSelfPermission(this, permission)
                 != PackageManager.PERMISSION_GRANTED
             ) {
@@ -148,6 +136,7 @@ fun CompassPermissionsLayout(
     )
 }
 
+// TODO Currently permissions are asked every single time the user enters this screen
 /**
  * Displays an alert dialog to let user decide whether to accept or deny permissions
  * for connecting to other devices

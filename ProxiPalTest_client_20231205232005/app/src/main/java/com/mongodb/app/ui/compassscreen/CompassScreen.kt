@@ -47,6 +47,7 @@ import com.mongodb.app.TAG
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.compassscreen.CompassConnectionType
+import com.mongodb.app.data.compassscreen.PERMISSIONS_FOR_DEVICE_CONNECTIONS
 import com.mongodb.app.data.compassscreen.UserLocation
 import com.mongodb.app.presentation.compassscreen.CompassCommunication
 import com.mongodb.app.presentation.compassscreen.CompassViewModel
@@ -88,17 +89,6 @@ class CompassScreen : ComponentActivity() {
      * Request code for verifying call to [requestPermissions]
      */
     private val REQUEST_CODE_REQUIRED_PERMISSIONS = 1
-
-    // For using Nearby API and connecting with another device
-    private val requiredPermissions = arrayOf(
-        Manifest.permission.BLUETOOTH,
-        Manifest.permission.BLUETOOTH_ADMIN,
-        Manifest.permission.ACCESS_WIFI_STATE,
-        Manifest.permission.CHANGE_WIFI_STATE,
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.NEARBY_WIFI_DEVICES,
-        Manifest.permission.BLUETOOTH_SCAN
-    )
 
 
     /*
@@ -191,7 +181,7 @@ class CompassScreen : ComponentActivity() {
         // Ask for permissions before allowing device connections
         // Check that the required permissions are allowed by the user
         var hasAllPermissionsGranted = true
-        for (permission in requiredPermissions) {
+        for (permission in PERMISSIONS_FOR_DEVICE_CONNECTIONS) {
             if (ContextCompat.checkSelfPermission(this, permission)
                 != PackageManager.PERMISSION_GRANTED
             ) {
@@ -205,18 +195,18 @@ class CompassScreen : ComponentActivity() {
                 "tempTag",
                 "CompassScreen: Not all permissions are granted, asking now"
             )
-            ActivityCompat.requestPermissions(
-                this, requiredPermissions, REQUEST_CODE_REQUIRED_PERMISSIONS
-            )
+//            ActivityCompat.requestPermissions(
+//                this, PERMISSIONS_FOR_DEVICE_CONNECTIONS, REQUEST_CODE_REQUIRED_PERMISSIONS
+//            )
         }
         else{
             Log.i(
                 "tempTag",
                 "CompassScreen: It seems permissions are already granted, but asking anyway"
             )
-            ActivityCompat.requestPermissions(
-                this, requiredPermissions, REQUEST_CODE_REQUIRED_PERMISSIONS
-            )
+//            ActivityCompat.requestPermissions(
+//                this, PERMISSIONS_FOR_DEVICE_CONNECTIONS, REQUEST_CODE_REQUIRED_PERMISSIONS
+//            )
         }
     }
 
@@ -229,7 +219,7 @@ class CompassScreen : ComponentActivity() {
             )
         }
 
-        for (permission in requiredPermissions){
+        for (permission in PERMISSIONS_FOR_DEVICE_CONNECTIONS){
             when {
                 ContextCompat.checkSelfPermission(this, permission)
                         == PackageManager.PERMISSION_GRANTED -> {
