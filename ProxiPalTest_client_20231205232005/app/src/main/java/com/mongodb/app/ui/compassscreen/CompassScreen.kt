@@ -89,6 +89,17 @@ class CompassScreen : ComponentActivity() {
      */
     private val REQUEST_CODE_REQUIRED_PERMISSIONS = 1
 
+    // For using Nearby API and connecting with another device
+    private val requiredPermissions = arrayOf(
+        Manifest.permission.BLUETOOTH,
+        Manifest.permission.BLUETOOTH_ADMIN,
+        Manifest.permission.ACCESS_WIFI_STATE,
+        Manifest.permission.CHANGE_WIFI_STATE,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.NEARBY_WIFI_DEVICES,
+        Manifest.permission.BLUETOOTH_SCAN
+    )
+
 
     /*
     ===== Functions =====
@@ -101,6 +112,7 @@ class CompassScreen : ComponentActivity() {
             "CompassScreen: Start of OnCreate()"
         )
 
+        verifyPermissions()
         verifyPermissions2()
 
         // Need to update repository when a configuration change occurs
@@ -174,18 +186,9 @@ class CompassScreen : ComponentActivity() {
 
     private fun verifyPermissions(){
         // Ask for permissions before allowing device connections
-        val permissions = arrayOf(
-            Manifest.permission.BLUETOOTH,
-            Manifest.permission.BLUETOOTH_ADMIN,
-            Manifest.permission.ACCESS_WIFI_STATE,
-            Manifest.permission.CHANGE_WIFI_STATE,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.NEARBY_WIFI_DEVICES,
-            Manifest.permission.BLUETOOTH_SCAN
-        )
         // Check that the required permissions are allowed by the user
         var hasAllPermissionsGranted = true
-        for (permission in permissions) {
+        for (permission in requiredPermissions) {
             if (ContextCompat.checkSelfPermission(this, permission)
                 != PackageManager.PERMISSION_GRANTED
             ) {
@@ -200,7 +203,7 @@ class CompassScreen : ComponentActivity() {
                 "CompassScreen: Not all permissions are granted, asking now"
             )
             ActivityCompat.requestPermissions(
-                this, permissions, REQUEST_CODE_REQUIRED_PERMISSIONS
+                this, requiredPermissions, REQUEST_CODE_REQUIRED_PERMISSIONS
             )
         }
         else{
@@ -209,7 +212,7 @@ class CompassScreen : ComponentActivity() {
                 "CompassScreen: It seems permissions are already granted, but asking anyway"
             )
             ActivityCompat.requestPermissions(
-                this, permissions, REQUEST_CODE_REQUIRED_PERMISSIONS
+                this, requiredPermissions, REQUEST_CODE_REQUIRED_PERMISSIONS
             )
         }
     }
@@ -222,32 +225,35 @@ class CompassScreen : ComponentActivity() {
                 "CompassScreen: Permission launcher granted? = \"$isGranted\""
             )
         }
-        when {
-            ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH)
-                    == PackageManager.PERMISSION_GRANTED -> {
-                Log.i(
-                    "tempTag",
-                    "CompassScreen: Permission granted"
-                )
-            }
 
-            ActivityCompat.shouldShowRequestPermissionRationale(
-                this, Manifest.permission.BLUETOOTH
-            ) -> {
-                Log.i(
-                    "tempTag",
-                    "CompassScreen: Permission not granted"
-                )
-            }
+        for (permission in requiredPermissions){
+            when {
+                ContextCompat.checkSelfPermission(this, permission)
+                        == PackageManager.PERMISSION_GRANTED -> {
+                    Log.i(
+                        "tempTag",
+                        "CompassScreen: Permission granted = \"$permission\""
+                    )
+                }
 
-            else -> {
-                Log.i(
-                    "tempTag",
-                    "CompassScreen: Permission not asked"
-                )
-                requestPermissionLauncher.launch(
-                    Manifest.permission.BLUETOOTH
-                )
+                ActivityCompat.shouldShowRequestPermissionRationale(
+                    this, permission
+                ) -> {
+                    Log.i(
+                        "tempTag",
+                        "CompassScreen: Permission not granted = \"$permission\""
+                    )
+                }
+
+                else -> {
+                    Log.i(
+                        "tempTag",
+                        "CompassScreen: Permission not asked = \"$permission\""
+                    )
+                    requestPermissionLauncher.launch(
+                        permission
+                    )
+                }
             }
         }
     }

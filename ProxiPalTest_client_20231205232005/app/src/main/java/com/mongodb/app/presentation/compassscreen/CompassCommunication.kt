@@ -231,8 +231,16 @@ class CompassCommunication constructor(
      * Updates the current connection type
      */
     fun updateConnectionType(newConnectionType: CompassConnectionType) {
-        _connectionType.value = newConnectionType
-        compassViewModel.updateConnectionType(newConnectionType)
+        // Can only transition from OFFLINE to WAITING
+        if (_connectionType.value == CompassConnectionType.OFFLINE && newConnectionType != CompassConnectionType.MEETING){
+            _connectionType.value = newConnectionType
+            compassViewModel.updateConnectionType(newConnectionType)
+        }
+        // Can only transition from MEETING to OFFLINE
+        else if (_connectionType.value == CompassConnectionType.MEETING && newConnectionType != CompassConnectionType.OFFLINE){
+            _connectionType.value = newConnectionType
+            compassViewModel.updateConnectionType(newConnectionType)
+        }
         when (connectionType.value) {
             CompassConnectionType.OFFLINE -> {
                 Log.i(
