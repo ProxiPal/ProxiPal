@@ -15,6 +15,7 @@ import com.mongodb.app.presentation.login.EventSeverity
 import com.mongodb.app.presentation.login.LoginAction
 import com.mongodb.app.presentation.login.LoginEvent
 import com.mongodb.app.presentation.login.LoginViewModel
+import com.mongodb.app.ui.compassscreen.CompassPermissions
 import com.mongodb.app.ui.compassscreen.CompassScreen
 import com.mongodb.app.ui.login.LoginScaffold
 import com.mongodb.app.ui.theme.MyApplicationTheme
@@ -43,7 +44,7 @@ class ComposeLoginActivity : ComponentActivity() {
             else
                 startActivity(Intent(
                     this,
-                    CompassScreen::class.java
+                    CompassPermissions::class.java
 //                    UserProfileScreen::class.java
                 ))
             finish()
@@ -65,7 +66,7 @@ class ComposeLoginActivity : ComponentActivity() {
                             )
                             else Intent(
                                 this@ComposeLoginActivity,
-                                CompassScreen::class.java
+                                CompassPermissions::class.java
 //                                UserProfileScreen::class.java
                             )
                             startActivity(intent)

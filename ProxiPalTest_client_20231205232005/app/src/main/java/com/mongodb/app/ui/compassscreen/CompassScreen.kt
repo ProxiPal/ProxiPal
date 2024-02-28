@@ -112,7 +112,6 @@ class CompassScreen : ComponentActivity() {
             "CompassScreen: Start of OnCreate()"
         )
 
-        verifyPermissions()
         verifyPermissions2()
 
         // Need to update repository when a configuration change occurs
@@ -184,6 +183,10 @@ class CompassScreen : ComponentActivity() {
         repository.close()
     }
 
+    @Deprecated(
+        message = "This does not work 100%; " +
+                "\"Missing required permissions, aborting call to <advertisingFunctionName> ...\""
+    )
     private fun verifyPermissions(){
         // Ask for permissions before allowing device connections
         // Check that the required permissions are allowed by the user
