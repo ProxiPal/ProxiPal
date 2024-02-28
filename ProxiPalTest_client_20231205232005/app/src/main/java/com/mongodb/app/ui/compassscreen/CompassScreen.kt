@@ -229,14 +229,14 @@ class CompassScreen : ComponentActivity() {
                 ) -> {
                     Log.i(
                         TAG(),
-                        "CompassScreen: Permission not granted = \"$permission\""
+                        "CompassScreen: Permission denied = \"$permission\""
                     )
                 }
 
                 else -> {
                     Log.i(
                         TAG(),
-                        "CompassScreen: Permission not asked = \"$permission\""
+                        "CompassScreen: Permission unasked = \"$permission\""
                     )
                     requestPermissionLauncher.launch(
                         permission

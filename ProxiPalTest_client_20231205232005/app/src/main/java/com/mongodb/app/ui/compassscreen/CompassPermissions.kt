@@ -80,42 +80,6 @@ fun CompassPermissionsLayout(
     requiredPermissions: List<String>,
     modifier: Modifier = Modifier
 ) {
-//    // All permissions needed for connecting with other devices
-//    val permissionStateBluetooth = rememberPermissionState(
-//        permission = Manifest.permission.BLUETOOTH
-//    )
-//    val permissionStateBluetoothAdmin = rememberPermissionState(
-//        permission = Manifest.permission.BLUETOOTH_ADMIN
-//    )
-//    val permissionStateAccessWifiState = rememberPermissionState(
-//        permission = Manifest.permission.ACCESS_WIFI_STATE
-//    )
-//    val permissionStateChangeWifiState = rememberPermissionState(
-//        permission = Manifest.permission.CHANGE_WIFI_STATE
-//    )
-//    // This is already checked in another file
-//    val permissionStateAccessFineLocation = rememberPermissionState(
-//        permission = Manifest.permission.ACCESS_FINE_LOCATION
-//    )
-//    val permissionStateNearbyWifiDevices = rememberPermissionState(
-//        permission = Manifest.permission.NEARBY_WIFI_DEVICES
-//    )
-//    val permissionStateBluetoothScan = rememberPermissionState(
-//        permission = Manifest.permission.BLUETOOTH_SCAN
-//    )
-//    val deviceConnectionPermissions = listOf(
-//        permissionStateBluetooth,
-//        permissionStateBluetoothAdmin,
-//        permissionStateAccessWifiState,
-//        permissionStateChangeWifiState,
-//        permissionStateAccessFineLocation,
-//        permissionStateNearbyWifiDevices,
-//        permissionStateBluetoothScan
-//    )
-//    val deviceConnectionPermissionStrings = deviceConnectionPermissions.map {
-//        it.toString()
-//    }
-
     val multiplePermissionState = rememberMultiplePermissionsState(
         permissions = requiredPermissions
     )
