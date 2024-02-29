@@ -14,7 +14,10 @@ import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.compassscreen.CompassConnectionType
 import com.mongodb.app.data.compassscreen.KM_PER_ONE_LATITUDE_DIFF
 import com.mongodb.app.data.compassscreen.KM_PER_ONE_LONGITUDE_DIFF
+import com.mongodb.app.data.compassscreen.MILES_PER_ONE_LATITUDE_DIFF
+import com.mongodb.app.data.compassscreen.MILES_PER_ONE_LONGITUDE_DIFF
 import com.mongodb.app.data.compassscreen.MS_BETWEEN_LOCATION_UPDATES
+import com.mongodb.app.data.compassscreen.SHOULD_USE_METRIC_SYSTEM
 import com.mongodb.app.data.compassscreen.UserLocation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -242,8 +245,14 @@ class CompassViewModel constructor(
     ): Double {
         // Using the distance formula
         // Make sure to take into account the actual distance between points
-        val deltaLatitude = (endLatitude - startLatitude) * KM_PER_ONE_LATITUDE_DIFF
-        val deltaLongitude = (endLongitude - startLongitude) * KM_PER_ONE_LONGITUDE_DIFF
+        var deltaLatitude = (endLatitude - startLatitude)
+        deltaLatitude *=
+            if (SHOULD_USE_METRIC_SYSTEM) KM_PER_ONE_LATITUDE_DIFF
+            else MILES_PER_ONE_LATITUDE_DIFF
+        var deltaLongitude = (endLongitude - startLongitude)
+        deltaLongitude *=
+            if (SHOULD_USE_METRIC_SYSTEM) KM_PER_ONE_LONGITUDE_DIFF
+            else MILES_PER_ONE_LONGITUDE_DIFF
         return sqrt(deltaLatitude.pow(2) + deltaLongitude.pow(2))
     }
 

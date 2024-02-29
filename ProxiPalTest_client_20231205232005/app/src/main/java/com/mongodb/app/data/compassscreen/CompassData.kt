@@ -16,6 +16,21 @@ const val KM_PER_ONE_LATITUDE_DIFF: Double = 111.195
 const val KM_PER_ONE_LONGITUDE_DIFF: Double = 111.195
 
 /**
+ * How many miles equal to exactly 1 latitude difference
+ */
+const val MILES_PER_ONE_LATITUDE_DIFF: Double = 69.093
+
+/**
+ * How many miles equal to exactly 1 longitude difference
+ */
+const val MILES_PER_ONE_LONGITUDE_DIFF: Double = 69.093
+
+/**
+ * A switch variable on whether to use the metric or imperial measurement system
+ */
+const val SHOULD_USE_METRIC_SYSTEM: Boolean = true
+
+/**
  * How many milliseconds (ms) between each update of matching users' location
  */
 const val MS_BETWEEN_LOCATION_UPDATES: Long = 2000
