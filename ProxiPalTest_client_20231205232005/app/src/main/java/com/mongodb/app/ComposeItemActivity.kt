@@ -158,6 +158,7 @@ class ComposeItemActivity : ComponentActivity() {
 
         setContent {
             MyApplicationTheme {
+                /*
                 TaskListScaffold(
                     repository,
                     toolbarViewModel,
@@ -165,6 +166,7 @@ class ComposeItemActivity : ComponentActivity() {
                     subscriptionTypeViewModel,
                     taskViewModel
                 )
+                 */
             }
         }
     }
@@ -204,6 +206,7 @@ fun TaskListScaffold(
     }
     val uriHandler = LocalUriHandler.current
 
+    /*
     Scaffold(
         topBar = { TaskAppToolbar(toolbarViewModel) },
         bottomBar = {
@@ -296,6 +299,7 @@ fun ItemActivityPreview() {
             )
         }
     }
+    */
 }
 
 
