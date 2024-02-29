@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -105,6 +106,16 @@ fun ConnectWithOthersToolbar(viewModel: ToolbarViewModel, navController: NavHost
                 colors = IconButtonDefaults.iconButtonColors(contentColor = Color.White)
             ) {
                 Icon(Icons.Outlined.Place, contentDescription = null)
+            }
+
+            // App SETTINGS
+            IconButton(
+                onClick = {
+                    navController.navigate(Routes.ScreenSettings.route)
+                },
+                colors = IconButtonDefaults.iconButtonColors(contentColor = Color.White)
+            ) {
+                Icon(Icons.Outlined.Settings, contentDescription = null)
             }
 
             // Log out

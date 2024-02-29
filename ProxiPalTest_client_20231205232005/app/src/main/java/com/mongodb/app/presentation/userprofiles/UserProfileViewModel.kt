@@ -438,4 +438,8 @@ class UserProfileViewModel constructor(
                 }
         }
     }
+
+    fun updateProximityRadius(radiusInMiles: Double){
+        _proximityRadius.value = radiusInMiles
+    }
 }

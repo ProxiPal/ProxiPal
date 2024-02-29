@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.mongodb.app.home.HomeScreen
 import com.mongodb.app.home.HomeViewModel
+import com.mongodb.app.home.ScreenSettings
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.ui.tasks.ConnectWithOthersScreen
 import com.mongodb.app.location.LocationPermissionScreen
@@ -42,6 +43,10 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
         }
         composable(Routes.HomeScreen.route) {
             HomeScreen(navController = navController, viewModel = HomeViewModel())
+        }
+        
+        composable(Routes.ScreenSettings.route){
+            ScreenSettings(navController = navController)
         }
     }
 }

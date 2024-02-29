@@ -215,7 +215,7 @@ fun UserProfileLayout(
         topBar = {
 //            UserProfileTopBar()
             // This top bar is used because it already has logging out of account implemented
-            TaskAppToolbar(viewModel = toolbarViewModel)
+            TaskAppToolbar(viewModel = toolbarViewModel, navController = navController)
         },
         bottomBar = { ProxiPalBottomAppBar(navController) },
         modifier = modifier
