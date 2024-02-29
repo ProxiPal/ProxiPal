@@ -5,6 +5,7 @@ import android.os.Looper
 import androidx.annotation.RequiresPermission
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -27,6 +29,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import com.mongodb.app.R
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import java.util.concurrent.TimeUnit
 
@@ -69,6 +72,9 @@ fun LocationUpdatesContent(usePreciseLocation: Boolean, userProfileViewModel: Us
     var locationUpdates by remember {
         mutableStateOf("")
     }
+    var isLookingForUsers by remember{
+        mutableStateOf(false)
+    }
 
     // Only register the location updates effect when we have a request
     if (locationRequest != null) {
@@ -83,48 +89,50 @@ fun LocationUpdatesContent(usePreciseLocation: Boolean, userProfileViewModel: Us
 
                 // Update the user's the latitude and longitude
                 userProfileViewModel.setUserProfileLocation(currentLocation.latitude, currentLocation.longitude)
+
+                // After updating the user's location, fetch and store nearby user profiles in the viewmodel
+                userProfileViewModel.fetchAndStoreNearbyUserProfiles()
             }
         }
     }
 
-    LazyColumn(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .animateContentSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        //verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        item {
-            // Toggle to start and stop location updates
-            // before asking for periodic location updates,
-            // it's good practice to fetch the current location
-            // or get the last known location
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Spacer(Modifier.height(150.dp))
-                Text(text = "Enable location updates")
-                Spacer(modifier = Modifier.padding(8.dp))
-                Switch(
-                    checked = locationRequest != null,
-                    onCheckedChange = { checked ->
-                        locationRequest = if (checked) {
-                            // Define the accuracy based on your needs and granted permissions
-                            val priority = if (usePreciseLocation) {
-                                Priority.PRIORITY_HIGH_ACCURACY
-                            } else {
-                                Priority.PRIORITY_BALANCED_POWER_ACCURACY
-                            }
-                            // Updates location at specified interval
-                            LocationRequest.Builder(priority, TimeUnit.SECONDS.toMillis(1)).build()
+
+        // Toggle to start and stop location updates
+        // before asking for periodic location updates,
+        // it's good practice to fetch the current location
+        // or get the last known location
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Spacer(Modifier.height(150.dp))
+            Text(text = stringResource(R.string.enable_location_updates))
+            Spacer(modifier = Modifier.padding(8.dp))
+            Switch(
+                checked = locationRequest != null,
+                onCheckedChange = { checked ->
+                    isLookingForUsers = checked
+                    locationRequest = if (checked) {
+                        // Define the accuracy based on your needs and granted permissions
+                        val priority = if (usePreciseLocation) {
+                            Priority.PRIORITY_HIGH_ACCURACY
                         } else {
-                            null
+                            Priority.PRIORITY_BALANCED_POWER_ACCURACY
                         }
-                    },
-                )
-            }
+                        // Updates location at specified interval
+                        LocationRequest.Builder(priority, TimeUnit.SECONDS.toMillis(1)).build()
+                    } else {
+                        null
+                    }
+                },
+            )
         }
-        item {
-            Text(text = locationUpdates)
-        }
+        Text(text = locationUpdates)
+        UserProfileDisplayList(userProfiles = userProfileViewModel.nearbyUserProfiles, isLookingForUsers)
     }
 }
 

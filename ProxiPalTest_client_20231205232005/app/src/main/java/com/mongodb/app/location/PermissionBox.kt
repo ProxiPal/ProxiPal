@@ -27,11 +27,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.mongodb.app.R
 
 // Contribution: Marco Pacini
 /**
@@ -156,7 +158,7 @@ private fun PermissionScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "Sample requires permission/s:",
+            text = stringResource(R.string.requires_permissions),
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(16.dp),
         )
@@ -181,7 +183,7 @@ private fun PermissionScreen(
                 }
             },
         ) {
-            Text(text = "Grant permissions")
+            Text(text = stringResource(R.string.grant_permissions))
         }
         if (errorText.isNotBlank()) {
             Text(
@@ -197,7 +199,7 @@ private fun PermissionScreen(
                 showRationale = false
             },
             title = {
-                Text(text = "Permissions required by the sample")
+                Text(text = stringResource(R.string.permissions_required_by))
             },
             text = {
                 Text(text = "The sample requires the following permissions to work:\n $permissions")

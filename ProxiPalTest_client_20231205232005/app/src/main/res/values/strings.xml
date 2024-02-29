@@ -44,4 +44,34 @@
          Programmer:Brian Poon 2/21/24   -->
     <string name="new_friend_request_notification_service_content_body">You have a new friend request!</string>
 
+    <!-- Home Screen -->
+    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="welcome_message">Welcome to ProxiPal</string>
+    <string name="settings">Settings</string>
+    <string name="profile_photos">Profile Photos</string>
+    <string name="upload_photo">Upload Photo</string>
+    <string name="upload_limit">You can upload up to 3 photos.</string>
+    <string name="bio">Bio</string>
+    <string name="bio_placeholder">Hi my name is...</string>
+    <string name="bio_length_indicator">%1$d / 100</string>
+    <string name="dialog_title">Edit %1$s Link</string>
+    <string name="invalid_url_error">Invalid URL. Please include http:// or https://</string>
+    <string name="url_label">URL</string>
+    <string name="ok_button">OK</string>
+    <string name="twitter_content_description">Twitter</string>
+    <string name="linkedin_content_description">LinkedIn</string>
+    <string name="instagram_content_description">Instagram</string>
+    <string name="meatball_menu_content_description">Menu</string>
+    <string name="twitter">Twitter</string>
+    <string name="linkedin">LinkedIn</string>
+    <string name="instagram">Instagram</string>
+
+    <!-- Connect with Others -->
+    <string name="enable_location_updates">Start connecting with nearby users</string>
+    <string name="searching_for_nearby_users">Searching for users...</string>
+    <string name="grant_permissions">Grant permissions</string>
+    <string name="permissions_required_by">Location permissions required by Proxipal</string>
+    <string name="requires_permissions">Proxipal requires location permissions</string>
+
+
 </resources>

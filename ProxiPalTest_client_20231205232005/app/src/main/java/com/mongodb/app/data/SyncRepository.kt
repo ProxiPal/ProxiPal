@@ -149,7 +149,7 @@ interface SyncRepository {
     /**
      * Returns a flow with nearby user profiles within a specified radius
      */
-    fun getNearbyUserProfileList(userLocation: CustomGeoPoint, radiusInMiles: Double): Flow<ResultsChange<UserProfile>>
+    fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInMiles: Double): Flow<ResultsChange<UserProfile>>
 
     // endregion location
 }
@@ -495,11 +495,12 @@ class RealmSyncRepository(
     /**
      * Returns a flow with nearby user profiles within a specified radius, at the time of the query.
      * Because the query returns frozen objects, this will likely be used consecutively in intervals to get consistently updated locations.
+     * [userLatitude] and [userLongitude] are the current user's location, used to form center of the search radius.
      */
     @OptIn(ExperimentalGeoSpatialApi::class)
-    override fun getNearbyUserProfileList(userLocation: CustomGeoPoint, radiusInMiles: Double): Flow<ResultsChange<UserProfile>>{
+    override fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInMiles: Double): Flow<ResultsChange<UserProfile>>{
         val circleAroundUser = GeoCircle.create(
-            center = GeoPoint.create(userLocation.latitude, userLocation.longitude),
+            center = GeoPoint.create(userLatitude, userLongitude),
             radius = Distance.fromMiles(radiusInMiles)
         )
         return realm.query<UserProfile>("location GEOWITHIN $circleAroundUser").query("ownerId != $0", currentUser.id).find().asFlow()
@@ -538,7 +539,7 @@ class MockRepository : SyncRepository {
     override suspend fun updateUserProfileLocation(latitude: Double, longitude: Double) =
         Unit
 
-    override fun getNearbyUserProfileList(userLocation: CustomGeoPoint, radiusInMiles: Double): Flow<ResultsChange<UserProfile>> = flowOf()
+    override fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInMiles: Double): Flow<ResultsChange<UserProfile>> = flowOf()
 
 
     companion object {
@@ -563,6 +564,9 @@ class MockRepository : SyncRepository {
             this.firstName = "First Name $index"
             this.lastName = "Last Name $index"
             this.biography = "Biography $index"
+
+            // set the locations to be slightly offset for each mockuser profile
+            this.location = CustomGeoPoint(0.0 + index*0.0001,0.0 + index*0.0001)
             // Make every other user profile mine in preview
             // For Compose previews only (in reality, a user will have only 1 profile)
             this.ownerId = when {
