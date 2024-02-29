@@ -1,6 +1,7 @@
 package com.mongodb.app.location
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
@@ -11,11 +12,16 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.mongodb.app.R
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.theme.Purple200
 import com.mongodb.app.ui.theme.Purple500
 import com.mongodb.app.ui.theme.Purple700
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontStyle
 
 @Composable
 fun ProximityRadiusAdjuster(userProfileViewModel: UserProfileViewModel) {
@@ -34,6 +40,12 @@ fun ProximityRadiusAdjuster(userProfileViewModel: UserProfileViewModel) {
             steps = 10,
             valueRange = 0.1f..1f
         )
-        Text(text = stringResource(R.string.proximity_radius_text, sliderPosition))
+        Text(
+            text = stringResource(R.string.proximity_radius_text, sliderPosition),
+            modifier = Modifier.padding(8.dp),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.body1.copy(fontSize = 18.sp),
+            fontStyle = FontStyle.Italic
+        )
     }
 }
