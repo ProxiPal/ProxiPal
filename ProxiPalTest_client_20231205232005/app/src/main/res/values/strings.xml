@@ -38,7 +38,25 @@
     <string name="user_profile_cancel_editing_message">Discard Changes</string>
     <string name="user_profile_permissions_warning">You can only modify or remove a user profile that belongs to you.</string>
     <!-- End user profile strings-->
-
+<!--    Start compass screen strings -->
+    <!--    The "%.3f" formats the measurements to 3 decimal places -->
+    <string name="compass_screen_bearing_message">Bearing angle (in degrees): %.3f</string>
+    <string name="compass_screen_distance_message">Distance from match (in km): %.3f</string>
+    <string name="compass_screen_cancel_message">Cancel match</string>
+    <string name="compass_screen_top_bar_header">Match found!</string>
+    <string name="compass_screen_awaiting_connection_message">Waiting for match to accept connection</string>
+    <string name="compass_screen_canceled_connection_message">The connection was dropped</string>
+    <string name="compass_screen_return_button">Return</string>
+<!--    End compass screen strings-->
+<!--    Start compass permissions screen strings -->
+    <string name="compass_permissions_required_permissions_list">Required permissions: %s</string>
+    <string name="compass_permissions_required_permissions_rationale">
+        These permissions are necessary to make your device discoverable to others nearby and to connect with matching users
+    </string>
+    <string name="compass_permissions_confirm_permissions_button">Confirm</string>
+    <string name="compass_permissions_dismiss_permissions_button">Dismiss</string>
+    <string name="compass_permissions_screen_permissions_denied">Cannot connect with other users without required permissions</string>
+    <!--    End compass permissions screen strings -->
 
     <!-- NewFriendRequestNotificationService strings
          Programmer:Brian Poon 2/21/24   -->

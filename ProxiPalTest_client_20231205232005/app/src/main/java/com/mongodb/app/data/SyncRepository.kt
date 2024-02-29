@@ -332,6 +332,13 @@ class RealmSyncRepository(
         }
     }
 
+    /**
+     * Returns the current user's ID
+     */
+    fun getCurrentUserId(): String{
+        return currentUser.id
+    }
+
     override suspend fun updateUserProfile(firstName: String, lastName: String, biography: String) {
         // Queries inside write transaction are live objects
         // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()

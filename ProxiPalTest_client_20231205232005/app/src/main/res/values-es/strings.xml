@@ -34,5 +34,22 @@
     <string name="user_profile_finish_editing_message">Guardar cambios</string>
     <string name="user_profile_cancel_editing_message">Descartar los cambios</string>
     <string name="user_profile_permissions_warning">Sólo puedes modificar o eliminar un perfil de usuario que te pertenezca.</string>
+
+    <string name="compass_screen_bearing_message">Ángulo de rodamiento (en grados): %.3f</string>
+    <string name="compass_screen_distance_message">Distancia desde el partido (en km): %.3f</string>
+    <string name="compass_screen_cancel_message">Cancelar partido</string>
+    <string name="compass_screen_top_bar_header">¡Coincidencia encontrada!</string>
+    <string name="compass_screen_awaiting_connection_message">Esperando a que la coincidencia acepte la conexión</string>
+    <string name="compass_screen_canceled_connection_message">Se ha interrumpido la conexión</string>
+    <string name="compass_screen_return_button">Volver</string>
+
+    <string name="compass_permissions_required_permissions_list">Permisos necesarios: %s</string>
+    <string name="compass_permissions_required_permissions_rationale">
+        Estos permisos son necesarios para que el dispositivo sea visible para otras personas cercanas y para conectarse con usuarios coincidentes
+    </string>
+    <string name="compass_permissions_confirm_permissions_button">Confirmar</string>
+    <string name="compass_permissions_dismiss_permissions_button">Despedir</string>
+    <string name="compass_permissions_screen_permissions_denied">No se puede conectar con otros usuarios sin los permisos necesarios</string>
+
     <string name="new_friend_request_notification_service_content_body">¡Tienes una nueva solicitud de amistad!</string>
 </resources>

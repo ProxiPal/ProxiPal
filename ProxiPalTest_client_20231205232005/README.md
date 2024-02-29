@@ -87,3 +87,8 @@ In the update function to update data in the database, if queries are in the rea
 For classes that do not update after a configuration change (ex: UserProfileViewModel), their SyncRepository/RealmSyncRepository instance variable must be reset. In classes that have their onCreate() or other functions called after a configuration change (ex: UserProfileScreen), they should directly update the SyncRepository/RealmSyncRepository instance variables in the classes that cannot be updated, within their own onCreate() or other functions that get called after a configuration change.
 Example:
     UserProfileScreen has its onCreate() called after a configuration change, but UserProfileViewModel only has its init{} called once. (Note, some classes' init{} do get called after a configuration change, such as RealmSyncRepository.) UserProfileScreen has its own instance variable of type SyncRepository/RealmSyncRepository that gets updated when its onCreate() gets called, or after a configuration change. UserProfileViewModel also has a variable of type SyncRepository/RealmSyncRepository, but it does not get updated after a configuration change like UserProfileScreen does. To update UserProfileViewModel's instance variable of type SyncRepository/RealmSyncRepository, UserProfileScreen calls a function in the other class and passes its own instance variable as an argument so the UserProfileViewModel's instance variable can get updated.
+
+## Cannot login to Realm at user sign in screen
+
+Deleting the app did not work first try. What did work was restarting Android Studio and wiping
+emulator device data on restart.
