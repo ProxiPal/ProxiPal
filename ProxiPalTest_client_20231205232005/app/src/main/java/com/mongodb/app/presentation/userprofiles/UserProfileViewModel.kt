@@ -37,6 +37,7 @@ import kotlinx.coroutines.withContext
 /*
 Contributions:
 - Kevin Kubota (all user profile UI, except for navigation between screens)
+- Marco Pacini (location related tasks only)
  */
 
 
@@ -68,6 +69,14 @@ class UserProfileViewModel constructor(
 
     private val _isEditingUserProfile: MutableState<Boolean> = mutableStateOf(false)
 
+    // for current user's location, added by Marco Pacini
+    private val _userProfileLatitude: MutableState<Double> = mutableStateOf(0.0)
+    private val _userProfileLongitude: MutableState<Double> = mutableStateOf(0.0)
+
+    private val _nearbyUserProfiles: MutableList<UserProfile> = mutableListOf()
+
+    private val _proximityRadius: MutableState<Double> = mutableStateOf(0.1)
+
 
     /*
     ===== Properties =====
@@ -93,6 +102,19 @@ class UserProfileViewModel constructor(
 
     val addUserProfileEvent: Flow<AddUserProfileEvent>
         get() = _addUserProfileEvent
+
+    // For current user's location, added by Marco Pacini
+    val userProfileLatitude: State<Double>
+        get() = _userProfileLatitude
+
+    val userProfileLongitude: State<Double>
+        get() = _userProfileLongitude
+
+    val nearbyUserProfiles: List<UserProfile>
+        get() = _nearbyUserProfiles
+
+    val proxmityRadius: State<Double>
+        get() = _proximityRadius
 
 
     init {
@@ -171,6 +193,8 @@ class UserProfileViewModel constructor(
                                     _userProfileFirstName.value = event.list[0].firstName
                                     _userProfileLastName.value = event.list[0].lastName
                                     _userProfileBiography.value = event.list[0].biography
+                                    _userProfileLatitude.value = event.list[0].location?.latitude!!
+                                    _userProfileLongitude.value = event.list[0].location?.longitude!!
                                 }
                                 else -> {
                                     Log.i(
@@ -182,6 +206,8 @@ class UserProfileViewModel constructor(
                                     _userProfileFirstName.value = event.list[0].firstName
                                     _userProfileLastName.value = event.list[0].lastName
                                     _userProfileBiography.value = event.list[0].biography
+                                    _userProfileLatitude.value = event.list[0].location?.latitude!!
+                                    _userProfileLongitude.value = event.list[0].location?.longitude!!
                                 }
                             }
                         }
@@ -268,6 +294,21 @@ class UserProfileViewModel constructor(
     }
 
     /**
+     * Updates the user profile's location
+     */
+    fun setUserProfileLocation(latitude: Double, longitude: Double){
+        _userProfileLatitude.value = latitude
+        _userProfileLongitude.value = longitude
+
+        viewModelScope.launch {
+            repository.updateUserProfileLocation(
+                latitude = userProfileLatitude.value,
+                longitude = userProfileLongitude.value
+            )
+        }
+    }
+
+    /**
      * Returns how many more characters are allowed before the corresponding character limit is reached
      */
     fun getRemainingCharacterAmountFirstName(): Int{
@@ -326,6 +367,8 @@ class UserProfileViewModel constructor(
         }
     }
 
+
+
     /**
      * Discards any unsaved changes made to the user profile
      */
@@ -380,6 +423,19 @@ class UserProfileViewModel constructor(
                     )
                 }
             }
+        }
+    }
+
+    /**
+     * Queries nearby user profiles and updates the nearby user profile list
+     */
+    fun fetchAndStoreNearbyUserProfiles() {
+        CoroutineScope(Dispatchers.Main).launch {
+            repository.getNearbyUserProfileList(userProfileLatitude.value, userProfileLongitude.value, 0.1)
+                .collect { resultsChange: ResultsChange<UserProfile> ->
+                    _nearbyUserProfiles.clear()
+                    _nearbyUserProfiles.addAll(resultsChange.list)
+                }
         }
     }
 }

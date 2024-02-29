@@ -56,6 +56,8 @@ import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.USER_PROFILE_EDIT_MODE_MAXIMUM_LINE_AMOUNT
 import com.mongodb.app.data.USER_PROFILE_ROW_HEADER_WEIGHT
+import com.mongodb.app.home.HomeScreen
+import com.mongodb.app.home.HomeViewModel
 import com.mongodb.app.navigation.NavigationGraph
 import com.mongodb.app.presentation.tasks.ToolbarEvent
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
@@ -179,7 +181,7 @@ class UserProfileScreen : ComponentActivity() {
 
         setContent {
             MyApplicationTheme {
-                NavigationGraph(toolbarViewModel, userProfileViewModel)
+                NavigationGraph(toolbarViewModel, userProfileViewModel, homeViewModel = HomeViewModel())
             }
         }
     }
@@ -206,6 +208,7 @@ fun UserProfileLayout(
     userProfileViewModel: UserProfileViewModel,
     toolbarViewModel: ToolbarViewModel,
     navController: NavHostController,
+    homeViewModel: HomeViewModel,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -217,10 +220,13 @@ fun UserProfileLayout(
         bottomBar = { ProxiPalBottomAppBar(navController) },
         modifier = modifier
     ) { innerPadding ->
-        UserProfileBody(
-            contentPadding = innerPadding,
-            userProfileViewModel = userProfileViewModel
-        )
+        Column {
+            UserProfileBody(
+                contentPadding = innerPadding,
+                userProfileViewModel = userProfileViewModel
+            )
+            HomeScreen(navController = navController, viewModel = homeViewModel)
+        }
     }
 }
 
@@ -238,7 +244,8 @@ fun UserProfileLayoutPreview() {
                 userProfileListState = userProfiles
             ),
             toolbarViewModel = ToolbarViewModel(repository),
-            navController = rememberNavController()
+            navController = rememberNavController(),
+            homeViewModel = HomeViewModel()
         )
     }
 }

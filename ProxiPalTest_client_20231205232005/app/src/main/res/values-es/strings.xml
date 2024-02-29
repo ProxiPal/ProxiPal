@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!-- Programmer: Brian Poon -->
 <resources>
     <string name="app_name">ProxiPal</string>
     <string name="prompt_email">Correo electrónico</string>

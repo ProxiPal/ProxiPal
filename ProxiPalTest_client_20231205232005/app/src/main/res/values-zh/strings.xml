@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ProxiPal</string>
+    <string name="prompt_email">電子郵件</string>
+    <string name="prompt_password">密碼</string>
+    <string name="create_account">建立帳戶</string>
+    <string name="log_in">登入</string>
+    <string name="already_have_account">已經有帳戶？登入</string>
+    <string name="does_not_have_account">沒有帳戶？建立帳戶</string>
+    <string name="log_out">登出</string>
+    <string name="airplane_mode">飛航模式</string>
+    <string name="show_completed_tasks_only">僅顯示已完成的任務</string>
+    <string name="mine">礦</string>
+    <string name="delete">刪除</string>
+    <string name="add_item">新增項目</string>
+    <string name="enter_item_name">輸入商品名稱：</string>
+    <string name="cancel">取消</string>
+    <string name="create">創造</string>
+    <string name="item_summary">項目概要</string>
+    <string name="permissions_error">您不得刪除或修改不屬於您的任務。</string>
+    <string name="show_all_tasks">顯示所有任務</string>
+    <string name="sync_message">在另一台裝置或模擬器上使用相同帳戶登錄，即可即時查看您的清單同步。</string>
+    <string name="account_clarification">請登入或註冊 Device Sync 使用者帳戶。這與您的 Atlas Cloud 登入是分開的。</string>
+    <string name="unable_to_switch">Sync 離線時切換訂閱不會影響 Realm 數據</string>
+    <string name="permissions_warning">您只能修改或刪除屬於您的任務。</string>
+    <string name="user_profile_header">使用者資料</string>
+    <string name="user_profile_first_name_header">名</string>
+    <string name="user_profile_last_name_header">姓</string>
+    <string name="user_profile_biography_header">傳</string>
+    <string name="user_profile_characters_remaining">剩餘 %s 個字符</string>
+    <string name="user_profile_start_editing_message">編輯個人資料</string>
+    <string name="user_profile_finish_editing_message">儲存變更</string>
+    <string name="user_profile_cancel_editing_message">放棄更改</string>
+    <string name="user_profile_permissions_warning">您只能修改或刪除屬於您的使用者設定檔。</string>
+    <string name="new_friend_request_notification_service_content_body">您有一個新的好友請求！</string>
+</resources>

@@ -16,46 +16,38 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
-
-/**
- * Types of UX events triggered by user actions.
- */
+// followed mongodb realm sync tutorial
+// user events
 sealed class LoginEvent(val severity: EventSeverity, val message: String) {
     class GoToTasks(severity: EventSeverity, message: String) : LoginEvent(severity, message)
     class ShowMessage(severity: EventSeverity, message: String) : LoginEvent(severity, message)
 }
 
-/**
- * Severity of the event.
- */
+// different types of events
 enum class EventSeverity {
     INFO, ERROR
 }
 
-/**
- * Users can either create accounts or log in with an existing one.
- */
+// login state
 enum class LoginAction {
-    LOGIN, CREATE_ACCOUNT
+    LOGIN
 }
 
-/**
- * UI representation of a screen state.
- */
+// data class used for account login/register
 data class LoginState(
     val action: LoginAction,
     val email: String = "",
     val password: String = "",
     val enabled: Boolean = true
 ) {
+
+    //initial login screen
     companion object {
-        /**
-         * Initial UI state of the login screen.
-         */
         val initialState = LoginState(action = LoginAction.LOGIN)
     }
 }
 
+// viewmodel for login
 class LoginViewModel : ViewModel() {
 
     private val _state: MutableState<LoginState> = mutableStateOf(LoginState.initialState)
@@ -68,9 +60,6 @@ class LoginViewModel : ViewModel() {
 
     private val authRepository: AuthRepository = RealmAuthRepository
 
-    fun switchToAction(loginAction: LoginAction) {
-        _state.value = state.value.copy(action = loginAction)
-    }
 
     fun setEmail(email: String) {
         _state.value = state.value.copy(email = email)
@@ -80,6 +69,7 @@ class LoginViewModel : ViewModel() {
         _state.value = state.value.copy(password = password)
     }
 
+    // creates an account
     fun createAccount(email: String, password: String) {
         _state.value = state.value.copy(enabled = false)
 
@@ -88,7 +78,6 @@ class LoginViewModel : ViewModel() {
                 authRepository.createAccount(email, password)
             }.onSuccess {
                 _event.emit(LoginEvent.ShowMessage(EventSeverity.INFO, "User created successfully."))
-                login(email, password)
             }.onFailure { ex: Throwable ->
                 _state.value = state.value.copy(enabled = true)
                 val message = when (ex) {
@@ -100,11 +89,11 @@ class LoginViewModel : ViewModel() {
         }
     }
 
+    // logs a user into their account
     fun login(email: String, password: String, fromCreation: Boolean = false) {
         if (!fromCreation) {
             _state.value = state.value.copy(enabled = false)
         }
-
         CoroutineScope(Dispatchers.IO).launch {
             runCatching {
                 app.login(Credentials.emailPassword(email, password))

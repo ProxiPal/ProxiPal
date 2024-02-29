@@ -5,8 +5,10 @@ import com.mongodb.app.TAG
 import com.mongodb.app.domain.Item
 import com.mongodb.app.app
 import com.mongodb.app.domain.UserProfile
+import com.mongodb.app.location.CustomGeoPoint
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
+import io.realm.kotlin.annotations.ExperimentalGeoSpatialApi
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.User
 import io.realm.kotlin.mongodb.exceptions.SyncException
@@ -17,6 +19,9 @@ import io.realm.kotlin.mongodb.syncSession
 import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.query.RealmQuery
 import io.realm.kotlin.query.Sort
+import io.realm.kotlin.types.geo.Distance
+import io.realm.kotlin.types.geo.GeoCircle
+import io.realm.kotlin.types.geo.GeoPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -28,6 +33,7 @@ import kotlin.time.Duration.Companion.seconds
 /*
 Contributions:
 - Kevin Kubota (added functions relating to user profiles, see below)
+- Marco Pacini (location related tasks only)
  */
 
 
@@ -129,6 +135,23 @@ interface SyncRepository {
      */
     fun isUserProfileMine(userProfile: UserProfile): Boolean
     // endregion User profiles
+
+    // Contribution: Marco Pacini
+    /*
+    These functions currently handle user location related tasks
+     */
+    // region location
+    /**
+     * Updates a possible existing user profile's location for the current user in the database using the specified latitude and longitude
+     */
+    suspend fun updateUserProfileLocation(latitude: Double, longitude: Double)
+
+    /**
+     * Returns a flow with nearby user profiles within a specified radius
+     */
+    fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInMiles: Double): Flow<ResultsChange<UserProfile>>
+
+    // endregion location
 }
 
 
@@ -156,7 +179,7 @@ class RealmSyncRepository(
         // ... the app will crash if querying anything other than B.
         // If errors still persist, try deleting and re-running the app.
         val set = if (SHOULD_USE_TASKS_ITEMS) setOf(Item::class)
-        else setOf(UserProfile::class)
+        else setOf(UserProfile::class, CustomGeoPoint::class)
         config = SyncConfiguration.Builder(currentUser, set)
             .initialSubscriptions { realm ->
                 // Subscribe to the active subscriptionType - first time defaults to MINE
@@ -299,6 +322,10 @@ class RealmSyncRepository(
             this.firstName = firstName
             this.lastName = lastName
             this.biography = biography
+
+            // Added by Marco Pacini, to make sure there is an initial location
+            // it will be updated by the connect screen
+            this.location = CustomGeoPoint(0.0,0.0)
         }
         realm.write {
             copyToRealm(userProfile, updatePolicy = UpdatePolicy.ALL)
@@ -405,6 +432,87 @@ class RealmSyncRepository(
             SubscriptionType.ALL -> realm.query()
         }
     // endregion User profiles
+
+    // Contribution: Marco Pacini
+    /*
+    These functions primarily handle user location related tasks
+     */
+    // region location
+    override suspend fun updateUserProfileLocation(latitude: Double, longitude: Double) {
+        // Queries inside write transaction are live objects
+        // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
+        val frozenUserProfile = getQueryUserProfiles(
+            realm = realm,
+            subscriptionType = getActiveSubscriptionType(realm)
+        ).find()
+        // In case the query result list is empty, check first before calling ".first()"
+        val frozenFirstUserProfile = if (frozenUserProfile.size > 0) {
+            frozenUserProfile.first()
+        } else {
+            null
+        }
+        if (frozenFirstUserProfile == null) {
+            Log.i(
+                TAG(),
+                "RealmSyncRepository: Creating a new user profile with the given parameters for " +
+                        "current user ID = \"${currentUser.id}\"...; " +
+                        "Skipping rest of user profile update function..."
+            )
+            // Create a new user profile before applying the updated changes
+            addUserProfile(
+                firstName = "empty",
+                lastName = "empty",
+                biography = "empty"
+            )
+            return
+        }
+        when (getQueryUserProfiles(
+            realm = realm,
+            subscriptionType = getActiveSubscriptionType(realm)
+        ).find().size) {
+            // Create a new profile for the user if they do not have one already in the database
+            // This may not be necessary as users will get their initial profiles added to the database
+            // ... once they register an account and deleting their profile will only occur when
+            // ... deleting their account (unsure if account deletion will be implemented)
+            0 -> {
+                Log.i(
+                    TAG(),
+                    "RealmSyncRepository: No user profiles found with owner ID \"${currentUser.id}\""
+                )
+            }
+
+            1 -> Log.i(
+                TAG(),
+                "RealmSyncRepository: Exactly 1 user profile found with owner ID \"${currentUser.id}\""
+            )
+
+            else -> Log.i(
+                TAG(),
+                "RealmSyncRepository: Multiple user profiles found with owner ID \"${currentUser.id}\""
+            )
+        }
+        realm.write {
+            findLatest(frozenFirstUserProfile)?.let { liveUserProfile ->
+                liveUserProfile.location?.latitude = latitude
+                liveUserProfile.location?.longitude = longitude
+            }
+        }
+    }
+
+    /**
+     * Returns a flow with nearby user profiles within a specified radius, at the time of the query.
+     * Because the query returns frozen objects, this will likely be used consecutively in intervals to get consistently updated locations.
+     * [userLatitude] and [userLongitude] are the current user's location, used to form center of the search radius.
+     */
+    @OptIn(ExperimentalGeoSpatialApi::class)
+    override fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInMiles: Double): Flow<ResultsChange<UserProfile>>{
+        val circleAroundUser = GeoCircle.create(
+            center = GeoPoint.create(userLatitude, userLongitude),
+            radius = Distance.fromMiles(radiusInMiles)
+        )
+        return realm.query<UserProfile>("location GEOWITHIN $circleAroundUser").query("ownerId != $0", currentUser.id).find().asFlow()
+    }
+    //endregion location
 }
 
 /**
@@ -435,6 +543,11 @@ class MockRepository : SyncRepository {
     override fun isUserProfileMine(userProfile: UserProfile): Boolean =
         userProfile.ownerId == MOCK_OWNER_ID_MINE
 
+    override suspend fun updateUserProfileLocation(latitude: Double, longitude: Double) =
+        Unit
+
+    override fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInMiles: Double): Flow<ResultsChange<UserProfile>> = flowOf()
+
 
     companion object {
         const val MOCK_OWNER_ID_MINE = "A"
@@ -458,6 +571,9 @@ class MockRepository : SyncRepository {
             this.firstName = "First Name $index"
             this.lastName = "Last Name $index"
             this.biography = "Biography $index"
+
+            // set the locations to be slightly offset for each mockuser profile
+            this.location = CustomGeoPoint(0.0 + index*0.0001,0.0 + index*0.0001)
             // Make every other user profile mine in preview
             // For Compose previews only (in reality, a user will have only 1 profile)
             this.ownerId = when {
