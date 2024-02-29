@@ -73,6 +73,8 @@ class UserProfileViewModel constructor(
     private val _userProfileLatitude: MutableState<Double> = mutableStateOf(0.0)
     private val _userProfileLongitude: MutableState<Double> = mutableStateOf(0.0)
 
+    private val _nearbyUserProfiles: MutableList<UserProfile> = mutableListOf()
+
 
     /*
     ===== Properties =====
@@ -105,6 +107,9 @@ class UserProfileViewModel constructor(
 
     val userProfileLongitude: State<Double>
         get() = _userProfileLongitude
+
+    val nearbyUserProfiles: List<UserProfile>
+        get() = _nearbyUserProfiles
 
 
     init {
@@ -413,6 +418,19 @@ class UserProfileViewModel constructor(
                     )
                 }
             }
+        }
+    }
+
+    /**
+     * Queries nearby user profiles and updates the nearby user profile list
+     */
+    fun fetchAndStoreNearbyUserProfiles() {
+        CoroutineScope(Dispatchers.Main).launch {
+            repository.getNearbyUserProfileList(userProfileLatitude.value, userProfileLongitude.value, 0.1)
+                .collect { resultsChange: ResultsChange<UserProfile> ->
+                    _nearbyUserProfiles.clear()
+                    _nearbyUserProfiles.addAll(resultsChange.list)
+                }
         }
     }
 }

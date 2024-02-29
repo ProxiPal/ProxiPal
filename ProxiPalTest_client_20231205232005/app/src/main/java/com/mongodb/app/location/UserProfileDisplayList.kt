@@ -1,22 +1,31 @@
 package com.mongodb.app.location
+import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mongodb.app.data.MockRepository
 import com.mongodb.app.domain.UserProfile
 
 // Contribution: Marco Pacini
@@ -25,14 +34,22 @@ import com.mongodb.app.domain.UserProfile
  * as they are queried from a specified radius around the current device
  */
 @Composable
-fun UserProfileList(userProfiles: MutableList<UserProfile>) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp)
-    ) {
-        items(userProfiles) { userProfile ->
-            UserProfileCard(userProfile)
-            Spacer(modifier = Modifier.height(16.dp))
+fun UserProfileDisplayList(userProfiles: List<UserProfile>) {
+    if (userProfiles.isEmpty()){
+        Box (Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+            EmptyListCard()
+        }
+    }
+    else {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            contentPadding = PaddingValues(16.dp)
+        ) {
+            items(userProfiles) { userProfile ->
+                UserProfileCard(userProfile)
+                Spacer(modifier = Modifier.height(16.dp))
+            }
         }
     }
 }
@@ -41,11 +58,13 @@ fun UserProfileList(userProfiles: MutableList<UserProfile>) {
 @Composable
 fun UserProfileCard(userProfile: UserProfile) {
     Card(
-        modifier = Modifier.size(width = 240.dp, height = 100.dp),
+        modifier = Modifier.size(width = 240.dp, height = 80.dp),
         elevation = 6.dp
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .padding(10.dp)
+                .horizontalScroll(rememberScrollState())
         ) {
             Text(
                 text = userProfile.firstName,
@@ -58,4 +77,42 @@ fun UserProfileCard(userProfile: UserProfile) {
             )
         }
     }
+}
+
+@Composable
+fun EmptyListCard() {
+    Card(
+        modifier = Modifier.size(width = 240.dp, height = 80.dp),
+        elevation = 6.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(10.dp)
+                .horizontalScroll(rememberScrollState())
+        ) {
+            Text(
+                text = "No nearby users",
+                style = MaterialTheme.typography.headlineMedium
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewUserProfileDisplayList() {
+    val repository = MockRepository()
+    val sampleUserProfiles = (1..10).map { index ->
+        MockRepository.getMockUserProfile(index)
+    }.toList()
+
+    UserProfileDisplayList(userProfiles = sampleUserProfiles)
+}
+@Preview
+
+@Composable
+fun PreviewEmptyUserProfileDisplayList() {
+    val sampleUserProfiles = listOf<UserProfile>()
+
+    UserProfileDisplayList(userProfiles = sampleUserProfiles)
 }

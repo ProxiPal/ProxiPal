@@ -83,6 +83,9 @@ fun LocationUpdatesContent(usePreciseLocation: Boolean, userProfileViewModel: Us
 
                 // Update the user's the latitude and longitude
                 userProfileViewModel.setUserProfileLocation(currentLocation.latitude, currentLocation.longitude)
+
+                // After updating the user's location, fetch and store nearby user profiles in the viewmodel
+                userProfileViewModel.fetchAndStoreNearbyUserProfiles()
             }
         }
     }
@@ -126,6 +129,7 @@ fun LocationUpdatesContent(usePreciseLocation: Boolean, userProfileViewModel: Us
             Text(text = locationUpdates)
         }
     }
+    UserProfileDisplayList(userProfiles = userProfileViewModel.nearbyUserProfiles)
 }
 
 /**
