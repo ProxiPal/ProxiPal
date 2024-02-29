@@ -23,6 +23,10 @@ import com.mongodb.app.ui.theme.Purple700
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 
+// contribution: Marco Pacini
+/**
+ * A composable for displaying a slider that adjusts the proximity radius.
+ */
 @Composable
 fun ProximityRadiusAdjuster(userProfileViewModel: UserProfileViewModel) {
     var sliderPosition by remember { mutableFloatStateOf(0f) }
@@ -37,7 +41,7 @@ fun ProximityRadiusAdjuster(userProfileViewModel: UserProfileViewModel) {
                 activeTrackColor = Purple500,
                 inactiveTrackColor = Purple700,
             ),
-            steps = 10,
+            steps = 8,
             valueRange = 0.1f..1f
         )
         Text(
