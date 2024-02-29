@@ -66,5 +66,12 @@
     <string name="linkedin">LinkedIn</string>
     <string name="instagram">Instagram</string>
 
+    <!-- Connect with Others -->
+    <string name="enable_location_updates">Start connecting with nearby users</string>
+    <string name="searching_for_nearby_users">Searching for users...</string>
+    <string name="grant_permissions">Grant permissions</string>
+    <string name="permissions_required_by">Location permissions required by Proxipal</string>
+    <string name="requires_permissions">Proxipal requires location permissions</string>
+
 
 </resources>

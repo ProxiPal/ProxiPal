@@ -75,6 +75,8 @@ class UserProfileViewModel constructor(
 
     private val _nearbyUserProfiles: MutableList<UserProfile> = mutableListOf()
 
+    private val _proximityRadius: MutableState<Double> = mutableStateOf(0.1)
+
 
     /*
     ===== Properties =====
@@ -110,6 +112,9 @@ class UserProfileViewModel constructor(
 
     val nearbyUserProfiles: List<UserProfile>
         get() = _nearbyUserProfiles
+
+    val proxmityRadius: State<Double>
+        get() = _proximityRadius
 
 
     init {

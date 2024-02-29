@@ -23,8 +23,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mongodb.app.R
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.domain.UserProfile
 
@@ -34,21 +36,29 @@ import com.mongodb.app.domain.UserProfile
  * as they are queried from a specified radius around the current device
  */
 @Composable
-fun UserProfileDisplayList(userProfiles: List<UserProfile>) {
-    if (userProfiles.isEmpty()){
-        Box (Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-            EmptyListCard()
+fun UserProfileDisplayList(userProfiles: List<UserProfile>, isLookingForUsers: Boolean) {
+    if (isLookingForUsers){
+        if (userProfiles.isEmpty()){
+            LazyColumn (
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                contentPadding = PaddingValues(16.dp)
+            ) {
+                item {
+                    EmptyListCard()
+                }
+            }
         }
-    }
-    else {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            contentPadding = PaddingValues(16.dp)
-        ) {
-            items(userProfiles) { userProfile ->
-                UserProfileCard(userProfile)
-                Spacer(modifier = Modifier.height(16.dp))
+        else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                contentPadding = PaddingValues(16.dp)
+            ) {
+                items(userProfiles) { userProfile ->
+                    UserProfileCard(userProfile)
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
             }
         }
     }
@@ -82,7 +92,7 @@ fun UserProfileCard(userProfile: UserProfile) {
 @Composable
 fun EmptyListCard() {
     Card(
-        modifier = Modifier.size(width = 240.dp, height = 80.dp),
+        modifier = Modifier.size(width = 360.dp, height = 80.dp),
         elevation = 6.dp
     ) {
         Column(
@@ -91,7 +101,7 @@ fun EmptyListCard() {
                 .horizontalScroll(rememberScrollState())
         ) {
             Text(
-                text = "No nearby users",
+                text = stringResource(R.string.searching_for_nearby_users),
                 style = MaterialTheme.typography.headlineMedium
             )
         }
@@ -101,12 +111,11 @@ fun EmptyListCard() {
 @Preview
 @Composable
 fun PreviewUserProfileDisplayList() {
-    val repository = MockRepository()
     val sampleUserProfiles = (1..10).map { index ->
         MockRepository.getMockUserProfile(index)
     }.toList()
 
-    UserProfileDisplayList(userProfiles = sampleUserProfiles)
+    UserProfileDisplayList(userProfiles = sampleUserProfiles, true)
 }
 @Preview
 
@@ -114,5 +123,5 @@ fun PreviewUserProfileDisplayList() {
 fun PreviewEmptyUserProfileDisplayList() {
     val sampleUserProfiles = listOf<UserProfile>()
 
-    UserProfileDisplayList(userProfiles = sampleUserProfiles)
+    UserProfileDisplayList(userProfiles = sampleUserProfiles, true)
 }
