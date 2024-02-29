@@ -29,6 +29,7 @@ import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
+// Contribution: Marco Pacini
 /**
  * Simple screen that manages the location permission state
  * Based on example from https://github.com/android/platform-samples/tree/main/samples/location

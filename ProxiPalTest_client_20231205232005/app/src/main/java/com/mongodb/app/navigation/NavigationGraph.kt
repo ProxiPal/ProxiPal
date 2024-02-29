@@ -12,6 +12,10 @@ import com.mongodb.app.ui.userprofiles.UserProfileLayout
 
 //TODO add more parameters as needed
 
+// Contribution: Marco Pacini
+/**
+ * Navigation graph for the different screens in Proxipal
+ */
 @Composable
 fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: UserProfileViewModel) {
     val navController = rememberNavController()
@@ -24,7 +28,11 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
             )
         }
         composable(Routes.ConnectWithOthersScreen.route) {
-            ConnectWithOthersScreen(toolbarViewModel = toolbarViewModel, navController = navController)
+            ConnectWithOthersScreen(
+                toolbarViewModel = toolbarViewModel,
+                navController = navController,
+                userProfileViewModel = userProfileViewModel
+            )
         }
         composable(Routes.LocationPermissionsScreen.route) {
             LocationPermissionScreen(navController)

@@ -9,6 +9,7 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 /*
 Contributions:
 - Kevin Kubota (entire file)
+- Marco Pacini (location attribute)
  */
 
 
@@ -22,7 +23,9 @@ class UserProfile : RealmObject {
     var lastName: String = ""
     var biography: String = ""
     var ownerId: String = ""
-    //var location: CustomGeoPoint? = null // location added by Marco Pacini
+
+    // Added by Marco Pacini, stores latitude and longitude
+    var location: CustomGeoPoint? = null
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
