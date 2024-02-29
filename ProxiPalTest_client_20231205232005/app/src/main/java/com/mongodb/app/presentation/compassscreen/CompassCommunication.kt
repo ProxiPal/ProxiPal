@@ -198,6 +198,10 @@ class CompassCommunication constructor(
      * Starts advertising, or allowing other users nearby the possibility to connect with you
      */
     private fun startAdvertising() {
+        Log.i(
+            TAG(),
+            "CompassCommunication: Start of advertising"
+        )
         val options = AdvertisingOptions.Builder().setStrategy(strategy).build()
         // TODO Advertising may fail, so need to handle cases when it does
         connectionsClient.startAdvertising(
@@ -212,6 +216,10 @@ class CompassCommunication constructor(
      * Starts discovering, or finding other users nearby to connect to
      */
     private fun startDiscovery() {
+        Log.i(
+            TAG(),
+            "CompassCommunication: Start of discovery"
+        )
         val options = DiscoveryOptions.Builder().setStrategy(strategy).build()
         connectionsClient.startDiscovery(packageName, endpointDiscoveryCallback, options)
     }
@@ -232,16 +240,18 @@ class CompassCommunication constructor(
      * Updates the current connection type
      */
     fun updateConnectionType(newConnectionType: CompassConnectionType) {
-        // Can only transition from OFFLINE to WAITING
-        if (_connectionType.value == CompassConnectionType.OFFLINE && newConnectionType != CompassConnectionType.MEETING){
-            _connectionType.value = newConnectionType
-            compassViewModel.updateConnectionType(newConnectionType)
-        }
-        // Can only transition from MEETING to OFFLINE
-        else if (_connectionType.value == CompassConnectionType.MEETING && newConnectionType != CompassConnectionType.OFFLINE){
-            _connectionType.value = newConnectionType
-            compassViewModel.updateConnectionType(newConnectionType)
-        }
+//        // Can only transition from OFFLINE to WAITING
+//        if (_connectionType.value == CompassConnectionType.OFFLINE && newConnectionType != CompassConnectionType.MEETING){
+//            _connectionType.value = newConnectionType
+//            compassViewModel.updateConnectionType(newConnectionType)
+//        }
+//        // Can only transition from MEETING to OFFLINE
+//        else if (_connectionType.value == CompassConnectionType.MEETING && newConnectionType != CompassConnectionType.OFFLINE){
+//            _connectionType.value = newConnectionType
+//            compassViewModel.updateConnectionType(newConnectionType)
+//        }
+        _connectionType.value = newConnectionType
+        compassViewModel.updateConnectionType(newConnectionType)
         when (connectionType.value) {
             CompassConnectionType.OFFLINE -> {
                 Log.i(
@@ -262,12 +272,6 @@ class CompassCommunication constructor(
                 Log.i(
                     TAG(),
                     "CompassCommunication: Now MEETING"
-                )
-            }
-            else -> {
-                Log.i(
-                    TAG(),
-                    "CompassCommunication: Unknown connection type \"${connectionType.value}\""
                 )
             }
         }

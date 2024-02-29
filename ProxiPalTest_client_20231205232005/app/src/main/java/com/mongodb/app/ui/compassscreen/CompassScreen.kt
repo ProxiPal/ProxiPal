@@ -131,6 +131,9 @@ class CompassScreen : ComponentActivity() {
         // This screen is entered only when the matched user accepts the connection
         // ... so as soon as this screen is shown, start the connection process
         compassCommunication!!.updateConnectionType(CompassConnectionType.WAITING)
+
+        // TODO Temporarily and quickly allow showing compass updating
+        compassCommunication!!.updateConnectionType(CompassConnectionType.MEETING)
     }
 
     @Deprecated("Deprecated in Java")
