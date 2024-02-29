@@ -7,23 +7,31 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
+
+import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.SHOULD_USE_TASKS_ITEMS
 import com.mongodb.app.presentation.login.EventSeverity
 import com.mongodb.app.presentation.login.LoginAction
 import com.mongodb.app.presentation.login.LoginEvent
 import com.mongodb.app.presentation.login.LoginViewModel
+import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
+import com.mongodb.app.ui.login.AccountScaffold
+
 import com.mongodb.app.ui.login.LoginScaffold
+import com.mongodb.app.ui.login.RegisterScaffold
+
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.userprofiles.UserProfileScreen
+import io.realm.kotlin.mongodb.User
 import kotlinx.coroutines.launch
 
 
 /*
 Contributions:
 - Kevin Kubota (added switch cases for starting or referencing an activity, see below)
+
+- Vichet Chim (added navigation between login page and sign up page)
  */
 
 
@@ -73,10 +81,14 @@ class ComposeLoginActivity : ComponentActivity() {
 
         setContent {
             MyApplicationTheme {
-                LoginScaffold(loginViewModel)
+                // Vichet Chim - navigation between login and sign up
+                AccountScaffold(loginViewModel = loginViewModel)
+
+                    }
+                }
             }
-        }
-    }
+
+
 
     private fun LoginEvent.process() {
         when (severity) {
@@ -90,15 +102,15 @@ class ComposeLoginActivity : ComponentActivity() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun LoginActivityPreview() {
-    MyApplicationTheme {
-        val viewModel = LoginViewModel().also {
-            it.switchToAction(LoginAction.LOGIN)
-            it.setEmail("test@test.com")
-            it.setPassword("123456")
-        }
-        LoginScaffold(viewModel)
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun LoginActivityPreview() {
+//    MyApplicationTheme {
+//        val viewModel = LoginViewModel().also {
+//            it.switchToAction(LoginAction.LOGIN)
+//            it.setEmail("test@test.com")
+//            it.setPassword("123456")
+//        }
+//        LoginScaffold(viewModel)
+//    }
+//}
