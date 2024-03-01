@@ -113,9 +113,12 @@ class CompassViewModel constructor(
         // Update user location values by a random value in range [-10, 10]
         val minimum = -10.0
         val maximum = 10.0
-        updateMatchedUserLatitude(Random.nextDouble(minimum, maximum))
-        updateMatchedUserLongitude(Random.nextDouble(minimum, maximum) * 2)
-        updateMeasurements()
+        updateMatchedUserLatitude(
+            _userProfileViewModel.userProfileLatitude.value
+                    + Random.nextDouble(minimum, maximum))
+        updateMatchedUserLongitude(
+            _userProfileViewModel.userProfileLongitude.value
+                    + Random.nextDouble(minimum, maximum) * 2)
     }
 
     fun getCurrentUserLocation(): String {
@@ -143,7 +146,6 @@ class CompassViewModel constructor(
     fun updateMatchedUserLatitude(newLatitude: Double) {
         if (isValidLatitude(newLatitude)) {
             _matchedUserLocation.value.latitude = newLatitude
-            updateMeasurements()
         }
     }
 
@@ -153,7 +155,6 @@ class CompassViewModel constructor(
     fun updateMatchedUserLongitude(newLongitude: Double) {
         if (isValidLongitude(newLongitude)) {
             _matchedUserLocation.value.longitude = newLongitude
-            updateMeasurements()
         }
     }
 
@@ -238,6 +239,7 @@ class CompassViewModel constructor(
             viewModelScope.launch {
                 while (connectionType.value != CompassConnectionType.OFFLINE) {
                     updateUserLocations()
+                    updateMeasurements()
                     delay(MS_BETWEEN_LOCATION_UPDATES)
                 }
             }

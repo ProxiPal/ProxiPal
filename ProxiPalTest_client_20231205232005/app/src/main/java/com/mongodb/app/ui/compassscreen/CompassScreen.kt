@@ -325,6 +325,11 @@ fun CompassScreenBodyContent(
     compassCommunication: CompassCommunication,
     modifier: Modifier = Modifier
 ) {
+    val onBackButtonClick = {
+        // TODO Temporarily and quickly allowing access to return to meeting state
+//        compassCommunication.updateConnectionType(CompassConnectionType.OFFLINE)
+        compassCommunication.updateConnectionType(CompassConnectionType.MEETING)
+    }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -344,6 +349,7 @@ fun CompassScreenBodyContent(
                     measurement = compassViewModel.distance.value
                 )
                 CompassScreenReturnButton(
+                    compassCommunication = compassCommunication,
                     onButtonClick = {
                         compassCommunication.updateConnectionType(CompassConnectionType.OFFLINE)
                     }
@@ -359,9 +365,8 @@ fun CompassScreenBodyContent(
                     textId = R.string.compass_screen_awaiting_connection_message
                 )
                 CompassScreenReturnButton(
-                    onButtonClick = {
-                        compassCommunication.updateConnectionType(CompassConnectionType.OFFLINE)
-                    }
+                    compassCommunication = compassCommunication,
+                    onButtonClick = { onBackButtonClick() }
                 )
             }
             // The current or matched user canceled the connection
@@ -370,9 +375,8 @@ fun CompassScreenBodyContent(
                     textId = R.string.compass_screen_canceled_connection_message
                 )
                 CompassScreenReturnButton(
-                    onButtonClick = {
-                        compassCommunication.updateConnectionType(CompassConnectionType.OFFLINE)
-                    }
+                    compassCommunication = compassCommunication,
+                    onButtonClick = { onBackButtonClick() }
                 )
             }
         }
@@ -429,6 +433,7 @@ fun CompassScreenMeasurementText(
  */
 @Composable
 fun CompassScreenReturnButton(
+    compassCommunication: CompassCommunication,
     onButtonClick: (() -> Unit),
     modifier: Modifier = Modifier
 ) {
@@ -436,7 +441,11 @@ fun CompassScreenReturnButton(
         onButtonClick = {
             onButtonClick()
         },
-        textId = R.string.compass_screen_return_button,
+        textId =
+        if (compassCommunication.connectionType.value == CompassConnectionType.MEETING)
+            R.string.compass_screen_cancel_button
+        else
+            R.string.compass_screen_return_button,
         modifier = modifier
     )
 }
