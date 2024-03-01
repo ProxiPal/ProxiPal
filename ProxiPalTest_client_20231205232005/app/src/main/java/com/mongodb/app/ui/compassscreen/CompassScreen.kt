@@ -47,6 +47,7 @@ import com.mongodb.app.data.compassscreen.ALL_NEARBY_API_PERMISSIONS_ARRAY
 import com.mongodb.app.data.compassscreen.CompassConnectionType
 import com.mongodb.app.presentation.compassscreen.CompassCommunication
 import com.mongodb.app.presentation.compassscreen.CompassViewModel
+import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.components.SingleButtonRow
 import com.mongodb.app.ui.components.SingleTextRow
 import com.mongodb.app.ui.theme.MyApplicationTheme
@@ -77,6 +78,11 @@ class CompassScreen : ComponentActivity() {
         CompassViewModel.factory(repository, this)
     }
 
+    // TODO May need to use UserProfileViewModel instance created in UserProfileScreen instead of this
+    private val userProfileViewModel: UserProfileViewModel by viewModels{
+        UserProfileViewModel.factory(repository, this)
+    }
+
     // App will crash if trying to set package name at this point
     // ... so set it later
     private var compassCommunication: CompassCommunication? = null
@@ -105,6 +111,8 @@ class CompassScreen : ComponentActivity() {
         compassViewModel.updateRepository(
             newRepository = repository
         )
+
+        compassViewModel.setViewModels(userProfileViewModel)
 
         compassCommunication = CompassCommunication(
             userId = repository.getCurrentUserId(),
@@ -460,9 +468,7 @@ fun TempCompassScreenLocationUpdating(
                 .fillMaxWidth()
         ) {
             Text(
-                text = "Current location:\n" +
-                        "\t\t${compassViewModel.currentUserLocation.value.latitude}\n" +
-                        "\t\t${compassViewModel.currentUserLocation.value.longitude}"
+                text = "Current location:\n${compassViewModel.getCurrentUserLocation()}"
             )
         }
         Row(
