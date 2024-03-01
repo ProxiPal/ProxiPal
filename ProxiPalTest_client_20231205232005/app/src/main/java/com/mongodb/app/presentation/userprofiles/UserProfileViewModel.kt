@@ -4,10 +4,8 @@ import android.os.Bundle
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
@@ -19,7 +17,6 @@ import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT
 import com.mongodb.app.data.USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT
 import com.mongodb.app.domain.UserProfile
-import com.mongodb.app.ui.userprofiles.UserProfileUiState
 import io.realm.kotlin.notifications.InitialResults
 import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.notifications.UpdatedResults
@@ -27,9 +24,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -55,10 +49,6 @@ class UserProfileViewModel constructor(
     /*
     ===== Variables =====
      */
-    // Accessible and editable only in this class
-    // A "data holder observable flow" for current and new states
-    private val _userProfileUiState = MutableStateFlow(UserProfileUiState())
-
     private val _event: MutableSharedFlow<UserProfileViewEvent> = MutableSharedFlow()
 
     private val _addUserProfileEvent: MutableSharedFlow<AddUserProfileEvent> = MutableSharedFlow()
@@ -81,10 +71,6 @@ class UserProfileViewModel constructor(
     /*
     ===== Properties =====
      */
-    // Read-only state flow for access outside this class
-    val userProfileUiState: StateFlow<UserProfileUiState>
-        get() = _userProfileUiState.asStateFlow()
-
     val userProfileFirstName: State<String>
         get() = _userProfileFirstName
 

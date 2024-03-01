@@ -97,7 +97,7 @@ class CompassCommunication constructor(
                 "CompassCommunication: Start of OnConnectionInitiated()"
             )
             connectionsClient.acceptConnection(endpointId, payloadCallback)
-            // TODO For privacy concerns, should see https://developer.android.com/codelabs/nearby-connections#5
+            // For privacy concerns, should see https://developer.android.com/codelabs/nearby-connections#5
         }
 
         override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {

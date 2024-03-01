@@ -54,17 +54,6 @@ import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
 import kotlinx.coroutines.launch
 
-/*
-TODO Current plan for order of events (See CompassConnectionType.kt for more)
-(1) When searching for other users to connect to
-(a) Use case #8
-(2) When selecting a user to connect to
-(a) Start discovering and advertising
-(b) Have a variable set to other user's ID and only connect to a device with that ID
-(c) If successful, use connection lifecycle object to show each other's location
-(3) If a user cancels the connection
-(a) Show the cancellation message to both users
- */
 class CompassScreen : ComponentActivity() {
     /*
     ===== Variables =====

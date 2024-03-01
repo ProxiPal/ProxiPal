@@ -33,7 +33,6 @@ class CompassViewModel constructor(
     /*
     ===== Variables =====
      */
-    // TODO Replace this with the actual location data
     private val _matchedUserLocation: MutableState<UserLocation> = mutableStateOf(
         UserLocation(0.0, 0.0)
     )
@@ -51,7 +50,6 @@ class CompassViewModel constructor(
     /*
     ===== Properties =====
      */
-    // TODO Replace this with the actual location data
     val matchedUserLocation: State<UserLocation>
         get() = _matchedUserLocation
 
@@ -66,7 +64,6 @@ class CompassViewModel constructor(
 
 
     init {
-        // TODO Temporary setting, replace this with actual values later
         _matchedUserLocation.value.latitude = 0.0
         _matchedUserLocation.value.longitude = 0.0
 
@@ -238,7 +235,6 @@ class CompassViewModel constructor(
     fun updateConnectionType(newCompassConnectionType: CompassConnectionType) {
         _connectionType.value = newCompassConnectionType
         if (connectionType.value == CompassConnectionType.MEETING) {
-            // TODO Temporary updating of user locations, replace this with actual values later
             viewModelScope.launch {
                 while (connectionType.value != CompassConnectionType.OFFLINE) {
                     updateUserLocations()

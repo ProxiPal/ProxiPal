@@ -213,7 +213,6 @@ fun UserProfileLayout(
 ) {
     Scaffold(
         topBar = {
-//            UserProfileTopBar()
             // This top bar is used because it already has logging out of account implemented
             TaskAppToolbar(viewModel = toolbarViewModel)
         },
@@ -247,36 +246,6 @@ fun UserProfileLayoutPreview() {
             navController = rememberNavController(),
             homeViewModel = HomeViewModel()
         )
-    }
-}
-
-/**
- * The top bar portion of the user profile screen
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-@Deprecated(
-    message = "Unused in favor of the existing template's top bar, which already has account log out functionality implemented"
-)
-fun UserProfileTopBar(modifier: Modifier = Modifier) {
-    CenterAlignedTopAppBar(
-        title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = stringResource(id = R.string.user_profile_header),
-                    style = MaterialTheme.typography.displayLarge
-                )
-            }
-        },
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun UserProfileTopBarPreview() {
-    MyApplicationTheme {
-        UserProfileTopBar()
     }
 }
 
