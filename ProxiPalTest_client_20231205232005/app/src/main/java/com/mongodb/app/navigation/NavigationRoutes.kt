@@ -9,4 +9,6 @@ sealed class Routes(val route: String) {
     object UserProfileScreen : Routes("userprofilescreen")
     object HomeScreen : Routes("homescreen")
     object ScreenSettings : Routes("screensettings")
+
+    object UserInterestsScreen : Routes("userinterestscreen")
 }

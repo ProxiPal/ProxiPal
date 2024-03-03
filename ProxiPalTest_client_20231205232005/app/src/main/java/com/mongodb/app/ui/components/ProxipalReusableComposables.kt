@@ -101,7 +101,7 @@ fun ProxiPalBottomAppBar(navController: NavHostController) {
             icon = { Icon(Icons.Filled.Favorite, contentDescription = "Navigate to friends") },
             label = { Text("Friends") },
             selected = false,
-            onClick = { /*TODO navigate to friends*/ },
+            onClick = { navController.navigate(Routes.UserInterestsScreen.route) },
             selectedContentColor = Color.White
         )
     }

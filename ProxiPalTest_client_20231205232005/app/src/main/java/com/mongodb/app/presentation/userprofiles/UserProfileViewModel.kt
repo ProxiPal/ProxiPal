@@ -77,6 +77,8 @@ class UserProfileViewModel constructor(
 
     private val _proximityRadius: MutableState<Double> = mutableStateOf(0.1)
 
+    private var _userProfileInterests: MutableList<String> = mutableListOf()
+
 
     /*
     ===== Properties =====
@@ -115,6 +117,10 @@ class UserProfileViewModel constructor(
 
     val proxmityRadius: State<Double>
         get() = _proximityRadius
+
+    val userProfileInterests: List<String>
+        get() = _userProfileInterests
+
 
 
     init {
@@ -195,6 +201,7 @@ class UserProfileViewModel constructor(
                                     _userProfileBiography.value = event.list[0].biography
                                     _userProfileLatitude.value = event.list[0].location?.latitude!!
                                     _userProfileLongitude.value = event.list[0].location?.longitude!!
+                                    _userProfileInterests = event.list[0].interests.toList().toMutableList()
                                 }
                                 else -> {
                                     Log.i(
@@ -280,6 +287,7 @@ class UserProfileViewModel constructor(
 //        }
     }
 
+
     /**
      * Updates the current user's user profile, if it exists
      */
@@ -296,6 +304,9 @@ class UserProfileViewModel constructor(
     /**
      * Updates the user profile's location
      */
+
+
+
     fun setUserProfileLocation(latitude: Double, longitude: Double){
         _userProfileLatitude.value = latitude
         _userProfileLongitude.value = longitude
@@ -403,6 +414,7 @@ class UserProfileViewModel constructor(
                     lastName = userProfileLastName.value,
                     biography = userProfileBiography.value
                 )
+
             }.onSuccess {
                 withContext(Dispatchers.Main) {
                     _addUserProfileEvent.emit(AddUserProfileEvent.Info("UPViewModel: Successfully added user profile " +
@@ -442,4 +454,24 @@ class UserProfileViewModel constructor(
     fun updateProximityRadius(radiusInMiles: Double){
         _proximityRadius.value = radiusInMiles
     }
+
+    fun toggleInterest(interest: String){
+        if (_userProfileInterests.contains(interest)) {
+            _userProfileInterests.remove(interest)
+        }  else{
+            _userProfileInterests.add(interest)
+        }
+        updateUserInterests(interest)
+    }
+
+
+    private fun updateUserInterests(interest:String) {
+    viewModelScope.launch {
+        repository.updateUserProfileInterests(
+            interest = interest
+        )
+    }
+    }
+
+
 }

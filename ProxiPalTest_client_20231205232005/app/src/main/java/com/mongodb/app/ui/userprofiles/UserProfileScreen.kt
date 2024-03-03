@@ -81,6 +81,8 @@ class UserProfileScreen : ComponentActivity() {
     /*
     ===== Variables =====
      */
+
+
     private val repository = RealmSyncRepository { _, error ->
         // Sync errors come from a background thread so route the Toast through the UI thread
         lifecycleScope.launch {
@@ -106,11 +108,14 @@ class UserProfileScreen : ComponentActivity() {
     }
 
 
+
     /*
     ===== Functions =====
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
 
         Log.i(
             TAG(),
@@ -522,7 +527,43 @@ fun UserProfileEditButtons(
     }
 }
 
-@Preview(showBackground = true)
+@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@Composable
+fun test(
+    userProfileViewModel: UserProfileViewModel,
+    toolbarViewModel: ToolbarViewModel,
+    navController: NavHostController,
+    onPreviousClicked: () -> Unit,
+    onNextClicked:() -> Unit,
+
+    modifier: Modifier = Modifier
+) {
+    Scaffold(
+        topBar = {
+//            UserProfileTopBar()
+            // This top bar is used because it already has logging out of account implemented
+            TaskAppToolbar(viewModel = toolbarViewModel, navController = navController)
+        },
+        bottomBar = { PreviousNextBottomAppBar(
+            onPreviousClicked = onPreviousClicked,
+            onNextClicked =onNextClicked,
+            currentPage = 1,
+            totalPages = 3
+        )},
+        modifier = modifier
+    ) { innerPadding ->
+        Column {
+            UserProfileBody(
+                contentPadding = innerPadding,
+                userProfileViewModel = userProfileViewModel
+            )
+            //HomeScreen(navController = navController, viewModel = homeViewModel)
+        }
+    }
+}
+
+//@Preview(showBackground = true)
 @Composable
 fun UserProfileEditButtonsPreview(){
     MyApplicationTheme {

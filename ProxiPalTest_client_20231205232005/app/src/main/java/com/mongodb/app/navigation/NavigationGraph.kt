@@ -11,7 +11,9 @@ import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.ui.tasks.ConnectWithOthersScreen
 import com.mongodb.app.location.LocationPermissionScreen
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
+import com.mongodb.app.ui.userprofiles.InterestScreen
 import com.mongodb.app.ui.userprofiles.UserProfileLayout
+import com.mongodb.app.ui.userprofiles.test
 
 //TODO add more parameters as needed
 
@@ -24,12 +26,28 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Routes.UserProfileScreen.route) {
         composable(Routes.UserProfileScreen.route) {
-            UserProfileLayout(
-                userProfileViewModel = userProfileViewModel,
-                toolbarViewModel = toolbarViewModel,
-                homeViewModel = homeViewModel,
-                navController = navController
-            )
+            if (userProfileViewModel.userProfileListState.isEmpty()){
+                test(
+                    userProfileViewModel = userProfileViewModel,
+                    toolbarViewModel = toolbarViewModel,
+                    navController = navController,
+                    onPreviousClicked ={} ,
+                    onNextClicked = {navController.navigate(Routes.UserInterestsScreen.route)
+
+                    },
+                )
+            }
+            else {
+                UserProfileLayout(
+                    userProfileViewModel = userProfileViewModel,
+                    toolbarViewModel = toolbarViewModel,
+                    homeViewModel = homeViewModel,
+                    navController = navController
+                )
+            }
+        }
+        composable(Routes.UserInterestsScreen.route){
+            InterestScreen(userProfileViewModel = userProfileViewModel ,onPreviousClicked = { navController.popBackStack() }, onNextClicked = {})
         }
         composable(Routes.ConnectWithOthersScreen.route) {
             ConnectWithOthersScreen(
