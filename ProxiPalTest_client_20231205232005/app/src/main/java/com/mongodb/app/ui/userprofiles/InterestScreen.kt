@@ -200,7 +200,7 @@ fun InterestScreen(userProfileViewModel: UserProfileViewModel, onPreviousClicked
             topBar ={ ProfileTopAppBar()},
             bottomBar = { PreviousNextBottomAppBar(
                 onPreviousClicked = onPreviousClicked,
-                onNextClicked = onPreviousClicked,
+                onNextClicked = onNextClicked,
                 currentPage = 2,
                 totalPages = 3
             )}
