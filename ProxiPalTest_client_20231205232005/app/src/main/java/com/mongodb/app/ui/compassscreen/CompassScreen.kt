@@ -207,6 +207,7 @@ class CompassScreen : ComponentActivity() {
     }
 
     private fun verifyPermissions2(){
+        // TODO Should show permission rationale with shouldShowRequestPermissionRationale()
         val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()){
                 isGranted: Boolean ->
             Log.i(

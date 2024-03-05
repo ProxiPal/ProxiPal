@@ -102,6 +102,9 @@ class CompassViewModel constructor(
         repository = newRepository
     }
 
+    /**
+     * Function to set view model instances. Should be called immediately after initialization
+     */
     fun setViewModels(userProfileViewModel: UserProfileViewModel) {
         _userProfileViewModel = userProfileViewModel
     }
@@ -121,6 +124,9 @@ class CompassViewModel constructor(
                     + Random.nextDouble(minimum, maximum) * 2)
     }
 
+    /**
+     * Returns a formatted string of the current user's location
+     */
     fun getCurrentUserLocation(): String {
         return "(${_userProfileViewModel.userProfileLatitude.value}, " +
                 "${_userProfileViewModel.userProfileLongitude.value})"
@@ -233,6 +239,9 @@ class CompassViewModel constructor(
         return sqrt(deltaLatitude.pow(2) + deltaLongitude.pow(2))
     }
 
+    /**
+     * Called by [CompassCommunication]'s [CompassCommunication.updateConnectionType] function
+     */
     fun updateConnectionType(newCompassConnectionType: CompassConnectionType) {
         _connectionType.value = newCompassConnectionType
         if (connectionType.value == CompassConnectionType.MEETING) {

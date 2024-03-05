@@ -59,9 +59,13 @@ class CompassCommunication constructor(
      */
     // region CallbackObjects
     /**
-     * Callback for receiving payloads
+     * Payload:
+     * Callback for receiving payloads (any kind of data, and no limit to data)
      */
     private val payloadCallback: PayloadCallback = object : PayloadCallback() {
+        /**
+         * Tells app when it's receiving a message
+         */
         override fun onPayloadReceived(endpointId: String, payload: Payload) {
             Log.i(
                 TAG(),
@@ -74,6 +78,9 @@ class CompassCommunication constructor(
             }
         }
 
+        /**
+         * Tracks the status of both incoming and outgoing messages
+         */
         override fun onPayloadTransferUpdate(endpointId: String, update: PayloadTransferUpdate) {
             Log.i(
                 TAG(),
@@ -90,7 +97,14 @@ class CompassCommunication constructor(
         }
     }
 
+    /**
+     * Advertising:
+     * Callback to inform you when someone who noticed your advertisement wants to connect
+     */
     private val connectionLifecycleCallback = object : ConnectionLifecycleCallback() {
+        /**
+         * Tells you that someone has noticed your advertisement and wants to connect
+         */
         override fun onConnectionInitiated(endpointId: String, info: ConnectionInfo) {
             Log.i(
                 TAG(),
@@ -100,6 +114,9 @@ class CompassCommunication constructor(
             // For privacy concerns, should see https://developer.android.com/codelabs/nearby-connections#5
         }
 
+        /**
+         * Tells you whether the connection between you and the sender was established
+         */
         override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {
             Log.i(
                 TAG(),
@@ -116,6 +133,9 @@ class CompassCommunication constructor(
             }
         }
 
+        /**
+         * Tells you that the connection is no longer active
+         */
         override fun onDisconnected(endpointId: String) {
             Log.i(
                 TAG(),
@@ -124,7 +144,14 @@ class CompassCommunication constructor(
         }
     }
 
+    /**
+     * Discovery:
+     * Callback similar to the callback used for advertising
+     */
     private val endpointDiscoveryCallback = object : EndpointDiscoveryCallback() {
+        /**
+         * Called every time an advertisement is detected
+         */
         override fun onEndpointFound(endpointId: String, info: DiscoveredEndpointInfo) {
             Log.i(
                 TAG(),
@@ -137,6 +164,9 @@ class CompassCommunication constructor(
             )
         }
 
+        /**
+         * Called every time an advertisement is no longer available
+         */
         override fun onEndpointLost(endpointId: String) {
             Log.i(
                 TAG(),
