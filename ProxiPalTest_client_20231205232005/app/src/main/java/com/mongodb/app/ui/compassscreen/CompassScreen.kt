@@ -88,6 +88,7 @@ class CompassScreen : ComponentActivity() {
     private val REQUEST_CODE_REQUIRED_PERMISSIONS = 1
 
 
+    // region WifiP2P
 //    private val manager: WifiP2pManager? by lazy(LazyThreadSafetyMode.NONE) {
 //        getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager?
 //    }
@@ -105,6 +106,7 @@ class CompassScreen : ComponentActivity() {
         addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)
         addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)
     }
+    // endregion WifiP2P
 
 
     /*
@@ -137,6 +139,7 @@ class CompassScreen : ComponentActivity() {
         compassCommunication!!.setCompassViewModel(compassViewModel)
 
 
+        // WifiP2P
         manager = getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager
         channel = manager.initialize(this, mainLooper, null)
 
@@ -166,18 +169,21 @@ class CompassScreen : ComponentActivity() {
         compassCommunication!!.updateConnectionType(CompassConnectionType.MEETING)
     }
 
-    /* register the broadcast receiver with the intent values to be matched */
     override fun onResume() {
         super.onResume()
+        // WifiP2P
+        // Register the broadcast receiver with the intent values to be matched
         receiver?.also { receiver ->
             registerReceiver(receiver, intentFilter)
         }
         receiver?.discoverPeers()
+        receiver?.requestPeers()
     }
 
-    /* unregister the broadcast receiver */
     override fun onPause() {
         super.onPause()
+        // WifiP2P
+        // Unregister the broadcast receiver
         receiver?.also { receiver ->
             unregisterReceiver(receiver)
         }

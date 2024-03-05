@@ -152,6 +152,37 @@ class WiFiDirectBroadcastReceiver(
         })
     }
 
+    fun requestPeers(){
+        // Permission check
+        if (ActivityCompat.checkSelfPermission(
+                activity,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
+                activity,
+                Manifest.permission.NEARBY_WIFI_DEVICES
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            Log.i(
+                TAG(),
+                "WiFiDirectBroadcastReceiver: Could not request without permissions"
+            )
+            return
+        }
+        manager.requestPeers(channel) { peers: WifiP2pDeviceList? ->
+            Log.i(
+                TAG(),
+                "WiFiDirectBroadcastReceiver: Current peer amount = \"${peers?.deviceList?.size}\""
+            )
+        }
+    }
+
     fun connectToPeers(peers: WifiP2pDeviceList?){
         if (peers == null) return
         // Get the first peer device
