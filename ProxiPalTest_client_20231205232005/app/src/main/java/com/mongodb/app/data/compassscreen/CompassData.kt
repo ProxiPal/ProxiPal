@@ -77,3 +77,11 @@ val ALL_NEARBY_API_PERMISSIONS_ARRAY = arrayOf(
     Manifest.permission.NEARBY_WIFI_DEVICES,
     Manifest.permission.ACCESS_COARSE_LOCATION,
 )
+
+val ALL_WIFIP2P_PERMISSIONS = listOf(
+    Manifest.permission.ACCESS_WIFI_STATE,
+    Manifest.permission.CHANGE_WIFI_STATE,
+    Manifest.permission.ACCESS_NETWORK_STATE,
+    Manifest.permission.CHANGE_NETWORK_STATE,
+    Manifest.permission.INTERNET
+)

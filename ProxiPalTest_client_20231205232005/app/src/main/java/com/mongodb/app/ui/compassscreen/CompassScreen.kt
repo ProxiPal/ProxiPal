@@ -2,7 +2,11 @@
 
 package com.mongodb.app.ui.compassscreen
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.net.wifi.p2p.WifiP2pManager
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -44,9 +48,11 @@ import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.compassscreen.ALL_NEARBY_API_PERMISSIONS
 import com.mongodb.app.data.compassscreen.ALL_NEARBY_API_PERMISSIONS_ARRAY
+import com.mongodb.app.data.compassscreen.ALL_WIFIP2P_PERMISSIONS
 import com.mongodb.app.data.compassscreen.CompassConnectionType
 import com.mongodb.app.presentation.compassscreen.CompassCommunication
 import com.mongodb.app.presentation.compassscreen.CompassViewModel
+import com.mongodb.app.presentation.compassscreen.WiFiDirectBroadcastReceiver
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.components.SingleButtonRow
 import com.mongodb.app.ui.components.SingleTextRow
@@ -82,6 +88,25 @@ class CompassScreen : ComponentActivity() {
     private val REQUEST_CODE_REQUIRED_PERMISSIONS = 1
 
 
+//    private val manager: WifiP2pManager? by lazy(LazyThreadSafetyMode.NONE) {
+//        getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager?
+//    }
+//
+//    private var channel: WifiP2pManager.Channel? = null
+
+    private lateinit var channel: WifiP2pManager.Channel
+    private lateinit var manager: WifiP2pManager
+
+    private var receiver: WiFiDirectBroadcastReceiver? = null
+
+    private val intentFilter = IntentFilter().apply {
+        addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION)
+        addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION)
+        addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)
+        addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)
+    }
+
+
     /*
     ===== Functions =====
      */
@@ -111,6 +136,14 @@ class CompassScreen : ComponentActivity() {
         compassCommunication!!.setConnectionsClient(this)
         compassCommunication!!.setCompassViewModel(compassViewModel)
 
+
+        manager = getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager
+        channel = manager.initialize(this, mainLooper, null)
+
+        channel.also { channel ->
+            receiver = WiFiDirectBroadcastReceiver(manager, channel, this)
+        }
+
         setContent {
             MyApplicationTheme {
                 CompassScreenLayout(
@@ -131,6 +164,23 @@ class CompassScreen : ComponentActivity() {
 
         // TODO Temporarily and quickly allow showing compass updating
         compassCommunication!!.updateConnectionType(CompassConnectionType.MEETING)
+    }
+
+    /* register the broadcast receiver with the intent values to be matched */
+    override fun onResume() {
+        super.onResume()
+        receiver?.also { receiver ->
+            registerReceiver(receiver, intentFilter)
+        }
+        receiver?.discoverPeers()
+    }
+
+    /* unregister the broadcast receiver */
+    override fun onPause() {
+        super.onPause()
+        receiver?.also { receiver ->
+            unregisterReceiver(receiver)
+        }
     }
 
     @Deprecated("Deprecated in Java")
@@ -216,7 +266,7 @@ class CompassScreen : ComponentActivity() {
             )
         }
 
-        for (permission in ALL_NEARBY_API_PERMISSIONS){
+        for (permission in ALL_NEARBY_API_PERMISSIONS + ALL_WIFIP2P_PERMISSIONS){
             when {
                 ContextCompat.checkSelfPermission(this, permission)
                         == PackageManager.PERMISSION_GRANTED -> {
