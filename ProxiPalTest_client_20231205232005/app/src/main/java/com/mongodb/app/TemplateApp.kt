@@ -24,7 +24,7 @@ class TemplateApp: Application() {
     override fun onCreate() {
         super.onCreate()
         createNewFriendRequestNotificationChannel() // Create notification channel for new friend request push notifications
-
+        createTestNotificationPermissionsNotificationChannel() // Create notification channel for testing notification permissions
 
         app = App.create(
             AppConfiguration.Builder(getString(R.string.realm_app_id))
@@ -44,6 +44,7 @@ class TemplateApp: Application() {
         service.showNotification()
     }
 
+    // Programmer: Brian Poon
     // Creates a new notification channel to handle new friend request notifications
     private fun createNewFriendRequestNotificationChannel() {
         // Creates a new notification channel with the given ID, name, and importance level
@@ -55,6 +56,26 @@ class TemplateApp: Application() {
 
         // Sets a description for the channel
         channel.description = "Used for new friend request notifications"
+
+        // Gets the notification manager service
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        // Creates the notification channel
+        notificationManager.createNotificationChannel(channel)
+    }
+
+    // Programmer: Brian Poon
+    // Creates a new notification channel to handle testing if notification permissions are enabled
+    private fun createTestNotificationPermissionsNotificationChannel() {
+        // Creates a new notification channel with the given ID, name, and importance level
+        val channel = NotificationChannel(
+            AllowNotificationsActivity.CHANNEL_ID, // The ID of the channel
+            "Test Notification For Permissions Enabled", // The name of the channel
+            NotificationManager.IMPORTANCE_HIGH // The importance level of the channel
+        )
+
+        // Sets a description for the channel
+        channel.description = "Used for testing if notification permissions are enabled"
 
         // Gets the notification manager service
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
