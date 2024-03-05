@@ -36,6 +36,9 @@
             android:name=".ComposeItemActivity"
             android:screenOrientation="nosensor" />
         <activity
+            android:name=".AllowNotificationsActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.userprofiles.UserProfileScreen"
             android:screenOrientation="fullSensor" />
         <activity
