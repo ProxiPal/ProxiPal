@@ -37,9 +37,13 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
                 state = true
             }
             if (state){
-                ProfileSetupScaffold(userProfileViewModel = userProfileViewModel, onPreviousClicked = { /*TODO*/ }, onNextClicked = {userProfileViewModel.addUserProfile();navController.navigate(Routes.UserInterestsScreen.route)})
-
-
+               // ProfileSetupScaffold(userProfileViewModel = userProfileViewModel, onPreviousClicked = { /*TODO*/ }, onNextClicked = {navController.navigate(Routes.UserInterestsScreen.route)})
+                test(
+                    userProfileViewModel = userProfileViewModel,
+                    toolbarViewModel = toolbarViewModel,
+                    navController = navController,
+                    onPreviousClicked = { /*TODO*/ },
+                    onNextClicked = { navController.navigate(Routes.UserInterestsScreen.route) })
             }
             else {
                 UserProfileLayout(
@@ -51,7 +55,7 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
             }
         }
         composable(Routes.UserInterestsScreen.route){
-            InterestScreen(userProfileViewModel = userProfileViewModel ,onPreviousClicked = { navController.popBackStack() }, onNextClicked = {state = false;Routes.UserProfileScreen.route})
+            InterestScreen(userProfileViewModel = userProfileViewModel ,onPreviousClicked = { navController.popBackStack() }, onNextClicked = {state = false;navController.popBackStack()})
         }
         composable(Routes.ConnectWithOthersScreen.route) {
             ConnectWithOthersScreen(
