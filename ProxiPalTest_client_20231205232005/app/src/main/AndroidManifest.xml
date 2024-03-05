@@ -36,6 +36,15 @@
             android:name=".ComposeItemActivity"
             android:screenOrientation="nosensor" />
         <activity
+            android:name=".SettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PrivacyPolicyActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LanguageActivity"
+            android:exported="false" />
+        <activity
             android:name=".AllowNotificationsActivity"
             android:exported="false" />
         <activity
