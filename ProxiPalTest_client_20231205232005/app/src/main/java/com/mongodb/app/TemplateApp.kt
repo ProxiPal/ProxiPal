@@ -23,10 +23,9 @@ class TemplateApp: Application() {
 
     override fun onCreate() {
         super.onCreate()
+        createNewFriendRequestNotificationChannel() // Create notification channel for new friend request push notifications
 
 
-
-        createNotificationChannel() // Create notification channel for push notifications
         app = App.create(
             AppConfiguration.Builder(getString(R.string.realm_app_id))
                 .baseUrl(getString(R.string.realm_base_url))
@@ -38,14 +37,15 @@ class TemplateApp: Application() {
         // it does not contain the data explorer link. Download the
         // app template from the Atlas UI to view a link to your data.
         Log.v(TAG(),"To see your data in Atlas, follow this link:" + getString(R.string.realm_data_explorer_link))
+
+
+        // Show Friend Request Notification
         val service = NewFriendRequestNotificationService(applicationContext)
         service.showNotification()
-
-
     }
 
     // Creates a new notification channel to handle new friend request notifications
-    private fun createNotificationChannel() {
+    private fun createNewFriendRequestNotificationChannel() {
         // Creates a new notification channel with the given ID, name, and importance level
         val channel = NotificationChannel(
             NewFriendRequestNotificationService.CHANNEL_ID, // The ID of the channel
