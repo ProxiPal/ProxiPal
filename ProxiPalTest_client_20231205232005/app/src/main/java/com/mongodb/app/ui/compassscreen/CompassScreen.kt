@@ -143,9 +143,6 @@ class CompassScreen : ComponentActivity() {
         manager = getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager
         channel = manager.initialize(this, mainLooper, null)
 
-        channel.also { channel ->
-            receiver = WiFiDirectBroadcastReceiver(manager, channel, this)
-        }
 
         setContent {
             MyApplicationTheme {
@@ -173,9 +170,9 @@ class CompassScreen : ComponentActivity() {
         super.onResume()
         // WifiP2P
         // Register the broadcast receiver with the intent values to be matched
-        receiver?.also { receiver ->
-            registerReceiver(receiver, intentFilter)
-        }
+        receiver = WiFiDirectBroadcastReceiver(manager, channel, this)
+        registerReceiver(receiver, intentFilter)
+
         receiver?.discoverPeers()
         receiver?.requestPeers()
     }
@@ -184,9 +181,7 @@ class CompassScreen : ComponentActivity() {
         super.onPause()
         // WifiP2P
         // Unregister the broadcast receiver
-        receiver?.also { receiver ->
-            unregisterReceiver(receiver)
-        }
+        unregisterReceiver(receiver)
     }
 
     @Deprecated("Deprecated in Java")
