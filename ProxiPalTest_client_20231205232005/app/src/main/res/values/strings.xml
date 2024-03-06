@@ -62,6 +62,22 @@
          Programmer:Brian Poon 2/21/24   -->
     <string name="new_friend_request_notification_service_content_body">You have a new friend request!</string>
 
+    <!-- Strings for App Settings Page
+         Programmer: Brian Poon 3/5/24  -->
+    <string name="to_customize_your_preferred_language_setting_on_your_device_simply_follow_these_steps_n_n1_open_the_app_settings_for_proxipal_on_your_android_device_n_n2_scroll_down_and_tap_on_language_n_n3_choose_your_preferred_language_from_the_list">To customize your preferred language setting on your device, simply follow these steps:\n\n1. Open the App Settings for ProxiPal on your Android device.\n\n2. Scroll down and tap on \'Language\'.\n\n3. Choose your preferred language from the list.</string>
+    <string name="open_settings">Open Settings</string>
+    <string name="this_mobile_application_is_designed_as_a_social_networking_platform_to_connect_students_with_similar_interests_academic_backgrounds_or_geographic_proximity_to_facilitate_making_new_friends_to_ensure_user_privacy_and_data_protection_the_app_collects_only_the_information_necessary_for_basic_functionality_and_user_experience_enhancement_including_usernames_profile_pictures_interests_and_location_data_user_data_is_securely_stored_and_managed_accessible_only_to_the_user_and_not_shared_with_any_third_party_entities_the_app_may_collect_analytics_data_such_as_user_interactions_and_usage_patterns_solely_for_the_purpose_of_improving_the_app_s_performance_and_user_experience_users_have_full_control_over_their_data_and_can_delete_their_accounts_and_personal_information_at_any_time_the_app_complies_with_applicable_privacy_laws_and_standards_such_as_the_general_data_protection_regulation_gdpr_and_the_california_consumer_privacy_act_ccpa_and_periodically_updates_its_privacy_policy_in_accordance_with_any_relevant_changes_or_developments">This mobile application is designed as a social networking platform to connect students with similar interests, academic backgrounds, or geographic proximity to facilitate making new friends. To ensure user privacy and data protection, the app collects only the information necessary for basic functionality and user experience enhancement, including usernames, profile pictures, interests, and location data. User data is securely stored and managed, accessible only to the user and not shared with any third-party entities. The app may collect analytics data, such as user interactions and usage patterns, solely for the purpose of improving the app\'s performance and user experience. Users have full control over their data and can delete their accounts and personal information at any time. The app complies with applicable privacy laws and standards, such as the General Data Protection Regulation (GDPR) and the California Consumer Privacy Act (CCPA), and periodically updates its privacy policy in accordance with any relevant changes or developments.</string>
+    <string name="app_settings">App Settings</string>
+    <string name="general">General</string>
+    <string name="profile_info">Profile Info</string>
+    <string name="language">Language</string>
+    <string name="features">Features</string>
+    <string name="allow_notifications">Allow Notifications</string>
+    <string name="advanced_settings">Advanced Settings</string>
+    <string name="services">Services</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="user_filters">User Filters</string>
+
     <!-- Home Screen -->
     <string name="title_activity_settings">SettingsActivity</string>
     <string name="welcome_message">Welcome to ProxiPal</string>
