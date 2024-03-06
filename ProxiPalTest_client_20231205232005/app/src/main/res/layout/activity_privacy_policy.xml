@@ -1,0 +1,23 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".PrivacyPolicyActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/privacyPolicyText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/this_mobile_application_is_designed_as_a_social_networking_platform_to_connect_students_with_similar_interests_academic_backgrounds_or_geographic_proximity_to_facilitate_making_new_friends_to_ensure_user_privacy_and_data_protection_the_app_collects_only_the_information_necessary_for_basic_functionality_and_user_experience_enhancement_including_usernames_profile_pictures_interests_and_location_data_user_data_is_securely_stored_and_managed_accessible_only_to_the_user_and_not_shared_with_any_third_party_entities_the_app_may_collect_analytics_data_such_as_user_interactions_and_usage_patterns_solely_for_the_purpose_of_improving_the_app_s_performance_and_user_experience_users_have_full_control_over_their_data_and_can_delete_their_accounts_and_personal_information_at_any_time_the_app_complies_with_applicable_privacy_laws_and_standards_such_as_the_general_data_protection_regulation_gdpr_and_the_california_consumer_privacy_act_ccpa_and_periodically_updates_its_privacy_policy_in_accordance_with_any_relevant_changes_or_developments"
+            android:textStyle="italic|bold"
+            android:textSize="35sp" />
+
+    </LinearLayout>
+
+</ScrollView>

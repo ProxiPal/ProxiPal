@@ -5,6 +5,16 @@
       <config />
     </shared>
     <layouts>
+      <layout url="file://$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/layout/activity_language.xml">
+        <config>
+          <theme>@style/Theme.App</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/layout/activity_settings.xml">
+        <config>
+          <theme>@style/Theme.App</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/xml/locales_config.xml">
         <config>
           <theme>@style/Theme.App</theme>
@@ -17,9 +27,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="12f788ab-0aea-4cd4-aef2-ea7f8311b508" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-
+      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/TemplateApp.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/TemplateApp.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,7 +38,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[C:\Users\VICHET\.android\avd\Pixel_7_API_34.avd]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[C:\Users\brian\.android\avd\Pixel_3a_API_34_extension_level_7_x86_64.avd]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$/ProxiPalTest_client_20231205232005">
       <ProjectState />
@@ -78,6 +87,7 @@
       <list>
         <option value="resourceFile" />
         <option value="valueResourceFile" />
+        <option value="Kotlin Class" />
       </list>
     </option>
   </component>
@@ -99,14 +109,17 @@
     "RunOnceActivity.cidr.known.project.marker": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-
+    "git-widget-placeholder": "App-Settings",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/brian/OneDrive/Documents/GitHub/ProxiPal/ProxiPalTest_client_20231205232005/app/src/main/res/drawable",
     "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\brian\OneDrive\Documents\GitHub\ProxiPal\ProxiPalTest_client_20231205232005\app\src\main\res\values-zh" />
       <recent name="C:\Users\brian\OneDrive\Documents\GitHub\ProxiPal\ProxiPalTest_client_20231205232005\app\src\main\res\drawable" />
+      <recent name="C:\Users\brian\OneDrive\Documents\GitHub\ProxiPal\ProxiPalTest_client_20231205232005\app\src\main\res\layout" />
+      <recent name="C:\Users\brian\OneDrive\Documents\GitHub\ProxiPal\ProxiPalTest_client_20231205232005\app\src\main\res\values-zh" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\VICHET\OneDrive\Desktop\test\ProxiPal\ProxiPalTest_client_20231205232005\app\src\main\res\drawable" />
