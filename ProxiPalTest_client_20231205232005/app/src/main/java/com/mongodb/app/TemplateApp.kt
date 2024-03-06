@@ -26,11 +26,17 @@ class TemplateApp: Application() {
         createNewFriendRequestNotificationChannel() // Create notification channel for new friend request push notifications
         createTestNotificationPermissionsNotificationChannel() // Create notification channel for testing notification permissions
 
+
+
         app = App.create(
             AppConfiguration.Builder(getString(R.string.realm_app_id))
                 .baseUrl(getString(R.string.realm_base_url))
                 .build()
         )
+
+
+
+
         Log.v(TAG(), "Initialized the App configuration for: ${app.configuration.appId}")
         // If you're getting this app code by cloning the repository at
         // https://github.com/mongodb/template-app-kotlin-todo, 
