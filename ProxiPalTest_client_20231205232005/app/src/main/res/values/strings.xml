@@ -106,7 +106,7 @@
     <string name="grant_permissions">Grant permissions</string>
     <string name="permissions_required_by">Location permissions required by Proxipal</string>
     <string name="requires_permissions">Proxipal requires location permissions</string>
-    <string name="proximity_radius_text">Searching for users within %1$.2f miles</string>
+    <string name="proximity_radius_text">Searching for users within %1$.2f meters</string>
 
 
 </resources>

@@ -149,7 +149,7 @@ interface SyncRepository {
     /**
      * Returns a flow with nearby user profiles within a specified radius
      */
-    fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInMiles: Double): Flow<ResultsChange<UserProfile>>
+    fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double): Flow<ResultsChange<UserProfile>>
 
     // endregion location
 }
@@ -505,10 +505,10 @@ class RealmSyncRepository(
      * [userLatitude] and [userLongitude] are the current user's location, used to form center of the search radius.
      */
     @OptIn(ExperimentalGeoSpatialApi::class)
-    override fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInMiles: Double): Flow<ResultsChange<UserProfile>>{
+    override fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double): Flow<ResultsChange<UserProfile>>{
         val circleAroundUser = GeoCircle.create(
             center = GeoPoint.create(userLatitude, userLongitude),
-            radius = Distance.fromMiles(radiusInMiles)
+            radius = Distance.fromKilometers(radiusInKilometers)
         )
         return realm.query<UserProfile>("location GEOWITHIN $circleAroundUser").query("ownerId != $0", currentUser.id).find().asFlow()
     }
@@ -546,7 +546,7 @@ class MockRepository : SyncRepository {
     override suspend fun updateUserProfileLocation(latitude: Double, longitude: Double) =
         Unit
 
-    override fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInMiles: Double): Flow<ResultsChange<UserProfile>> = flowOf()
+    override fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double): Flow<ResultsChange<UserProfile>> = flowOf()
 
 
     companion object {
