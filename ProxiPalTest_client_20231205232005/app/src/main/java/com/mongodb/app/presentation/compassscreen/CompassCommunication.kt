@@ -21,6 +21,10 @@ import com.google.android.gms.nearby.connection.Strategy
 import com.mongodb.app.TAG
 import com.mongodb.app.data.compassscreen.CompassConnectionType
 
+/**
+ * Handles the connection logic between devices using the Nearby API.
+ * So far, this can get devices to recognize each other unlike Wifi P2P Direct
+ */
 class CompassCommunication constructor(
     private val userId: String,
     private val packageName: String
@@ -155,11 +159,13 @@ class CompassCommunication constructor(
         override fun onEndpointFound(endpointId: String, info: DiscoveredEndpointInfo) {
             Log.i(
                 TAG(),
-                "CompassCommunication: Start of OnEndpointFound()"
+                "CompassCommunication: Start of OnEndpointFound() ;; " +
+                        "endpointId = \"$endpointId\" ;; " +
+                        "endpointInfo = \"$info\""
             )
             connectionsClient.requestConnection(
                 userId,
-                packageName,
+                endpointId,
                 connectionLifecycleCallback
             )
         }

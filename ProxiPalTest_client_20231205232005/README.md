@@ -98,3 +98,9 @@ emulator device data on restart.
 ## Discovery and advertising functions from Nearby API show as aborted in logcat
 
 Need to add all necessary permissions, request them, and make sure they are allowed by the user. See Nearby API
+
+## Could not get emulators to recognize each other when on different devices
+
+Try having both emulators on one device. Still have yet to confirm if this works 100%, but
+at least log cat messages show they can discover each other. Different API levels don't seem to
+break anything.
