@@ -4,10 +4,10 @@ package com.mongodb.app.ui.compassscreen
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.net.wifi.p2p.WifiP2pDeviceList
 import android.net.wifi.p2p.WifiP2pManager
 import android.os.Bundle
 import android.util.Log
@@ -107,10 +107,10 @@ class CompassScreen : ComponentActivity() {
         addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION)
         addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)
         addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)
-        addAction(BluetoothDevice.ACTION_FOUND)
-        addAction(BluetoothDevice.ACTION_UUID)
-        addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
-        addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+
+        addAction(BluetoothDevice.ACTION_FOUND);
+        addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+        addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
     }
     // endregion WifiP2P
 
@@ -181,6 +181,8 @@ class CompassScreen : ComponentActivity() {
 
         receiver?.discoverPeers()
         receiver?.requestPeers()
+
+        receiver?.tempCheckForPeers()
     }
 
     override fun onPause() {

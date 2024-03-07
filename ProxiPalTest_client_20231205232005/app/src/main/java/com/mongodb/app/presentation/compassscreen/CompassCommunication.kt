@@ -20,6 +20,10 @@ import com.google.android.gms.nearby.connection.PayloadTransferUpdate
 import com.google.android.gms.nearby.connection.Strategy
 import com.mongodb.app.TAG
 import com.mongodb.app.data.compassscreen.CompassConnectionType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * Handles the connection logic between devices using the Nearby API.
@@ -27,16 +31,24 @@ import com.mongodb.app.data.compassscreen.CompassConnectionType
  */
 class CompassCommunication constructor(
     private val userId: String,
-    private val packageName: String
+    private val packageName: String,
+    private val activity: Activity? = null
 ) {
     /*
     ===== Variables =====
      */
     /**
      * From Nearby Connections API, how to discover and connect to other devices.
-     * P2P_STAR = Can discover multiple devices, but can only communicate with 1 at a time
+     * P2P_STAR = Can discover multiple devices, but can only communicate with 1 at a time.
+     * This should be the same for both devices that wish to connect with each other
      */
-    private val strategy: Strategy = Strategy.P2P_STAR
+    private val strategy: Strategy = Strategy.P2P_POINT_TO_POINT
+
+    /**
+     * This should uniquely identify the app from other apps (such as the app package name)
+     * and should be the same for both devices that wish to connect with each other
+     */
+    private val serviceId: String = packageName //"120001"
 
     private lateinit var connectionsClient: ConnectionsClient
 
@@ -163,11 +175,27 @@ class CompassCommunication constructor(
                         "endpointId = \"$endpointId\" ;; " +
                         "endpointInfo = \"$info\""
             )
-            connectionsClient.requestConnection(
-                userId,
-                endpointId,
-                connectionLifecycleCallback
-            )
+//            connectionsClient.requestConnection(
+////                userId,
+//                "Device A",
+//                endpointId,
+//                connectionLifecycleCallback
+//            )
+            CoroutineScope(Dispatchers.Main).launch {
+                while (true){
+                    Log.i(
+                        TAG(),
+                        "CompassCommunication: Requesting connection..."
+                    )
+                    connectionsClient.requestConnection(
+//                userId,
+                        "Device A",
+                        endpointId,
+                        connectionLifecycleCallback
+                    )
+                    delay(8000)
+                }
+            }
         }
 
         /**
@@ -241,7 +269,8 @@ class CompassCommunication constructor(
         val options = AdvertisingOptions.Builder().setStrategy(strategy).build()
         // TODO Advertising may fail, so need to handle cases when it does
         connectionsClient.startAdvertising(
-            userId,
+//            userId,
+            "Device A",
             packageName,
             connectionLifecycleCallback,
             options
@@ -257,7 +286,11 @@ class CompassCommunication constructor(
             "CompassCommunication: Start of discovery"
         )
         val options = DiscoveryOptions.Builder().setStrategy(strategy).build()
-        connectionsClient.startDiscovery(packageName, endpointDiscoveryCallback, options)
+        connectionsClient.startDiscovery(
+//            packageName,
+            serviceId,
+            endpointDiscoveryCallback,
+            options)
     }
 
     private fun disconnect() {

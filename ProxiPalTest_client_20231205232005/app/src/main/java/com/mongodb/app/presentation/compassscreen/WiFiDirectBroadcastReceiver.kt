@@ -14,6 +14,10 @@ import android.net.wifi.p2p.WifiP2pManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.mongodb.app.TAG
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.net.ServerSocket
 
 /**
@@ -60,6 +64,26 @@ class WiFiDirectBroadcastReceiver(
     /*
     ===== Functions =====
      */
+//    @SuppressLint("MissingPermission")
+//    fun onPeersAvailable(){
+//        doAfterPermissionCheck(
+//            doWithPermissions = {
+//                manager.discoverServices(channel, actionListener)
+////                manager.startListening()
+//            }
+//        )
+//    }
+
+    fun tempCheckForPeers(){
+        CoroutineScope(Dispatchers.Main).launch {
+            while (true){
+                discoverPeers()
+                requestPeers()
+                delay(8000)
+            }
+        }
+    }
+
     @SuppressLint("MissingPermission")
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != null){
@@ -120,6 +144,10 @@ class WiFiDirectBroadcastReceiver(
      */
     @SuppressLint("MissingPermission")
     fun discoverPeers(){
+        Log.i(
+            TAG(),
+            "WiFiDirectBroadcastReceiver: Start of discoverPeers()"
+        )
         // Initiates peer discovery
         doAfterPermissionCheck(
             doWithPermissions = {
@@ -130,12 +158,18 @@ class WiFiDirectBroadcastReceiver(
 
     @SuppressLint("MissingPermission")
     fun requestPeers(){
+        Log.i(
+            TAG(),
+            "WiFiDirectBroadcastReceiver: Start of requestPeers()"
+        )
         doAfterPermissionCheck(
             doWithPermissions = {
                 manager.requestPeers(channel) { peers: WifiP2pDeviceList? ->
                     Log.i(
                         TAG(),
-                        "WiFiDirectBroadcastReceiver: Current peer amount = \"${peers?.deviceList?.size}\""
+                        "WiFiDirectBroadcastReceiver: Peers = \"$peers\" ;; " +
+                                "Peer device list = \"${peers?.deviceList}\" ;; " +
+                                "Peer device amount = \"${peers?.deviceList?.size}\""
                     )
                 }
             }
