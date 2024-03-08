@@ -6,13 +6,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
@@ -21,6 +25,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -35,10 +40,13 @@ import com.mongodb.app.R
 import com.mongodb.app.TAG
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
+import com.mongodb.app.data.messages.MESSAGE_WIDTH_WEIGHT
+import com.mongodb.app.data.messages.MOCK_MESSAGE_LIST
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
 import kotlinx.coroutines.launch
+import java.util.Random
 
 class MessagesScreen : ComponentActivity(){
     // region Variables
@@ -98,6 +106,7 @@ fun MessagesScreenLayout(
         MessagesBodyContent(
             modifier = Modifier
                 .padding(innerPadding)
+//                .absolutePadding(top = innerPadding.calculateTopPadding())
         )
     }
 }
@@ -140,18 +149,30 @@ fun MessagesTopBar(
 fun MessagesBodyContent(
     modifier: Modifier = Modifier
 ){
-    Column (
+    Column(
         modifier = modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
     ){
-        SingleMessage(
-            isSenderMe = false,
-            message = "Hello"
-        )
-        SingleMessage(
-            isSenderMe = true,
-            message = "World!"
+        LazyColumn(
+            // Start at the bottom, then scroll up to show older messages
+            reverseLayout = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ){
+            // TODO Replace String with a custom Realm message class
+            val messageList = MOCK_MESSAGE_LIST
+            // Start with the more recent messages at the bottom
+            items(messageList.reversed()){ message ->
+                SingleMessage(
+                    // Make about half of random messages mine
+                    isSenderMe = Random().nextInt(2) == 1,
+                    message = message
+                )
+            }
+        }
+        MessagesTextField(
+            modifier = Modifier
         )
     }
 }
@@ -166,7 +187,6 @@ fun SingleMessage(
         if (isSenderMe) Arrangement.End else Arrangement.Start
     val columnAlignment =
         if (isSenderMe) Alignment.End else Alignment.Start
-    val messageWidthWeight = 0.6f
 
     // To ensure the message card can vary in size depending on the message size,
     // ... the card will expand horizontally at first for shorter messages
@@ -179,13 +199,13 @@ fun SingleMessage(
         if (isSenderMe){
             Spacer(
                 modifier = Modifier
-                    .weight(messageWidthWeight)
+                    .weight(MESSAGE_WIDTH_WEIGHT)
             )
         }
         Row(
             horizontalArrangement = rowArrangement,
             modifier = Modifier
-                .weight(1 - messageWidthWeight)
+                .weight(1 - MESSAGE_WIDTH_WEIGHT)
         ){
             Column(
                 horizontalAlignment = columnAlignment,
@@ -212,9 +232,29 @@ fun SingleMessage(
         if (!isSenderMe){
             Spacer(
                 modifier = Modifier
-                    .weight(messageWidthWeight)
+                    .weight(MESSAGE_WIDTH_WEIGHT)
             )
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MessagesTextField(
+    modifier: Modifier = Modifier
+){
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .fillMaxWidth()
+    ){
+        TextField(
+            value = "temp",
+            onValueChange = {},
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+        )
     }
 }
 // endregion Functions
