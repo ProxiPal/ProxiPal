@@ -20,6 +20,19 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.net.ServerSocket
 
+
+/*
+ * TODO Important: This does not currently work with emulators. This MAY work with physical devices, but has yet to be tested
+ * So far, this can get emulators to recognize each other unlike Wifi P2P Direct, but
+ * they cannot yet actually connect to each other.
+ * This must be tested with physical Android devices, which we do not currently have ready.
+ */
+/*
+Contributions:
+- Kevin Kubota (entire file)
+ */
+
+
 /**
  * A BroadcastReceiver that notifies of important Wi-Fi p2p events.
  */
@@ -64,16 +77,9 @@ class WiFiDirectBroadcastReceiver(
     /*
     ===== Functions =====
      */
-//    @SuppressLint("MissingPermission")
-//    fun onPeersAvailable(){
-//        doAfterPermissionCheck(
-//            doWithPermissions = {
-//                manager.discoverServices(channel, actionListener)
-////                manager.startListening()
-//            }
-//        )
-//    }
-
+    /**
+     * A temporary infinite loop for testing the peer discovery and connection abilities
+     */
     fun tempCheckForPeers(){
         CoroutineScope(Dispatchers.Main).launch {
             while (true){
@@ -156,6 +162,9 @@ class WiFiDirectBroadcastReceiver(
         )
     }
 
+    /**
+     * Requests the current list of peer devices (nearby)
+     */
     @SuppressLint("MissingPermission")
     fun requestPeers(){
         Log.i(
@@ -176,6 +185,9 @@ class WiFiDirectBroadcastReceiver(
         )
     }
 
+    /**
+     * Connects to the first peer device found in the peer device list
+     */
     @SuppressLint("MissingPermission")
     fun connectToPeers(peers: WifiP2pDeviceList?){
         if (peers == null) return
@@ -197,7 +209,6 @@ class WiFiDirectBroadcastReceiver(
      * the WifiP2PManager
      */
     private fun doAfterPermissionCheck(doWithPermissions: (() -> Unit)){
-        // Permission check
         if (ActivityCompat.checkSelfPermission(
                 activity,
                 Manifest.permission.ACCESS_FINE_LOCATION

@@ -2,6 +2,13 @@ package com.mongodb.app.data.compassscreen
 
 import android.Manifest
 
+
+/*
+Contributions:
+- Kevin Kubota (entire file)
+ */
+
+
 // Using https://gps-coordinates.org/distance-between-coordinates.php
 // Using https://latlongdata.com/distance-calculator/
 

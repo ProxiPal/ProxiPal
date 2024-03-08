@@ -104,3 +104,6 @@ Need to add all necessary permissions, request them, and make sure they are allo
 Try having both emulators on one device. Still have yet to confirm if this works 100%, but
 at least log cat messages show they can discover each other. Different API levels don't seem to
 break anything.
+
+EDIT: Emulators have been noted to either not connect with each other or have unreliable connections.
+Physical devices are a must for testing the compass connection code between devices.

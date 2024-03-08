@@ -12,6 +12,12 @@ import androidx.compose.ui.res.stringResource
 
 
 /*
+Contributions:
+- Kevin Kubota (entire file)
+ */
+
+
+/*
 ===== Functions =====
  */
 /**

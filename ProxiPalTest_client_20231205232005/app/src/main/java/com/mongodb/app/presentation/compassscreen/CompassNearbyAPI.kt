@@ -25,11 +25,23 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-/**
- * Handles the connection logic between devices using the Nearby API.
- * So far, this can get devices to recognize each other unlike Wifi P2P Direct
+
+/*
+ * TODO Important: This does not currently work with emulators. This MAY work with physical devices, but has yet to be tested
+ * So far, this can get emulators to recognize each other unlike Wifi P2P Direct, but
+ * they cannot yet actually connect to each other.
+ * This must be tested with physical Android devices, which we do not currently have ready.
  */
-class CompassCommunication constructor(
+/*
+Contributions:
+- Kevin Kubota (entire file)
+ */
+
+
+/**
+ * Handles the connection logic between devices using the Nearby API
+ */
+class CompassNearbyAPI constructor(
     private val userId: String,
     private val packageName: String,
     private val activity: Activity? = null
@@ -161,6 +173,7 @@ class CompassCommunication constructor(
     }
 
     /**
+     * (So far, this is the only functionality that gets called when using emulators.)
      * Discovery:
      * Callback similar to the callback used for advertising
      */
@@ -175,12 +188,8 @@ class CompassCommunication constructor(
                         "endpointId = \"$endpointId\" ;; " +
                         "endpointInfo = \"$info\""
             )
-//            connectionsClient.requestConnection(
-////                userId,
-//                "Device A",
-//                endpointId,
-//                connectionLifecycleCallback
-//            )
+            // Temporarily creating an infinite loop to check if connections can be established overtime
+            // After done, remove the while loop and just have the single requestConnection call
             CoroutineScope(Dispatchers.Main).launch {
                 while (true){
                     Log.i(
@@ -267,7 +276,7 @@ class CompassCommunication constructor(
             "CompassCommunication: Start of advertising"
         )
         val options = AdvertisingOptions.Builder().setStrategy(strategy).build()
-        // TODO Advertising may fail, so need to handle cases when it does
+        // Advertising may fail, so need to handle cases if it does
         connectionsClient.startAdvertising(
 //            userId,
             "Device A",

@@ -1,9 +1,9 @@
 package com.mongodb.app.presentation.compassscreen
 
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
@@ -27,6 +27,13 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.random.Random
 
+
+/*
+Contributions:
+- Kevin Kubota (entire file)
+ */
+
+
 class CompassViewModel constructor(
     private var repository: SyncRepository
 ) : ViewModel() {
@@ -37,9 +44,9 @@ class CompassViewModel constructor(
         UserLocation(0.0, 0.0)
     )
 
-    private val _bearing: MutableState<Double> = mutableStateOf(0.0)
+    private val _bearing: MutableState<Double> = mutableDoubleStateOf(0.0)
 
-    private val _distance: MutableState<Double> = mutableStateOf(0.0)
+    private val _distance: MutableState<Double> = mutableDoubleStateOf(0.0)
 
     private val _connectionType: MutableState<CompassConnectionType> =
         mutableStateOf(CompassConnectionType.OFFLINE)
@@ -130,6 +137,15 @@ class CompassViewModel constructor(
     fun getCurrentUserLocation(): String {
         return "(${_userProfileViewModel.userProfileLatitude.value}, " +
                 "${_userProfileViewModel.userProfileLongitude.value})"
+    }
+
+    /**
+     * Returns a formatted string of the matched user's location
+     */
+    fun getMatchedUserLocation(): String{
+        // TODO Need to change this to the actual location when device connection code gets working
+        return "(${matchedUserLocation.value.latitude}, " +
+                "${matchedUserLocation.value.longitude})"
     }
 
     /**
@@ -240,7 +256,7 @@ class CompassViewModel constructor(
     }
 
     /**
-     * Called by [CompassCommunication]'s [CompassCommunication.updateConnectionType] function
+     * Called by [CompassNearbyAPI]'s [CompassNearbyAPI.updateConnectionType] function
      */
     fun updateConnectionType(newCompassConnectionType: CompassConnectionType) {
         _connectionType.value = newCompassConnectionType

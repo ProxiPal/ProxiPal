@@ -28,6 +28,13 @@ import com.mongodb.app.TAG
 import com.mongodb.app.data.compassscreen.ALL_NEARBY_API_PERMISSIONS
 import com.mongodb.app.ui.theme.MyApplicationTheme
 
+
+/*
+Contributions:
+- Kevin Kubota (entire file, excluding navigation between screens, if any)
+ */
+
+
 /**
  * Displays the screen for the user to accept or deny permissions needed for communicating
  * with their matched user. Should show this screen first, if necessary, before CompassScreen
