@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 
 
 /*
@@ -54,6 +55,7 @@ fun SingleButtonRow(
 fun SingleTextRow(
     @StringRes
     textId: Int,
+    isTextBold: Boolean,
     modifier: Modifier = Modifier
 ){
     Row(
@@ -64,7 +66,8 @@ fun SingleTextRow(
         Text(
             text = stringResource(
                 id = textId
-            )
+            ),
+            fontWeight = if (isTextBold) FontWeight.Bold else null
         )
     }
 }

@@ -39,7 +39,9 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -409,7 +411,10 @@ fun CompassScreenBodyContent(
     modifier: Modifier = Modifier
 ) {
     val onBackButtonClick = {
-        compassNearbyAPI.updateConnectionType(CompassConnectionType.OFFLINE)
+//        compassNearbyAPI.updateConnectionType(CompassConnectionType.OFFLINE)
+
+        // TODO Remove this later; Right now is for temporarily and quickly showing compass updating
+        compassNearbyAPI.updateConnectionType(CompassConnectionType.MEETING)
     }
     Column(
         modifier = modifier
@@ -429,21 +434,26 @@ fun CompassScreenBodyContent(
                     measurementText = R.string.compass_screen_distance_message,
                     measurement = compassViewModel.distance.value
                 )
+                CompassScreenCurrentLocations(
+                    compassViewModel = compassViewModel,
+                    modifier = Modifier
+                        .padding(top = 8.dp, bottom = 8.dp)
+                )
                 CompassScreenReturnButton(
                     compassNearbyAPI = compassNearbyAPI,
                     onButtonClick = {
                         compassNearbyAPI.updateConnectionType(CompassConnectionType.OFFLINE)
                     }
                 )
-                CompassScreenCurrentLocations(
-                    compassViewModel = compassViewModel
-                )
             }
             // Connection is not yet established with matched user
             // Show button to go back
             CompassConnectionType.WAITING -> {
                 SingleTextRow(
-                    textId = R.string.compass_screen_awaiting_connection_message
+                    textId = R.string.compass_screen_awaiting_connection_message,
+                    isTextBold = false,
+                    modifier = Modifier
+                        .padding(top = 8.dp, bottom = 8.dp)
                 )
                 CompassScreenReturnButton(
                     compassNearbyAPI = compassNearbyAPI,
@@ -453,7 +463,10 @@ fun CompassScreenBodyContent(
             // The current or matched user canceled the connection
             CompassConnectionType.OFFLINE -> {
                 SingleTextRow(
-                    textId = R.string.compass_screen_canceled_connection_message
+                    textId = R.string.compass_screen_canceled_connection_message,
+                    isTextBold = false,
+                    modifier = Modifier
+                        .padding(top = 8.dp, bottom = 8.dp)
                 )
                 CompassScreenReturnButton(
                     compassNearbyAPI = compassNearbyAPI,
@@ -504,7 +517,8 @@ fun CompassScreenMeasurementText(
             .fillMaxWidth()
     ) {
         Text(
-            text = stringResource(id = measurementText, measurement)
+            text = stringResource(id = measurementText, measurement),
+            fontWeight = FontWeight.Bold
         )
     }
 }
