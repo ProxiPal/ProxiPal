@@ -169,10 +169,6 @@ class RealmSyncRepository(
         get() = app.currentUser!!
 
     init {
-        Log.i(
-            TAG(),
-            "RealmSyncRepository: Start of Init{}"
-        )
         // Contributed by Kevin Kubota
         // This assignment impacts what type of object can be queried.
         // If trying to query A when the sync configuration is set for B,
@@ -353,12 +349,6 @@ class RealmSyncRepository(
             null
         }
         if (frozenFirstUserProfile == null) {
-            Log.i(
-                TAG(),
-                "RealmSyncRepository: Creating a new user profile with the given parameters for " +
-                        "current user ID = \"${currentUser.id}\"...; " +
-                        "Skipping rest of user profile update function..."
-            )
             // Create a new user profile before applying the updated changes
             addUserProfile(
                 firstName = firstName,
@@ -366,31 +356,6 @@ class RealmSyncRepository(
                 biography = biography
             )
             return
-        }
-        when (getQueryUserProfiles(
-            realm = realm,
-            subscriptionType = getActiveSubscriptionType(realm)
-        ).find().size) {
-            // Create a new profile for the user if they do not have one already in the database
-            // This may not be necessary as users will get their initial profiles added to the database
-            // ... once they register an account and deleting their profile will only occur when
-            // ... deleting their account (unsure if account deletion will be implemented)
-            0 -> {
-                Log.i(
-                    TAG(),
-                    "RealmSyncRepository: No user profiles found with owner ID \"${currentUser.id}\""
-                )
-            }
-
-            1 -> Log.i(
-                TAG(),
-                "RealmSyncRepository: Exactly 1 user profile found with owner ID \"${currentUser.id}\""
-            )
-
-            else -> Log.i(
-                TAG(),
-                "RealmSyncRepository: Multiple user profiles found with owner ID \"${currentUser.id}\""
-            )
         }
         realm.write {
             findLatest(frozenFirstUserProfile)?.let { liveUserProfile ->

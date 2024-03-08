@@ -112,11 +112,6 @@ class UserProfileScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Log.i(
-            TAG(),
-            "UPScreen: Start of OnCreate()"
-        )
-
         // region ViewModel events
         lifecycleScope.launch {
             userProfileViewModel.event
