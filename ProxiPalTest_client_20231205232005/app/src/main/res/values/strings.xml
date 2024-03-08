@@ -91,6 +91,7 @@
     <string name="permissions_required_by">Location permissions required by Proxipal</string>
     <string name="requires_permissions">Proxipal requires location permissions</string>
     <string name="proximity_radius_text">Searching for users within %1$.2f miles</string>
+    <string name="server_client_id">06277155842-cvp1gfmpl2euecgn1bsaaf4c1il2nnpa.apps.googleusercontent.com</string>
 
 
 </resources>
