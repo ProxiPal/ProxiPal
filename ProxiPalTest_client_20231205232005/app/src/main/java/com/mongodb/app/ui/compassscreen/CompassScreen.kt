@@ -409,9 +409,7 @@ fun CompassScreenBodyContent(
     modifier: Modifier = Modifier
 ) {
     val onBackButtonClick = {
-        // TODO Temporarily and quickly allowing access to return to meeting state
-//        compassCommunication.updateConnectionType(CompassConnectionType.OFFLINE)
-        compassNearbyAPI.updateConnectionType(CompassConnectionType.MEETING)
+        compassNearbyAPI.updateConnectionType(CompassConnectionType.OFFLINE)
     }
     Column(
         modifier = modifier
