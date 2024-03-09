@@ -19,6 +19,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <!--    For compass screen connections (Need a way to communicate with another device nearby) -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:name=".TemplateApp"
