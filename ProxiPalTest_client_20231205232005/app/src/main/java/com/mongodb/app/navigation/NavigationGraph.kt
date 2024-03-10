@@ -1,5 +1,6 @@
 package com.mongodb.app.navigation
 
+import ProfileSetupScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -17,14 +18,14 @@ import com.mongodb.app.location.LocationPermissionScreen
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.userprofiles.IndustryScreen
 import com.mongodb.app.ui.userprofiles.InterestScreen
-import com.mongodb.app.ui.userprofiles.ProfileSetup
-import com.mongodb.app.ui.userprofiles.ProfileSetupScaffold
+
 import com.mongodb.app.ui.userprofiles.UserProfileLayout
 
 
 //TODO add more parameters as needed
 
 // Contribution: Marco Pacini
+// Vichet Chim - added first time login
 /**
  * Navigation graph for the different screens in Proxipal
  */
@@ -34,10 +35,11 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Routes.UserProfileScreen.route) {
         composable(Routes.UserProfileScreen.route) {
+            //checks if its the user's first time login in, added by Vichet Chim
             if (userProfileViewModel.userProfileListState.isEmpty()){
                 state = true
             }
-            if (state){
+            if (state){ // displays user setup screens
                 ProfileSetupScaffold(
                     userProfileViewModel = userProfileViewModel,
                     toolbarViewModel = toolbarViewModel,
@@ -55,10 +57,14 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
             }
         }
         composable(Routes.UserInterestsScreen.route){
-            InterestScreen(userProfileViewModel = userProfileViewModel ,onPreviousClicked = { navController.popBackStack() }, onNextClicked = {navController.navigate(Routes.UserIndustriesScreen.route)})
+            InterestScreen(userProfileViewModel = userProfileViewModel,
+                onPreviousClicked = { navController.popBackStack() },
+                onNextClicked = {navController.navigate(Routes.UserIndustriesScreen.route)})
         }
         composable(Routes.UserIndustriesScreen.route){
-            IndustryScreen(userProfileViewModel = userProfileViewModel ,onPreviousClicked = { navController.popBackStack() }, onNextClicked = {state = false;navController.popBackStack();navController.popBackStack()})
+            IndustryScreen(userProfileViewModel = userProfileViewModel,
+                onPreviousClicked = { navController.popBackStack() },
+                onNextClicked = {state = false;navController.popBackStack();navController.popBackStack()}) //end of user setup screen
         }
         composable(Routes.ConnectWithOthersScreen.route) {
             ConnectWithOthersScreen(

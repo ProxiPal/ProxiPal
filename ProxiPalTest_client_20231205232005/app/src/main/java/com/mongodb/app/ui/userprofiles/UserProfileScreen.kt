@@ -527,41 +527,7 @@ fun UserProfileEditButtons(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Composable
-fun ProfileSetupScaffold(
-    userProfileViewModel: UserProfileViewModel,
-    toolbarViewModel: ToolbarViewModel,
-    navController: NavHostController,
-    onPreviousClicked: () -> Unit,
-    onNextClicked:() -> Unit,
 
-    modifier: Modifier = Modifier
-) {
-    Scaffold(
-        topBar = {
-//            UserProfileTopBar()
-            // This top bar is used because it already has logging out of account implemented
-            TaskAppToolbar(viewModel = toolbarViewModel, navController = navController)
-        },
-        bottomBar = { PreviousNextBottomAppBar(
-            onPreviousClicked = onPreviousClicked,
-            onNextClicked =onNextClicked,
-            currentPage = 1,
-            totalPages = 3
-        )},
-        modifier = modifier
-    ) { innerPadding ->
-        Column {
-            UserProfileBody(
-                contentPadding = innerPadding,
-                userProfileViewModel = userProfileViewModel
-            )
-            //HomeScreen(navController = navController, viewModel = homeViewModel)
-        }
-    }
-}
 
 //@Preview(showBackground = true)
 @Composable

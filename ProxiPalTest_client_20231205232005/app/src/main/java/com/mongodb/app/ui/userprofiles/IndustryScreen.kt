@@ -33,6 +33,7 @@ import com.mongodb.app.R
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.theme.MyApplicationTheme
 
+//list of resources for industry
 val industryGridItems = listOf(
     GridItemData(R.drawable.culture, R.string.arts_entertainment),
     GridItemData(R.drawable.food, R.string.food_drink),
@@ -45,7 +46,7 @@ val industryGridItems = listOf(
     GridItemData(R.drawable.retail, R.string.retail),
 )
 
-
+//grid of industries
 @Composable
 fun IndustryGrid(gridItems: List<GridItemData>,  userProfileViewModel: UserProfileViewModel, userIndustries: List<String>) {
     LazyVerticalGrid(
@@ -59,6 +60,7 @@ fun IndustryGrid(gridItems: List<GridItemData>,  userProfileViewModel: UserProfi
         }
     }
 }
+//each grid item of industry
 @Composable
 fun IndustryGridItem(gridItemData: GridItemData, userProfileViewModel: UserProfileViewModel, userIndustries: List<String>) {
     val itemText = GridItemText(gridItemData.text)
@@ -99,7 +101,7 @@ fun IndustryGridItem(gridItemData: GridItemData, userProfileViewModel: UserProfi
     }
 
 }
-
+//scaffold for industry screen
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun IndustryScreen(userProfileViewModel: UserProfileViewModel, onPreviousClicked: () -> Unit, onNextClicked: () -> Unit) {

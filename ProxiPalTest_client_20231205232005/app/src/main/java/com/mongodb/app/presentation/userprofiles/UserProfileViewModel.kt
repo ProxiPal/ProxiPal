@@ -36,6 +36,7 @@ import kotlinx.coroutines.withContext
 Contributions:
 - Kevin Kubota (all user profile UI, except for navigation between screens)
 - Marco Pacini (location related tasks only)
+- Vichet Chim (user's interest/industry)
  */
 
 
@@ -75,7 +76,7 @@ class UserProfileViewModel constructor(
 
     private val _proximityRadius: MutableState<Double> = mutableStateOf(0.1)
 
-    // for current user's interests/industries
+    // for current user's interests/industries, added by Vichet Chim
     private var _userProfileInterests: MutableList<String> = mutableListOf()
     private var _userProfileIndustries: MutableList<String> = mutableListOf()
 
@@ -118,7 +119,7 @@ class UserProfileViewModel constructor(
     val proxmityRadius: State<Double>
         get() = _proximityRadius
 
-    // for current user's interests/industries
+    // for current user's interests/industries, added by Vichet Chim
     val userProfileInterests: List<String>
         get() = _userProfileInterests
     val userProfileIndustries: List<String>
@@ -462,6 +463,8 @@ class UserProfileViewModel constructor(
         _proximityRadius.value = radiusInMiles
     }
 
+
+    //toggle user's interest
     fun toggleInterest(interest: String){
         if (_userProfileInterests.contains(interest)) {
             _userProfileInterests.remove(interest)
@@ -472,6 +475,7 @@ class UserProfileViewModel constructor(
     }
 
 
+    // update user interests' list
     private fun updateUserInterests(interest:String) {
     viewModelScope.launch {
         repository.updateUserProfileInterests(
@@ -480,7 +484,7 @@ class UserProfileViewModel constructor(
     }
     }
 
-
+    //toggle user's industry
     fun toggleIndustry(industry: String){
         if (_userProfileIndustries.contains(industry)) {
             _userProfileIndustries.remove(industry)
@@ -490,7 +494,7 @@ class UserProfileViewModel constructor(
         updateUserIndustries(industry)
     }
 
-
+    // update user industries' list
     private fun updateUserIndustries(industry:String) {
         viewModelScope.launch {
             repository.updateUserProfileIndustries(
