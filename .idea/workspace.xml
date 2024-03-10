@@ -17,11 +17,29 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="12f788ab-0aea-4cd4-aef2-ea7f8311b508" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/ui/userprofiles/IndustryScreen.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/drawable/education.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/drawable/finance.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/drawable/healthcare.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/drawable/media.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/drawable/retail.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/build.gradle.kts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/ComposeLoginActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/ComposeLoginActivity.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/ui/tasks/TaskAppToolbar.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/ui/tasks/TaskAppToolbar.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/data/SyncRepository.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/data/SyncRepository.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/domain/UserProfile.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/domain/UserProfile.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/navigation/NavigationGraph.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/navigation/NavigationGraph.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/navigation/NavigationRoutes.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/navigation/NavigationRoutes.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/presentation/userprofiles/UserProfileViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/presentation/userprofiles/UserProfileViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/ui/components/ProxipalReusableComposables.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/ui/components/ProxipalReusableComposables.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/ui/login/LoginScaffold.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/ui/login/LoginScaffold.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/ui/login/RegisterScaffold.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/ui/login/RegisterScaffold.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/ui/tasks/AddItem.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/ui/tasks/AddItem.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/ui/userprofiles/InterestScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/ui/userprofiles/InterestScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/ui/userprofiles/ProfileSetupScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/ui/userprofiles/ProfileSetupScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/ui/userprofiles/UserProfileScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/ui/userprofiles/UserProfileScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/values/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/values/themes.xml" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/values/themes.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -102,6 +120,7 @@
         <option value="resourceFile" />
         <option value="valueResourceFile" />
         <option value="Kotlin Class" />
+        <option value="Kotlin File" />
       </list>
     </option>
   </component>
@@ -137,6 +156,9 @@
       <recent name="$PROJECT_DIR$/ProxiPal2/gradle scripts" />
       <recent name="$PROJECT_DIR$/ProxiPal2/gradle" />
       <recent name="$PROJECT_DIR$/ProxiPal2/app" />
+    </key>
+    <key name="android.template.1196576985">
+      <recent name="com.mongodb.app.ui.login" />
     </key>
     <key name="CopyKotlinDeclarationDialog.RECENTS_KEY">
       <recent name="com.mongodb.app" />

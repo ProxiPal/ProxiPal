@@ -35,7 +35,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,42 +50,34 @@ import com.mongodb.app.ui.theme.MyApplicationTheme
 
 
 // data class for item data: id of image , and name
-data class GridItemData(
-    val imageId: Int,
-    val text: String
+data class GridItemData(val imageId: Int, val text: Int) // list of items, contains image, item name
+
+val interestGridItems = listOf(
+    GridItemData(R.drawable.culture, R.string.art_culture),
+    GridItemData(R.drawable.food, R.string.food_drink),
+    GridItemData(R.drawable.game, R.string.gaming),
+    GridItemData(R.drawable.music, R.string.music),
+    GridItemData(R.drawable.nature, R.string.nature),
+    GridItemData(R.drawable.sport, R.string.activity),
+    GridItemData(R.drawable.fashion, R.string.fashion),
+    GridItemData(R.drawable.technology, R.string.technology),
+    GridItemData(R.drawable.travel, R.string.travel),
 )
-
-
-// list of items, contains image, item name
-val gridItems = listOf(
-    GridItemData(R.drawable.culture, "Arts & Culture"),
-    GridItemData(R.drawable.food, "Food & Drinks"),
-    GridItemData(R.drawable.game, "Gaming"),
-    GridItemData(R.drawable.music, "Music"),
-    GridItemData(R.drawable.nature, "Nature"),
-    GridItemData(R.drawable.sport, "Activity"),
-    GridItemData(R.drawable.fashion, "Fashion"),
-    GridItemData(R.drawable.technology, "Technology"),
-    GridItemData(R.drawable.travel, "Travel"),
-
-)
-
-
 
 // top bar, contains title and sub heading
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileTopAppBar(){
+fun ProfileTopAppBar(heading:Int, subHeading:Int){
     TopAppBar(modifier = Modifier.padding(10.dp),
         title = {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Choose your Interests",
+                Text(text = stringResource(id = heading),
                     color = Color.Black,
                     fontSize= 30.sp)
-                Text(text = "You can always change this later.",
+                Text(text = stringResource(id = subHeading),
                     color = Color.Gray,
                     fontSize = 15.sp)
             }
@@ -95,7 +89,9 @@ fun ProfileTopAppBar(){
 @Composable
 fun Grid(gridItems: List<GridItemData>,  userProfileViewModel: UserProfileViewModel, userInterests: List<String>) {
     LazyVerticalGrid(
-        modifier= Modifier.fillMaxSize().padding(5.dp),
+        modifier= Modifier
+            .fillMaxSize()
+            .padding(5.dp),
         columns = GridCells.Fixed(3),
         verticalArrangement = Arrangement.spacedBy(5.dp),
         horizontalArrangement = Arrangement.spacedBy(5.dp)
@@ -106,16 +102,23 @@ fun Grid(gridItems: List<GridItemData>,  userProfileViewModel: UserProfileViewMo
     }
 }
 
+@Composable
+fun GridItemText(resourceId: Int): String {
+    val context = LocalContext.current
+    return context.resources.getString(resourceId)
+}
+
 // item in grid
 @Composable
 fun GridItem(gridItemData: GridItemData, userProfileViewModel: UserProfileViewModel, userInterests: List<String>) {
-    var isSelected by remember { mutableStateOf(userInterests.contains(gridItemData.text)) }
+    val itemText = GridItemText(gridItemData.text)
+    var isSelected by remember { mutableStateOf(userInterests.contains(itemText)) }
     Log.d("isSelected", "isSelected:$isSelected")
 
 
     // button that displays the image and name of corresponding item , button changes color when clicked to show selected
     Button(
-        onClick = {isSelected = !isSelected ;userProfileViewModel.toggleInterest(gridItemData.text);
+        onClick = {isSelected = !isSelected ;userProfileViewModel.toggleInterest(itemText);
 
 
                   },
@@ -138,7 +141,7 @@ fun GridItem(gridItemData: GridItemData, userProfileViewModel: UserProfileViewMo
                 modifier = Modifier.size(150.dp)
             )
             Text(
-                text = gridItemData.text,
+                text = stringResource(id = gridItemData.text),
                 color = if (isSelected) Color.White else Color.Black,
                 textAlign = TextAlign.Center, fontSize = 12.sp
             )
@@ -160,9 +163,21 @@ fun PreviousNextBottomAppBar(
             TextButton(onClick = onPreviousClicked){
                 Icon(Icons.Default.ArrowBack,
                     contentDescription = "Back",
-                    tint = Color(0xFFEF8524))
-                Text(text = "Back",
-                    color = Color(0xFFEF8524), fontSize = 20.sp)
+                    tint =
+                    if (currentPage!=1) {
+                        Color(0xFFEF8524)
+                    }
+                    else {
+                            Color.Transparent
+                    })
+                Text(text = stringResource(id = R.string.back),
+                    color =
+                    if (currentPage!=1) {
+                            Color(0xFFEF8524)
+                        }
+                        else{
+                            Color.Transparent
+                        }, fontSize = 20.sp)
             }
             Spacer(modifier = Modifier.weight(1f))
             // loop to create indication of which page user is on
@@ -180,7 +195,7 @@ fun PreviousNextBottomAppBar(
                     color = Color(0xFFEF8524),
                     fontSize = 20.sp)
                 Icon(Icons.Default.ArrowForward,
-                    contentDescription = "Next",
+                    contentDescription = stringResource(id = R.string.next),
                     tint = Color(0xFFEF8524))
             }
         }
@@ -192,12 +207,11 @@ fun PreviousNextBottomAppBar(
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun InterestScreen(userProfileViewModel: UserProfileViewModel, onPreviousClicked: () -> Unit, onNextClicked: () -> Unit) {
-
     val userInterests = userProfileViewModel.userProfileInterests.toMutableList()
     Log.d("userinterest", "userinterest:$userInterests")
     MyApplicationTheme {
         Scaffold(
-            topBar ={ ProfileTopAppBar()},
+            topBar ={ ProfileTopAppBar(R.string.interest_heading, R.string.interest_subheading)},
             bottomBar = { PreviousNextBottomAppBar(
                 onPreviousClicked = onPreviousClicked,
                 onNextClicked = onNextClicked,
@@ -210,7 +224,7 @@ fun InterestScreen(userProfileViewModel: UserProfileViewModel, onPreviousClicked
                 modifier = Modifier
                     .padding(innerPadding),
             ) {
-                Grid(gridItems,  userProfileViewModel, userInterests = userInterests)
+                Grid(interestGridItems,  userProfileViewModel, userInterests = userInterests)
             }
         }
     }

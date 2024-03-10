@@ -15,11 +15,12 @@ import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.ui.tasks.ConnectWithOthersScreen
 import com.mongodb.app.location.LocationPermissionScreen
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
+import com.mongodb.app.ui.userprofiles.IndustryScreen
 import com.mongodb.app.ui.userprofiles.InterestScreen
 import com.mongodb.app.ui.userprofiles.ProfileSetup
 import com.mongodb.app.ui.userprofiles.ProfileSetupScaffold
 import com.mongodb.app.ui.userprofiles.UserProfileLayout
-import com.mongodb.app.ui.userprofiles.test
+
 
 //TODO add more parameters as needed
 
@@ -37,8 +38,7 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
                 state = true
             }
             if (state){
-               // ProfileSetupScaffold(userProfileViewModel = userProfileViewModel, onPreviousClicked = { /*TODO*/ }, onNextClicked = {navController.navigate(Routes.UserInterestsScreen.route)})
-                test(
+                ProfileSetupScaffold(
                     userProfileViewModel = userProfileViewModel,
                     toolbarViewModel = toolbarViewModel,
                     navController = navController,
@@ -55,7 +55,10 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
             }
         }
         composable(Routes.UserInterestsScreen.route){
-            InterestScreen(userProfileViewModel = userProfileViewModel ,onPreviousClicked = { navController.popBackStack() }, onNextClicked = {state = false;navController.popBackStack()})
+            InterestScreen(userProfileViewModel = userProfileViewModel ,onPreviousClicked = { navController.popBackStack() }, onNextClicked = {navController.navigate(Routes.UserIndustriesScreen.route)})
+        }
+        composable(Routes.UserIndustriesScreen.route){
+            IndustryScreen(userProfileViewModel = userProfileViewModel ,onPreviousClicked = { navController.popBackStack() }, onNextClicked = {state = false;navController.popBackStack();navController.popBackStack()})
         }
         composable(Routes.ConnectWithOthersScreen.route) {
             ConnectWithOthersScreen(

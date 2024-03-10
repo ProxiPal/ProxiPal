@@ -32,6 +32,7 @@ class UserProfile : RealmObject {
     var location: CustomGeoPoint? = null
 
     var interests : RealmList<String> = realmListOf()
+    var industries : RealmList<String> = realmListOf()
 
 
     override fun equals(other: Any?): Boolean {

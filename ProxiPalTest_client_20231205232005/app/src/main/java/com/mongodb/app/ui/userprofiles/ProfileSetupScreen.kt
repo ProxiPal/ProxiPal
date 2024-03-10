@@ -26,7 +26,6 @@ fun ProfileSetup(userProfileViewModel: UserProfileViewModel){
 fun ProfileSetupScaffold(userProfileViewModel: UserProfileViewModel, onPreviousClicked: ()-> Unit, onNextClicked:()->Unit){
     MyApplicationTheme {
         Scaffold(
-            topBar ={ ProfileTopAppBar()},
             bottomBar = { PreviousNextBottomAppBar(
                 onPreviousClicked = onPreviousClicked,
                 onNextClicked = onNextClicked,

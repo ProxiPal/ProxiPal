@@ -530,7 +530,7 @@ fun UserProfileEditButtons(
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun test(
+fun ProfileSetupScaffold(
     userProfileViewModel: UserProfileViewModel,
     toolbarViewModel: ToolbarViewModel,
     navController: NavHostController,

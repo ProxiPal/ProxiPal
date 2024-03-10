@@ -4,10 +4,8 @@ import android.os.Bundle
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
@@ -77,7 +75,9 @@ class UserProfileViewModel constructor(
 
     private val _proximityRadius: MutableState<Double> = mutableStateOf(0.1)
 
+    // for current user's interests/industries
     private var _userProfileInterests: MutableList<String> = mutableListOf()
+    private var _userProfileIndustries: MutableList<String> = mutableListOf()
 
 
     /*
@@ -118,8 +118,12 @@ class UserProfileViewModel constructor(
     val proxmityRadius: State<Double>
         get() = _proximityRadius
 
+    // for current user's interests/industries
     val userProfileInterests: List<String>
         get() = _userProfileInterests
+    val userProfileIndustries: List<String>
+        get() = _userProfileIndustries
+
 
 
 
@@ -202,6 +206,7 @@ class UserProfileViewModel constructor(
                                     _userProfileLatitude.value = event.list[0].location?.latitude!!
                                     _userProfileLongitude.value = event.list[0].location?.longitude!!
                                     _userProfileInterests = event.list[0].interests.toList().toMutableList()
+                                    _userProfileIndustries = event.list[0].industries.toList().toMutableList()
                                 }
                                 else -> {
                                     Log.i(
@@ -215,6 +220,8 @@ class UserProfileViewModel constructor(
                                     _userProfileBiography.value = event.list[0].biography
                                     _userProfileLatitude.value = event.list[0].location?.latitude!!
                                     _userProfileLongitude.value = event.list[0].location?.longitude!!
+                                    _userProfileInterests = event.list[0].interests.toList().toMutableList()
+                                    _userProfileIndustries = event.list[0].industries.toList().toMutableList()
                                 }
                             }
                         }
@@ -473,5 +480,23 @@ class UserProfileViewModel constructor(
     }
     }
 
+
+    fun toggleIndustry(industry: String){
+        if (_userProfileIndustries.contains(industry)) {
+            _userProfileIndustries.remove(industry)
+        }  else{
+            _userProfileIndustries.add(industry)
+        }
+        updateUserIndustries(industry)
+    }
+
+
+    private fun updateUserIndustries(industry:String) {
+        viewModelScope.launch {
+            repository.updateUserProfileIndustries(
+                industry = industry
+            )
+        }
+    }
 
 }
