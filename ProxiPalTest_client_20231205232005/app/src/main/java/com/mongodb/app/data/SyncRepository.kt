@@ -567,7 +567,11 @@ class RealmSyncRepository(
             addUserProfile(
                 firstName = "empty",
                 lastName = "empty",
-                biography = "empty"
+                biography = "empty",
+                instagramHandle = "empty",
+                twitterHandle = "empty",
+                linktreeHandle = "empty",
+                linkedinHandle = "empty"
             )
             return
         }
@@ -633,7 +637,11 @@ class RealmSyncRepository(
             addUserProfile(
                 firstName = "empty",
                 lastName = "empty",
-                biography = "empty"
+                biography = "empty",
+                instagramHandle = "empty",
+                twitterHandle = "empty",
+                linktreeHandle = "empty",
+                linkedinHandle = "empty"
             )
             return
         }
