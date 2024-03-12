@@ -6,27 +6,39 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.lifecycle.lifecycleScope
-
-import com.mongodb.app.data.RealmSyncRepository
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
 import com.mongodb.app.data.SHOULD_USE_TASKS_ITEMS
 import com.mongodb.app.presentation.login.EventSeverity
-import com.mongodb.app.presentation.login.LoginAction
 import com.mongodb.app.presentation.login.LoginEvent
 import com.mongodb.app.presentation.login.LoginViewModel
-import com.mongodb.app.ui.compassscreen.CompassPermissions
-import com.mongodb.app.ui.compassscreen.CompassScreen
-import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.login.AccountScaffold
-
-import com.mongodb.app.ui.login.LoginScaffold
-import com.mongodb.app.ui.login.RegisterScaffold
-
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.userprofiles.UserProfileScreen
-import io.realm.kotlin.mongodb.User
+import io.realm.kotlin.Realm
+import io.realm.kotlin.mongodb.App
+import io.realm.kotlin.mongodb.Credentials
+import io.realm.kotlin.mongodb.GoogleAuthType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 
 /*
@@ -40,6 +52,8 @@ Contributions:
 class ComposeLoginActivity : ComponentActivity() {
 
     private val loginViewModel: LoginViewModel by viewModels()
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,13 +103,11 @@ class ComposeLoginActivity : ComponentActivity() {
         setContent {
             MyApplicationTheme {
                 // Vichet Chim - navigation between login and sign up
-                AccountScaffold(loginViewModel = loginViewModel)
-
+                    AccountScaffold(loginViewModel = loginViewModel)
                     }
                 }
+
             }
-
-
 
     private fun LoginEvent.process() {
         when (severity) {
@@ -107,17 +119,15 @@ class ComposeLoginActivity : ComponentActivity() {
             }
         }
     }
+
+
+
+
+
+
+
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun LoginActivityPreview() {
-//    MyApplicationTheme {
-//        val viewModel = LoginViewModel().also {
-//            it.switchToAction(LoginAction.LOGIN)
-//            it.setEmail("test@test.com")
-//            it.setPassword("123456")
-//        }
-//        LoginScaffold(viewModel)
-//    }
-//}
+
+
+

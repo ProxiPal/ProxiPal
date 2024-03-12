@@ -4,10 +4,8 @@ import android.os.Bundle
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
@@ -38,6 +36,7 @@ import kotlinx.coroutines.withContext
 Contributions:
 - Kevin Kubota (all user profile UI, except for navigation between screens)
 - Marco Pacini (location related tasks only)
+- Vichet Chim (user's interest/industry)
  */
 
 
@@ -77,11 +76,17 @@ class UserProfileViewModel constructor(
 
     private val _proximityRadius: MutableState<Double> = mutableStateOf(0.1)
 
+
     //added by George Fu for Social media handling
     private val _userProfileInstagramHandle: MutableState<String> = mutableStateOf("")
     private val _userProfileTwitterHandle: MutableState<String> = mutableStateOf("")
     private val _userProfileLinktreeHandle: MutableState<String> = mutableStateOf("")
     private val _userProfilelinkedinHandle: MutableState<String> = mutableStateOf("")
+
+    // for current user's interests/industries, added by Vichet Chim
+    private var _userProfileInterests: MutableList<String> = mutableListOf()
+    private var _userProfileIndustries: MutableList<String> = mutableListOf()
+
 
 
     /*
@@ -122,6 +127,7 @@ class UserProfileViewModel constructor(
     val proxmityRadius: State<Double>
         get() = _proximityRadius
 
+
     //George Fu For Social Media
     val userProfileInstagramHandle: State<String>
         get() = _userProfileInstagramHandle
@@ -134,6 +140,15 @@ class UserProfileViewModel constructor(
 
     val userProfilelinkedinHandle: State<String>
         get() = _userProfilelinkedinHandle
+
+    // for current user's interests/industries, added by Vichet Chim
+    val userProfileInterests: List<String>
+        get() = _userProfileInterests
+    val userProfileIndustries: List<String>
+        get() = _userProfileIndustries
+
+
+
 
 
     init {
@@ -214,10 +229,15 @@ class UserProfileViewModel constructor(
                                     _userProfileBiography.value = event.list[0].biography
                                     _userProfileLatitude.value = event.list[0].location?.latitude!!
                                     _userProfileLongitude.value = event.list[0].location?.longitude!!
+
                                     _userProfileInstagramHandle.value = event.list[0].instagramHandle
                                     _userProfileTwitterHandle.value = event.list[0].twitterHandle
                                     _userProfileLinktreeHandle.value = event.list[0].linktreeHandle
                                     _userProfilelinkedinHandle.value = event.list[0].linkedinHandle
+
+                                    _userProfileInterests = event.list[0].interests.toList().toMutableList()
+                                    _userProfileIndustries = event.list[0].industries.toList().toMutableList()
+
                                 }
                                 else -> {
                                     Log.i(
@@ -231,10 +251,15 @@ class UserProfileViewModel constructor(
                                     _userProfileBiography.value = event.list[0].biography
                                     _userProfileLatitude.value = event.list[0].location?.latitude!!
                                     _userProfileLongitude.value = event.list[0].location?.longitude!!
+
                                     _userProfileInstagramHandle.value = event.list[0].instagramHandle
                                     _userProfileTwitterHandle.value = event.list[0].twitterHandle
                                     _userProfileLinktreeHandle.value = event.list[0].linktreeHandle
                                     _userProfilelinkedinHandle.value = event.list[0].linkedinHandle
+
+                                    _userProfileInterests = event.list[0].interests.toList().toMutableList()
+                                    _userProfileIndustries = event.list[0].industries.toList().toMutableList()
+
                                 }
                             }
                         }
@@ -307,6 +332,7 @@ class UserProfileViewModel constructor(
 //        }
     }
 
+
     /**
      * Updates the current user's user profile, if it exists
      */
@@ -328,6 +354,9 @@ class UserProfileViewModel constructor(
     /**
      * Updates the user profile's location
      */
+
+
+
     fun setUserProfileLocation(latitude: Double, longitude: Double){
         _userProfileLatitude.value = latitude
         _userProfileLongitude.value = longitude
@@ -520,6 +549,7 @@ class UserProfileViewModel constructor(
                     linktreeHandle = userProfileLinktreeHandle.value,
                     linkedinHandle = userProfilelinkedinHandle.value
                 )
+
             }.onSuccess {
                 withContext(Dispatchers.Main) {
                     _addUserProfileEvent.emit(AddUserProfileEvent.Info("UPViewModel: Successfully added user profile " +
@@ -559,4 +589,45 @@ class UserProfileViewModel constructor(
     fun updateProximityRadius(radiusInKilometers: Double){
         _proximityRadius.value = radiusInKilometers
     }
+
+
+    //toggle user's interest
+    fun toggleInterest(interest: String){
+        if (_userProfileInterests.contains(interest)) {
+            _userProfileInterests.remove(interest)
+        }  else{
+            _userProfileInterests.add(interest)
+        }
+        updateUserInterests(interest)
+    }
+
+
+    // update user interests' list
+    private fun updateUserInterests(interest:String) {
+    viewModelScope.launch {
+        repository.updateUserProfileInterests(
+            interest = interest
+        )
+    }
+    }
+
+    //toggle user's industry
+    fun toggleIndustry(industry: String){
+        if (_userProfileIndustries.contains(industry)) {
+            _userProfileIndustries.remove(industry)
+        }  else{
+            _userProfileIndustries.add(industry)
+        }
+        updateUserIndustries(industry)
+    }
+
+    // update user industries' list
+    private fun updateUserIndustries(industry:String) {
+        viewModelScope.launch {
+            repository.updateUserProfileIndustries(
+                industry = industry
+            )
+        }
+    }
+
 }
