@@ -40,6 +40,8 @@ import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.messages.MESSAGE_WIDTH_WEIGHT
 import com.mongodb.app.data.messages.MOCK_MESSAGE_LIST
+import com.mongodb.app.data.messages.MessagesRealm
+import com.mongodb.app.data.messages.MockMessagesRealm
 import com.mongodb.app.presentation.messages.MessagesViewModel
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.ui.theme.MyApplicationTheme
@@ -53,8 +55,13 @@ class MessagesScreen : ComponentActivity(){
         }
     }
 
+    private val messagesRealm = MessagesRealm { _, _ ->
+        lifecycleScope.launch {
+        }
+    }
+
     private val messagesViewModel: MessagesViewModel by viewModels {
-        MessagesViewModel.factory(repository, this)
+        MessagesViewModel.factory(messagesRealm, this)
     }
 
     private val toolbarViewModel: ToolbarViewModel by viewModels {
@@ -276,7 +283,7 @@ fun MessagesInputRow(
             modifier = Modifier
                 .weight(0.20f)
                 .clickable {
-                    messagesViewModel.resetMessage()
+                    messagesViewModel.sendMessage()
                 }
         )
     }
@@ -290,8 +297,9 @@ fun MessagesInputRow(
 fun MessagesScreenLayoutPreview(){
     MyApplicationTheme {
         val repository = MockRepository()
+        val mockRealm = MockMessagesRealm()
         MessagesScreenLayout(
-            messagesViewModel = MessagesViewModel(repository),
+            messagesViewModel = MessagesViewModel(mockRealm),
             toolbarViewModel = ToolbarViewModel(repository),
 //            navController = rememberNavController()
         )
@@ -310,9 +318,9 @@ fun MessagesTopBarPreview(){
 @Composable
 fun MessagesBodyContentPreview(){
     MyApplicationTheme {
-        val repository = MockRepository()
+        val mockRealm = MockMessagesRealm()
         MessagesBodyContent(
-            messagesViewModel = MessagesViewModel(repository)
+            messagesViewModel = MessagesViewModel(mockRealm)
         )
     }
 }
