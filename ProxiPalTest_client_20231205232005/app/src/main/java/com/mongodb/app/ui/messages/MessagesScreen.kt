@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -26,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,6 +40,7 @@ import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.messages.MESSAGE_WIDTH_WEIGHT
 import com.mongodb.app.data.messages.MOCK_MESSAGE_LIST
+import com.mongodb.app.presentation.messages.MessagesViewModel
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
@@ -47,6 +51,10 @@ class MessagesScreen : ComponentActivity(){
     private val repository = RealmSyncRepository { _, _ ->
         lifecycleScope.launch {
         }
+    }
+
+    private val messagesViewModel: MessagesViewModel by viewModels {
+        MessagesViewModel.factory(repository, this)
     }
 
     private val toolbarViewModel: ToolbarViewModel by viewModels {
@@ -66,6 +74,7 @@ class MessagesScreen : ComponentActivity(){
 
         setContent {
             MessagesScreenLayout(
+                messagesViewModel = messagesViewModel,
                 toolbarViewModel = toolbarViewModel,
 //                navController =
             )
@@ -82,6 +91,7 @@ class MessagesScreen : ComponentActivity(){
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessagesScreenLayout(
+    messagesViewModel: MessagesViewModel,
     toolbarViewModel: ToolbarViewModel,
 //    navController: NavHostController,
     modifier: Modifier = Modifier
@@ -98,6 +108,7 @@ fun MessagesScreenLayout(
         // Pad the body of content so it does not get cut off by the scaffold top bar
     ) { innerPadding ->
         MessagesBodyContent(
+            messagesViewModel = messagesViewModel,
             modifier = Modifier
                 .padding(innerPadding)
 //                .absolutePadding(top = innerPadding.calculateTopPadding())
@@ -141,6 +152,7 @@ fun MessagesTopBar(
  */
 @Composable
 fun MessagesBodyContent(
+    messagesViewModel: MessagesViewModel,
     modifier: Modifier = Modifier
 ){
     Column(
@@ -165,7 +177,8 @@ fun MessagesBodyContent(
                 )
             }
         }
-        MessagesTextField(
+        MessagesInputRow(
+            messagesViewModel = messagesViewModel,
             modifier = Modifier
         )
     }
@@ -236,7 +249,8 @@ fun SingleMessage(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MessagesTextField(
+fun MessagesInputRow(
+    messagesViewModel: MessagesViewModel,
     modifier: Modifier = Modifier
 ){
     Row(
@@ -245,11 +259,25 @@ fun MessagesTextField(
             .fillMaxWidth()
     ){
         TextField(
-            value = stringResource(id = R.string.messages_screen_empty_message_field),
-            onValueChange = {},
+            value = messagesViewModel.message.value,
+            placeholder = {
+                Text(
+                    text = stringResource(id = R.string.messages_screen_empty_message_field)
+                )
+            },
+            onValueChange = { messagesViewModel.updateMessage(it) },
             singleLine = true,
             modifier = Modifier
-                .fillMaxWidth()
+                .weight(0.80f)
+        )
+        Icon(
+            painter = painterResource(id = R.drawable.tempcompass),
+            contentDescription = "Send message",
+            modifier = Modifier
+                .weight(0.20f)
+                .clickable {
+                    messagesViewModel.resetMessage()
+                }
         )
     }
 }
@@ -262,9 +290,9 @@ fun MessagesTextField(
 fun MessagesScreenLayoutPreview(){
     MyApplicationTheme {
         val repository = MockRepository()
-        val toolbarViewModel = ToolbarViewModel(repository)
         MessagesScreenLayout(
-            toolbarViewModel = toolbarViewModel,
+            messagesViewModel = MessagesViewModel(repository),
+            toolbarViewModel = ToolbarViewModel(repository),
 //            navController = rememberNavController()
         )
     }
@@ -282,7 +310,10 @@ fun MessagesTopBarPreview(){
 @Composable
 fun MessagesBodyContentPreview(){
     MyApplicationTheme {
-        MessagesBodyContent()
+        val repository = MockRepository()
+        MessagesBodyContent(
+            messagesViewModel = MessagesViewModel(repository)
+        )
     }
 }
 
