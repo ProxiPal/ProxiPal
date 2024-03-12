@@ -108,5 +108,12 @@
     <string name="requires_permissions">Proxipal requires location permissions</string>
     <string name="proximity_radius_text">Searching for users within %1$.2f meters</string>
 
+    <!-- Filters -->
+    <string name="interests">Interests</string>
+    <string name="industry">Industry</string>
+    <string name="others">Others</string>
+    <string name="apply_filter">Apply Filter</string>
+    <string name="cancel_Filter">Cancel</string>
+
 
 </resources>

@@ -113,12 +113,12 @@ interface SyncRepository {
     /**
      * Adds a user profile that belongs to the current user using the specified parameters
      */
-    suspend fun addUserProfile(firstName: String, lastName: String, biography: String)
+    suspend fun addUserProfile(firstName: String, lastName: String, biography: String, instagramHandle: String, twitterHandle : String, linktreeHandle : String, linkedinHandle : String)
 
     /**
      * Updates a possible existing user profile for the current user in the database using the specified parameters
      */
-    suspend fun updateUserProfile(firstName: String, lastName: String, biography: String)
+    suspend fun updateUserProfile(firstName: String, lastName: String, biography: String, instagramHandle: String, twitterHandle: String, linktreeHandle : String, linkedinHandle : String)
 
     /**
      * Updates the Sync subscription based on the specified [SubscriptionType].
@@ -315,13 +315,18 @@ class RealmSyncRepository(
             .asFlow()
     }
 
-    override suspend fun addUserProfile(firstName: String, lastName: String, biography: String) {
+    //added the social media handling
+    override suspend fun addUserProfile(firstName: String, lastName: String, biography: String, instagramHandle: String, twitterHandle: String, linktreeHandle : String, linkedinHandle : String) {
         // The "owner ID" added is associated with the user currently logged into the app
         val userProfile = UserProfile().apply {
             ownerId = currentUser.id
             this.firstName = firstName
             this.lastName = lastName
             this.biography = biography
+            this.instagramHandle = instagramHandle
+            this.twitterHandle = twitterHandle
+            this.linktreeHandle = linktreeHandle
+            this.linkedinHandle = linkedinHandle
 
             // Added by Marco Pacini, to make sure there is an initial location
             // it will be updated by the connect screen
@@ -339,7 +344,7 @@ class RealmSyncRepository(
         return currentUser.id
     }
 
-    override suspend fun updateUserProfile(firstName: String, lastName: String, biography: String) {
+    override suspend fun updateUserProfile(firstName: String, lastName: String, biography: String, instagramHandle: String, twitterHandle: String, linktreeHandle: String, linkedinHandle: String) {
         // Queries inside write transaction are live objects
         // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
         val frozenUserProfile = getQueryUserProfiles(
@@ -363,7 +368,12 @@ class RealmSyncRepository(
             addUserProfile(
                 firstName = firstName,
                 lastName = lastName,
-                biography = biography
+                biography = biography,
+
+                instagramHandle = instagramHandle,
+                twitterHandle = twitterHandle,
+                linktreeHandle = linktreeHandle,
+                linkedinHandle = linkedinHandle
             )
             return
         }
@@ -397,6 +407,11 @@ class RealmSyncRepository(
                 liveUserProfile.firstName = firstName
                 liveUserProfile.lastName = lastName
                 liveUserProfile.biography = biography
+
+                liveUserProfile.instagramHandle = instagramHandle
+                liveUserProfile.twitterHandle = twitterHandle
+                liveUserProfile.linktreeHandle = linktreeHandle
+                liveUserProfile.linkedinHandle = linkedinHandle
             }
         }
     }
@@ -462,7 +477,13 @@ class RealmSyncRepository(
             addUserProfile(
                 firstName = "empty",
                 lastName = "empty",
-                biography = "empty"
+                biography = "empty",
+                instagramHandle = "empty",
+                twitterHandle = "empty",
+                linktreeHandle = "empty",
+                linkedinHandle = "empty"
+
+
             )
             return
         }
@@ -534,9 +555,9 @@ class MockRepository : SyncRepository {
 
     // Contributed by Kevin Kubota
     override fun getUserProfileList(): Flow<ResultsChange<UserProfile>> = flowOf()
-    override suspend fun addUserProfile(firstName: String, lastName: String, biography: String) =
+    override suspend fun addUserProfile(firstName: String, lastName: String, biography: String, instagramHandle: String, twitterHandle: String, linktreeHandle: String, linkedinHandle: String) =
         Unit
-    override suspend fun updateUserProfile(firstName: String, lastName: String, biography: String) =
+    override suspend fun updateUserProfile(firstName: String, lastName: String, biography: String, instagramHandle: String, twitterHandle: String, linktreeHandle: String, linkedinHandle: String) =
         Unit
     override suspend fun updateSubscriptionsUserProfiles(subscriptionType: SubscriptionType) = Unit
     override suspend fun deleteUserProfile(userProfile: UserProfile) = Unit

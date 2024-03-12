@@ -27,6 +27,11 @@ class UserProfile : RealmObject {
     // Added by Marco Pacini, stores latitude and longitude
     var location: CustomGeoPoint? = null
 
+    var instagramHandle: String = ""
+    var twitterHandle: String = ""
+    var linktreeHandle: String =""
+    var linkedinHandle: String = ""
+
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
         if (other !is UserProfile) return false

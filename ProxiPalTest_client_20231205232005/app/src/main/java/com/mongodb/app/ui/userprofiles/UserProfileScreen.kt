@@ -225,7 +225,7 @@ fun UserProfileLayout(
                 contentPadding = innerPadding,
                 userProfileViewModel = userProfileViewModel
             )
-            HomeScreen(navController = navController, viewModel = homeViewModel)
+            HomeScreen(navController = navController, viewModel = homeViewModel, userProfileViewModel = userProfileViewModel)
         }
     }
 }
