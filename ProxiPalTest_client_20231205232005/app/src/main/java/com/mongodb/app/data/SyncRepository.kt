@@ -4,6 +4,7 @@ import android.util.Log
 import com.mongodb.app.TAG
 import com.mongodb.app.domain.Item
 import com.mongodb.app.app
+import com.mongodb.app.data.messages.SHOULD_PRINT_REALM_CONFIG_INFO
 import com.mongodb.app.domain.UserProfile
 import com.mongodb.app.location.CustomGeoPoint
 import io.realm.kotlin.Realm
@@ -203,20 +204,30 @@ class RealmSyncRepository(
 
         realm = Realm.open(config)
 
-//        // After configuration changes, realm stays the same but config changes every time
-//        // This leads to the app crashing when trying to interact with Realm after a configuration change
-//        Log.i(
-//            TAG(),
-//            "RealmSyncRepository: Realm = \"${realm}\""
-//        )
-//        Log.i(
-//            TAG(),
-//            "RealmSyncRepository: Config = \"${config}\""
-//        )
+        if (SHOULD_PRINT_REALM_CONFIG_INFO){
+            // After configuration changes, realm stays the same but config changes every time
+            // This leads to the app crashing when trying to interact with Realm after a configuration change
+            Log.i(
+                TAG(),
+                "RealmSyncRepository: Realm = \"${realm}\""
+            )
+            Log.i(
+                TAG(),
+                "RealmSyncRepository: Config = \"${config}\""
+            )
+        }
 
         // Mutable states must be updated on the UI thread
         CoroutineScope(Dispatchers.Main).launch {
             realm.subscriptions.waitForSynchronization()
+        }
+        if (SHOULD_PRINT_REALM_CONFIG_INFO){
+            for (subscription in realm.subscriptions){
+                Log.i(
+                    TAG(),
+                    "RealmSyncRepository: Subscription = \"$subscription\""
+                )
+            }
         }
     }
 

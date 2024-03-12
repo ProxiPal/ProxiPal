@@ -94,3 +94,10 @@ Example:
 
 Deleting the app did not work first try. What did work was restarting Android Studio and wiping
 emulator device data on restart.
+
+### Issues encountered when working on messages screen
+
+## "RLM_ERR_NO_SUBSCRIPTION_FOR_WRITE"; no flexible subscription error
+
+Needed to manually update the realm instance's subscriptions with 
+"realm.subscriptions.update { add(\\subscriptionHere\\) }"

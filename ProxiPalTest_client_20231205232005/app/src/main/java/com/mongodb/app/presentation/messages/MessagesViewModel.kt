@@ -1,13 +1,17 @@
 package com.mongodb.app.presentation.messages
 
 import android.os.Bundle
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
+import com.mongodb.app.TAG
 import com.mongodb.app.data.messages.IMessagesRealm
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class MessagesViewModel constructor(
@@ -57,6 +61,15 @@ class MessagesViewModel constructor(
                 timeSent = getTimeSent()
             )
         }
+        // By itself this does not work, but with the viewModelScope this does work
+//        CoroutineScope(Dispatchers.IO).launch {
+//            runCatching {
+//                messagesRealm.addMessage(
+//                    message = message.value,
+//                    timeSent = getTimeSent()
+//                )
+//            }
+//        }
     }
 
     /**
