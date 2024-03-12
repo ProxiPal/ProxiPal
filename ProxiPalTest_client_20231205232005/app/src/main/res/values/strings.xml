@@ -57,6 +57,11 @@
     <string name="compass_permissions_dismiss_permissions_button">Dismiss</string>
     <string name="compass_permissions_screen_permissions_denied">Cannot connect with other users without required permissions</string>
     <!--    End compass permissions screen strings -->
+<!--    Start messages screen strings -->
+    <string name="messages_screen_sent_by_me">Sent by you</string>
+    <string name="messages_screen_sent_by_other">Sent by %s</string>
+    <string name="messages_screen_empty_message_field">Type message here...</string>
+<!--    End messages screen strings-->
 
     <!-- NewFriendRequestNotificationService strings
          Programmer:Brian Poon 2/21/24   -->

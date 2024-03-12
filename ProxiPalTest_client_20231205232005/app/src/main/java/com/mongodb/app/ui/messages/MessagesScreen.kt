@@ -6,19 +6,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,7 +41,6 @@ import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
 import kotlinx.coroutines.launch
-import java.util.Random
 
 class MessagesScreen : ComponentActivity(){
     // region Variables
@@ -165,8 +159,8 @@ fun MessagesBodyContent(
             // Start with the more recent messages at the bottom
             items(messageList.reversed()){ message ->
                 SingleMessage(
-                    // Make about half of random messages mine
-                    isSenderMe = Random().nextInt(2) == 1,
+                    // TODO Use custom Realm class to store who sent a message
+                    isSenderMe = messageList.reversed().indexOf(message) % 2 == 1,
                     message = message
                 )
             }
@@ -224,7 +218,9 @@ fun SingleMessage(
                     )
                 }
                 Text(
-                    text = "Sent by someone",
+                    text =
+                    if (isSenderMe) stringResource(id = R.string.messages_screen_sent_by_me)
+                    else stringResource(id = R.string.messages_screen_sent_by_other, "someone"),
                     style = MaterialTheme.typography.labelSmall
                 )
             }
@@ -249,7 +245,7 @@ fun MessagesTextField(
             .fillMaxWidth()
     ){
         TextField(
-            value = "temp",
+            value = stringResource(id = R.string.messages_screen_empty_message_field),
             onValueChange = {},
             singleLine = true,
             modifier = Modifier
