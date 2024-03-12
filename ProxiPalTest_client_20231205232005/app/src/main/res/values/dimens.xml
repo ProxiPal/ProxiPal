@@ -6,4 +6,11 @@
     <dimen name="user_profile_row_padding">10dp</dimen>
     <dimen name="user_profile_spacer_height">10dp</dimen>
     <!-- End user profile dimensions -->
+<!--    Start of messages screen dimensions -->
+    <dimen name="messages_screen_profile_picture_size">44.dp</dimen>
+    <dimen name="messages_screen_message_vertical_padding">8.dp</dimen>
+    <dimen name="messages_screen_message_horizontal_padding">12.dp</dimen>
+    <dimen name="messages_screen_message_container_padding">4.dp</dimen>
+    <dimen name="messages_screen_message_container_rounding">10.dp</dimen>
+<!--    End of messages screen dimensions -->
 </resources>

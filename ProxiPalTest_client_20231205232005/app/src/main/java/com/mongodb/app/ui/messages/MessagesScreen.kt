@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,8 +14,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,7 +31,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -138,13 +145,27 @@ fun MessagesTopBar(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = stringResource(
-                        id = R.string.app_name
-                    ),
-                    color = Color.White,
-                    style = MaterialTheme.typography.displayMedium
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                    Image(
+                        // TODO Change this to a person's profile picture
+                        painter = painterResource(id = R.drawable.linkedin),
+                        contentDescription = null,
+                        // Crops the image to fit (the circular shape space)
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .clip(MaterialTheme.shapes.small)
+                            .size(dimensionResource(id = R.dimen.messages_screen_profile_picture_size))
+                    )
+                    Text(
+                        text = stringResource(
+                            id = R.string.app_name
+                        ),
+                        color = Color.Black,
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
             }
         },
         colors = TopAppBarDefaults.smallTopAppBarColors(
@@ -201,6 +222,17 @@ fun SingleMessage(
         if (isSenderMe) Arrangement.End else Arrangement.Start
     val columnAlignment =
         if (isSenderMe) Alignment.End else Alignment.Start
+    val messageShape =
+        if (isSenderMe) CutCornerShape(
+            topStart = dimensionResource(id = R.dimen.messages_screen_message_container_rounding),
+            topEnd = dimensionResource(id = R.dimen.messages_screen_message_container_rounding),
+            bottomStart = dimensionResource(id = R.dimen.messages_screen_message_container_rounding)
+        )
+    else CutCornerShape(
+        topStart = dimensionResource(id = R.dimen.messages_screen_message_container_rounding),
+        topEnd = dimensionResource(id = R.dimen.messages_screen_message_container_rounding),
+        bottomEnd = dimensionResource(id = R.dimen.messages_screen_message_container_rounding)
+    )
 
     // To ensure the message card can vary in size depending on the message size,
     // ... the card will expand horizontally at first for shorter messages
@@ -208,7 +240,10 @@ fun SingleMessage(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 4.dp, bottom = 4.dp)
+            .padding(
+                top = dimensionResource(id = R.dimen.messages_screen_message_container_padding),
+                bottom = dimensionResource(id = R.dimen.messages_screen_message_container_padding)
+            )
     ){
         if (isSenderMe){
             Spacer(
@@ -222,11 +257,10 @@ fun SingleMessage(
                 .weight(1 - MESSAGE_WIDTH_WEIGHT)
         ){
             Column(
-                horizontalAlignment = columnAlignment,
-                modifier = Modifier
+                horizontalAlignment = columnAlignment
             ){
                 Card(
-                    modifier = Modifier
+                    shape = messageShape
                 ){
                     Text(
                         text = message,
@@ -234,9 +268,15 @@ fun SingleMessage(
                         softWrap = true,
                         overflow = TextOverflow.Clip,
                         modifier = Modifier
-                            .padding(8.dp)
+                            .padding(
+                                top = dimensionResource(id = R.dimen.messages_screen_message_vertical_padding),
+                                bottom = dimensionResource(id = R.dimen.messages_screen_message_vertical_padding),
+                                start = dimensionResource(id = R.dimen.messages_screen_message_horizontal_padding),
+                                end = dimensionResource(id = R.dimen.messages_screen_message_horizontal_padding)
+                            )
                     )
                 }
+                // The "sent by" message label
                 Text(
                     text =
                     if (isSenderMe) stringResource(id = R.string.messages_screen_sent_by_me)
