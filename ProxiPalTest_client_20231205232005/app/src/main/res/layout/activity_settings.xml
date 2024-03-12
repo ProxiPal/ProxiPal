@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+
+    <!-- App Settings Title Header -->
+    <TextView
+        android:id="@+id/tvSettingsTitle"
+        android:text="@string/app_settings"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp" />
+
+    <!-- General Settings Header -->
+    <TextView
+        android:id="@+id/tvGeneralTitle"
+        android:text="@string/general"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvSettingsTitle"
+        android:layout_marginTop="16dp" />
+
+    <!-- Profile Info Section -->
+    <TextView
+        android:id="@+id/tvProfileInfo"
+        android:text="@string/profile_info"
+        android:textSize="30sp"
+        android:textColor="@color/white"
+        android:gravity="fill"
+        android:layout_below="@id/tvGeneralTitle"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/button_selector"
+        app:drawableLeftCompat="@drawable/ic_launcher_foreground"
+        />
+
+    <!-- Language Section -->
+    <TextView
+        android:id="@+id/tvLanguage"
+        android:text="@string/language"
+        android:textSize="30sp"
+        android:textColor="@color/white"
+        android:gravity="fill"
+        android:layout_below="@id/tvProfileInfo"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/button_selector"
+        app:drawableLeftCompat="@drawable/ic_launcher_foreground" />
+
+
+    <!-- Line Break -->
+    <View
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/tvLanguage"
+        android:background="@color/black" />
+
+    <!-- Features Header -->
+    <TextView
+        android:id="@+id/tvFeatures"
+        android:text="@string/features"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvLanguage"
+        android:layout_marginTop="32dp" />
+
+    <TextView
+        android:id="@+id/tvAllowNotifications"
+        android:text="@string/allow_notifications"
+        android:textSize="25sp"
+        android:textColor="@color/white"
+        android:gravity="fill"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@id/tvFeatures"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/button_selector"
+        app:drawableLeftCompat="@drawable/ic_launcher_foreground"
+        />
+
+    <!-- User Filters Section -->
+    <TextView
+        android:id="@+id/tvUserFilters"
+        android:text="@string/user_filters"
+        android:textSize="27sp"
+        android:textColor="@color/white"
+        android:gravity="fill"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@id/tvAllowNotifications"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/button_selector"
+        app:drawableLeftCompat="@drawable/ic_launcher_foreground"
+        />
+
+
+    <!-- Advanced Settings Section -->
+    <TextView
+        android:id="@+id/tvAdvancedSettings"
+        android:text="@string/advanced_settings"
+        android:textSize="25sp"
+        android:textColor="@color/white"
+        android:gravity="fill"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@id/tvUserFilters"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/button_selector"
+        app:drawableLeftCompat="@drawable/ic_launcher_foreground"
+        />
+
+    <!-- Line Break -->
+    <View
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/tvAdvancedSettings"
+        android:background="@color/black" />
+
+    <!-- Services Header -->
+    <TextView
+        android:id="@+id/tvServices"
+        android:text="@string/services"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvAdvancedSettings"
+        android:layout_marginTop="32dp" />
+
+
+    <!-- Privacy Policy Section -->
+    <TextView
+        android:id="@+id/tvPrivacyPolicy"
+        android:text="@string/privacy_policy"
+        android:textSize="25sp"
+        android:textColor="@color/white"
+        android:gravity="fill"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@id/tvServices"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/button_selector"
+        app:drawableLeftCompat="@drawable/ic_launcher_foreground"
+        />
+
+</RelativeLayout>

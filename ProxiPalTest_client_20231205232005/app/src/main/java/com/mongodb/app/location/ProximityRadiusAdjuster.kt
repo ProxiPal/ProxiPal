@@ -29,7 +29,7 @@ import androidx.compose.ui.text.font.FontStyle
  */
 @Composable
 fun ProximityRadiusAdjuster(userProfileViewModel: UserProfileViewModel) {
-    var sliderPosition by remember { mutableFloatStateOf(0f) }
+    var sliderPosition by remember { mutableFloatStateOf(0.1f) }
     Column {
         Slider(
             value = sliderPosition,
@@ -41,11 +41,11 @@ fun ProximityRadiusAdjuster(userProfileViewModel: UserProfileViewModel) {
                 activeTrackColor = Purple500,
                 inactiveTrackColor = Purple700,
             ),
-            steps = 8,
-            valueRange = 0.1f..1f
+            steps = 4,
+            valueRange = 0.05f..0.1f
         )
         Text(
-            text = stringResource(R.string.proximity_radius_text, sliderPosition),
+            text = stringResource(R.string.proximity_radius_text, sliderPosition*1000),
             modifier = Modifier.padding(8.dp),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.body1.copy(fontSize = 18.sp),
