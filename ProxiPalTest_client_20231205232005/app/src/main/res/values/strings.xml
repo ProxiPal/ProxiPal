@@ -146,5 +146,12 @@
 
 
 
+    <!-- Filters -->
+    <string name="interests">Interests</string>
+    <string name="industry">Industry</string>
+    <string name="others">Others</string>
+    <string name="apply_filter">Apply Filter</string>
+    <string name="cancel_Filter">Cancel</string>
+
 
 </resources>

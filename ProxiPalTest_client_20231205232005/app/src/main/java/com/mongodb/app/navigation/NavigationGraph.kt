@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.mongodb.app.home.FilterScreen
 import com.mongodb.app.home.HomeScreen
 import com.mongodb.app.home.HomeViewModel
 import com.mongodb.app.home.ScreenSettings
@@ -76,12 +77,15 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
         composable(Routes.LocationPermissionsScreen.route) {
             LocationPermissionScreen(navController)
         }
+        //march7
         composable(Routes.HomeScreen.route) {
-            HomeScreen(navController = navController, viewModel = HomeViewModel())
+            HomeScreen(navController = navController, viewModel = homeViewModel, userProfileViewModel = userProfileViewModel)
         }
-        
         composable(Routes.ScreenSettings.route){
             ScreenSettings(navController = navController)
+        }
+        composable(Routes.FilterScreen.route){
+            FilterScreen(navController)
         }
     }
 }

@@ -35,6 +35,7 @@ import com.mongodb.app.R
 import com.mongodb.app.AllowNotificationsActivity
 import com.mongodb.app.LanguageActivity
 import com.mongodb.app.PrivacyPolicyActivity
+import com.mongodb.app.navigation.Routes
 
 //This is the code to edit the settings screen.
 @Composable
@@ -102,6 +103,7 @@ fun ScreenSettings(navController: NavHostController) {
                     }
                     SettingsItem("User Filters") {
                         Toast.makeText(context, "User Filters clicked!", Toast.LENGTH_SHORT).show()
+                        navController.navigate(Routes.FilterScreen.route)
                     }
                     SettingsItem("Advanced Settings") {
                         Toast.makeText(context, "Advanced Settings clicked!", Toast.LENGTH_SHORT).show()
