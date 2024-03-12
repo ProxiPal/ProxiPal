@@ -1,5 +1,7 @@
 package com.mongodb.app.data.messages
 
+import android.util.Log
+import com.mongodb.app.TAG
 import com.mongodb.app.app
 import com.mongodb.app.domain.FriendMessage
 import io.realm.kotlin.Realm
@@ -33,6 +35,10 @@ class MessagesRealm(
 
 
     init{
+        Log.i(
+            TAG(),
+            "MessagesRealm: Start of init{}"
+        )
         val schemaSet = setOf(FriendMessage::class)
         config = SyncConfiguration.Builder(currentUser, schemaSet)
             .initialSubscriptions { realm ->

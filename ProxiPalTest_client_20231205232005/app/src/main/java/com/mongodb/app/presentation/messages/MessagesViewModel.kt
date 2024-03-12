@@ -33,6 +33,11 @@ class MessagesViewModel constructor(
         _message.value = ""
     }
 
+    private fun getTimeSent(): Long{
+        // TODO Update this to actually get the system time sent
+        return Long.MAX_VALUE
+    }
+
     fun sendMessage(){
         addMessageToDatabase()
         resetMessage()
@@ -47,7 +52,10 @@ class MessagesViewModel constructor(
      */
     private fun addMessageToDatabase(){
         viewModelScope.launch {
-            messagesRealm
+            messagesRealm.addMessage(
+                message = message.value,
+                timeSent = getTimeSent()
+            )
         }
     }
 

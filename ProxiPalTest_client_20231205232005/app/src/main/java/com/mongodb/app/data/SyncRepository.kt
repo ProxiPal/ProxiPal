@@ -162,7 +162,6 @@ class RealmSyncRepository(
     onSyncError: (session: SyncSession, error: SyncException) -> Unit
 ) : SyncRepository {
 
-    // Unsure if there can be more than 1 instance of a Realm
     private val realm: Realm
     private val config: SyncConfiguration
     private val currentUser: User

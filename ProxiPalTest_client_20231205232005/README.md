@@ -72,6 +72,8 @@ On a related note, this link:
     https://www.mongodb.com/docs/realm/sdk/kotlin/sync/subscribe/ 
 may be helpful since it revolves around properly setting up Sync subscriptions.
 
+Need to update read and write rules in "Rules" under "Data Access" under "App Services" tab on Mongo Atlas website.
+
 ## Log message shows successful adding {className} to database but the object is not actually added
 
 A new database collection was first created with a dummy object for user profiles. (Unsure if this was needed but the collection was manually created anyway.) Logged into the Atlas website and went to the "Rules" sub-section of the database's "Data Access" section (on the far left). Then, a rule was added to the collection that holds objects of type {className} in the database. The rule was (1) applicable always, (2) had insert, delete, and search document permissions, and (3) had read all, write all field permissions.
