@@ -81,6 +81,8 @@ class UserProfileScreen : ComponentActivity() {
     /*
     ===== Variables =====
      */
+
+
     private val repository = RealmSyncRepository { _, error ->
         // Sync errors come from a background thread so route the Toast through the UI thread
         lifecycleScope.launch {
@@ -106,11 +108,14 @@ class UserProfileScreen : ComponentActivity() {
     }
 
 
+
     /*
     ===== Functions =====
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
 
         Log.i(
             TAG(),
@@ -522,7 +527,9 @@ fun UserProfileEditButtons(
     }
 }
 
-@Preview(showBackground = true)
+
+
+//@Preview(showBackground = true)
 @Composable
 fun UserProfileEditButtonsPreview(){
     MyApplicationTheme {

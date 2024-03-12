@@ -10,6 +10,7 @@ import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.annotations.ExperimentalGeoSpatialApi
 import io.realm.kotlin.ext.query
+import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.mongodb.User
 import io.realm.kotlin.mongodb.exceptions.SyncException
 import io.realm.kotlin.mongodb.subscriptions
@@ -19,6 +20,7 @@ import io.realm.kotlin.mongodb.syncSession
 import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.query.RealmQuery
 import io.realm.kotlin.query.Sort
+import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.geo.Distance
 import io.realm.kotlin.types.geo.GeoCircle
 import io.realm.kotlin.types.geo.GeoPoint
@@ -151,6 +153,9 @@ interface SyncRepository {
      */
     fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double): Flow<ResultsChange<UserProfile>>
 
+    suspend fun updateUserProfileInterests(interest:String)
+
+    suspend fun updateUserProfileIndustries(industry:String)
     // endregion location
 }
 
@@ -326,6 +331,7 @@ class RealmSyncRepository(
             // Added by Marco Pacini, to make sure there is an initial location
             // it will be updated by the connect screen
             this.location = CustomGeoPoint(0.0,0.0)
+            //this.interests.add("")
         }
         realm.write {
             copyToRealm(userProfile, updatePolicy = UpdatePolicy.ALL)
@@ -512,7 +518,143 @@ class RealmSyncRepository(
         )
         return realm.query<UserProfile>("location GEOWITHIN $circleAroundUser").query("ownerId != $0", currentUser.id).find().asFlow()
     }
+
     //endregion location
+
+
+    override suspend fun updateUserProfileInterests(interest:String) {
+        // Queries inside write transaction are live objects
+        // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
+        val frozenUserProfile = getQueryUserProfiles(
+            realm = realm,
+            subscriptionType = getActiveSubscriptionType(realm)
+        ).find()
+        // In case the query result list is empty, check first before calling ".first()"
+        val frozenFirstUserProfile = if (frozenUserProfile.size > 0) {
+            frozenUserProfile.first()
+        } else {
+            null
+        }
+        if (frozenFirstUserProfile == null) {
+            Log.i(
+                TAG(),
+                "RealmSyncRepository: Creating a new user profile with the given parameters for " +
+                        "current user ID = \"${currentUser.id}\"...; " +
+                        "Skipping rest of user profile update function..."
+            )
+            // Create a new user profile before applying the updated changes
+            addUserProfile(
+                firstName = "empty",
+                lastName = "empty",
+                biography = "empty"
+            )
+            return
+        }
+        when (getQueryUserProfiles(
+            realm = realm,
+            subscriptionType = getActiveSubscriptionType(realm)
+        ).find().size) {
+            // Create a new profile for the user if they do not have one already in the database
+            // This may not be necessary as users will get their initial profiles added to the database
+            // ... once they register an account and deleting their profile will only occur when
+            // ... deleting their account (unsure if account deletion will be implemented)
+            0 -> {
+                Log.i(
+                    TAG(),
+                    "RealmSyncRepository: No user profiles found with owner ID \"${currentUser.id}\""
+                )
+            }
+
+            1 -> Log.i(
+                TAG(),
+                "RealmSyncRepository: Exactly 1 user profile found with owner ID \"${currentUser.id}\""
+            )
+
+            else -> Log.i(
+                TAG(),
+                "RealmSyncRepository: Multiple user profiles found with owner ID \"${currentUser.id}\""
+            )
+        }
+        realm.write {
+            findLatest(frozenFirstUserProfile)?.let { liveUserProfile ->
+                if (liveUserProfile.interests.contains(interest)){
+                    liveUserProfile.interests.remove(interest)
+                } else{
+                    liveUserProfile.interests.add(interest)
+                }
+
+            }
+        }
+    }
+
+
+    override suspend fun updateUserProfileIndustries(industry:String) {
+        // Queries inside write transaction are live objects
+        // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
+        val frozenUserProfile = getQueryUserProfiles(
+            realm = realm,
+            subscriptionType = getActiveSubscriptionType(realm)
+        ).find()
+        // In case the query result list is empty, check first before calling ".first()"
+        val frozenFirstUserProfile = if (frozenUserProfile.size > 0) {
+            frozenUserProfile.first()
+        } else {
+            null
+        }
+        if (frozenFirstUserProfile == null) {
+            Log.i(
+                TAG(),
+                "RealmSyncRepository: Creating a new user profile with the given parameters for " +
+                        "current user ID = \"${currentUser.id}\"...; " +
+                        "Skipping rest of user profile update function..."
+            )
+            // Create a new user profile before applying the updated changes
+            addUserProfile(
+                firstName = "empty",
+                lastName = "empty",
+                biography = "empty"
+            )
+            return
+        }
+        when (getQueryUserProfiles(
+            realm = realm,
+            subscriptionType = getActiveSubscriptionType(realm)
+        ).find().size) {
+            // Create a new profile for the user if they do not have one already in the database
+            // This may not be necessary as users will get their initial profiles added to the database
+            // ... once they register an account and deleting their profile will only occur when
+            // ... deleting their account (unsure if account deletion will be implemented)
+            0 -> {
+                Log.i(
+                    TAG(),
+                    "RealmSyncRepository: No user profiles found with owner ID \"${currentUser.id}\""
+                )
+            }
+
+            1 -> Log.i(
+                TAG(),
+                "RealmSyncRepository: Exactly 1 user profile found with owner ID \"${currentUser.id}\""
+            )
+
+            else -> Log.i(
+                TAG(),
+                "RealmSyncRepository: Multiple user profiles found with owner ID \"${currentUser.id}\""
+            )
+        }
+        realm.write {
+            findLatest(frozenFirstUserProfile)?.let { liveUserProfile ->
+                if (liveUserProfile.industries.contains(industry)){
+                    liveUserProfile.industries.remove(industry)
+                } else{
+                    liveUserProfile.industries.add(industry)
+                }
+
+            }
+        }
+    }
+
+
+
 }
 
 /**
@@ -548,6 +690,9 @@ class MockRepository : SyncRepository {
 
     override fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double): Flow<ResultsChange<UserProfile>> = flowOf()
 
+    override suspend fun updateUserProfileInterests(interest:String) = Unit
+
+    override suspend fun updateUserProfileIndustries(industry:String) = Unit
 
     companion object {
         const val MOCK_OWNER_ID_MINE = "A"

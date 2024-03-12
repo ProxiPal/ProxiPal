@@ -1,9 +1,13 @@
 package com.mongodb.app.domain
 
 import com.mongodb.app.location.CustomGeoPoint
+
+import io.realm.kotlin.ext.realmListOf
+import io.realm.kotlin.types.RealmList
 import org.mongodb.kbson.ObjectId
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
+
 
 
 /*
@@ -26,6 +30,10 @@ class UserProfile : RealmObject {
 
     // Added by Marco Pacini, stores latitude and longitude
     var location: CustomGeoPoint? = null
+
+    var interests : RealmList<String> = realmListOf()
+    var industries : RealmList<String> = realmListOf()
+
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false

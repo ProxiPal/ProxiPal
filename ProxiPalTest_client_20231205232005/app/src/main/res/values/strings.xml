@@ -4,9 +4,17 @@
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
     <string name="create_account">Create Account</string>
-    <string name="log_in">Log In</string>
+    <string name="log_in">LOGIN</string>
     <string name="already_have_account">Already have an account? Log in</string>
-    <string name="does_not_have_account">Don\'t have an account? Create account</string>
+    <string name="does_not_have_account">No account yet?</string>
+    <string name="login_subheading">Login to access your bookmarks and personal preferences.</string>
+    <string name="prompt_email_reset_password">Enter email to</string>
+    <string name="reset_password">reset password</string>
+    <string name="password_reset_email">Email sent</string>
+    <string name="register_here">Register here.</string>
+    <string name="prompt_password_comfirm">Confirm password</string>
+    <string name="email_confirmation">An email has been sent for account confirmation. Click the link finish account creation.</string>
+    <string name="matching_password">Password does not match</string>
     <string name="log_out">Log Out</string>
     <string name="airplane_mode">Airplane Mode</string>
     <string name="show_completed_tasks_only">Show completed tasks only</string>
@@ -38,7 +46,7 @@
     <string name="user_profile_cancel_editing_message">Discard Changes</string>
     <string name="user_profile_permissions_warning">You can only modify or remove a user profile that belongs to you.</string>
     <!-- End user profile strings-->
-<!--    Start compass screen strings -->
+    <!--    Start compass screen strings -->
     <!--    The "%.3f" formats the measurements to 3 decimal places -->
     <string name="compass_screen_bearing_message">Bearing angle (in degrees): %.3f</string>
     <string name="compass_screen_distance_message">Distance from match (in km): %.3f</string>
@@ -47,8 +55,8 @@
     <string name="compass_screen_awaiting_connection_message">Waiting for match to accept connection</string>
     <string name="compass_screen_canceled_connection_message">The connection was dropped</string>
     <string name="compass_screen_return_button">Return</string>
-<!--    End compass screen strings-->
-<!--    Start compass permissions screen strings -->
+    <!--    End compass screen strings-->
+    <!--    Start compass permissions screen strings -->
     <string name="compass_permissions_required_permissions_list">Required permissions: %s</string>
     <string name="compass_permissions_required_permissions_rationale">
         These permissions are necessary to make your device discoverable to others nearby and to connect with matching users
@@ -106,7 +114,37 @@
     <string name="grant_permissions">Grant permissions</string>
     <string name="permissions_required_by">Location permissions required by Proxipal</string>
     <string name="requires_permissions">Proxipal requires location permissions</string>
+
+    <string name="proximity_radius_text">Searching for users within %1$.2f miles</string>
+    <string name="server_client_id">06277155842-cvp1gfmpl2euecgn1bsaaf4c1il2nnpa.apps.googleusercontent.com</string>
+    <string name="title_activity_reset_password1">ResetPassword1</string>
+
+    <!-- Interests -->
+    <string name="interest_heading">Choose your interests</string>
+    <string name="interest_subheading">You can always change this later</string>
+    <string name="art_culture">Arts &amp; Culture</string>
+    <string name="food_drink">Food &amp; Drinks</string>
+    <string name="gaming">Gaming</string>
+    <string name="music">Music</string>
+    <string name="nature">Nature</string>
+    <string name="activity">Sport</string>
+    <string name="fashion">Fashion</string>
+    <string name="technology">Technology</string>
+    <string name="travel">Travel</string>
+
+    <!-- Industrys -->
+    <string name="industry_heading">Choose your industries</string>
+    <string name="arts_entertainment">Arts &amp; Ent.</string>
+    <string name="education">Education</string>
+    <string name="healthcare">Healthcare</string>
+    <string name="finance">Finance</string>
+    <string name="retail">Retail</string>
+    <string name="media">Media</string>
+    <string name="back">Back</string>
+    <string name="next">Next</string>
+
     <string name="proximity_radius_text">Searching for users within %1$.2f meters</string>
+
 
 
 </resources>
