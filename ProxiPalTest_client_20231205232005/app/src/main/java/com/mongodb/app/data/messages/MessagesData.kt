@@ -6,7 +6,7 @@ val MOCK_MESSAGE_LIST = listOf(
     "This is a very long message."
 )
 
-const val MESSAGE_WIDTH_WEIGHT = 0.6f
+const val MESSAGE_WIDTH_WEIGHT = 0.4f
 
 /**
  * A debugging switch variable on whether to print log messages about Realm instances

@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -51,6 +54,8 @@ import com.mongodb.app.data.messages.MessagesRealm
 import com.mongodb.app.data.messages.MockMessagesRealm
 import com.mongodb.app.presentation.messages.MessagesViewModel
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
+import com.mongodb.app.ui.theme.MessageColorMine
+import com.mongodb.app.ui.theme.MessageColorOther
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
 import kotlinx.coroutines.launch
@@ -198,7 +203,7 @@ fun MessagesBodyContent(
             val messageList = MOCK_MESSAGE_LIST
             // Start with the more recent messages at the bottom
             items(messageList.reversed()){ message ->
-                SingleMessage(
+                SingleMessageContainer(
                     // TODO Use custom Realm class to store who sent a message
                     isSenderMe = messageList.reversed().indexOf(message) % 2 == 1,
                     message = message
@@ -213,26 +218,15 @@ fun MessagesBodyContent(
 }
 
 @Composable
-fun SingleMessage(
-    isSenderMe: Boolean,
+fun SingleMessageContainer(
     message: String,
+    isSenderMe: Boolean,
     modifier: Modifier = Modifier
 ){
     val rowArrangement =
         if (isSenderMe) Arrangement.End else Arrangement.Start
     val columnAlignment =
         if (isSenderMe) Alignment.End else Alignment.Start
-    val messageShape =
-        if (isSenderMe) CutCornerShape(
-            topStart = dimensionResource(id = R.dimen.messages_screen_message_container_rounding),
-            topEnd = dimensionResource(id = R.dimen.messages_screen_message_container_rounding),
-            bottomStart = dimensionResource(id = R.dimen.messages_screen_message_container_rounding)
-        )
-    else CutCornerShape(
-        topStart = dimensionResource(id = R.dimen.messages_screen_message_container_rounding),
-        topEnd = dimensionResource(id = R.dimen.messages_screen_message_container_rounding),
-        bottomEnd = dimensionResource(id = R.dimen.messages_screen_message_container_rounding)
-    )
 
     // To ensure the message card can vary in size depending on the message size,
     // ... the card will expand horizontally at first for shorter messages
@@ -242,40 +236,32 @@ fun SingleMessage(
             .fillMaxWidth()
             .padding(
                 top = dimensionResource(id = R.dimen.messages_screen_message_container_padding),
-                bottom = dimensionResource(id = R.dimen.messages_screen_message_container_padding)
+                bottom = dimensionResource(id = R.dimen.messages_screen_message_container_padding),
+                start = if (isSenderMe) 0.dp
+                else dimensionResource(id = R.dimen.messages_screen_message_container_padding),
+                end = if (isSenderMe) dimensionResource(id = R.dimen.messages_screen_message_container_padding)
+                else 0.dp
             )
     ){
         if (isSenderMe){
             Spacer(
                 modifier = Modifier
-                    .weight(MESSAGE_WIDTH_WEIGHT)
+                    .weight(1 - MESSAGE_WIDTH_WEIGHT)
             )
         }
         Row(
             horizontalArrangement = rowArrangement,
             modifier = Modifier
-                .weight(1 - MESSAGE_WIDTH_WEIGHT)
+                .weight(MESSAGE_WIDTH_WEIGHT)
         ){
             Column(
                 horizontalAlignment = columnAlignment
             ){
-                Card(
-                    shape = messageShape
-                ){
-                    Text(
-                        text = message,
-                        style = MaterialTheme.typography.bodyLarge,
-                        softWrap = true,
-                        overflow = TextOverflow.Clip,
-                        modifier = Modifier
-                            .padding(
-                                top = dimensionResource(id = R.dimen.messages_screen_message_vertical_padding),
-                                bottom = dimensionResource(id = R.dimen.messages_screen_message_vertical_padding),
-                                start = dimensionResource(id = R.dimen.messages_screen_message_horizontal_padding),
-                                end = dimensionResource(id = R.dimen.messages_screen_message_horizontal_padding)
-                            )
-                    )
-                }
+                SingleMessage(
+                    message = message,
+                    isSenderMe = isSenderMe,
+                    modifier = Modifier
+                )
                 // The "sent by" message label
                 Text(
                     text =
@@ -288,9 +274,53 @@ fun SingleMessage(
         if (!isSenderMe){
             Spacer(
                 modifier = Modifier
-                    .weight(MESSAGE_WIDTH_WEIGHT)
+                    .weight(1 - MESSAGE_WIDTH_WEIGHT)
             )
         }
+    }
+}
+
+@Composable
+fun SingleMessage(
+    message: String,
+    isSenderMe: Boolean,
+    modifier: Modifier = Modifier
+){
+    val messageShape =
+        // Every corner except the lower right is rounded
+        if (isSenderMe) RoundedCornerShape(
+            topStart = dimensionResource(id = R.dimen.messages_screen_message_container_rounding),
+            topEnd = dimensionResource(id = R.dimen.messages_screen_message_container_rounding),
+            bottomStart = dimensionResource(id = R.dimen.messages_screen_message_container_rounding)
+        )
+        // Every corner except the lower left is rounded
+        else RoundedCornerShape(
+            topStart = dimensionResource(id = R.dimen.messages_screen_message_container_rounding),
+            topEnd = dimensionResource(id = R.dimen.messages_screen_message_container_rounding),
+            bottomEnd = dimensionResource(id = R.dimen.messages_screen_message_container_rounding)
+        )
+
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSenderMe) MessageColorMine
+            else MessageColorOther
+        ),
+        shape = messageShape,
+        modifier = modifier
+    ){
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyLarge,
+            softWrap = true,
+            overflow = TextOverflow.Clip,
+            modifier = Modifier
+                .padding(
+                    top = dimensionResource(id = R.dimen.messages_screen_message_vertical_padding),
+                    bottom = dimensionResource(id = R.dimen.messages_screen_message_vertical_padding),
+                    start = dimensionResource(id = R.dimen.messages_screen_message_horizontal_padding),
+                    end = dimensionResource(id = R.dimen.messages_screen_message_horizontal_padding)
+                )
+        )
     }
 }
 
@@ -367,11 +397,22 @@ fun MessagesBodyContentPreview(){
 
 @Preview(showBackground = true)
 @Composable
+fun SingleMessageContainerPreview(){
+    MyApplicationTheme {
+        SingleMessageContainer(
+            message = stringResource(id = R.string.user_profile_test_string),
+            isSenderMe = true
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
 fun SingleMessagePreview(){
     MyApplicationTheme {
         SingleMessage(
-            isSenderMe = true,
-            message = stringResource(id = R.string.user_profile_test_string)
+            message = stringResource(id = R.string.user_profile_test_string),
+            isSenderMe = true
         )
     }
 }
