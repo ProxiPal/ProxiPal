@@ -77,4 +77,5 @@ dependencies {
     androidTestImplementation ("androidx.compose.ui:ui-test-junit4:1.6.1")
     debugImplementation ("androidx.compose.ui:ui-tooling:1.6.1")
     implementation ("com.google.accompanist:accompanist-pager:0.19.0")
+    implementation("androidx.compose.material:material-icons-extended")
 }

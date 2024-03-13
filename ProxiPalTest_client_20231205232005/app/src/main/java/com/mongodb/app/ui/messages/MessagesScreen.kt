@@ -20,12 +20,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.automirrored.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -56,11 +61,12 @@ import com.mongodb.app.presentation.messages.MessagesViewModel
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.ui.theme.MessageColorMine
 import com.mongodb.app.ui.theme.MessageColorOther
+import com.mongodb.app.ui.theme.MessageInputBackgroundColor
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
 import kotlinx.coroutines.launch
 
-class MessagesScreen : ComponentActivity(){
+class MessagesScreen : ComponentActivity() {
     // region Variables
     private val repository = RealmSyncRepository { _, _ ->
         lifecycleScope.launch {
@@ -114,7 +120,7 @@ fun MessagesScreenLayout(
     toolbarViewModel: ToolbarViewModel,
 //    navController: NavHostController,
     modifier: Modifier = Modifier
-){
+) {
     Scaffold(
         topBar = {
 //            TaskAppToolbar(
@@ -152,7 +158,7 @@ fun MessagesTopBar(
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
-                ){
+                ) {
                     Image(
                         // TODO Change this to a person's profile picture
                         painter = painterResource(id = R.drawable.linkedin),
@@ -187,22 +193,22 @@ fun MessagesTopBar(
 fun MessagesBodyContent(
     messagesViewModel: MessagesViewModel,
     modifier: Modifier = Modifier
-){
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
-    ){
+    ) {
         LazyColumn(
             // Start at the bottom, then scroll up to show older messages
             reverseLayout = true,
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-        ){
+        ) {
             // TODO Replace String with a custom Realm message class
             val messageList = MOCK_MESSAGE_LIST
             // Start with the more recent messages at the bottom
-            items(messageList.reversed()){ message ->
+            items(messageList.reversed()) { message ->
                 SingleMessageContainer(
                     // TODO Use custom Realm class to store who sent a message
                     isSenderMe = messageList.reversed().indexOf(message) % 2 == 1,
@@ -222,7 +228,7 @@ fun SingleMessageContainer(
     message: String,
     isSenderMe: Boolean,
     modifier: Modifier = Modifier
-){
+) {
     val rowArrangement =
         if (isSenderMe) Arrangement.End else Arrangement.Start
     val columnAlignment =
@@ -242,8 +248,8 @@ fun SingleMessageContainer(
                 end = if (isSenderMe) dimensionResource(id = R.dimen.messages_screen_message_container_padding)
                 else 0.dp
             )
-    ){
-        if (isSenderMe){
+    ) {
+        if (isSenderMe) {
             Spacer(
                 modifier = Modifier
                     .weight(1 - MESSAGE_WIDTH_WEIGHT)
@@ -253,10 +259,10 @@ fun SingleMessageContainer(
             horizontalArrangement = rowArrangement,
             modifier = Modifier
                 .weight(MESSAGE_WIDTH_WEIGHT)
-        ){
+        ) {
             Column(
                 horizontalAlignment = columnAlignment
-            ){
+            ) {
                 SingleMessage(
                     message = message,
                     isSenderMe = isSenderMe,
@@ -271,7 +277,7 @@ fun SingleMessageContainer(
                 )
             }
         }
-        if (!isSenderMe){
+        if (!isSenderMe) {
             Spacer(
                 modifier = Modifier
                     .weight(1 - MESSAGE_WIDTH_WEIGHT)
@@ -285,7 +291,7 @@ fun SingleMessage(
     message: String,
     isSenderMe: Boolean,
     modifier: Modifier = Modifier
-){
+) {
     val messageShape =
         // Every corner except the lower right is rounded
         if (isSenderMe) RoundedCornerShape(
@@ -302,12 +308,13 @@ fun SingleMessage(
 
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = if (isSenderMe) MessageColorMine
+            containerColor =
+            if (isSenderMe) MessageColorMine
             else MessageColorOther
         ),
         shape = messageShape,
         modifier = modifier
-    ){
+    ) {
         Text(
             text = message,
             style = MaterialTheme.typography.bodyLarge,
@@ -329,12 +336,15 @@ fun SingleMessage(
 fun MessagesInputRow(
     messagesViewModel: MessagesViewModel,
     modifier: Modifier = Modifier
-){
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
-    ){
+            .background(
+                color = MessageInputBackgroundColor
+            )
+    ) {
         TextField(
             value = messagesViewModel.message.value,
             placeholder = {
@@ -345,17 +355,21 @@ fun MessagesInputRow(
             onValueChange = { messagesViewModel.updateMessage(it) },
             singleLine = true,
             modifier = Modifier
-                .weight(0.80f)
+                .weight(1f)
+            // Padding causes the messages's UI to go too large for some reason
+//                .padding(
+//                    top = dimensionResource(id = R.dimen.messages_screen_message_input_padding)
+//                )
         )
-        Icon(
-            painter = painterResource(id = R.drawable.tempcompass),
-            contentDescription = "Send message",
+        IconButton(
+            onClick = { messagesViewModel.sendMessage() },
             modifier = Modifier
-                .weight(0.20f)
-                .clickable {
-                    messagesViewModel.sendMessage()
-                }
-        )
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.Send,
+                contentDescription = "Send message"
+            )
+        }
     }
 }
 // endregion Functions
@@ -364,7 +378,7 @@ fun MessagesInputRow(
 // region PreviewFunctions
 @Preview(showBackground = true)
 @Composable
-fun MessagesScreenLayoutPreview(){
+fun MessagesScreenLayoutPreview() {
     MyApplicationTheme {
         val repository = MockRepository()
         val mockRealm = MockMessagesRealm()
@@ -378,7 +392,7 @@ fun MessagesScreenLayoutPreview(){
 
 @Preview(showBackground = true)
 @Composable
-fun MessagesTopBarPreview(){
+fun MessagesTopBarPreview() {
     MyApplicationTheme {
         MessagesTopBar()
     }
@@ -386,7 +400,7 @@ fun MessagesTopBarPreview(){
 
 @Preview(showBackground = true)
 @Composable
-fun MessagesBodyContentPreview(){
+fun MessagesBodyContentPreview() {
     MyApplicationTheme {
         val mockRealm = MockMessagesRealm()
         MessagesBodyContent(
@@ -397,20 +411,9 @@ fun MessagesBodyContentPreview(){
 
 @Preview(showBackground = true)
 @Composable
-fun SingleMessageContainerPreview(){
+fun SingleMessageContainerPreview() {
     MyApplicationTheme {
         SingleMessageContainer(
-            message = stringResource(id = R.string.user_profile_test_string),
-            isSenderMe = true
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SingleMessagePreview(){
-    MyApplicationTheme {
-        SingleMessage(
             message = stringResource(id = R.string.user_profile_test_string),
             isSenderMe = true
         )

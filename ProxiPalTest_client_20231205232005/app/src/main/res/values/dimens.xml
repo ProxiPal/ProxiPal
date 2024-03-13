@@ -12,5 +12,6 @@
     <dimen name="messages_screen_message_horizontal_padding">12.dp</dimen>
     <dimen name="messages_screen_message_container_padding">4.dp</dimen>
     <dimen name="messages_screen_message_container_rounding">10.dp</dimen>
+    <dimen name="messages_screen_message_input_padding">4.dp</dimen>
 <!--    End of messages screen dimensions -->
 </resources>
