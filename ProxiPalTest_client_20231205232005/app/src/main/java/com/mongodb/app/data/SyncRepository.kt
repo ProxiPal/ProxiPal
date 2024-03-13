@@ -220,7 +220,15 @@ class RealmSyncRepository(
 
         // Mutable states must be updated on the UI thread
         CoroutineScope(Dispatchers.Main).launch {
+            Log.i(
+                TAG(),
+                "SyncRepository: Start of subscription synchronization"
+            )
             realm.subscriptions.waitForSynchronization()
+            Log.i(
+                TAG(),
+                "SyncRepository: End of subscription synchronization"
+            )
         }
         if (SHOULD_PRINT_REALM_CONFIG_INFO){
             for (subscription in realm.subscriptions){

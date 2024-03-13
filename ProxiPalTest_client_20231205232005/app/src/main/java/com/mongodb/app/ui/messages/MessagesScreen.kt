@@ -88,10 +88,10 @@ TODO List of tasks to do for messages screen
 
 class MessagesScreen : ComponentActivity() {
     // region Variables
-//    private val repository = RealmSyncRepository { _, _ ->
-//        lifecycleScope.launch {
-//        }
-//    }
+    private val repository = RealmSyncRepository { _, _ ->
+        lifecycleScope.launch {
+        }
+    }
 
     private val messagesRealm = MessagesRealm { _, _ ->
         lifecycleScope.launch {
@@ -448,24 +448,24 @@ fun MessagesScreenLayoutPreview() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun MessagesTopBarPreview() {
-    MyApplicationTheme {
-        MessagesTopBar()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun MessagesTopBarPreview() {
+//    MyApplicationTheme {
+//        MessagesTopBar()
+//    }
+//}
 
-@Preview(showBackground = true)
-@Composable
-fun MessagesBodyContentPreview() {
-    MyApplicationTheme {
-        val mockRealm = MockMessagesRealm()
-        MessagesBodyContent(
-            messagesViewModel = MessagesViewModel(mockRealm)
-        )
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun MessagesBodyContentPreview() {
+//    MyApplicationTheme {
+//        val mockRealm = MockMessagesRealm()
+//        MessagesBodyContent(
+//            messagesViewModel = MessagesViewModel(mockRealm)
+//        )
+//    }
+//}
 
 @Preview(showBackground = true)
 @Composable

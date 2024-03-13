@@ -70,10 +70,18 @@ class MessagesRealm(
 
         // Mutable states must be updated on the UI thread
         CoroutineScope(Dispatchers.Main).launch {
+            Log.i(
+                TAG(),
+                "MessagesRealm: Start of subscription synchronization"
+            )
             _realm.subscriptions.waitForSynchronization()
             // Need to call this to make sure related subscriptions are added properly
             // ... otherwise this will result in an "RLM_ERR_NO_SUBSCRIPTION_FOR_WRITE" error
             updateSubscriptions()
+            Log.i(
+                TAG(),
+                "MessagesRealm: End of subscription synchronization"
+            )
         }
     }
 
