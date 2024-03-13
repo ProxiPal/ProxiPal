@@ -76,7 +76,6 @@ TODO List of tasks to do for messages screen
     ... Also this is more ideal than directly embedding messages into a conversation as (1) Messages can get large if
     ... adding photos to messages and (2) There may be a lot of messages in a conversation)
 - Add ability to add an image (see HomeScreen and HomeViewModel)
-- Correct function to get system time for setting the timeSent field of a message
 - Show the most recent message for each corresponding conversation in the friends screen
 | Add functionality where new messages in the friends screen are bolded if their time sent is more recent than the time
 ... you last read that conversation (timeRead will be a new field and will get updated when the user either opens or exits
@@ -89,10 +88,10 @@ TODO List of tasks to do for messages screen
 
 class MessagesScreen : ComponentActivity() {
     // region Variables
-    private val repository = RealmSyncRepository { _, _ ->
-        lifecycleScope.launch {
-        }
-    }
+//    private val repository = RealmSyncRepository { _, _ ->
+//        lifecycleScope.launch {
+//        }
+//    }
 
     private val messagesRealm = MessagesRealm { _, _ ->
         lifecycleScope.launch {
