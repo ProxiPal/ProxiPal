@@ -33,6 +33,7 @@ class MessagesRealm(
         get() = app.currentUser!!
     // endregion Properties
 
+
     init{
         Log.i(
             TAG(),

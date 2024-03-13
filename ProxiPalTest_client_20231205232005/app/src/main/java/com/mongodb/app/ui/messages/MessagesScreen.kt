@@ -7,7 +7,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,14 +17,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.automirrored.*
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,25 +46,28 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.mongodb.app.R
 import com.mongodb.app.TAG
-import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.messages.MESSAGE_WIDTH_WEIGHT
 import com.mongodb.app.data.messages.MOCK_MESSAGE_LIST
 import com.mongodb.app.data.messages.MessagesRealm
 import com.mongodb.app.data.messages.MockMessagesRealm
 import com.mongodb.app.presentation.messages.MessagesViewModel
-import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.ui.theme.MessageColorMine
 import com.mongodb.app.ui.theme.MessageColorOther
 import com.mongodb.app.ui.theme.MessageInputBackgroundColor
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
 import kotlinx.coroutines.launch
+import java.sql.Timestamp
+import java.time.Instant
+import java.time.LocalDateTime
+import java.util.Calendar
+import java.util.Date
+
 
 /*
 TODO List of tasks to do for messages screen
 - Update message UI
-| Add current friend icon above message history
 | Add message when at top of message history (something like "No more messages to load")
 - Update database/collection workings
 | Add collection for FriendConversations (current FriendMessage one will become FriendMessages)
@@ -87,6 +85,8 @@ TODO List of tasks to do for messages screen
 | Add ability to delete a message
 | Add ability to reply to a message
 */
+
+
 class MessagesScreen : ComponentActivity() {
     // region Variables
     private val repository = RealmSyncRepository { _, _ ->
@@ -102,10 +102,6 @@ class MessagesScreen : ComponentActivity() {
     private val messagesViewModel: MessagesViewModel by viewModels {
         MessagesViewModel.factory(messagesRealm, this)
     }
-
-    private val toolbarViewModel: ToolbarViewModel by viewModels {
-        ToolbarViewModel.factory(repository, this)
-    }
     // endregion Variables
 
 
@@ -120,9 +116,7 @@ class MessagesScreen : ComponentActivity() {
 
         setContent {
             MessagesScreenLayout(
-                messagesViewModel = messagesViewModel,
-                toolbarViewModel = toolbarViewModel,
-//                navController =
+                messagesViewModel = messagesViewModel
             )
         }
     }
@@ -138,16 +132,10 @@ class MessagesScreen : ComponentActivity() {
 @Composable
 fun MessagesScreenLayout(
     messagesViewModel: MessagesViewModel,
-    toolbarViewModel: ToolbarViewModel,
-//    navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         topBar = {
-//            TaskAppToolbar(
-//                viewModel = toolbarViewModel,
-////                navController = navController
-//            )
             MessagesTopBar()
         },
         modifier = modifier
@@ -157,7 +145,6 @@ fun MessagesScreenLayout(
             messagesViewModel = messagesViewModel,
             modifier = Modifier
                 .padding(innerPadding)
-//                .absolutePadding(top = innerPadding.calculateTopPadding())
         )
     }
 }
@@ -377,7 +364,7 @@ fun MessagesInputRow(
             singleLine = true,
             modifier = Modifier
                 .weight(1f)
-            // Padding causes the messages's UI to go too large for some reason
+            // Padding causes the messages' UI to go too large for some reason
 //                .padding(
 //                    top = dimensionResource(id = R.dimen.messages_screen_message_input_padding)
 //                )
@@ -399,14 +386,65 @@ fun MessagesInputRow(
 // region PreviewFunctions
 @Preview(showBackground = true)
 @Composable
+fun TimePreview(){
+    MyApplicationTheme {
+        // There are many established ways online to get the system time as a number
+        // ... but using Calendar.getInstance() might be the most common answer
+        Column{
+            // Note, numerical values are in milliseconds, not seconds
+            // Dates are in PDT, but millisecond times are in GMT (?)
+
+//            // This works
+//            Text(
+//                text = "Timestamp = \n\"${Timestamp(System.currentTimeMillis())}\""
+//            )
+//            Text(
+//                text = "System time = \n\"${System.currentTimeMillis()}\""
+//            )
+
+//            // This works too
+//            Text(
+//                text = "Current date time = \n\"${java.util.Date()}\""
+//            )
+//            Text(
+//                text = "Current timestamp = \n\"${java.util.Date().time}\""
+//            )
+
+//            // This works too
+//            Text(
+//                text = "Local date time = \n\"${LocalDateTime.now()}\""
+//            )
+            
+//            // This works too
+//            Text(
+//                text = "Instant time = \n\"${Instant.now().epochSecond}\""
+//            )
+//            Text(
+//                text = "Instant ms time = \n\"${Instant.now().toEpochMilli()}\""
+//            )
+
+            // This works too
+            Text(
+                text = "Calendar date time = \n\"${Calendar.getInstance().time}\""
+            )
+            Text(
+                text = "Calendar time = \n\"${Calendar.getInstance().timeInMillis}\""
+            )
+            Text(
+                text = "Calendar date from time = \n\"${Date(Calendar.getInstance().timeInMillis)}\""
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
 fun MessagesScreenLayoutPreview() {
     MyApplicationTheme {
-        val repository = MockRepository()
+//        val repository = MockRepository()
         val mockRealm = MockMessagesRealm()
         MessagesScreenLayout(
-            messagesViewModel = MessagesViewModel(mockRealm),
-            toolbarViewModel = ToolbarViewModel(repository),
-//            navController = rememberNavController()
+            messagesViewModel = MessagesViewModel(mockRealm)
         )
     }
 }
