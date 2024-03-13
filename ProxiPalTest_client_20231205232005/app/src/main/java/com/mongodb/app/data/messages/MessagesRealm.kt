@@ -18,29 +18,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-interface IMessagesRealm{
-    /**
-     * Pauses synchronization with MongoDB. This is used to emulate a scenario of no connectivity.
-     */
-    fun pauseSync()
-
-    /**
-     * Resumes synchronization with MongoDB.
-     */
-    fun resumeSync()
-
-    /**
-     * Closes the realm instance held by this repository.
-     */
-    fun close()
-
-    suspend fun updateSubscriptions()
-
-    fun getQueryMessages(realm: Realm): RealmQuery<FriendMessage>
-
-    suspend fun addMessage(message: String, timeSent: Long)
-}
-
 class MessagesRealm(
     onSyncError: (session: SyncSession, error: SyncException) -> Unit
 ): IMessagesRealm {
@@ -61,10 +38,6 @@ class MessagesRealm(
             TAG(),
             "MessagesRealm: Start of init{}"
         )
-//        Log.i(
-//            TAG(),
-//            "MessagesRealm: ${}"
-//        )
         val schemaSet = setOf(FriendMessage::class)
         _config = SyncConfiguration.Builder(currentUser, schemaSet)
             .initialSubscriptions { realm ->
@@ -144,30 +117,4 @@ class MessagesRealm(
         }
     }
     // endregion Functions
-}
-
-class MockMessagesRealm : IMessagesRealm{
-    override fun pauseSync() {
-        TODO("Not yet implemented")
-    }
-
-    override fun resumeSync() {
-        TODO("Not yet implemented")
-    }
-
-    override fun close() {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun updateSubscriptions() {
-        TODO("Not yet implemented")
-    }
-
-    override fun getQueryMessages(realm: Realm): RealmQuery<FriendMessage> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun addMessage(message: String, timeSent: Long) {
-        TODO("Not yet implemented")
-    }
 }

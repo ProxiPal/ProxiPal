@@ -9,23 +9,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 
-import com.mongodb.app.data.RealmSyncRepository
-import com.mongodb.app.data.SHOULD_USE_TASKS_ITEMS
+import com.mongodb.app.data.userprofiles.SHOULD_USE_TASKS_ITEMS
 import com.mongodb.app.presentation.login.EventSeverity
-import com.mongodb.app.presentation.login.LoginAction
 import com.mongodb.app.presentation.login.LoginEvent
 import com.mongodb.app.presentation.login.LoginViewModel
-import com.mongodb.app.ui.compassscreen.CompassPermissions
-import com.mongodb.app.ui.compassscreen.CompassScreen
-import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.login.AccountScaffold
 
-import com.mongodb.app.ui.login.LoginScaffold
-import com.mongodb.app.ui.login.RegisterScaffold
 
 import com.mongodb.app.ui.theme.MyApplicationTheme
-import com.mongodb.app.ui.userprofiles.UserProfileScreen
-import io.realm.kotlin.mongodb.User
 import kotlinx.coroutines.launch
 
 

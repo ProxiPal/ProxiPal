@@ -5,6 +5,7 @@ import com.mongodb.app.TAG
 import com.mongodb.app.domain.Item
 import com.mongodb.app.app
 import com.mongodb.app.data.messages.SHOULD_PRINT_REALM_CONFIG_INFO
+import com.mongodb.app.data.userprofiles.SHOULD_USE_TASKS_ITEMS
 import com.mongodb.app.domain.UserProfile
 import com.mongodb.app.location.CustomGeoPoint
 import io.realm.kotlin.Realm

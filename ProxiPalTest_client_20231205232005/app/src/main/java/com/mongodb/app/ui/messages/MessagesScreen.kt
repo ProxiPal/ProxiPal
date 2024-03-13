@@ -66,6 +66,27 @@ import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
 import kotlinx.coroutines.launch
 
+/*
+TODO List of tasks to do for messages screen
+- Update message UI
+| Add current friend icon above message history
+| Add message when at top of message history (something like "No more messages to load")
+- Update database/collection workings
+| Add collection for FriendConversations (current FriendMessage one will become FriendMessages)
+    | Make a 1-to-many relationship from FriendConversations and FriendMessages (Each document is a single message,
+    ... which prevents both parties of a conversation from editing the same document(s) at the same time.
+    ... Also this is more ideal than directly embedding messages into a conversation as (1) Messages can get large if
+    ... adding photos to messages and (2) There may be a lot of messages in a conversation)
+- Add ability to add an image (see HomeScreen and HomeViewModel)
+- Correct function to get system time for setting the timeSent field of a message
+- Show the most recent message for each corresponding conversation in the friends screen
+| Add functionality where new messages in the friends screen are bolded if their time sent is more recent than the time
+... you last read that conversation (timeRead will be a new field and will get updated when the user either opens or exits
+... out of viewing the conversation.)
+- Add ability to tap and hold a message
+| Add ability to delete a message
+| Add ability to reply to a message
+*/
 class MessagesScreen : ComponentActivity() {
     // region Variables
     private val repository = RealmSyncRepository { _, _ ->
