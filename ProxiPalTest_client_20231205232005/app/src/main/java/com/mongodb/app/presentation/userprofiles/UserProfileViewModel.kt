@@ -17,7 +17,6 @@ import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT
 import com.mongodb.app.data.USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT
 import com.mongodb.app.domain.UserProfile
-import com.mongodb.app.ui.userprofiles.UserProfileUiState
 import io.realm.kotlin.notifications.InitialResults
 import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.notifications.UpdatedResults
@@ -25,9 +24,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -54,10 +50,6 @@ class UserProfileViewModel constructor(
     /*
     ===== Variables =====
      */
-    // Accessible and editable only in this class
-    // A "data holder observable flow" for current and new states
-    private val _userProfileUiState = MutableStateFlow(UserProfileUiState())
-
     private val _event: MutableSharedFlow<UserProfileViewEvent> = MutableSharedFlow()
 
     private val _addUserProfileEvent: MutableSharedFlow<AddUserProfileEvent> = MutableSharedFlow()
@@ -92,10 +84,6 @@ class UserProfileViewModel constructor(
     /*
     ===== Properties =====
      */
-    // Read-only state flow for access outside this class
-    val userProfileUiState: StateFlow<UserProfileUiState>
-        get() = _userProfileUiState.asStateFlow()
-
     val userProfileFirstName: State<String>
         get() = _userProfileFirstName
 
@@ -152,10 +140,6 @@ class UserProfileViewModel constructor(
 
 
     init {
-        Log.i(
-            TAG(),
-            "UPViewModel: Start of Init{}"
-        )
         getUserProfile()
     }
 
@@ -198,10 +182,6 @@ class UserProfileViewModel constructor(
         viewModelScope.launch {
             repository.getUserProfileList()
                 .collect { event: ResultsChange<UserProfile> ->
-                    Log.i(
-                        TAG(),
-                        "UPViewModel: Current user's user profile amount = \"${event.list.size}\""
-                    )
                     when (event) {
                         is InitialResults -> {
                             userProfileListState.clear()
@@ -210,19 +190,11 @@ class UserProfileViewModel constructor(
                             // ... but will allow the app to run and not throw an exception for now
                             when (event.list.size){
                                 0 -> {
-                                    Log.i(
-                                        TAG(),
-                                        "UPViewModel: InitialResults; Current user has no user profile created"
-                                    )
                                     // When trying to update a user profile that is not saved in the database
                                     // ... the SyncRepository will handle creating a new user profile before
                                     // ... making the updated changes
                                 }
                                 1 -> {
-                                    Log.i(
-                                        TAG(),
-                                        "UPViewModel: InitialResults; Getting current user's user profile..."
-                                    )
                                     // Load the saved profile details
                                     _userProfileFirstName.value = event.list[0].firstName
                                     _userProfileLastName.value = event.list[0].lastName
@@ -240,11 +212,6 @@ class UserProfileViewModel constructor(
 
                                 }
                                 else -> {
-                                    Log.i(
-                                        TAG(),
-                                        "UPViewModel: InitialResults; Current user has more than 1 user profile; " +
-                                                "Retrieving only the first user profile instance..."
-                                    )
                                     // Load the saved profile details
                                     _userProfileFirstName.value = event.list[0].firstName
                                     _userProfileLastName.value = event.list[0].lastName
@@ -285,51 +252,6 @@ class UserProfileViewModel constructor(
                     }
                 }
         }
-//        viewModelScope.launch {
-//            repository.getUserProfileList()
-//                .collect { event: ResultsChange<UserProfile> ->
-//                    Log.i(
-//                        TAG(),
-//                        "UPViewModel: Current user's user profile amount = \"${event.list.size}\""
-//                    )
-//                    userProfileListState.clear()
-//                    userProfileListState.addAll(event.list)
-//                    // The user should not have more than 1 user profile,
-//                    // ... but will allow the app to run and not throw an exception for now
-//                    when (event.list.size){
-//                        0 -> {
-//                            Log.i(
-//                                TAG(),
-//                                "UPViewModel: InitialResults; Current user has no user profile created"
-//                            )
-//                            // When trying to update a user profile that is not saved in the database
-//                            // ... the SyncRepository will handle creating a new user profile before
-//                            // ... making the updated changes
-//                        }
-//                        1 -> {
-//                            Log.i(
-//                                TAG(),
-//                                "UPViewModel: InitialResults; Getting current user's user profile..."
-//                            )
-//                            // Load the saved profile details
-//                            _userProfileFirstName.value = event.list[0].firstName
-//                            _userProfileLastName.value = event.list[0].lastName
-//                            _userProfileBiography.value = event.list[0].biography
-//                        }
-//                        else -> {
-//                            Log.i(
-//                                TAG(),
-//                                "UPViewModel: InitialResults; Current user has more than 1 user profile; " +
-//                                        "Retrieving only the first user profile instance..."
-//                            )
-//                            // Load the saved profile details
-//                            _userProfileFirstName.value = event.list[0].firstName
-//                            _userProfileLastName.value = event.list[0].lastName
-//                            _userProfileBiography.value = event.list[0].biography
-//                        }
-//                    }
-//                }
-//        }
     }
 
 

@@ -50,13 +50,13 @@
     <!--    The "%.3f" formats the measurements to 3 decimal places -->
     <string name="compass_screen_bearing_message">Bearing angle (in degrees): %.3f</string>
     <string name="compass_screen_distance_message">Distance from match (in km): %.3f</string>
-    <string name="compass_screen_cancel_message">Cancel match</string>
     <string name="compass_screen_top_bar_header">Match found!</string>
     <string name="compass_screen_awaiting_connection_message">Waiting for match to accept connection</string>
     <string name="compass_screen_canceled_connection_message">The connection was dropped</string>
     <string name="compass_screen_return_button">Return</string>
-    <!--    End compass screen strings-->
-    <!--    Start compass permissions screen strings -->
+    <string name="compass_screen_cancel_button">Cancel</string>
+<!--    End compass screen strings-->
+<!--    Start compass permissions screen strings -->
     <string name="compass_permissions_required_permissions_list">Required permissions: %s</string>
     <string name="compass_permissions_required_permissions_rationale">
         These permissions are necessary to make your device discoverable to others nearby and to connect with matching users

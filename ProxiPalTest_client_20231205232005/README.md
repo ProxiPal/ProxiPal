@@ -88,7 +88,22 @@ For classes that do not update after a configuration change (ex: UserProfileView
 Example:
     UserProfileScreen has its onCreate() called after a configuration change, but UserProfileViewModel only has its init{} called once. (Note, some classes' init{} do get called after a configuration change, such as RealmSyncRepository.) UserProfileScreen has its own instance variable of type SyncRepository/RealmSyncRepository that gets updated when its onCreate() gets called, or after a configuration change. UserProfileViewModel also has a variable of type SyncRepository/RealmSyncRepository, but it does not get updated after a configuration change like UserProfileScreen does. To update UserProfileViewModel's instance variable of type SyncRepository/RealmSyncRepository, UserProfileScreen calls a function in the other class and passes its own instance variable as an argument so the UserProfileViewModel's instance variable can get updated.
 
+### Issues encountered when working on compass screen
+
 ## Cannot login to Realm at user sign in screen
 
 Deleting the app did not work first try. What did work was restarting Android Studio and wiping
 emulator device data on restart.
+
+## Discovery and advertising functions from Nearby API show as aborted in logcat
+
+Need to add all necessary permissions, request them, and make sure they are allowed by the user. See Nearby API
+
+## Could not get emulators to recognize each other when on different devices
+
+Try having both emulators on one device. Still have yet to confirm if this works 100%, but
+at least log cat messages show they can discover each other. Different API levels don't seem to
+break anything.
+
+EDIT: Emulators have been noted to either not connect with each other or have unreliable connections.
+Physical devices are a must for testing the compass connection code between devices.

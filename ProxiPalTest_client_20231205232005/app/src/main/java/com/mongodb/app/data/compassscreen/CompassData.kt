@@ -2,6 +2,13 @@ package com.mongodb.app.data.compassscreen
 
 import android.Manifest
 
+
+/*
+Contributions:
+- Kevin Kubota (entire file)
+ */
+
+
 // Using https://gps-coordinates.org/distance-between-coordinates.php
 // Using https://latlongdata.com/distance-calculator/
 
@@ -14,6 +21,21 @@ const val KM_PER_ONE_LATITUDE_DIFF: Double = 111.195
  * How many kilometers (km) equal to exactly 1 longitude difference
  */
 const val KM_PER_ONE_LONGITUDE_DIFF: Double = 111.195
+
+/**
+ * How many miles equal to exactly 1 latitude difference
+ */
+const val MILES_PER_ONE_LATITUDE_DIFF: Double = 69.093
+
+/**
+ * How many miles equal to exactly 1 longitude difference
+ */
+const val MILES_PER_ONE_LONGITUDE_DIFF: Double = 69.093
+
+/**
+ * A switch variable on whether to use the metric or imperial measurement system
+ */
+const val SHOULD_USE_METRIC_SYSTEM: Boolean = true
 
 /**
  * How many milliseconds (ms) between each update of matching users' location
@@ -61,4 +83,12 @@ val ALL_NEARBY_API_PERMISSIONS_ARRAY = arrayOf(
     Manifest.permission.CHANGE_WIFI_STATE,
     Manifest.permission.NEARBY_WIFI_DEVICES,
     Manifest.permission.ACCESS_COARSE_LOCATION,
+)
+
+val ALL_WIFIP2P_PERMISSIONS = listOf(
+    Manifest.permission.ACCESS_WIFI_STATE,
+    Manifest.permission.CHANGE_WIFI_STATE,
+    Manifest.permission.ACCESS_NETWORK_STATE,
+    Manifest.permission.CHANGE_NETWORK_STATE,
+    Manifest.permission.INTERNET
 )
