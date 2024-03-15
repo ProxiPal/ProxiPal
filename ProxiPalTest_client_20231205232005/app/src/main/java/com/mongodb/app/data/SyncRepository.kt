@@ -49,6 +49,7 @@ interface SyncRepository {
     /*
     ===== Functions =====
      */
+    // region RealmFunctions
     /**
      * Returns the active [SubscriptionType].
      */
@@ -68,6 +69,7 @@ interface SyncRepository {
      * Closes the realm instance held by this repository.
      */
     fun close()
+    // endregion RealmFunctions
 
     /*
     These functions are from an existing template
@@ -182,9 +184,9 @@ class RealmSyncRepository(
         // If trying to query A when the sync configuration is set for B,
         // ... the app will crash if querying anything other than B.
         // If errors still persist, try deleting and re-running the app.
-        val set = if (SHOULD_USE_TASKS_ITEMS) setOf(Item::class)
+        val schemaSet = if (SHOULD_USE_TASKS_ITEMS) setOf(Item::class)
         else setOf(UserProfile::class, CustomGeoPoint::class, FriendMessage::class)
-        config = SyncConfiguration.Builder(currentUser, set)
+        config = SyncConfiguration.Builder(currentUser, schemaSet)
             .initialSubscriptions { realm ->
                 // Subscribe to the active subscriptionType - first time defaults to MINE
                 val activeSubscriptionType = getActiveSubscriptionType(realm)
@@ -243,9 +245,6 @@ class RealmSyncRepository(
                 TAG(),
                 "RealmSyncRepository: Start of subscription synchronization"
             )
-            // TODO
-            // This line crashes when running normally
-            // But doesn't crash and instead doesn't work when using debugger
             realm.subscriptions.waitForSynchronization()
             Log.i(
                 TAG(),
@@ -254,42 +253,11 @@ class RealmSyncRepository(
         }
     }
 
-    override suspend fun updateSubscriptions() {
-        // Add the messages query to the realm subscriptions
-        realm.subscriptions.update {
-            add(getQueryMessages(realm), _messagesSubscriptionName)
-        }
-        if (SHOULD_PRINT_REALM_CONFIG_INFO){
-            for (subscription in realm.subscriptions){
-                Log.i(
-                    TAG(),
-                    "RealmSyncRepository: Subscription = \"${subscription}\" ;; " +
-                            "Subscription name = \"${subscription.name}\" ;; " +
-                            "Subscription description = \"${subscription.queryDescription}\""
-                )
-            }
-        }
-    }
-
-    override fun getQueryMessages(realm: Realm): RealmQuery<FriendMessage>{
-        return realm.query("ownerId == $0", currentUser.id)
-    }
-
-    override suspend fun addMessage(message: String, timeSent: Long){
-        val friendMessage = FriendMessage().apply {
-            ownerId = currentUser.id
-            this.message = message
-            this.timeSent = timeSent
-        }
-        realm.write {
-            copyToRealm(friendMessage, updatePolicy = UpdatePolicy.ALL)
-        }
-    }
-
 
     /*
     ===== Functions =====
      */
+    // region RealmFunctions
     override fun getActiveSubscriptionType(realm: Realm?): SubscriptionType {
         val realmInstance = realm ?: this.realm
         val subscriptions = realmInstance.subscriptions
@@ -312,6 +280,7 @@ class RealmSyncRepository(
     }
 
     override fun close() = realm.close()
+    // endregion RealmFunctions
 
     /*
     These functions are from an existing template
@@ -578,12 +547,48 @@ class RealmSyncRepository(
         return realm.query<UserProfile>("location GEOWITHIN $circleAroundUser").query("ownerId != $0", currentUser.id).find().asFlow()
     }
     //endregion location
+
+
+    // region Messages
+    override suspend fun updateSubscriptions() {
+        // Add the messages query to the realm subscriptions
+        realm.subscriptions.update {
+            add(getQueryMessages(realm), _messagesSubscriptionName)
+        }
+        if (SHOULD_PRINT_REALM_CONFIG_INFO){
+            for (subscription in realm.subscriptions){
+                Log.i(
+                    TAG(),
+                    "RealmSyncRepository: Subscription = \"${subscription}\" ;; " +
+                            "Subscription name = \"${subscription.name}\" ;; " +
+                            "Subscription description = \"${subscription.queryDescription}\""
+                )
+            }
+        }
+    }
+
+    override fun getQueryMessages(realm: Realm): RealmQuery<FriendMessage>{
+        return realm.query("ownerId == $0", currentUser.id)
+    }
+
+    override suspend fun addMessage(message: String, timeSent: Long){
+        val friendMessage = FriendMessage().apply {
+            ownerId = currentUser.id
+            this.message = message
+            this.timeSent = timeSent
+        }
+        realm.write {
+            copyToRealm(friendMessage, updatePolicy = UpdatePolicy.ALL)
+        }
+    }
+    // endregion Messages
 }
 
 /**
  * Mock repo for generating the Compose layout preview.
  */
 class MockRepository : SyncRepository {
+    // region Functions
     override fun getActiveSubscriptionType(realm: Realm?): SubscriptionType = SubscriptionType.ALL
     override fun pauseSync() = Unit
     override fun resumeSync() = Unit
@@ -612,6 +617,7 @@ class MockRepository : SyncRepository {
         Unit
 
     override fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double): Flow<ResultsChange<UserProfile>> = flowOf()
+    // endregion Functions
 
 
     companion object {

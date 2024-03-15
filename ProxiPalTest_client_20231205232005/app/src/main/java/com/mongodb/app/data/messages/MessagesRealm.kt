@@ -18,6 +18,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+@Deprecated(
+    message = "Having more than 1 class open a realm instance may cause the app to crash or not work " +
+            "with the database"
+)
 class MessagesRealm(
     onSyncError: (session: SyncSession, error: SyncException) -> Unit
 ): IMessagesRealm {
@@ -87,16 +91,6 @@ class MessagesRealm(
 
 
     // region Functions
-    override fun pauseSync() {
-        _realm.syncSession.pause()
-    }
-
-    override fun resumeSync() {
-        _realm.syncSession.resume()
-    }
-
-    override fun close() = _realm.close()
-
     override suspend fun updateSubscriptions() {
         _realm.subscriptions.update {
             add(getQueryMessages(_realm), _subscriptionNameOwnedMessages)

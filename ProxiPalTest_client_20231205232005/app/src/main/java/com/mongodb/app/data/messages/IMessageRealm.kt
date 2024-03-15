@@ -9,21 +9,6 @@ import io.realm.kotlin.query.RealmQuery
  */
 interface IMessagesRealm{
     /**
-     * Pauses synchronization with MongoDB. This is used to emulate a scenario of no connectivity.
-     */
-    fun pauseSync()
-
-    /**
-     * Resumes synchronization with MongoDB.
-     */
-    fun resumeSync()
-
-    /**
-     * Closes the realm instance held by this repository.
-     */
-    fun close()
-
-    /**
      * Updates the realm instance subscriptions
      */
     suspend fun updateSubscriptions()
