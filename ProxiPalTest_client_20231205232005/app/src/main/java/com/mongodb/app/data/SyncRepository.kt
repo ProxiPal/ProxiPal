@@ -4,8 +4,10 @@ import android.util.Log
 import com.mongodb.app.TAG
 import com.mongodb.app.domain.Item
 import com.mongodb.app.app
+import com.mongodb.app.data.messages.IMessagesRealm
 import com.mongodb.app.data.messages.SHOULD_PRINT_REALM_CONFIG_INFO
 import com.mongodb.app.data.userprofiles.SHOULD_USE_TASKS_ITEMS
+import com.mongodb.app.domain.FriendMessage
 import com.mongodb.app.domain.UserProfile
 import com.mongodb.app.location.CustomGeoPoint
 import io.realm.kotlin.Realm
@@ -162,12 +164,13 @@ interface SyncRepository {
  */
 class RealmSyncRepository(
     onSyncError: (session: SyncSession, error: SyncException) -> Unit
-) : SyncRepository {
+) : SyncRepository, IMessagesRealm {
 
     private val realm: Realm
     private val config: SyncConfiguration
     private val currentUser: User
         get() = app.currentUser!!
+    private val _messagesSubscriptionName: String = "MyFriendMessages"
 
     init {
         Log.i(
@@ -180,7 +183,7 @@ class RealmSyncRepository(
         // ... the app will crash if querying anything other than B.
         // If errors still persist, try deleting and re-running the app.
         val set = if (SHOULD_USE_TASKS_ITEMS) setOf(Item::class)
-        else setOf(UserProfile::class, CustomGeoPoint::class)
+        else setOf(UserProfile::class, CustomGeoPoint::class, FriendMessage::class)
         config = SyncConfiguration.Builder(currentUser, set)
             .initialSubscriptions { realm ->
                 // Subscribe to the active subscriptionType - first time defaults to MINE
@@ -195,6 +198,10 @@ class RealmSyncRepository(
                         getQueryUserProfiles(realm, activeSubscriptionType),
                         activeSubscriptionType.name
                     )
+                    add(
+                        getQueryMessages(realm),
+                        _messagesSubscriptionName
+                    )
                 }
             }
             .errorHandler { session: SyncSession, error: SyncException ->
@@ -205,7 +212,7 @@ class RealmSyncRepository(
 
         realm = Realm.open(config)
 
-        if (SHOULD_PRINT_REALM_CONFIG_INFO){
+        if (SHOULD_PRINT_REALM_CONFIG_INFO) {
             // After configuration changes, realm stays the same but config changes every time
             // This leads to the app crashing when trying to interact with Realm after a configuration change
             Log.i(
@@ -216,27 +223,66 @@ class RealmSyncRepository(
                 TAG(),
                 "RealmSyncRepository: Config = \"${config}\""
             )
+            Log.i(
+                TAG(),
+                "RealmSyncRepository: Subscription amount = \"${realm.subscriptions.size}\""
+            )
+            for (subscription in realm.subscriptions){
+                Log.i(
+                    TAG(),
+                    "RealmSyncRepository: Subscription = \"${subscription}\" ;; " +
+                            "Subscription name = \"${subscription.name}\" ;; " +
+                            "Subscription description = \"${subscription.queryDescription}\""
+                )
+            }
         }
 
         // Mutable states must be updated on the UI thread
         CoroutineScope(Dispatchers.Main).launch {
             Log.i(
                 TAG(),
-                "SyncRepository: Start of subscription synchronization"
+                "RealmSyncRepository: Start of subscription synchronization"
             )
+            // TODO
+            // This line crashes when running normally
+            // But doesn't crash and instead doesn't work when using debugger
             realm.subscriptions.waitForSynchronization()
             Log.i(
                 TAG(),
-                "SyncRepository: End of subscription synchronization"
+                "RealmSyncRepository: End of subscription synchronization"
             )
+        }
+    }
+
+    override suspend fun updateSubscriptions() {
+        // Add the messages query to the realm subscriptions
+        realm.subscriptions.update {
+            add(getQueryMessages(realm), _messagesSubscriptionName)
         }
         if (SHOULD_PRINT_REALM_CONFIG_INFO){
             for (subscription in realm.subscriptions){
                 Log.i(
                     TAG(),
-                    "RealmSyncRepository: Subscription = \"$subscription\""
+                    "RealmSyncRepository: Subscription = \"${subscription}\" ;; " +
+                            "Subscription name = \"${subscription.name}\" ;; " +
+                            "Subscription description = \"${subscription.queryDescription}\""
                 )
             }
+        }
+    }
+
+    override fun getQueryMessages(realm: Realm): RealmQuery<FriendMessage>{
+        return realm.query("ownerId == $0", currentUser.id)
+    }
+
+    override suspend fun addMessage(message: String, timeSent: Long){
+        val friendMessage = FriendMessage().apply {
+            ownerId = currentUser.id
+            this.message = message
+            this.timeSent = timeSent
+        }
+        realm.write {
+            copyToRealm(friendMessage, updatePolicy = UpdatePolicy.ALL)
         }
     }
 

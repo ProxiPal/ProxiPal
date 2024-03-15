@@ -101,3 +101,18 @@ emulator device data on restart.
 
 Needed to manually update the realm instance's subscriptions with 
 "realm.subscriptions.update { add(\\subscriptionHere\\) }"
+
+## App crashing when running regularly, then runs without working when debugging
+
+This was mainly caused whenever the realm.subscriptions.update() was called.
+What steps I took to fix it was:
+(1) Uninstall app
+(2) Re-run app and sign in
+(3) Revert realm subscriptions to only use user profile and geopoint subscriptions
+(4) Run app to check user profile functionality to see if it saves to database
+(5) Run app to check if messages screen can show without crashing
+(6) Re-instate messages subscriptions
+(7) Run app to check if messages can be sent and saved to database
+
+EDIT: It might be better to just have 1 class have a realm instance open, as multiple
+classes opening multiple realms causes the subscription-related error in the header

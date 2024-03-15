@@ -93,13 +93,13 @@ class MessagesScreen : ComponentActivity() {
         }
     }
 
-    private val messagesRealm = MessagesRealm { _, _ ->
-        lifecycleScope.launch {
-        }
-    }
+//    private val messagesRealm = MessagesRealm { _, _ ->
+//        lifecycleScope.launch {
+//        }
+//    }
 
     private val messagesViewModel: MessagesViewModel by viewModels {
-        MessagesViewModel.factory(messagesRealm, this)
+        MessagesViewModel.factory(repository, this)
     }
     // endregion Variables
 
