@@ -131,6 +131,7 @@ fun LocationUpdatesContent(usePreciseLocation: Boolean, userProfileViewModel: Us
                 },
             )
         }
+        ProximityRadiusAdjuster(userProfileViewModel)
         Text(text = locationUpdates)
         UserProfileDisplayList(userProfiles = userProfileViewModel.nearbyUserProfiles, isLookingForUsers)
     }

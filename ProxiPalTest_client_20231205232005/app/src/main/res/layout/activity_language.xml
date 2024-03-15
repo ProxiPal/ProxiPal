@@ -1,0 +1,23 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".LanguageActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/privacyPolicyText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/to_customize_your_preferred_language_setting_on_your_device_simply_follow_these_steps_n_n1_open_the_app_settings_for_proxipal_on_your_android_device_n_n2_scroll_down_and_tap_on_language_n_n3_choose_your_preferred_language_from_the_list"
+            android:textSize="35sp"
+            android:textStyle="bold"/>
+
+    </LinearLayout>
+
+</ScrollView>

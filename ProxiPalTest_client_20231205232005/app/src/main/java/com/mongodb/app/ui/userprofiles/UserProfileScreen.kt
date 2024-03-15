@@ -81,6 +81,8 @@ class UserProfileScreen : ComponentActivity() {
     /*
     ===== Variables =====
      */
+
+
     private val repository = RealmSyncRepository { _, error ->
         // Sync errors come from a background thread so route the Toast through the UI thread
         lifecycleScope.launch {
@@ -106,11 +108,19 @@ class UserProfileScreen : ComponentActivity() {
     }
 
 
+
     /*
     ===== Functions =====
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
+        Log.i(
+            TAG(),
+            "UPScreen: Start of OnCreate()"
+        )
+
 
         // region ViewModel events
         lifecycleScope.launch {
@@ -209,7 +219,7 @@ fun UserProfileLayout(
     Scaffold(
         topBar = {
             // This top bar is used because it already has logging out of account implemented
-            TaskAppToolbar(viewModel = toolbarViewModel)
+            TaskAppToolbar(viewModel = toolbarViewModel, navController = navController)
         },
         bottomBar = { ProxiPalBottomAppBar(navController) },
         modifier = modifier
@@ -219,7 +229,7 @@ fun UserProfileLayout(
                 contentPadding = innerPadding,
                 userProfileViewModel = userProfileViewModel
             )
-            HomeScreen(navController = navController, viewModel = homeViewModel)
+            HomeScreen(navController = navController, viewModel = homeViewModel, userProfileViewModel = userProfileViewModel)
         }
     }
 }
@@ -486,7 +496,9 @@ fun UserProfileEditButtons(
     }
 }
 
-@Preview(showBackground = true)
+
+
+//@Preview(showBackground = true)
 @Composable
 fun UserProfileEditButtonsPreview(){
     MyApplicationTheme {

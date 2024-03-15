@@ -32,7 +32,7 @@ fun AddItemPrompt(viewModel: AddItemViewModel) {
             Column {
                 Text(stringResource(R.string.enter_item_name))
                 TextField(
-                    colors = ExposedDropdownMenuDefaults.textFieldColors(containerColor = Color.White),
+                   // colors = ExposedDropdownMenuDefaults.textFieldColors(containerColor = Color.White),
                     value = viewModel.taskSummary.value,
                     maxLines = 2,
                     onValueChange = {

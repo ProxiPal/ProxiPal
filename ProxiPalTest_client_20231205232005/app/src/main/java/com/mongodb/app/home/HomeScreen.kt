@@ -1,25 +1,17 @@
 package com.mongodb.app.home
 
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.text.style.TextAlign
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
@@ -34,7 +26,6 @@ import androidx.compose.material3.Button
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.navigation.NavHostController
 import com.mongodb.app.R
 import com.google.accompanist.pager.*
@@ -56,15 +47,35 @@ import androidx.compose.material3.*
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.TextButton
-import com.mongodb.app.navigation.Routes
+import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 
 // HomeScreen Composable function, serves as the main screen of the app.
 @Composable
-fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel) {
-    // State for bio text with persistence over configuration changes.
-    var bioText by rememberSaveable { mutableStateOf("") }
-    val keyboardController = LocalSoftwareKeyboardController.current
+//march7
+fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel, userProfileViewModel: UserProfileViewModel) {
+
+    //George Fu - Added the different handling state for each Social Media
+    val twitterHandleState = userProfileViewModel.userProfileTwitterHandle.value
+    var twitterHandle by remember { mutableStateOf(twitterHandleState) }
+    LaunchedEffect(key1 = twitterHandleState) {
+        twitterHandle = twitterHandleState
+    }
+    val linktreeHandleState = userProfileViewModel.userProfileLinktreeHandle.value
+    var linktreeHandle by remember { mutableStateOf(linktreeHandleState) }
+    LaunchedEffect(key1 = linktreeHandleState) {
+        linktreeHandle = linktreeHandleState
+    }
+    val linkedinHandleState = userProfileViewModel.userProfilelinkedinHandle.value
+    var linkedinHandle by remember { mutableStateOf(linkedinHandleState) }
+    LaunchedEffect(key1 = linkedinHandleState) {
+        linkedinHandle = linkedinHandleState
+    }
+
+    val instagramHandleState = userProfileViewModel.userProfileInstagramHandle.value
+    var instagramHandle by remember { mutableStateOf(instagramHandleState) }
+    LaunchedEffect(key1 = instagramHandleState) {
+        instagramHandle = instagramHandleState
+    }
     val context = LocalContext.current
     // State for the list of images, initialized empty.
     val imagesList = viewModel.imagesList.value
@@ -99,7 +110,7 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel) {
             .verticalScroll(rememberScrollState())) {
 
             Spacer(modifier = Modifier.height(16.dp))
-            // Bio section moved here, under the Header and before ProfilePhotosSection.
+
 
             // Section for managing profile photos.
             ProfilePhotosSection(
@@ -114,7 +125,7 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel) {
                     launcher.launch("image/*")
                 }
             )
-            SocialMediaOptions()
+            SocialMediaOptions(userProfileViewModel = userProfileViewModel)
 
         }
     }
@@ -222,8 +233,11 @@ fun CustomPagerIndicator(pagerState: PagerState, totalDots: Int) {
         }
     }
 }
+//George Fu Added Everything Below
 @Composable
-fun SocialMediaOptions() {
+fun SocialMediaOptions(userProfileViewModel: UserProfileViewModel) {
+    val context = LocalContext.current // Obtain context directly within Composable
+
     // Use LazyRow for horizontal scrolling
     LazyRow(
         modifier = Modifier
@@ -240,81 +254,54 @@ fun SocialMediaOptions() {
         )
 
         items(socialMediaItems) { item ->
-            SocialMediaOptionButton(
-                icon = painterResource(id = item.first),
-                text = item.second
-            )
+            when (item.second.lowercase()) {
+                "instagram" -> {
+                    InstagramOptionButton(
+                        icon = painterResource(id = item.first),
+                        text = item.second,
+                        userProfileViewModel = userProfileViewModel
+                    )
+                }
+                "twitter" -> {
+                    TwitterOptionButton(
+                        icon = painterResource(id = item.first),
+                        text = item.second,
+                        userProfileViewModel = userProfileViewModel
+                    )
+                }
+                "linktree" -> {
+                    LinktreeOptionButton(
+                        icon = painterResource(id = item.first),
+                        text = item.second,
+                        userProfileViewModel = userProfileViewModel
+                    )
+                }
+                "linkedin" -> {
+                    LinkedinOptionButton(
+                        icon = painterResource(id = item.first),
+                        text = item.second,
+                        userProfileViewModel = userProfileViewModel
+                    )
+                }
+            }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SocialMediaOptionButton(icon: Painter, text: String) {
-    var showDialog by rememberSaveable { mutableStateOf(false) }
-    // Determine the initial URL based on the button's text
-    val initialUrl = when (text.lowercase()) {
-        "twitter" -> "http://twitter.com/"
-        "linkedin" -> "http://linkedin.com/"
-        "instagram" -> "http://instagram.com/"
-        "linktree" -> "http://linktr.ee/"
-        else -> "http://"
-    }
-    var url by rememberSaveable { mutableStateOf(initialUrl) }
-    var showError by rememberSaveable { mutableStateOf(false) }
-    var urlConfirmed by rememberSaveable { mutableStateOf(false) }
+fun InstagramOptionButton(icon: Painter, text: String, userProfileViewModel: UserProfileViewModel) {
+    var showDialog by remember { mutableStateOf(false) }
+    val instagramHandle = userProfileViewModel.userProfileInstagramHandle.value
     val context = LocalContext.current
-
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = { Text(text = stringResource(id = R.string.dialog_title, text)) },
-            text = {
-                Column {
-                    OutlinedTextField(
-                        value = url,
-                        onValueChange = {
-                            if (!it.startsWith(initialUrl)) {
-                                url = initialUrl
-                            } else {
-                                url = it
-                            }
-                            showError = false
-                        },
-                        label = { Text(text = stringResource(id = R.string.url_label)) },
-                        isError = showError,
-                    )
-                    if (showError) {
-                        Text(
-                            text = stringResource(id = R.string.invalid_url_error),
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (url.length > initialUrl.length) {
-                            showDialog = false
-                            urlConfirmed = true // User has confirmed the URL
-                        } else {
-                            showError = true
-                        }
-                    }
-                ) { Text(text = stringResource(id = R.string.ok_button)) }
-            }
-        )
-    }
 
     OutlinedButton(
         onClick = {
-            // If the URL has been confirmed, navigate directly; otherwise, show dialog for editing
-            if (urlConfirmed) {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            if (instagramHandle.isNotEmpty()) {
+                // If Instagram handle exists, open Instagram profile
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("http://instagram.com/$instagramHandle"))
                 context.startActivity(intent)
             } else {
+                // If no handle, show dialog to input
                 showDialog = true
             }
         },
@@ -332,23 +319,314 @@ fun SocialMediaOptionButton(icon: Painter, text: String) {
                 modifier = Modifier
                     .size(50.dp)
                     .align(Alignment.CenterStart),
-                tint = Color.Unspecified
+                tint = Color.Unspecified // Maintain original icon colors
             )
             Text(
                 text = text,
                 modifier = Modifier.align(Alignment.Center)
             )
             Icon(
-                painter = painterResource(id = R.drawable.meatball),
-                contentDescription = "Clickable Image",
+                painter = painterResource(id = R.drawable.meatball), // Ensure you have this icon in your drawable resources
+                contentDescription = "Options",
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .clickable {
+                        // Show dialog for input or additional options
                         showDialog = true
                     }
                     .size(24.dp),
-                tint = Color.Unspecified
+                tint = Color.Unspecified // Maintain original icon colors
             )
         }
     }
+
+    if (showDialog) {
+        InputInstagramHandleDialog(
+            currentHandle = instagramHandle,
+            onHandleConfirm = { newHandle ->
+                userProfileViewModel.setUserProfileInstagramHandle(newHandle)
+                showDialog = false
+            },
+            onDismissRequest = { showDialog = false }
+        )
+    }
+}
+//this function is for the confirming the username button
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun InputInstagramHandleDialog(currentHandle: String, onHandleConfirm: (String) -> Unit, onDismissRequest: () -> Unit) {
+    var textState by rememberSaveable { mutableStateOf(currentHandle) }
+    AlertDialog(
+        onDismissRequest = { onDismissRequest() },
+        title = { Text("Enter Instagram Username") },
+        text = {
+            TextField(
+                value = textState,
+                onValueChange = { textState = it },
+                label = { Text("Username") }
+            )
+        },
+        confirmButton = {
+            Button(onClick = { onHandleConfirm(textState) }) {
+                Text("Confirm")
+            }
+        }
+    )
+}
+
+@Composable
+fun TwitterOptionButton(icon: Painter, text: String, userProfileViewModel: UserProfileViewModel) {
+    var showDialog by remember { mutableStateOf(false) }
+    val twitterHandle = userProfileViewModel.userProfileTwitterHandle.value
+    val context = LocalContext.current
+
+    OutlinedButton(
+        onClick = {
+            if (twitterHandle.isNotEmpty()) {
+                // If twitter handle exists, open Twitter profile
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("http://twitter.com/$twitterHandle"))
+                context.startActivity(intent)
+            } else {
+                // If no handle, show dialog to input
+                showDialog = true
+            }
+        },
+        modifier = Modifier
+            .width(250.dp)
+            .height(56.dp)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Icon(
+                painter = icon,
+                contentDescription = text,
+                modifier = Modifier
+                    .size(50.dp)
+                    .align(Alignment.CenterStart),
+                tint = Color.Unspecified // Maintain original icon colors
+            )
+            Text(
+                text = text,
+                modifier = Modifier.align(Alignment.Center)
+            )
+            Icon(
+                painter = painterResource(id = R.drawable.meatball), // Ensure you have this icon in your drawable resources
+                contentDescription = "Options",
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .clickable {
+                        // Show dialog for input or additional options
+                        showDialog = true
+                    }
+                    .size(24.dp),
+                tint = Color.Unspecified // Maintain original icon colors
+            )
+        }
+    }
+
+    if (showDialog) {
+        InputTwitterHandleDialog(
+            currentHandle = twitterHandle,
+            onHandleConfirm = { newHandle ->
+                userProfileViewModel.setUserProfileTwitterHandle(newHandle)
+                showDialog = false
+            },
+            onDismissRequest = { showDialog = false }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun InputTwitterHandleDialog(currentHandle: String, onHandleConfirm: (String) -> Unit, onDismissRequest: () -> Unit) {
+    var textState by rememberSaveable { mutableStateOf(currentHandle) }
+    AlertDialog(
+        onDismissRequest = { onDismissRequest() },
+        title = { Text("Enter Twitter Username") },
+        text = {
+            TextField(
+                value = textState,
+                onValueChange = { textState = it },
+                label = { Text("Username") }
+            )
+        },
+        confirmButton = {
+            Button(onClick = { onHandleConfirm(textState) }) {
+                Text("Confirm")
+            }
+        }
+    )
+}
+@Composable
+fun LinktreeOptionButton(icon: Painter, text: String, userProfileViewModel: UserProfileViewModel) {
+    var showDialog by remember { mutableStateOf(false) }
+    val linktreeHandle = userProfileViewModel.userProfileLinktreeHandle.value
+    val context = LocalContext.current
+
+    OutlinedButton(
+        onClick = {
+            if (linktreeHandle.isNotEmpty()) {
+                // If linktree handle exists, open LinkTree profile
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("http://linktr.ee/$linktreeHandle"))
+                context.startActivity(intent)
+            } else {
+                // If no handle, show dialog to input
+                showDialog = true
+            }
+        },
+        modifier = Modifier
+            .width(250.dp)
+            .height(56.dp)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Icon(
+                painter = icon,
+                contentDescription = text,
+                modifier = Modifier
+                    .size(50.dp)
+                    .align(Alignment.CenterStart),
+                tint = Color.Unspecified // Maintain original icon colors
+            )
+            Text(
+                text = text,
+                modifier = Modifier.align(Alignment.Center)
+            )
+            Icon(
+                painter = painterResource(id = R.drawable.meatball), // Ensure you have this icon in your drawable resources
+                contentDescription = "Options",
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .clickable {
+                        // Show dialog for input or additional options
+                        showDialog = true
+                    }
+                    .size(24.dp),
+                tint = Color.Unspecified // Maintain original icon colors
+            )
+        }
+    }
+
+    if (showDialog) {
+        InputLinktreeHandleDialog(
+            currentHandle = linktreeHandle,
+            onHandleConfirm = { newHandle ->
+                userProfileViewModel.setUserProfileLinktreeHandle(newHandle)
+                showDialog = false
+            },
+            onDismissRequest = { showDialog = false }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun InputLinktreeHandleDialog(currentHandle: String, onHandleConfirm: (String) -> Unit, onDismissRequest: () -> Unit) {
+    var textState by rememberSaveable { mutableStateOf(currentHandle) }
+    AlertDialog(
+        onDismissRequest = { onDismissRequest() },
+        title = { Text("Enter Linktree Username") },
+        text = {
+            TextField(
+                value = textState,
+                onValueChange = { textState = it },
+                label = { Text("Username") }
+            )
+        },
+        confirmButton = {
+            Button(onClick = { onHandleConfirm(textState) }) {
+                Text("Confirm")
+            }
+        }
+    )
+}
+
+@Composable
+fun LinkedinOptionButton(icon: Painter, text: String, userProfileViewModel: UserProfileViewModel) {
+    var showDialog by remember { mutableStateOf(false) }
+    val linkedinHandle = userProfileViewModel.userProfilelinkedinHandle.value
+    val context = LocalContext.current
+
+    OutlinedButton(
+        onClick = {
+            if (linkedinHandle.isNotEmpty()) {
+                // If linkedin handle exists, open LinkedIn profile
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("http://$linkedinHandle"))
+                context.startActivity(intent)
+            } else {
+                // If no handle, show dialog to input
+                showDialog = true
+            }
+        },
+        modifier = Modifier
+            .width(250.dp)
+            .height(56.dp)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Icon(
+                painter = icon,
+                contentDescription = text,
+                modifier = Modifier
+                    .size(50.dp)
+                    .align(Alignment.CenterStart),
+                tint = Color.Unspecified // Maintain original icon colors
+            )
+            Text(
+                text = text,
+                modifier = Modifier.align(Alignment.Center)
+            )
+            Icon(
+                painter = painterResource(id = R.drawable.meatball), // Ensure you have this icon in your drawable resources
+                contentDescription = "Options",
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .clickable {
+                        // Show dialog for input or additional options
+                        showDialog = true
+                    }
+                    .size(24.dp),
+                tint = Color.Unspecified // Maintain original icon colors
+            )
+        }
+    }
+
+    if (showDialog) {
+        InputlinkedinHandleDialog(
+            currentHandle = linkedinHandle,
+            onHandleConfirm = { newHandle ->
+                userProfileViewModel.setUserProfilelinkedinHandle(newHandle)
+                showDialog = false
+            },
+            onDismissRequest = { showDialog = false }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun InputlinkedinHandleDialog(currentHandle: String, onHandleConfirm: (String) -> Unit, onDismissRequest: () -> Unit) {
+    var textState by rememberSaveable { mutableStateOf(currentHandle) }
+    AlertDialog(
+        onDismissRequest = { onDismissRequest() },
+        title = { Text("Enter LinkedIn URL") },
+        text = {
+            TextField(
+                value = textState,
+                onValueChange = { textState = it },
+                label = { Text("Username") }
+            )
+        },
+        confirmButton = {
+            Button(onClick = { onHandleConfirm(textState) }) {
+                Text("Confirm")
+            }
+        }
+    )
 }

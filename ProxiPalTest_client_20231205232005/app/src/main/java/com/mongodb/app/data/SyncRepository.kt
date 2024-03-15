@@ -10,6 +10,7 @@ import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.annotations.ExperimentalGeoSpatialApi
 import io.realm.kotlin.ext.query
+import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.mongodb.User
 import io.realm.kotlin.mongodb.exceptions.SyncException
 import io.realm.kotlin.mongodb.subscriptions
@@ -19,6 +20,7 @@ import io.realm.kotlin.mongodb.syncSession
 import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.query.RealmQuery
 import io.realm.kotlin.query.Sort
+import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.geo.Distance
 import io.realm.kotlin.types.geo.GeoCircle
 import io.realm.kotlin.types.geo.GeoPoint
@@ -113,12 +115,12 @@ interface SyncRepository {
     /**
      * Adds a user profile that belongs to the current user using the specified parameters
      */
-    suspend fun addUserProfile(firstName: String, lastName: String, biography: String)
+    suspend fun addUserProfile(firstName: String, lastName: String, biography: String, instagramHandle: String, twitterHandle : String, linktreeHandle : String, linkedinHandle : String)
 
     /**
      * Updates a possible existing user profile for the current user in the database using the specified parameters
      */
-    suspend fun updateUserProfile(firstName: String, lastName: String, biography: String)
+    suspend fun updateUserProfile(firstName: String, lastName: String, biography: String, instagramHandle: String, twitterHandle: String, linktreeHandle : String, linkedinHandle : String)
 
     /**
      * Updates the Sync subscription based on the specified [SubscriptionType].
@@ -149,8 +151,11 @@ interface SyncRepository {
     /**
      * Returns a flow with nearby user profiles within a specified radius
      */
-    fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInMiles: Double): Flow<ResultsChange<UserProfile>>
+    fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double): Flow<ResultsChange<UserProfile>>
 
+    suspend fun updateUserProfileInterests(interest:String)
+
+    suspend fun updateUserProfileIndustries(industry:String)
     // endregion location
 }
 
@@ -311,17 +316,23 @@ class RealmSyncRepository(
             .asFlow()
     }
 
-    override suspend fun addUserProfile(firstName: String, lastName: String, biography: String) {
+    //added the social media handling
+    override suspend fun addUserProfile(firstName: String, lastName: String, biography: String, instagramHandle: String, twitterHandle: String, linktreeHandle : String, linkedinHandle : String) {
         // The "owner ID" added is associated with the user currently logged into the app
         val userProfile = UserProfile().apply {
             ownerId = currentUser.id
             this.firstName = firstName
             this.lastName = lastName
             this.biography = biography
+            this.instagramHandle = instagramHandle
+            this.twitterHandle = twitterHandle
+            this.linktreeHandle = linktreeHandle
+            this.linkedinHandle = linkedinHandle
 
             // Added by Marco Pacini, to make sure there is an initial location
             // it will be updated by the connect screen
             this.location = CustomGeoPoint(0.0,0.0)
+            //this.interests.add("")
         }
         realm.write {
             copyToRealm(userProfile, updatePolicy = UpdatePolicy.ALL)
@@ -335,7 +346,7 @@ class RealmSyncRepository(
         return currentUser.id
     }
 
-    override suspend fun updateUserProfile(firstName: String, lastName: String, biography: String) {
+    override suspend fun updateUserProfile(firstName: String, lastName: String, biography: String, instagramHandle: String, twitterHandle: String, linktreeHandle: String, linkedinHandle: String) {
         // Queries inside write transaction are live objects
         // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
         val frozenUserProfile = getQueryUserProfiles(
@@ -353,7 +364,12 @@ class RealmSyncRepository(
             addUserProfile(
                 firstName = firstName,
                 lastName = lastName,
-                biography = biography
+                biography = biography,
+
+                instagramHandle = instagramHandle,
+                twitterHandle = twitterHandle,
+                linktreeHandle = linktreeHandle,
+                linkedinHandle = linkedinHandle
             )
             return
         }
@@ -362,6 +378,11 @@ class RealmSyncRepository(
                 liveUserProfile.firstName = firstName
                 liveUserProfile.lastName = lastName
                 liveUserProfile.biography = biography
+
+                liveUserProfile.instagramHandle = instagramHandle
+                liveUserProfile.twitterHandle = twitterHandle
+                liveUserProfile.linktreeHandle = linktreeHandle
+                liveUserProfile.linkedinHandle = linkedinHandle
             }
         }
     }
@@ -427,7 +448,13 @@ class RealmSyncRepository(
             addUserProfile(
                 firstName = "empty",
                 lastName = "empty",
-                biography = "empty"
+                biography = "empty",
+                instagramHandle = "empty",
+                twitterHandle = "empty",
+                linktreeHandle = "empty",
+                linkedinHandle = "empty"
+
+
             )
             return
         }
@@ -470,14 +497,158 @@ class RealmSyncRepository(
      * [userLatitude] and [userLongitude] are the current user's location, used to form center of the search radius.
      */
     @OptIn(ExperimentalGeoSpatialApi::class)
-    override fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInMiles: Double): Flow<ResultsChange<UserProfile>>{
+    override fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double): Flow<ResultsChange<UserProfile>>{
         val circleAroundUser = GeoCircle.create(
             center = GeoPoint.create(userLatitude, userLongitude),
-            radius = Distance.fromMiles(radiusInMiles)
+            radius = Distance.fromKilometers(radiusInKilometers)
         )
         return realm.query<UserProfile>("location GEOWITHIN $circleAroundUser").query("ownerId != $0", currentUser.id).find().asFlow()
     }
+
     //endregion location
+
+
+    override suspend fun updateUserProfileInterests(interest:String) {
+        // Queries inside write transaction are live objects
+        // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
+        val frozenUserProfile = getQueryUserProfiles(
+            realm = realm,
+            subscriptionType = getActiveSubscriptionType(realm)
+        ).find()
+        // In case the query result list is empty, check first before calling ".first()"
+        val frozenFirstUserProfile = if (frozenUserProfile.size > 0) {
+            frozenUserProfile.first()
+        } else {
+            null
+        }
+        if (frozenFirstUserProfile == null) {
+            Log.i(
+                TAG(),
+                "RealmSyncRepository: Creating a new user profile with the given parameters for " +
+                        "current user ID = \"${currentUser.id}\"...; " +
+                        "Skipping rest of user profile update function..."
+            )
+            // Create a new user profile before applying the updated changes
+            addUserProfile(
+                firstName = "empty",
+                lastName = "empty",
+                biography = "empty",
+                instagramHandle = "empty",
+                twitterHandle = "empty",
+                linktreeHandle = "empty",
+                linkedinHandle = "empty"
+            )
+            return
+        }
+        when (getQueryUserProfiles(
+            realm = realm,
+            subscriptionType = getActiveSubscriptionType(realm)
+        ).find().size) {
+            // Create a new profile for the user if they do not have one already in the database
+            // This may not be necessary as users will get their initial profiles added to the database
+            // ... once they register an account and deleting their profile will only occur when
+            // ... deleting their account (unsure if account deletion will be implemented)
+            0 -> {
+                Log.i(
+                    TAG(),
+                    "RealmSyncRepository: No user profiles found with owner ID \"${currentUser.id}\""
+                )
+            }
+
+            1 -> Log.i(
+                TAG(),
+                "RealmSyncRepository: Exactly 1 user profile found with owner ID \"${currentUser.id}\""
+            )
+
+            else -> Log.i(
+                TAG(),
+                "RealmSyncRepository: Multiple user profiles found with owner ID \"${currentUser.id}\""
+            )
+        }
+        realm.write {
+            findLatest(frozenFirstUserProfile)?.let { liveUserProfile ->
+                if (liveUserProfile.interests.contains(interest)){
+                    liveUserProfile.interests.remove(interest)
+                } else{
+                    liveUserProfile.interests.add(interest)
+                }
+
+            }
+        }
+    }
+
+
+    override suspend fun updateUserProfileIndustries(industry:String) {
+        // Queries inside write transaction are live objects
+        // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
+        val frozenUserProfile = getQueryUserProfiles(
+            realm = realm,
+            subscriptionType = getActiveSubscriptionType(realm)
+        ).find()
+        // In case the query result list is empty, check first before calling ".first()"
+        val frozenFirstUserProfile = if (frozenUserProfile.size > 0) {
+            frozenUserProfile.first()
+        } else {
+            null
+        }
+        if (frozenFirstUserProfile == null) {
+            Log.i(
+                TAG(),
+                "RealmSyncRepository: Creating a new user profile with the given parameters for " +
+                        "current user ID = \"${currentUser.id}\"...; " +
+                        "Skipping rest of user profile update function..."
+            )
+            // Create a new user profile before applying the updated changes
+            addUserProfile(
+                firstName = "empty",
+                lastName = "empty",
+                biography = "empty",
+                instagramHandle = "empty",
+                twitterHandle = "empty",
+                linktreeHandle = "empty",
+                linkedinHandle = "empty"
+            )
+            return
+        }
+        when (getQueryUserProfiles(
+            realm = realm,
+            subscriptionType = getActiveSubscriptionType(realm)
+        ).find().size) {
+            // Create a new profile for the user if they do not have one already in the database
+            // This may not be necessary as users will get their initial profiles added to the database
+            // ... once they register an account and deleting their profile will only occur when
+            // ... deleting their account (unsure if account deletion will be implemented)
+            0 -> {
+                Log.i(
+                    TAG(),
+                    "RealmSyncRepository: No user profiles found with owner ID \"${currentUser.id}\""
+                )
+            }
+
+            1 -> Log.i(
+                TAG(),
+                "RealmSyncRepository: Exactly 1 user profile found with owner ID \"${currentUser.id}\""
+            )
+
+            else -> Log.i(
+                TAG(),
+                "RealmSyncRepository: Multiple user profiles found with owner ID \"${currentUser.id}\""
+            )
+        }
+        realm.write {
+            findLatest(frozenFirstUserProfile)?.let { liveUserProfile ->
+                if (liveUserProfile.industries.contains(industry)){
+                    liveUserProfile.industries.remove(industry)
+                } else{
+                    liveUserProfile.industries.add(industry)
+                }
+
+            }
+        }
+    }
+
+
+
 }
 
 /**
@@ -499,9 +670,9 @@ class MockRepository : SyncRepository {
 
     // Contributed by Kevin Kubota
     override fun getUserProfileList(): Flow<ResultsChange<UserProfile>> = flowOf()
-    override suspend fun addUserProfile(firstName: String, lastName: String, biography: String) =
+    override suspend fun addUserProfile(firstName: String, lastName: String, biography: String, instagramHandle: String, twitterHandle: String, linktreeHandle: String, linkedinHandle: String) =
         Unit
-    override suspend fun updateUserProfile(firstName: String, lastName: String, biography: String) =
+    override suspend fun updateUserProfile(firstName: String, lastName: String, biography: String, instagramHandle: String, twitterHandle: String, linktreeHandle: String, linkedinHandle: String) =
         Unit
     override suspend fun updateSubscriptionsUserProfiles(subscriptionType: SubscriptionType) = Unit
     override suspend fun deleteUserProfile(userProfile: UserProfile) = Unit
@@ -511,8 +682,11 @@ class MockRepository : SyncRepository {
     override suspend fun updateUserProfileLocation(latitude: Double, longitude: Double) =
         Unit
 
-    override fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInMiles: Double): Flow<ResultsChange<UserProfile>> = flowOf()
+    override fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double): Flow<ResultsChange<UserProfile>> = flowOf()
 
+    override suspend fun updateUserProfileInterests(interest:String) = Unit
+
+    override suspend fun updateUserProfileIndustries(industry:String) = Unit
 
     companion object {
         const val MOCK_OWNER_ID_MINE = "A"

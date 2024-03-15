@@ -117,8 +117,8 @@ fun PreviewUserProfileDisplayList() {
 
     UserProfileDisplayList(userProfiles = sampleUserProfiles, true)
 }
-@Preview
 
+@Preview
 @Composable
 fun PreviewEmptyUserProfileDisplayList() {
     val sampleUserProfiles = listOf<UserProfile>()
