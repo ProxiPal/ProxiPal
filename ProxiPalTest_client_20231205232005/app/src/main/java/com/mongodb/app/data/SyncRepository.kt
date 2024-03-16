@@ -4,9 +4,11 @@ import android.util.Log
 import com.mongodb.app.TAG
 import com.mongodb.app.domain.Item
 import com.mongodb.app.app
+import com.mongodb.app.data.messages.IConversationsRealm
 import com.mongodb.app.data.messages.IMessagesRealm
 import com.mongodb.app.data.messages.SHOULD_PRINT_REALM_CONFIG_INFO
 import com.mongodb.app.data.userprofiles.SHOULD_USE_TASKS_ITEMS
+import com.mongodb.app.domain.FriendConversation
 import com.mongodb.app.domain.FriendMessage
 import com.mongodb.app.domain.UserProfile
 import com.mongodb.app.location.CustomGeoPoint
@@ -31,6 +33,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import java.util.SortedSet
 import kotlin.time.Duration.Companion.seconds
 
 
@@ -46,9 +49,9 @@ Contributions:
  * Working functions and code for Item classes has been copied for UserProfile classes
  */
 interface SyncRepository {
-    /*
-    ===== Functions =====
-     */
+    // region Functions
+
+
     // region RealmFunctions
     /**
      * Returns the active [SubscriptionType].
@@ -158,6 +161,9 @@ interface SyncRepository {
     fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double): Flow<ResultsChange<UserProfile>>
 
     // endregion location
+
+
+    // endregion Functions
 }
 
 
@@ -166,13 +172,14 @@ interface SyncRepository {
  */
 class RealmSyncRepository(
     onSyncError: (session: SyncSession, error: SyncException) -> Unit
-) : SyncRepository, IMessagesRealm {
+) : SyncRepository, IMessagesRealm, IConversationsRealm {
 
     private val realm: Realm
     private val config: SyncConfiguration
     private val currentUser: User
         get() = app.currentUser!!
     private val _messagesSubscriptionName: String = "MyFriendMessages"
+    private val _conversationsSubscriptionName: String = "MyFriendConversations"
 
     init {
         Log.i(
@@ -185,7 +192,11 @@ class RealmSyncRepository(
         // ... the app will crash if querying anything other than B.
         // If errors still persist, try deleting and re-running the app.
         val schemaSet = if (SHOULD_USE_TASKS_ITEMS) setOf(Item::class)
-        else setOf(UserProfile::class, CustomGeoPoint::class, FriendMessage::class)
+        else setOf(
+            UserProfile::class,
+            CustomGeoPoint::class,
+            FriendMessage::class,
+            FriendConversation::class)
         config = SyncConfiguration.Builder(currentUser, schemaSet)
             .initialSubscriptions { realm ->
                 // Subscribe to the active subscriptionType - first time defaults to MINE
@@ -203,6 +214,10 @@ class RealmSyncRepository(
                     add(
                         getQueryMessages(realm),
                         _messagesSubscriptionName
+                    )
+                    add(
+                        getQueryConversations(realm),
+                        _conversationsSubscriptionName
                     )
                 }
             }
@@ -254,9 +269,6 @@ class RealmSyncRepository(
     }
 
 
-    /*
-    ===== Functions =====
-     */
     // region RealmFunctions
     override fun getActiveSubscriptionType(realm: Realm?): SubscriptionType {
         val realmInstance = realm ?: this.realm
@@ -550,7 +562,7 @@ class RealmSyncRepository(
 
 
     // region Messages
-    override suspend fun updateSubscriptions() {
+    override suspend fun updateSubscriptionsMessages() {
         // Add the messages query to the realm subscriptions
         realm.subscriptions.update {
             add(getQueryMessages(realm), _messagesSubscriptionName)
@@ -559,7 +571,7 @@ class RealmSyncRepository(
             for (subscription in realm.subscriptions){
                 Log.i(
                     TAG(),
-                    "RealmSyncRepository: Subscription = \"${subscription}\" ;; " +
+                    "RealmSyncRepository: Message subscription = \"${subscription}\" ;; " +
                             "Subscription name = \"${subscription.name}\" ;; " +
                             "Subscription description = \"${subscription.queryDescription}\""
                 )
@@ -568,6 +580,7 @@ class RealmSyncRepository(
     }
 
     override fun getQueryMessages(realm: Realm): RealmQuery<FriendMessage>{
+        // Find all messages sent by the current user
         return realm.query("ownerId == $0", currentUser.id)
     }
 
@@ -582,6 +595,40 @@ class RealmSyncRepository(
         }
     }
     // endregion Messages
+
+
+    // region Conversations
+    override suspend fun updateSubscriptionsConversations() {
+        // Add the conversations query to the realm subscriptions
+        realm.subscriptions.update {
+            add(getQueryConversations(realm), _conversationsSubscriptionName)
+        }
+        if (SHOULD_PRINT_REALM_CONFIG_INFO){
+            for (subscription in realm.subscriptions){
+                Log.i(
+                    TAG(),
+                    "RealmSyncRepository: Conversation subscription = \"${subscription}\" ;; " +
+                            "Subscription name = \"${subscription.name}\" ;; " +
+                            "Subscription description = \"${subscription.queryDescription}\""
+                )
+            }
+        }
+    }
+
+    override fun getQueryConversations(realm: Realm): RealmQuery<FriendConversation> {
+        // Find all conversations where the current user is involved
+        return realm.query("usersInvolved CONTAINS $0", currentUser.id)
+    }
+
+    override suspend fun addConversation(usersInvolved: SortedSet<String>) {
+        val friendConversation = FriendConversation().apply{
+            this.usersInvolved = usersInvolved
+        }
+        realm.write{
+            copyToRealm(friendConversation, updatePolicy = UpdatePolicy.ALL)
+        }
+    }
+    // endregion
 }
 
 /**

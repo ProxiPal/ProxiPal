@@ -49,8 +49,7 @@ import com.mongodb.app.TAG
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.messages.MESSAGE_WIDTH_WEIGHT
 import com.mongodb.app.data.messages.MOCK_MESSAGE_LIST
-import com.mongodb.app.data.messages.MessagesRealm
-import com.mongodb.app.data.messages.MockMessagesRealm
+import com.mongodb.app.data.messages.MockMessagesRepository
 import com.mongodb.app.presentation.messages.MessagesViewModel
 import com.mongodb.app.ui.theme.MessageColorMine
 import com.mongodb.app.ui.theme.MessageColorOther
@@ -58,9 +57,6 @@ import com.mongodb.app.ui.theme.MessageInputBackgroundColor
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
 import kotlinx.coroutines.launch
-import java.sql.Timestamp
-import java.time.Instant
-import java.time.LocalDateTime
 import java.util.Calendar
 import java.util.Date
 
@@ -436,7 +432,7 @@ fun TimePreview(){
 fun MessagesScreenLayoutPreview() {
     MyApplicationTheme {
 //        val repository = MockRepository()
-        val mockRealm = MockMessagesRealm()
+        val mockRealm = MockMessagesRepository()
         MessagesScreenLayout(
             messagesViewModel = MessagesViewModel(mockRealm)
         )

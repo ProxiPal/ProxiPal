@@ -5,13 +5,13 @@ import io.realm.kotlin.Realm
 import io.realm.kotlin.query.RealmQuery
 
 /**
- * Contains necessary functions when working with message objects and the Atlas Realm
+ * Contains necessary functions when working with [FriendMessage] objects
  */
 interface IMessagesRealm{
     /**
-     * Updates the realm instance subscriptions
+     * Updates the realm instance subscriptions for messages
      */
-    suspend fun updateSubscriptions()
+    suspend fun updateSubscriptionsMessages()
 
     /**
      * Returns a query to be added as a subscription to the realm instance

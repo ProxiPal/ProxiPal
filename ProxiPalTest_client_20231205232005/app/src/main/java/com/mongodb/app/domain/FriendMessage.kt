@@ -6,7 +6,7 @@ import org.mongodb.kbson.ObjectId
 
 
 /**
- * A single friend message object that gets added and saved to the database
+ * A database object for a single message within a [FriendConversation]
  */
 class FriendMessage : RealmObject {
     @PrimaryKey

@@ -7,8 +7,8 @@ import io.realm.kotlin.query.RealmQuery
 /**
  * A mock class to be used in preview Composable functions
  */
-class MockMessagesRealm : IMessagesRealm{
-    override suspend fun updateSubscriptions() {
+class MockMessagesRepository : IMessagesRealm{
+    override suspend fun updateSubscriptionsMessages() {
         TODO("Not yet implemented")
     }
 
