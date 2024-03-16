@@ -1,10 +1,11 @@
 package com.mongodb.app.domain
 
+import io.realm.kotlin.ext.realmListOf
+import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 import org.mongodb.kbson.BsonObjectId
 import org.mongodb.kbson.ObjectId
-import java.util.SortedSet
 
 /**
  * A database object for uniquely identifying a friend conversation
@@ -13,7 +14,7 @@ class FriendConversation : RealmObject {
     @PrimaryKey
     var _id: ObjectId = BsonObjectId()
     // Collection of users' IDs (see ownerId field of FriendMessage class)
-    var usersInvolved: SortedSet<String> = sortedSetOf("")
+    var usersInvolved: RealmList<String> = realmListOf()
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
@@ -27,13 +28,5 @@ class FriendConversation : RealmObject {
         var result = _id.hashCode()
         result = 31 * result + usersInvolved.hashCode()
         return result
-    }
-
-    fun addUserToConversation(userIdToAdd: String){
-        usersInvolved.add(userIdToAdd)
-    }
-
-    fun removeUserFromConversation(userIdToRemove: String){
-        usersInvolved.remove(userIdToRemove)
     }
 }

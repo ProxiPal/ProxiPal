@@ -49,6 +49,7 @@ import com.mongodb.app.TAG
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.messages.MESSAGE_WIDTH_WEIGHT
 import com.mongodb.app.data.messages.MOCK_MESSAGE_LIST
+import com.mongodb.app.data.messages.MockConversationRepository
 import com.mongodb.app.data.messages.MockMessagesRepository
 import com.mongodb.app.presentation.messages.MessagesViewModel
 import com.mongodb.app.ui.theme.MessageColorMine
@@ -90,7 +91,7 @@ class MessagesScreen : ComponentActivity() {
     }
 
     private val messagesViewModel: MessagesViewModel by viewModels {
-        MessagesViewModel.factory(repository, this)
+        MessagesViewModel.factory(repository, repository, this)
     }
     // endregion Variables
 
@@ -431,32 +432,16 @@ fun TimePreview(){
 @Composable
 fun MessagesScreenLayoutPreview() {
     MyApplicationTheme {
-//        val repository = MockRepository()
-        val mockRealm = MockMessagesRepository()
+        val mockMessagesRepository = MockMessagesRepository()
+        val mockConversationRepository = MockConversationRepository()
         MessagesScreenLayout(
-            messagesViewModel = MessagesViewModel(mockRealm)
+            messagesViewModel = MessagesViewModel(
+                messagesRealm = mockMessagesRepository,
+                conversationsRealm = mockConversationRepository
+            )
         )
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun MessagesTopBarPreview() {
-//    MyApplicationTheme {
-//        MessagesTopBar()
-//    }
-//}
-
-//@Preview(showBackground = true)
-//@Composable
-//fun MessagesBodyContentPreview() {
-//    MyApplicationTheme {
-//        val mockRealm = MockMessagesRealm()
-//        MessagesBodyContent(
-//            messagesViewModel = MessagesViewModel(mockRealm)
-//        )
-//    }
-//}
 
 @Preview(showBackground = true)
 @Composable

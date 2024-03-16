@@ -2,7 +2,9 @@ package com.mongodb.app.data.messages
 
 import com.mongodb.app.domain.FriendConversation
 import io.realm.kotlin.Realm
+import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.query.RealmQuery
+import kotlinx.coroutines.flow.Flow
 import java.util.SortedSet
 
 
@@ -19,6 +21,10 @@ class MockConversationRepository: IConversationsRealm{
     }
 
     override suspend fun addConversation(usersInvolved: SortedSet<String>) {
+        TODO("Not yet implemented")
+    }
+
+    override fun getConversationList(): Flow<ResultsChange<FriendConversation>> {
         TODO("Not yet implemented")
     }
 }

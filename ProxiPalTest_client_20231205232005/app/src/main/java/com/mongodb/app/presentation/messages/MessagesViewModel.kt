@@ -2,29 +2,44 @@ package com.mongodb.app.presentation.messages
 
 import android.os.Bundle
 import android.util.Log
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.mongodb.app.TAG
+import com.mongodb.app.data.messages.IConversationsRealm
 import com.mongodb.app.data.messages.IMessagesRealm
+import com.mongodb.app.domain.FriendConversation
+import io.realm.kotlin.notifications.InitialResults
+import io.realm.kotlin.notifications.ResultsChange
+import io.realm.kotlin.notifications.UpdatedResults
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Date
+import java.util.SortedSet
 
 class MessagesViewModel constructor(
-    private var messagesRealm: IMessagesRealm
+    private var messagesRealm: IMessagesRealm,
+    private var conversationsRealm: IConversationsRealm
 ) : ViewModel(){
     // region Variables
     private val _message = mutableStateOf("")
+    private val _usersInvolved = sortedSetOf("")
+    private val _conversationsListState: SnapshotStateList<FriendConversation> = mutableStateListOf()
     // endregion Variables
 
 
     // region Properties
     val message
         get() = _message
+    val usersInvolved
+        get() = _usersInvolved
+    val conversationsListState
+        get() = _conversationsListState
     // endregion Properties
 
 
@@ -54,6 +69,8 @@ class MessagesViewModel constructor(
     fun sendMessage(){
         addMessageToDatabase()
         resetMessage()
+
+        getConversationList()
     }
 
     fun deleteMessage(){
@@ -92,6 +109,42 @@ class MessagesViewModel constructor(
     private fun removeMessageFromDatabase(){
         // TODO
     }
+
+    private fun addConversationToDatabase(){
+        // TODO These values are hardcoded for now
+        val usersInvolved = sortedSetOf(
+            // Gmail account
+            "65e96193c6e205c32b0915cc",
+            // Student account
+            "6570119696faac878ad696a5"
+        )
+    }
+
+    private fun getConversationList(){
+        viewModelScope.launch {
+            conversationsRealm.getConversationList()
+                .collect {
+                    event: ResultsChange<FriendConversation> ->
+                    when (event){
+                        is InitialResults -> {
+                            conversationsListState.clear()
+                            conversationsListState.addAll(event.list)
+                            Log.i(
+                                TAG(),
+                                "MessagesViewModel: Conversation amount = \"" +
+                                        "${event.list.size}\""
+                            )
+                        }
+                        is UpdatedResults -> TODO()
+                        else -> Unit // No-op
+                    }
+                }
+        }
+    }
+
+    fun updateConversationUsersInvolved(usersInvolved: SortedSet<String>){
+
+    }
     // endregion Functions
 
 
@@ -99,6 +152,7 @@ class MessagesViewModel constructor(
     companion object {
         fun factory(
             messagesRealm: IMessagesRealm,
+            conversationsRealm: IConversationsRealm,
             owner: SavedStateRegistryOwner,
             defaultArgs: Bundle? = null
         ): AbstractSavedStateViewModelFactory {
@@ -109,7 +163,7 @@ class MessagesViewModel constructor(
                     handle: SavedStateHandle
                 ): T {
                     // Remember to change the cast to the class name this code is in
-                    return MessagesViewModel (messagesRealm) as T
+                    return MessagesViewModel (messagesRealm, conversationsRealm) as T
                 }
             }
         }

@@ -25,6 +25,7 @@ import io.realm.kotlin.mongodb.syncSession
 import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.query.RealmQuery
 import io.realm.kotlin.query.Sort
+import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.geo.Distance
 import io.realm.kotlin.types.geo.GeoCircle
 import io.realm.kotlin.types.geo.GeoPoint
@@ -621,12 +622,28 @@ class RealmSyncRepository(
     }
 
     override suspend fun addConversation(usersInvolved: SortedSet<String>) {
+        val usersInvolvedAmount = usersInvolved.size
+//        // Create an empty array equal to the size of the set of users involved
+//        val usersInvolvedArray = Array(usersInvolvedAmount) { "" }
+//        // Set each element of the empty array to an element of the set
+//        for ((index, userInvolved) in usersInvolved.withIndex()){
+//            usersInvolvedArray[index] = userInvolved
+//        }
+
+        val usersInvolvedList = usersInvolved.toList()
+
         val friendConversation = FriendConversation().apply{
-            this.usersInvolved = usersInvolved
+            this.usersInvolved = usersInvolvedList as RealmList<String>
         }
         realm.write{
             copyToRealm(friendConversation, updatePolicy = UpdatePolicy.ALL)
         }
+    }
+
+    override fun getConversationList(): Flow<ResultsChange<FriendConversation>> {
+        return realm.query<FriendConversation>()
+            .sort(Pair("_id", Sort.ASCENDING))
+            .asFlow()
     }
     // endregion
 }
