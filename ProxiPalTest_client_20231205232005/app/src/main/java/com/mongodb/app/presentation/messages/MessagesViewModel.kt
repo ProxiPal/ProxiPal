@@ -70,6 +70,7 @@ class MessagesViewModel constructor(
         addMessageToDatabase()
         resetMessage()
 
+        addConversationToDatabase()
         getConversationList()
     }
 
@@ -118,9 +119,19 @@ class MessagesViewModel constructor(
             // Student account
             "6570119696faac878ad696a5"
         )
+        viewModelScope.launch {
+            Log.i(
+                TAG(),
+                "MessageViewModel: Conversation users involved = \"${usersInvolved}\""
+            )
+            conversationsRealm.addConversation(
+                usersInvolved = usersInvolved
+            )
+        }
     }
 
     private fun getConversationList(){
+        // This logic is copied from the UserProfileViewModel class
         viewModelScope.launch {
             conversationsRealm.getConversationList()
                 .collect {
@@ -135,7 +146,24 @@ class MessagesViewModel constructor(
                                         "${event.list.size}\""
                             )
                         }
-                        is UpdatedResults -> TODO()
+                        is UpdatedResults -> {
+                            if (event.deletions.isNotEmpty() && conversationsListState.isNotEmpty()) {
+                                event.deletions.reversed().forEach {
+                                    conversationsListState.removeAt(it)
+                                }
+                            }
+                            if (event.insertions.isNotEmpty()) {
+                                event.insertions.forEach {
+                                    conversationsListState.add(it, event.list[it])
+                                }
+                            }
+                            if (event.changes.isNotEmpty()) {
+                                event.changes.forEach {
+                                    conversationsListState.removeAt(it)
+                                    conversationsListState.add(it, event.list[it])
+                                }
+                            }
+                        }
                         else -> Unit // No-op
                     }
                 }

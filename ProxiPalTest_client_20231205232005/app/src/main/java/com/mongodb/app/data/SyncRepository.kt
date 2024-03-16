@@ -16,6 +16,7 @@ import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.annotations.ExperimentalGeoSpatialApi
 import io.realm.kotlin.ext.query
+import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.mongodb.User
 import io.realm.kotlin.mongodb.exceptions.SyncException
 import io.realm.kotlin.mongodb.subscriptions
@@ -618,22 +619,27 @@ class RealmSyncRepository(
 
     override fun getQueryConversations(realm: Realm): RealmQuery<FriendConversation> {
         // Find all conversations where the current user is involved
-        return realm.query("usersInvolved CONTAINS $0", currentUser.id)
+        return realm.query("$0 IN usersInvolved", currentUser.id)
     }
 
     override suspend fun addConversation(usersInvolved: SortedSet<String>) {
         val usersInvolvedAmount = usersInvolved.size
-//        // Create an empty array equal to the size of the set of users involved
-//        val usersInvolvedArray = Array(usersInvolvedAmount) { "" }
-//        // Set each element of the empty array to an element of the set
-//        for ((index, userInvolved) in usersInvolved.withIndex()){
-//            usersInvolvedArray[index] = userInvolved
-//        }
-
+        // Convert the given set to a list
         val usersInvolvedList = usersInvolved.toList()
+        val usersInvolvedRealmList: RealmList<String> = realmListOf()
+        // Iterate through the list and set each element to the realm list
+        // Sets don't use indexes but list and realm list must
+        for (index in 0..<usersInvolvedAmount){
+            usersInvolvedRealmList.add(usersInvolvedList[index])
+        }
+        Log.i(
+            TAG(),
+            "RealmSyncRepository: Conversation users involved = \"" +
+                    "${usersInvolvedRealmList}\""
+        )
 
         val friendConversation = FriendConversation().apply{
-            this.usersInvolved = usersInvolvedList as RealmList<String>
+            this.usersInvolved = usersInvolvedRealmList
         }
         realm.write{
             copyToRealm(friendConversation, updatePolicy = UpdatePolicy.ALL)

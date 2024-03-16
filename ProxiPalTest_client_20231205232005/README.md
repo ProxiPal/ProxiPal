@@ -116,3 +116,7 @@ What steps I took to fix it was:
 
 EDIT: It might be better to just have 1 class have a realm instance open, as multiple
 classes opening multiple realms causes the subscription-related error in the header
+
+## Realm subscriptions don't update automatically when changing in code
+
+Need to uninstall and re-install app, then realm subscriptions will update
