@@ -29,5 +29,5 @@ interface IConversationsRealm {
     /**
      * Returns a list of all friend conversations across all users
      */
-    fun getConversationList(): Flow<ResultsChange<FriendConversation>>
+    fun getAllConversations(): Flow<ResultsChange<FriendConversation>>
 }

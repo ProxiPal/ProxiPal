@@ -24,7 +24,7 @@ class MockConversationRepository: IConversationsRealm{
         TODO("Not yet implemented")
     }
 
-    override fun getConversationList(): Flow<ResultsChange<FriendConversation>> {
+    override fun getAllConversations(): Flow<ResultsChange<FriendConversation>> {
         TODO("Not yet implemented")
     }
 }

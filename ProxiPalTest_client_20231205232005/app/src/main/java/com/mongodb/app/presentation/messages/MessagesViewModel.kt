@@ -11,9 +11,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.mongodb.app.TAG
+import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.messages.IConversationsRealm
 import com.mongodb.app.data.messages.IMessagesRealm
 import com.mongodb.app.domain.FriendConversation
+import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.notifications.InitialResults
 import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.notifications.UpdatedResults
@@ -23,23 +25,28 @@ import java.util.Date
 import java.util.SortedSet
 
 class MessagesViewModel constructor(
-    private var messagesRealm: IMessagesRealm,
-    private var conversationsRealm: IConversationsRealm
+    private var repository: SyncRepository,
+    private var messagesRepository: IMessagesRealm,
+    private var conversationsRepository: IConversationsRealm
 ) : ViewModel(){
     // region Variables
     private val _message = mutableStateOf("")
-    private val _usersInvolved = sortedSetOf("")
+    private var _usersInvolved: SortedSet<String> = sortedSetOf("")
     private val _conversationsListState: SnapshotStateList<FriendConversation> = mutableStateListOf()
+    private val _allConversations: MutableList<FriendConversation> = mutableListOf()
+    private val _allConversationsInvolvedIn: MutableList<FriendConversation> = mutableListOf()
     // endregion Variables
 
 
     // region Properties
     val message
         get() = _message
-    val usersInvolved
-        get() = _usersInvolved
     val conversationsListState
         get() = _conversationsListState
+    val allConversations
+        get() = _allConversations
+    val allConversationsInvolvedIn
+        get() = _allConversationsInvolvedIn
     // endregion Properties
 
 
@@ -67,11 +74,31 @@ class MessagesViewModel constructor(
     }
 
     fun sendMessage(){
+        // Before creating and saving a message in the database
+        // ... check if there is the corresponding conversation object
+        // ... to store a reference to the message
+        // If not, create the conversation object first
+        // If it exists already, get the corresponding conversation object
+
+        getConversationList()
+        val currentConversation = getSpecificConversation(_usersInvolved)
+        if (currentConversation != null){
+            Log.i(
+                TAG(),
+                "MessagesViewModel: Conversation object exists = \"${currentConversation}\""
+            )
+        }
+        else{
+            Log.i(
+                TAG(),
+                "MessagesViewModel: Conversation object doesn't exist; Adding it now"
+            )
+            addConversationToDatabase()
+        }
+
+
         addMessageToDatabase()
         resetMessage()
-
-        addConversationToDatabase()
-        getConversationList()
     }
 
     fun deleteMessage(){
@@ -88,7 +115,7 @@ class MessagesViewModel constructor(
                 TAG(),
                 "MessageViewModel: Message = \"${message.value}\" ;; Time = \"${timeSent}\""
             )
-            messagesRealm.addMessage(
+            messagesRepository.addMessage(
                 message = message.value,
                 timeSent = timeSent
             )
@@ -112,28 +139,34 @@ class MessagesViewModel constructor(
     }
 
     private fun addConversationToDatabase(){
-        // TODO These values are hardcoded for now
-        val usersInvolved = sortedSetOf(
-            // Gmail account
-            "65e96193c6e205c32b0915cc",
-            // Student account
-            "6570119696faac878ad696a5"
-        )
         viewModelScope.launch {
             Log.i(
                 TAG(),
-                "MessageViewModel: Conversation users involved = \"${usersInvolved}\""
+                "MessageViewModel: Conversation users involved = \"${_usersInvolved}\""
             )
-            conversationsRealm.addConversation(
-                usersInvolved = usersInvolved
+            conversationsRepository.addConversation(
+                usersInvolved = _usersInvolved
             )
         }
+    }
+
+    private fun getSpecificConversation(usersInvolved: SortedSet<String>): FriendConversation?{
+        for (conversation in allConversationsInvolvedIn){
+            if (conversation.usersInvolved == usersInvolved.toRealmList()){
+                return conversation
+            }
+        }
+        Log.i(
+            TAG(),
+            "MessagesViewModel: Could not find conversation = \"${usersInvolved.toRealmList()}\""
+        )
+        return null
     }
 
     private fun getConversationList(){
         // This logic is copied from the UserProfileViewModel class
         viewModelScope.launch {
-            conversationsRealm.getConversationList()
+            conversationsRepository.getAllConversations()
                 .collect {
                     event: ResultsChange<FriendConversation> ->
                     when (event){
@@ -144,6 +177,18 @@ class MessagesViewModel constructor(
                                 TAG(),
                                 "MessagesViewModel: Conversation amount = \"" +
                                         "${event.list.size}\""
+                            )
+                            // Add each element in the retrieved list of all conversations to a variable list
+                            event.list.forEach {
+                                allConversations.add(it)
+                                if (it.usersInvolved.contains(repository.getCurrentUserId())){
+                                    allConversationsInvolvedIn.add(it)
+                                }
+                            }
+                            Log.i(
+                                TAG(),
+                                "MessagesViewModel: Lists' conversation amounts = \"" +
+                                        "${allConversations.size}\" ;; \"${allConversationsInvolvedIn.size}\""
                             )
                         }
                         is UpdatedResults -> {
@@ -171,7 +216,7 @@ class MessagesViewModel constructor(
     }
 
     fun updateConversationUsersInvolved(usersInvolved: SortedSet<String>){
-
+        _usersInvolved = usersInvolved
     }
     // endregion Functions
 
@@ -179,6 +224,7 @@ class MessagesViewModel constructor(
     // Allows instantiating an instance of itself
     companion object {
         fun factory(
+            repository: SyncRepository,
             messagesRealm: IMessagesRealm,
             conversationsRealm: IConversationsRealm,
             owner: SavedStateRegistryOwner,
@@ -191,7 +237,7 @@ class MessagesViewModel constructor(
                     handle: SavedStateHandle
                 ): T {
                     // Remember to change the cast to the class name this code is in
-                    return MessagesViewModel (messagesRealm, conversationsRealm) as T
+                    return MessagesViewModel (repository, messagesRealm, conversationsRealm) as T
                 }
             }
         }

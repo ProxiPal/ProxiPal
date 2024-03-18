@@ -71,6 +71,11 @@ interface SyncRepository {
     fun resumeSync()
 
     /**
+     * Gets the current user's ID
+     */
+    fun getCurrentUserId(): String
+
+    /**
      * Closes the realm instance held by this repository.
      */
     fun close()
@@ -294,6 +299,10 @@ class RealmSyncRepository(
     }
 
     override fun close() = realm.close()
+
+    override fun getCurrentUserId(): String{
+        return currentUser.id
+    }
     // endregion RealmFunctions
 
     /*
@@ -378,13 +387,6 @@ class RealmSyncRepository(
         realm.write {
             copyToRealm(userProfile, updatePolicy = UpdatePolicy.ALL)
         }
-    }
-
-    /**
-     * Returns the current user's ID
-     */
-    fun getCurrentUserId(): String{
-        return currentUser.id
     }
 
     override suspend fun updateUserProfile(firstName: String, lastName: String, biography: String) {
@@ -623,15 +625,7 @@ class RealmSyncRepository(
     }
 
     override suspend fun addConversation(usersInvolved: SortedSet<String>) {
-        val usersInvolvedAmount = usersInvolved.size
-        // Convert the given set to a list
-        val usersInvolvedList = usersInvolved.toList()
-        val usersInvolvedRealmList: RealmList<String> = realmListOf()
-        // Iterate through the list and set each element to the realm list
-        // Sets don't use indexes but list and realm list must
-        for (index in 0..<usersInvolvedAmount){
-            usersInvolvedRealmList.add(usersInvolvedList[index])
-        }
+        val usersInvolvedRealmList: RealmList<String> = usersInvolved.toRealmList()
         Log.i(
             TAG(),
             "RealmSyncRepository: Conversation users involved = \"" +
@@ -646,10 +640,25 @@ class RealmSyncRepository(
         }
     }
 
-    override fun getConversationList(): Flow<ResultsChange<FriendConversation>> {
+    override fun getAllConversations(): Flow<ResultsChange<FriendConversation>> {
         return realm.query<FriendConversation>()
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
+    }
+
+    // Extension function
+    fun SortedSet<String>.toRealmList(): RealmList<String>{
+        val elementAmount = this.size
+        // Converts the original set to a list
+        val setToList = this.toList()
+        // Creates an empty realm list
+        val setToRealmList: RealmList<String> = realmListOf()
+        // Iterate through the list and set each element to the realm list
+        // Sets don't use indexes but list and realm list must
+        for (index in 0..<elementAmount){
+            setToRealmList.add(setToList[index])
+        }
+        return setToRealmList
     }
     // endregion
 }
@@ -662,6 +671,10 @@ class MockRepository : SyncRepository {
     override fun getActiveSubscriptionType(realm: Realm?): SubscriptionType = SubscriptionType.ALL
     override fun pauseSync() = Unit
     override fun resumeSync() = Unit
+    override fun getCurrentUserId(): String {
+        TODO("Not yet implemented")
+    }
+
     override fun close() = Unit
 
     override fun getTaskList(): Flow<ResultsChange<Item>> = flowOf()

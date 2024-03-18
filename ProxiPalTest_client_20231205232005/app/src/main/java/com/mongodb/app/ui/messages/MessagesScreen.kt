@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.mongodb.app.R
 import com.mongodb.app.TAG
+import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.messages.MESSAGE_WIDTH_WEIGHT
 import com.mongodb.app.data.messages.MOCK_MESSAGE_LIST
@@ -91,7 +92,7 @@ class MessagesScreen : ComponentActivity() {
     }
 
     private val messagesViewModel: MessagesViewModel by viewModels {
-        MessagesViewModel.factory(repository, repository, this)
+        MessagesViewModel.factory(repository, repository, repository, this)
     }
     // endregion Variables
 
@@ -104,6 +105,15 @@ class MessagesScreen : ComponentActivity() {
             TAG(),
             "MessagesScreen: Start of OnCreate()"
         )
+
+        // TODO These values are hardcoded for now
+        val usersInvolved = sortedSetOf(
+            // Gmail account
+            "65e96193c6e205c32b0915cc",
+            // Student account
+            "6570119696faac878ad696a5"
+        )
+        messagesViewModel.updateConversationUsersInvolved(usersInvolved)
 
         setContent {
             MessagesScreenLayout(
@@ -432,12 +442,14 @@ fun TimePreview(){
 @Composable
 fun MessagesScreenLayoutPreview() {
     MyApplicationTheme {
+        val mockSyncRepository = MockRepository()
         val mockMessagesRepository = MockMessagesRepository()
         val mockConversationRepository = MockConversationRepository()
         MessagesScreenLayout(
             messagesViewModel = MessagesViewModel(
-                messagesRealm = mockMessagesRepository,
-                conversationsRealm = mockConversationRepository
+                repository = mockSyncRepository,
+                messagesRepository = mockMessagesRepository,
+                conversationsRepository = mockConversationRepository
             )
         )
     }
