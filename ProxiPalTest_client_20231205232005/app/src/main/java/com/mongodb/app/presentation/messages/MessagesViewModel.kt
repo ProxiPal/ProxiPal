@@ -35,6 +35,7 @@ class MessagesViewModel constructor(
     private val _conversationsListState: SnapshotStateList<FriendConversation> = mutableStateListOf()
     private val _allConversations: MutableList<FriendConversation> = mutableListOf()
     private val _allConversationsInvolvedIn: MutableList<FriendConversation> = mutableListOf()
+    private var _currentConversation: FriendConversation? = null
     // endregion Variables
 
 
@@ -80,12 +81,13 @@ class MessagesViewModel constructor(
         // If not, create the conversation object first
         // If it exists already, get the corresponding conversation object
 
-        getConversationList()
-        val currentConversation = getSpecificConversation(_usersInvolved)
-        if (currentConversation != null){
+//        getConversationList()
+//        val currentConversation = getSpecificConversation(_usersInvolved)
+        getCurrentConversation()
+        if (_currentConversation != null){
             Log.i(
                 TAG(),
-                "MessagesViewModel: Conversation object exists = \"${currentConversation}\""
+                "MessagesViewModel: Conversation object exists = \"${_currentConversation}\""
             )
         }
         else{
@@ -161,6 +163,55 @@ class MessagesViewModel constructor(
             "MessagesViewModel: Could not find conversation = \"${usersInvolved.toRealmList()}\""
         )
         return null
+    }
+
+    private fun getCurrentConversation(){
+        // This logic is copied from the UserProfileViewModel class
+        viewModelScope.launch {
+            conversationsRepository.getSpecificConversation(_usersInvolved)
+                .collect {
+                        event: ResultsChange<FriendConversation> ->
+                    when (event){
+                        is InitialResults -> {
+                            conversationsListState.clear()
+                            conversationsListState.addAll(event.list)
+                            Log.i(
+                                TAG(),
+                                "MessagesViewModel: Current conversation amount = \"" +
+                                        "${event.list.size}\""
+                            )
+                            if (event.list.size == 1){
+                                _currentConversation = event.list[0]
+                            }
+                            else{
+                                Log.i(
+                                    TAG(),
+                                    "MessagesViewModel: SKipping current conversation retrieval"
+                                )
+                            }
+                        }
+                        is UpdatedResults -> {
+                            if (event.deletions.isNotEmpty() && conversationsListState.isNotEmpty()) {
+                                event.deletions.reversed().forEach {
+                                    conversationsListState.removeAt(it)
+                                }
+                            }
+                            if (event.insertions.isNotEmpty()) {
+                                event.insertions.forEach {
+                                    conversationsListState.add(it, event.list[it])
+                                }
+                            }
+                            if (event.changes.isNotEmpty()) {
+                                event.changes.forEach {
+                                    conversationsListState.removeAt(it)
+                                    conversationsListState.add(it, event.list[it])
+                                }
+                            }
+                        }
+                        else -> Unit // No-op
+                    }
+                }
+        }
     }
 
     private fun getConversationList(){

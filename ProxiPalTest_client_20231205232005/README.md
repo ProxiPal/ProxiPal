@@ -120,3 +120,7 @@ classes opening multiple realms causes the subscription-related error in the hea
 ## Realm subscriptions don't update automatically when changing in code
 
 Need to uninstall and re-install app, then realm subscriptions will update
+
+## (App crashes immediately) Cannot change schema from {x} to {y}
+
+Uninstall and re-install app

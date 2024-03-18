@@ -30,4 +30,9 @@ interface IConversationsRealm {
      * Returns a list of all friend conversations across all users
      */
     fun getAllConversations(): Flow<ResultsChange<FriendConversation>>
+
+    /**
+     * Returns a specific conversation object if it exists
+     */
+    fun getSpecificConversation(usersInvolved: SortedSet<String>): Flow<ResultsChange<FriendConversation>>
 }

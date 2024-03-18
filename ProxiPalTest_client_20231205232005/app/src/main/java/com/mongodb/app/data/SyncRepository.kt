@@ -35,6 +35,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import org.mongodb.kbson.ObjectId
 import java.util.SortedSet
 import kotlin.time.Duration.Companion.seconds
 
@@ -631,9 +632,12 @@ class RealmSyncRepository(
             "RealmSyncRepository: Conversation users involved = \"" +
                     "${usersInvolvedRealmList}\""
         )
+        val messagesSentRealmList: RealmList<ObjectId> = realmListOf()
 
         val friendConversation = FriendConversation().apply{
             this.usersInvolved = usersInvolvedRealmList
+            // Start with an empty list, then message references are added after
+            this.messagesSent = messagesSentRealmList
         }
         realm.write{
             copyToRealm(friendConversation, updatePolicy = UpdatePolicy.ALL)
@@ -642,6 +646,12 @@ class RealmSyncRepository(
 
     override fun getAllConversations(): Flow<ResultsChange<FriendConversation>> {
         return realm.query<FriendConversation>()
+            .sort(Pair("_id", Sort.ASCENDING))
+            .asFlow()
+    }
+
+    override fun getSpecificConversation(usersInvolved: SortedSet<String>): Flow<ResultsChange<FriendConversation>> {
+        return realm.query<FriendConversation>("$0 == messagesSent", usersInvolved)
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
     }
