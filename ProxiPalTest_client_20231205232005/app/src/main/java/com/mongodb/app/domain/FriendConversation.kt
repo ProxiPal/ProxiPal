@@ -13,10 +13,10 @@ import org.mongodb.kbson.ObjectId
 class FriendConversation : RealmObject {
     @PrimaryKey
     var _id: ObjectId = BsonObjectId()
-    // Collection of user string IDs (see FriendMessage ownerId field)
+    // Collection of user string IDs (see FriendMessage "ownerId" field)
     var usersInvolved: RealmList<String> = realmListOf()
-    // Collection of message ObjectIds (these are auto-generated)
-    var messagesSent: RealmList<ObjectId> = realmListOf()
+    // Collection of message string IDs (the FriendMessage ObjectId "_id" field as a string)
+    var messagesSent: RealmList<String> = realmListOf()
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false

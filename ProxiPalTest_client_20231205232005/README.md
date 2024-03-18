@@ -121,6 +121,7 @@ classes opening multiple realms causes the subscription-related error in the hea
 
 Need to uninstall and re-install app, then realm subscriptions will update
 
+## "[RLM_ERR_INVALID_SCHEMA_CHANGE]: The following changes cannot be made in additive-only schema mode:"
 ## (App crashes immediately) Cannot change schema from {x} to {y}
 
 Uninstall and re-install app

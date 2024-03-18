@@ -75,32 +75,12 @@ class MessagesViewModel constructor(
     }
 
     fun sendMessage(){
-        // Before creating and saving a message in the database
-        // ... check if there is the corresponding conversation object
-        // ... to store a reference to the message
-        // If not, create the conversation object first
-        // If it exists already, get the corresponding conversation object
+        viewModelScope.launch {
+            getCurrentConversation()
 
-//        getConversationList()
-//        val currentConversation = getSpecificConversation(_usersInvolved)
-        getCurrentConversation()
-        if (_currentConversation != null){
-            Log.i(
-                TAG(),
-                "MessagesViewModel: Conversation object exists = \"${_currentConversation}\""
-            )
+            addMessageToDatabase()
+            resetMessage()
         }
-        else{
-            Log.i(
-                TAG(),
-                "MessagesViewModel: Conversation object doesn't exist; Adding it now"
-            )
-            addConversationToDatabase()
-        }
-
-
-        addMessageToDatabase()
-        resetMessage()
     }
 
     fun deleteMessage(){
@@ -110,27 +90,16 @@ class MessagesViewModel constructor(
     /**
      * Adds a friend message to the database and consequently to both users' message history
      */
-    private fun addMessageToDatabase(){
-        viewModelScope.launch {
-            val timeSent: Long = getCurrentTime()
-            Log.i(
-                TAG(),
-                "MessageViewModel: Message = \"${message.value}\" ;; Time = \"${timeSent}\""
-            )
-            messagesRepository.addMessage(
-                message = message.value,
-                timeSent = timeSent
-            )
-        }
-        // By itself this does not work, but with the viewModelScope this does work
-//        CoroutineScope(Dispatchers.IO).launch {
-//            runCatching {
-//                messagesRealm.addMessage(
-//                    message = message.value,
-//                    timeSent = getTimeSent()
-//                )
-//            }
-//        }
+    private suspend fun addMessageToDatabase(){
+        val timeSent: Long = getCurrentTime()
+        Log.i(
+            TAG(),
+            "MessagesViewModel: Message = \"${message.value}\" ;; Time = \"${timeSent}\""
+        )
+        messagesRepository.addMessage(
+            message = message.value,
+            timeSent = timeSent
+        )
     }
 
     /**
@@ -140,130 +109,75 @@ class MessagesViewModel constructor(
         // TODO
     }
 
-    private fun addConversationToDatabase(){
-        viewModelScope.launch {
-            Log.i(
-                TAG(),
-                "MessageViewModel: Conversation users involved = \"${_usersInvolved}\""
-            )
-            conversationsRepository.addConversation(
-                usersInvolved = _usersInvolved
-            )
-        }
-    }
-
-    private fun getSpecificConversation(usersInvolved: SortedSet<String>): FriendConversation?{
-        for (conversation in allConversationsInvolvedIn){
-            if (conversation.usersInvolved == usersInvolved.toRealmList()){
-                return conversation
-            }
-        }
+    private suspend fun addConversationToDatabase(){
         Log.i(
             TAG(),
-            "MessagesViewModel: Could not find conversation = \"${usersInvolved.toRealmList()}\""
+            "MessagesViewModel: Conversation users involved = \"${_usersInvolved}\""
         )
-        return null
+        conversationsRepository.addConversation(
+            usersInvolved = _usersInvolved
+        )
     }
 
-    private fun getCurrentConversation(){
+    private suspend fun getCurrentConversation(){
         // This logic is copied from the UserProfileViewModel class
-        viewModelScope.launch {
-            conversationsRepository.getSpecificConversation(_usersInvolved)
-                .collect {
-                        event: ResultsChange<FriendConversation> ->
-                    when (event){
-                        is InitialResults -> {
-                            conversationsListState.clear()
-                            conversationsListState.addAll(event.list)
-                            Log.i(
-                                TAG(),
-                                "MessagesViewModel: Current conversation amount = \"" +
-                                        "${event.list.size}\""
-                            )
-                            if (event.list.size == 1){
+        conversationsRepository.getSpecificConversation(_usersInvolved)
+            .collect {
+                    event: ResultsChange<FriendConversation> ->
+                when (event){
+                    is InitialResults -> {
+                        conversationsListState.clear()
+                        conversationsListState.addAll(event.list)
+                        Log.i(
+                            TAG(),
+                            "MessagesViewModel: Current conversation amount = \"" +
+                                    "${event.list.size}\""
+                        )
+                        when (event.list.size) {
+                            1 -> {
                                 _currentConversation = event.list[0]
                             }
-                            else{
+                            0 -> {
+                                // Before creating and saving a message in the database
+                                // ... check if there is the corresponding conversation object
+                                // ... to store a reference to the message
+                                // If not, create the conversation object first
+                                // If it exists already, get the corresponding conversation object
+                                addConversationToDatabase()
+                            }
+                            else -> {
                                 Log.i(
                                     TAG(),
-                                    "MessagesViewModel: SKipping current conversation retrieval"
+                                    "MessagesViewModel: Too many found current conversations; Skipping..."
                                 )
                             }
                         }
-                        is UpdatedResults -> {
-                            if (event.deletions.isNotEmpty() && conversationsListState.isNotEmpty()) {
-                                event.deletions.reversed().forEach {
-                                    conversationsListState.removeAt(it)
-                                }
-                            }
-                            if (event.insertions.isNotEmpty()) {
-                                event.insertions.forEach {
-                                    conversationsListState.add(it, event.list[it])
-                                }
-                            }
-                            if (event.changes.isNotEmpty()) {
-                                event.changes.forEach {
-                                    conversationsListState.removeAt(it)
-                                    conversationsListState.add(it, event.list[it])
-                                }
-                            }
-                        }
-                        else -> Unit // No-op
+                        Log.i(
+                            TAG(),
+                            "MessagesViewModel: Current conversation = \"${_currentConversation}\""
+                        )
                     }
-                }
-        }
-    }
-
-    private fun getConversationList(){
-        // This logic is copied from the UserProfileViewModel class
-        viewModelScope.launch {
-            conversationsRepository.getAllConversations()
-                .collect {
-                    event: ResultsChange<FriendConversation> ->
-                    when (event){
-                        is InitialResults -> {
-                            conversationsListState.clear()
-                            conversationsListState.addAll(event.list)
-                            Log.i(
-                                TAG(),
-                                "MessagesViewModel: Conversation amount = \"" +
-                                        "${event.list.size}\""
-                            )
-                            // Add each element in the retrieved list of all conversations to a variable list
-                            event.list.forEach {
-                                allConversations.add(it)
-                                if (it.usersInvolved.contains(repository.getCurrentUserId())){
-                                    allConversationsInvolvedIn.add(it)
-                                }
-                            }
-                            Log.i(
-                                TAG(),
-                                "MessagesViewModel: Lists' conversation amounts = \"" +
-                                        "${allConversations.size}\" ;; \"${allConversationsInvolvedIn.size}\""
-                            )
-                        }
-                        is UpdatedResults -> {
-                            if (event.deletions.isNotEmpty() && conversationsListState.isNotEmpty()) {
-                                event.deletions.reversed().forEach {
-                                    conversationsListState.removeAt(it)
-                                }
-                            }
-                            if (event.insertions.isNotEmpty()) {
-                                event.insertions.forEach {
-                                    conversationsListState.add(it, event.list[it])
-                                }
-                            }
-                            if (event.changes.isNotEmpty()) {
-                                event.changes.forEach {
-                                    conversationsListState.removeAt(it)
-                                    conversationsListState.add(it, event.list[it])
-                                }
+                    is UpdatedResults -> {
+                        if (event.deletions.isNotEmpty() && conversationsListState.isNotEmpty()) {
+                            event.deletions.reversed().forEach {
+                                conversationsListState.removeAt(it)
                             }
                         }
-                        else -> Unit // No-op
+                        if (event.insertions.isNotEmpty()) {
+                            event.insertions.forEach {
+                                conversationsListState.add(it, event.list[it])
+                            }
+                        }
+                        if (event.changes.isNotEmpty()) {
+                            event.changes.forEach {
+                                conversationsListState.removeAt(it)
+                                conversationsListState.add(it, event.list[it])
+                            }
+                        }
                     }
+                    else -> Unit // No-op
                 }
-        }
+            }
     }
 
     fun updateConversationUsersInvolved(usersInvolved: SortedSet<String>){

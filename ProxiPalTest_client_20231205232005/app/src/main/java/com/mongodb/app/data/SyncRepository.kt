@@ -632,7 +632,7 @@ class RealmSyncRepository(
             "RealmSyncRepository: Conversation users involved = \"" +
                     "${usersInvolvedRealmList}\""
         )
-        val messagesSentRealmList: RealmList<ObjectId> = realmListOf()
+        val messagesSentRealmList: RealmList<String> = realmListOf("")
 
         val friendConversation = FriendConversation().apply{
             this.usersInvolved = usersInvolvedRealmList
@@ -651,7 +651,7 @@ class RealmSyncRepository(
     }
 
     override fun getSpecificConversation(usersInvolved: SortedSet<String>): Flow<ResultsChange<FriendConversation>> {
-        return realm.query<FriendConversation>("$0 == messagesSent", usersInvolved)
+        return realm.query<FriendConversation>("$0 == usersInvolved", usersInvolved)
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
     }
