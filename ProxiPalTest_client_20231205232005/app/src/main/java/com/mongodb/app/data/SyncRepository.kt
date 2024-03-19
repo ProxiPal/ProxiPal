@@ -2,7 +2,6 @@ package com.mongodb.app.data
 
 import android.util.Log
 import com.mongodb.app.TAG
-import com.mongodb.app.domain.Item
 import com.mongodb.app.app
 import com.mongodb.app.data.messages.IConversationsRealm
 import com.mongodb.app.data.messages.IMessagesRealm
@@ -10,6 +9,7 @@ import com.mongodb.app.data.messages.SHOULD_PRINT_REALM_CONFIG_INFO
 import com.mongodb.app.data.userprofiles.SHOULD_USE_TASKS_ITEMS
 import com.mongodb.app.domain.FriendConversation
 import com.mongodb.app.domain.FriendMessage
+import com.mongodb.app.domain.Item
 import com.mongodb.app.domain.UserProfile
 import com.mongodb.app.location.CustomGeoPoint
 import io.realm.kotlin.Realm
@@ -32,10 +32,11 @@ import io.realm.kotlin.types.geo.GeoCircle
 import io.realm.kotlin.types.geo.GeoPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import org.mongodb.kbson.BsonObjectId
 import org.mongodb.kbson.ObjectId
 import java.util.SortedSet
 import kotlin.time.Duration.Companion.seconds
@@ -688,6 +689,31 @@ class RealmSyncRepository(
                 findLatest(frozenObject)?.removeMessage(messageId)
             }
         }
+    }
+
+    override suspend fun readReferencedMessages(friendConversation: FriendConversation): MutableList<FriendMessage> {
+        val messages: MutableList<FriendMessage> = mutableListOf()
+        for (messageId in friendConversation.messagesSent){
+            val localJob = CoroutineScope(Dispatchers.Main).async{
+                val messageFlow: Flow<ResultsChange<FriendMessage>> = readMessage(messageId)
+                // Use .first instead of .collect
+                // Otherwise only the 1st message will be retrieved
+                // ... since .collect does not terminate automatically (?)
+                messageFlow.first{
+                    messages.addAll(it.list)
+                }
+            }
+            Log.i(
+                TAG(),
+                "RealmSyncRepository: (before) Referenced message amount = \"${messages.size}\""
+            )
+            localJob.await()
+            Log.i(
+                TAG(),
+                "RealmSyncRepository: (after) Referenced message amount = \"${messages.size}\""
+            )
+        }
+        return messages
     }
 
     // Extension function

@@ -1,6 +1,7 @@
 package com.mongodb.app.data.messages
 
 import com.mongodb.app.domain.FriendConversation
+import com.mongodb.app.domain.FriendMessage
 import io.realm.kotlin.Realm
 import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.query.RealmQuery
@@ -35,4 +36,9 @@ interface IConversationsRealm {
      * Updates a [FriendConversation] object
      */
     suspend fun updateConversation(usersInvolved: SortedSet<String>, messageId: String, shouldAddMessage: Boolean)
+
+    /**
+     * Gets a list of all referenced [FriendMessage] objects of a specific [FriendConversation] object
+     */
+    suspend fun readReferencedMessages(friendConversation: FriendConversation): MutableList<FriendMessage>
 }

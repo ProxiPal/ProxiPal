@@ -1,6 +1,7 @@
 package com.mongodb.app.data.messages
 
 import com.mongodb.app.domain.FriendConversation
+import com.mongodb.app.domain.FriendMessage
 import io.realm.kotlin.Realm
 import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.query.RealmQuery
@@ -33,6 +34,10 @@ class MockConversationRepository: IConversationsRealm{
         messageId: String,
         shouldAddMessage: Boolean
     ) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun readReferencedMessages(friendConversation: FriendConversation): MutableList<FriendMessage> {
         TODO("Not yet implemented")
     }
 }

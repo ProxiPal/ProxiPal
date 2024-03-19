@@ -129,7 +129,15 @@ class MessagesViewModel(
     /**
      * Converts a [FriendConversation]'s list of message ID references to a list of [FriendMessage]s
      */
-    fun getMessagesFromConversation(): List<FriendMessage> {
+    fun getMessagesFromConversation(): MutableList<FriendMessage> {
+        if (currentConversation != null){
+            var messages: MutableList<FriendMessage> = mutableListOf()
+            viewModelScope.launch {
+//                messages = conversationsRepository.readReferencedMessages(currentConversation!!)
+                conversationsRepository.readReferencedMessages(currentConversation!!)
+            }
+            return messages
+        }
         val messages: MutableList<FriendMessage> = mutableListOf()
         if (currentConversation != null) {
             for (messageId in currentConversation!!.messagesSent) {
