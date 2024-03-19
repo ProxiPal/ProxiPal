@@ -31,4 +31,11 @@ class MockConversationRepository: IConversationsRealm{
     override fun getSpecificConversation(usersInvolved: SortedSet<String>): Flow<ResultsChange<FriendConversation>> {
         TODO("Not yet implemented")
     }
+
+    override suspend fun updateConversation(
+        usersInvolved: SortedSet<String>,
+        messageId: String
+    ) {
+        TODO("Not yet implemented")
+    }
 }

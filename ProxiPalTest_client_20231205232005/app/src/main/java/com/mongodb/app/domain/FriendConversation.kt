@@ -33,4 +33,18 @@ class FriendConversation : RealmObject {
         result = 31 * result + messagesSent.hashCode()
         return result
     }
+
+    /**
+     * Add a reference to a [FriendMessage] object
+     */
+    fun addMessageReference(messageId: String){
+        messagesSent.add(messageId)
+    }
+
+    /**
+     * Removes a reference to a [FriendMessage] object
+     */
+    fun removeMessage(messageId: String){
+        messagesSent.remove(messageId)
+    }
 }

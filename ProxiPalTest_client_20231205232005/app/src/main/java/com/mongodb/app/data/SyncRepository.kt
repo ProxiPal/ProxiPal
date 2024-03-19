@@ -656,6 +656,38 @@ class RealmSyncRepository(
             .asFlow()
     }
 
+    override suspend fun updateConversation(
+        usersInvolved: SortedSet<String>,
+        messageId: String
+    ) {
+        // Queries inside write transaction are live objects
+        // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
+        // This is the same query as in the method getting a specific conversation
+        val frozenObjects = realm.query<FriendConversation>("$0 == usersInvolved", usersInvolved)
+            .find()
+        // In case the query result list is empty, check first before calling ".first()"
+        val frozenObject = if (frozenObjects.size > 0) {
+            frozenObjects.first()
+        } else {
+            null
+        }
+        if (frozenObject == null) {
+            Log.i(
+                TAG(),
+                "RealmSyncRepository: Creating a new conversation object; " +
+                        "Users involved = \"${usersInvolved}\""
+            )
+            // Create a new conversation object
+            addConversation(
+                usersInvolved = usersInvolved
+            )
+            return
+        }
+        realm.write {
+            findLatest(frozenObject)?.addMessageReference(messageId)
+        }
+    }
+
     // Extension function
     fun SortedSet<String>.toRealmList(): RealmList<String>{
         val elementAmount = this.size

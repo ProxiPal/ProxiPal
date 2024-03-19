@@ -35,4 +35,9 @@ interface IConversationsRealm {
      * Returns a specific conversation object if it exists
      */
     fun getSpecificConversation(usersInvolved: SortedSet<String>): Flow<ResultsChange<FriendConversation>>
+
+    /**
+     * Updates a [FriendConversation] object
+     */
+    suspend fun updateConversation(usersInvolved: SortedSet<String>, messageId: String)
 }
