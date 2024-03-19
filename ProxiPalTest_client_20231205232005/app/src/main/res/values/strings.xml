@@ -154,4 +154,12 @@
     <string name="cancel_Filter">Cancel</string>
 
 
+    <!-- Tutorial -->
+    <string name="this_is_the_profile_screen_here_you_can_edit_your_profile_and_add_photos">This is the profile screen, here you can edit your profile and add photos!</string>
+    <string name="this_is_the_connect_screen_here_you_can_connect_with_nearby_users_and_start_looking_for_friends">This is the connect screen, here you can connect with nearby users and start looking for friends!</string>
+    <string name="this_is_the_friends_screen_here_you_can_exchange_messages_with_friends">This is the friends screen, here you can exchange messages with friends!</string>
+    <string name="great_you_re_all_set">Great! You\'re all set!</string>
+    <string name="welcome_to_appname">Welcome to Proxipal!</string>
+
+
 </resources>

@@ -1,5 +1,6 @@
 package com.mongodb.app.tutorial
 
+import android.graphics.Paint.Align
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,12 +12,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.outlined.ChangeCircle
+import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,21 +29,29 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.mongodb.app.R
+import com.mongodb.app.data.MockRepository
 import com.mongodb.app.home.HomeViewModel
+import com.mongodb.app.location.UserProfileDisplayList
 import com.mongodb.app.navigation.Routes
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.tasks.ConnectWithOthersScreen
 import com.mongodb.app.ui.theme.Blue
+import com.mongodb.app.ui.theme.MyApplicationTheme
+import com.mongodb.app.ui.theme.Purple200
 import com.mongodb.app.ui.theme.Shapes
 import com.mongodb.app.ui.userprofiles.UserProfileLayout
 import kotlinx.coroutines.delay
@@ -89,11 +101,13 @@ fun AppOnboarding(
 {
     var currentStep by remember { mutableIntStateOf(0) }
     var alertDialogOffset by remember { mutableIntStateOf(80) }
+    var circleOffset by remember { mutableIntStateOf(-132) }
     val steps = listOf(
-        "Welcome to Your App!",
-        "This is the home screen, here you can edit your profile and add photos!",
-        "This is the connect screen, here you can connect with nearby users and start looking for friends!",
-        "Great! You're all set!"
+        stringResource(R.string.welcome_to_appname),
+        stringResource(R.string.this_is_the_profile_screen_here_you_can_edit_your_profile_and_add_photos),
+        stringResource(R.string.this_is_the_connect_screen_here_you_can_connect_with_nearby_users_and_start_looking_for_friends),
+        stringResource(R.string.this_is_the_friends_screen_here_you_can_exchange_messages_with_friends),
+        stringResource(R.string.great_you_re_all_set)
     )
 
     val progressSteps = steps.size - 1
@@ -114,26 +128,36 @@ fun AppOnboarding(
                             navController.navigate(Routes.UserProfileScreen.route)
                         }
                     },
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)
                 ) {
                     Text(if (currentStep < progressSteps) "Next" else "Got it!")
                 }
             },
+            backgroundColor = Purple200,
             modifier = Modifier.padding(16.dp)
         )
 
         if (currentStep == 1){
-            UserProfileLayout(
-                userProfileViewModel = userProfileViewModel,
-                toolbarViewModel = toolbarViewModel,
-                navController = navController,
-                homeViewModel = homeViewModel)
+            Box {
+                UserProfileLayout(
+                    userProfileViewModel = userProfileViewModel,
+                    toolbarViewModel = toolbarViewModel,
+                    navController = navController,
+                    homeViewModel = homeViewModel
+                )
+                CircleToBottomAppBar(circleOffset)
+            }
         }
         else if (currentStep == 2){
-            ConnectWithOthersScreen(
-                toolbarViewModel = toolbarViewModel,
-                navController = navController,
-                userProfileViewModel = userProfileViewModel
-            )
+            circleOffset = 0
+            Box {
+                ConnectWithOthersScreen(
+                    toolbarViewModel = toolbarViewModel,
+                    navController = navController,
+                    userProfileViewModel = userProfileViewModel
+                )
+                CircleToBottomAppBar(circleOffset)
+            }
         }
     }
 }
@@ -156,15 +180,18 @@ fun LinearDeterminateIndicator(progress: Float) {
 }
 
 @Composable
-fun ArrowToBottomAppBar(modifier: Modifier = Modifier) {
-    Box {
+fun CircleToBottomAppBar(circleOffset: Int) {
+    Box (modifier = Modifier.fillMaxSize()){
         androidx.compose.material3.Icon(
-            Icons.Filled.ArrowDownward,
+            Icons.Outlined.Circle,
             contentDescription = "Arrow Downward",
-            modifier = Modifier.align(alignment = Alignment.BottomCenter)
+            tint = Color.White,
+            modifier = Modifier
+                .align(alignment = Alignment.BottomCenter)
+                .offset(x = circleOffset.dp, y = 25.dp)
+                .size(100.dp)
         )
     }
-
 }
 
 
@@ -188,6 +215,29 @@ fun OnboardingScreen(
                 navController = navController,
                 homeViewModel = homeViewModel
             )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun UserProfileLayoutWithCircle() {
+    MyApplicationTheme {
+        val repository = MockRepository()
+        val userProfiles = (1..30).map { index ->
+            MockRepository.getMockUserProfile(index)
+        }.toMutableStateList()
+        Box {
+            UserProfileLayout(
+                userProfileViewModel = UserProfileViewModel(
+                    repository = repository,
+                    userProfileListState = userProfiles
+                ),
+                toolbarViewModel = ToolbarViewModel(repository),
+                navController = rememberNavController(),
+                homeViewModel = HomeViewModel()
+            )
+            CircleToBottomAppBar(0)
         }
     }
 }
