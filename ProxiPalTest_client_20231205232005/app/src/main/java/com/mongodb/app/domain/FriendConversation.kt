@@ -37,7 +37,7 @@ class FriendConversation : RealmObject {
     /**
      * Add a reference to a [FriendMessage] object
      */
-    fun addMessageReference(messageId: String){
+    fun addMessage(messageId: String){
         messagesSent.add(messageId)
     }
 

@@ -20,21 +20,18 @@ class MockConversationRepository: IConversationsRealm{
         TODO("Not yet implemented")
     }
 
-    override suspend fun addConversation(usersInvolved: SortedSet<String>) {
+    override suspend fun createConversation(usersInvolved: SortedSet<String>) {
         TODO("Not yet implemented")
     }
 
-    override fun getAllConversations(): Flow<ResultsChange<FriendConversation>> {
-        TODO("Not yet implemented")
-    }
-
-    override fun getSpecificConversation(usersInvolved: SortedSet<String>): Flow<ResultsChange<FriendConversation>> {
+    override fun readConversation(usersInvolved: SortedSet<String>): Flow<ResultsChange<FriendConversation>> {
         TODO("Not yet implemented")
     }
 
     override suspend fun updateConversation(
         usersInvolved: SortedSet<String>,
-        messageId: String
+        messageId: String,
+        shouldAddMessage: Boolean
     ) {
         TODO("Not yet implemented")
     }

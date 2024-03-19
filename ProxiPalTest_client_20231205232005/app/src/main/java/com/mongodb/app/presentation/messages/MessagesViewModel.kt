@@ -25,7 +25,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.SortedSet
 
-class MessagesViewModel constructor(
+class MessagesViewModel(
     private var repository: SyncRepository,
     private var messagesRepository: IMessagesRealm,
     private var conversationsRepository: IConversationsRealm
@@ -34,8 +34,6 @@ class MessagesViewModel constructor(
     private val _message = mutableStateOf("")
     private var _usersInvolved: SortedSet<String> = sortedSetOf("")
     private val _conversationsListState: SnapshotStateList<FriendConversation> = mutableStateListOf()
-    private val _allConversations: MutableList<FriendConversation> = mutableListOf()
-    private val _allConversationsInvolvedIn: MutableList<FriendConversation> = mutableListOf()
     private var _currentConversation: FriendConversation? = null
     // endregion Variables
 
@@ -45,10 +43,6 @@ class MessagesViewModel constructor(
         get() = _message
     val conversationsListState
         get() = _conversationsListState
-    val allConversations
-        get() = _allConversations
-    val allConversationsInvolvedIn
-        get() = _allConversationsInvolvedIn
     // endregion Properties
 
 
@@ -98,10 +92,8 @@ class MessagesViewModel constructor(
             }
         Log.i(
             TAG(),
-            "MessagesViewModel: New message... " +
-                    "Id = \"${newMessage._id}\"; " +
-                    "Message = \"${newMessage.message}\" ; " +
-                    "Time = \"${newMessage.timeSent}\""
+            "MessagesViewModel: New message ID = \"${newMessage._id.toHexString()}\"; " +
+                    "Message = \"${newMessage.message}\""
         )
 
         messagesRepository.createMessage(
@@ -110,7 +102,9 @@ class MessagesViewModel constructor(
         // Add a reference to the new message in the corresponding conversation object
         conversationsRepository.updateConversation(
             usersInvolved = _usersInvolved,
-            messageId = newMessage._id.toString()
+            // Use .toHexString() instead of .toString()
+            messageId = newMessage._id.toHexString(),
+            shouldAddMessage = true
         )
     }
 
@@ -126,14 +120,14 @@ class MessagesViewModel constructor(
             TAG(),
             "MessagesViewModel: Conversation users involved = \"${_usersInvolved}\""
         )
-        conversationsRepository.addConversation(
+        conversationsRepository.createConversation(
             usersInvolved = _usersInvolved
         )
     }
 
     private suspend fun getCurrentConversation(){
         // This logic is copied from the UserProfileViewModel class
-        conversationsRepository.getSpecificConversation(_usersInvolved)
+        conversationsRepository.readConversation(_usersInvolved)
             .collect {
                     event: ResultsChange<FriendConversation> ->
                 when (event){

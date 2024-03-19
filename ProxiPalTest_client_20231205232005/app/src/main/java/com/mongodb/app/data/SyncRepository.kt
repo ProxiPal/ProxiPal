@@ -620,7 +620,7 @@ class RealmSyncRepository(
         return realm.query("$0 IN usersInvolved", currentUser.id)
     }
 
-    override suspend fun addConversation(usersInvolved: SortedSet<String>) {
+    override suspend fun createConversation(usersInvolved: SortedSet<String>) {
         val usersInvolvedRealmList: RealmList<String> = usersInvolved.toRealmList()
         Log.i(
             TAG(),
@@ -639,33 +639,27 @@ class RealmSyncRepository(
         }
     }
 
-    override fun getAllConversations(): Flow<ResultsChange<FriendConversation>> {
-        return realm.query<FriendConversation>()
-            .sort(Pair("_id", Sort.ASCENDING))
-            .asFlow()
+    private fun getRealmQuerySpecificConversation(usersInvolved: SortedSet<String>): RealmQuery<FriendConversation>{
+        return realm.query<FriendConversation>("$0 == usersInvolved", usersInvolved)
     }
 
-    override fun getSpecificConversation(usersInvolved: SortedSet<String>): Flow<ResultsChange<FriendConversation>> {
-        return realm.query<FriendConversation>("$0 == usersInvolved", usersInvolved)
+    override fun readConversation(usersInvolved: SortedSet<String>): Flow<ResultsChange<FriendConversation>> {
+        return getRealmQuerySpecificConversation(usersInvolved)
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
     }
 
     override suspend fun updateConversation(
         usersInvolved: SortedSet<String>,
-        messageId: String
+        messageId: String,
+        shouldAddMessage: Boolean
     ) {
         // Queries inside write transaction are live objects
         // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
-        // This is the same query as in the method getting a specific conversation
-        val frozenObjects = realm.query<FriendConversation>("$0 == usersInvolved", usersInvolved)
+        val frozenObjects = getRealmQuerySpecificConversation(usersInvolved)
             .find()
         // In case the query result list is empty, check first before calling ".first()"
-        val frozenObject = if (frozenObjects.size > 0) {
-            frozenObjects.first()
-        } else {
-            null
-        }
+        val frozenObject = if (frozenObjects.size > 0) frozenObjects.first() else null
         if (frozenObject == null) {
             Log.i(
                 TAG(),
@@ -673,13 +667,18 @@ class RealmSyncRepository(
                         "Users involved = \"${usersInvolved}\""
             )
             // Create a new conversation object
-            addConversation(
+            createConversation(
                 usersInvolved = usersInvolved
             )
             return
         }
         realm.write {
-            findLatest(frozenObject)?.addMessageReference(messageId)
+            if (shouldAddMessage){
+                findLatest(frozenObject)?.addMessage(messageId)
+            }
+            else{
+                findLatest(frozenObject)?.removeMessage(messageId)
+            }
         }
     }
 

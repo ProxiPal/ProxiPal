@@ -22,22 +22,17 @@ interface IConversationsRealm {
     fun getQueryConversations(realm: Realm): RealmQuery<FriendConversation>
 
     /**
-     * Adds a conversation object to the Atlas database
+     * Creates a [FriendConversation] Realm object
      */
-    suspend fun addConversation(usersInvolved: SortedSet<String>)
-
-    /**
-     * Returns a list of all friend conversations across all users
-     */
-    fun getAllConversations(): Flow<ResultsChange<FriendConversation>>
+    suspend fun createConversation(usersInvolved: SortedSet<String>)
 
     /**
      * Returns a specific conversation object if it exists
      */
-    fun getSpecificConversation(usersInvolved: SortedSet<String>): Flow<ResultsChange<FriendConversation>>
+    fun readConversation(usersInvolved: SortedSet<String>): Flow<ResultsChange<FriendConversation>>
 
     /**
      * Updates a [FriendConversation] object
      */
-    suspend fun updateConversation(usersInvolved: SortedSet<String>, messageId: String)
+    suspend fun updateConversation(usersInvolved: SortedSet<String>, messageId: String, shouldAddMessage: Boolean)
 }
