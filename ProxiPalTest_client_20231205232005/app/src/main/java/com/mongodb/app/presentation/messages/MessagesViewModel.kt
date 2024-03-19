@@ -43,6 +43,8 @@ class MessagesViewModel(
         get() = _message
     val conversationsListState
         get() = _conversationsListState
+    val currentConversation
+        get() = _currentConversation
     // endregion Properties
 
 
@@ -184,6 +186,42 @@ class MessagesViewModel(
                     else -> Unit // No-op
                 }
             }
+    }
+
+    fun getConversationMessages(): List<FriendMessage> {
+        val messages: MutableList<FriendMessage> = mutableListOf()
+        if (currentConversation != null) {
+            for (messageId in currentConversation!!.messagesSent) {
+                // Need to launch every time, otherwise will lead to scenario where first message
+                // ... is able to be read, but will stop trying to get other messages
+                viewModelScope.launch {
+                    messagesRepository.readMessage(messageId)
+                        .collect { event: ResultsChange<FriendMessage> ->
+                            Log.i(
+                                TAG(),
+                                "MessagesViewModel: Message amount with message ID = " +
+                                        "\"${messageId}\" is \"${event.list.size}\""
+                            )
+                            when (event) {
+                                is InitialResults -> {
+                                    messages.addAll(event.list)
+                                }
+                                // Do nothing
+                                else -> Unit
+                            }
+                        }
+                }
+            }
+        }
+        Log.i(
+            TAG(),
+            "MessagesViewModel: Total messages in list = \"${messages.size}\""
+        )
+        return messages
+    }
+
+    fun isMessageMine(message: FriendMessage): Boolean{
+        return message.ownerId == repository.getCurrentUserId()
     }
 
     fun updateConversationUsersInvolved(usersInvolved: SortedSet<String>){

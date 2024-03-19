@@ -14,6 +14,9 @@ class FriendMessage : RealmObject {
     var message: String = ""
     // Cannot use BsonDateTime, also Bson timestamp is for Mongo internal use
     var timeSent: Long = Long.MIN_VALUE
+    /**
+     * The app ID of the user who sent the message
+     */
     var ownerId: String = ""
 
     override fun equals(other: Any?): Boolean {

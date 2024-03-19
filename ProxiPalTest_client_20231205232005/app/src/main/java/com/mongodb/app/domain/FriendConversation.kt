@@ -4,7 +4,6 @@ import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
-import org.mongodb.kbson.BsonObjectId
 import org.mongodb.kbson.ObjectId
 
 /**
@@ -12,10 +11,14 @@ import org.mongodb.kbson.ObjectId
  */
 class FriendConversation : RealmObject {
     @PrimaryKey
-    var _id: ObjectId = BsonObjectId()
-    // Collection of user string IDs (see FriendMessage "ownerId" field)
+    var _id: ObjectId = ObjectId()
+    /**
+     * Collection of user string IDs (see FriendMessage "ownerId" field)
+     */
     var usersInvolved: RealmList<String> = realmListOf()
-    // Collection of message string IDs (the FriendMessage ObjectId "_id" field as a string)
+    /**
+     * Collection of message string IDs (the FriendMessage ObjectId "_id" field as a string)
+     */
     var messagesSent: RealmList<String> = realmListOf()
 
     override fun equals(other: Any?): Boolean {

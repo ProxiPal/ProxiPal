@@ -218,14 +218,12 @@ fun MessagesBodyContent(
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            // TODO Replace String with a custom Realm message class
-            val messageList = MOCK_MESSAGE_LIST
+            val messageList = messagesViewModel.getConversationMessages()
             // Start with the more recent messages at the bottom
             items(messageList.reversed()) { message ->
                 SingleMessageContainer(
-                    // TODO Use custom Realm class to store who sent a message
-                    isSenderMe = messageList.reversed().indexOf(message) % 2 == 1,
-                    message = message
+                    isSenderMe = messagesViewModel.isMessageMine(message),
+                    message = message.message
                 )
             }
         }
