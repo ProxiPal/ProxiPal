@@ -63,6 +63,7 @@ import com.mongodb.app.presentation.tasks.ToolbarEvent
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.presentation.userprofiles.AddUserProfileEvent
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
+import com.mongodb.app.tutorial.OnboardingScreen
 import com.mongodb.app.ui.components.MultiLineText
 import com.mongodb.app.ui.components.ProxiPalBottomAppBar
 import com.mongodb.app.ui.components.SingleLineText

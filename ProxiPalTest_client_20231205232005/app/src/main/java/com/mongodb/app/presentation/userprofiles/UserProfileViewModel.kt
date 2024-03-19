@@ -87,6 +87,9 @@ class UserProfileViewModel constructor(
     private var _userProfileInterests: MutableList<String> = mutableListOf()
     private var _userProfileIndustries: MutableList<String> = mutableListOf()
 
+    // for tutorial, added by Marco Pacini
+    private var _showTutorial: MutableState<Boolean> = mutableStateOf(true)
+
 
 
     /*
@@ -146,6 +149,9 @@ class UserProfileViewModel constructor(
         get() = _userProfileInterests
     val userProfileIndustries: List<String>
         get() = _userProfileIndustries
+
+    val showTutorial: State<Boolean>
+        get() = _showTutorial
 
 
 
