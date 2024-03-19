@@ -73,19 +73,21 @@ class MessagesViewModel(
 
     fun sendMessage(){
         viewModelScope.launch {
-            addMessageToDatabase()
+            createMessage()
             resetMessage()
         }
     }
 
-    fun deleteMessage(){
-        removeMessageFromDatabase()
+    fun removeMessage(){
+        deleteMessage()
     }
 
+
+    // region Messages
     /**
-     * Adds a friend message to the database and consequently to both users' message history
+     * Adds a [FriendMessage] object to the database
      */
-    private suspend fun addMessageToDatabase(){
+    private suspend fun createMessage(){
         val newMessage = FriendMessage()
             .also {
                 it.message = message.value
@@ -111,13 +113,61 @@ class MessagesViewModel(
     }
 
     /**
-     * Removes a sent message from the database and consequently from both users' message history
+     * Removes a [FriendMessage] object from the database
      */
-    private fun removeMessageFromDatabase(){
+    private fun deleteMessage(){
         // TODO
     }
 
-    private suspend fun addConversationToDatabase(){
+    /**
+     * Checks if a specific message was sent by the current user
+     */
+    fun isMessageMine(message: FriendMessage): Boolean{
+        return message.ownerId == repository.getCurrentUserId()
+    }
+
+    /**
+     * Converts a [FriendConversation]'s list of message ID references to a list of [FriendMessage]s
+     */
+    fun getMessagesFromConversation(): List<FriendMessage> {
+        val messages: MutableList<FriendMessage> = mutableListOf()
+        if (currentConversation != null) {
+            for (messageId in currentConversation!!.messagesSent) {
+                // Need to launch every time, otherwise will lead to scenario where first message
+                // ... is able to be read, but will stop trying to get other messages
+                viewModelScope.launch {
+                    messagesRepository.readMessage(messageId)
+                        .collect { event: ResultsChange<FriendMessage> ->
+                            Log.i(
+                                TAG(),
+                                "MessagesViewModel: Message amount with message ID = " +
+                                        "\"${messageId}\" is \"${event.list.size}\""
+                            )
+                            when (event) {
+                                is InitialResults -> {
+                                    messages.addAll(event.list)
+                                }
+                                // Do nothing
+                                else -> Unit
+                            }
+                        }
+                }
+            }
+        }
+        Log.i(
+            TAG(),
+            "MessagesViewModel: Total messages in list = \"${messages.size}\""
+        )
+        return messages
+    }
+    // endregion Messages
+
+
+    // region Conversations
+    /**
+     * Adds a [FriendConversation] object to the database
+     */
+    private suspend fun createConversation(){
         Log.i(
             TAG(),
             "MessagesViewModel: Conversation users involved = \"${_usersInvolved}\""
@@ -127,7 +177,10 @@ class MessagesViewModel(
         )
     }
 
-    private suspend fun getCurrentConversation(){
+    /**
+     * Gets the current [FriendConversation] object, if it exists
+     */
+    private suspend fun readConversation(){
         // This logic is copied from the UserProfileViewModel class
         conversationsRepository.readConversation(_usersInvolved)
             .collect {
@@ -151,7 +204,7 @@ class MessagesViewModel(
                                 // ... to store a reference to the message
                                 // If not, create the conversation object first
                                 // If it exists already, get the corresponding conversation object
-                                addConversationToDatabase()
+                                createConversation()
                             }
                             else -> {
                                 Log.i(
@@ -188,47 +241,14 @@ class MessagesViewModel(
             }
     }
 
-    fun getConversationMessages(): List<FriendMessage> {
-        val messages: MutableList<FriendMessage> = mutableListOf()
-        if (currentConversation != null) {
-            for (messageId in currentConversation!!.messagesSent) {
-                // Need to launch every time, otherwise will lead to scenario where first message
-                // ... is able to be read, but will stop trying to get other messages
-                viewModelScope.launch {
-                    messagesRepository.readMessage(messageId)
-                        .collect { event: ResultsChange<FriendMessage> ->
-                            Log.i(
-                                TAG(),
-                                "MessagesViewModel: Message amount with message ID = " +
-                                        "\"${messageId}\" is \"${event.list.size}\""
-                            )
-                            when (event) {
-                                is InitialResults -> {
-                                    messages.addAll(event.list)
-                                }
-                                // Do nothing
-                                else -> Unit
-                            }
-                        }
-                }
-            }
-        }
-        Log.i(
-            TAG(),
-            "MessagesViewModel: Total messages in list = \"${messages.size}\""
-        )
-        return messages
-    }
-
-    fun isMessageMine(message: FriendMessage): Boolean{
-        return message.ownerId == repository.getCurrentUserId()
-    }
-
-    fun updateConversationUsersInvolved(usersInvolved: SortedSet<String>){
+    /**
+     * Updates a [FriendConversation]'s users involved field
+     */
+    fun updateUsersInvolved(usersInvolved: SortedSet<String>){
         _usersInvolved = usersInvolved
         // Get the corresponding conversation object with the given users involved
         viewModelScope.launch {
-            getCurrentConversation()
+            readConversation()
         }
     }
     // endregion Functions

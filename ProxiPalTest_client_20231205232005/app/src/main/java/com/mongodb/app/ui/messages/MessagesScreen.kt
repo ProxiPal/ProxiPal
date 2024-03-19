@@ -117,7 +117,7 @@ class MessagesScreen : ComponentActivity() {
             // Student account
             "6570119696faac878ad696a5"
         )
-        messagesViewModel.updateConversationUsersInvolved(usersInvolved)
+        messagesViewModel.updateUsersInvolved(usersInvolved)
 
         setContent {
             MessagesScreenLayout(
@@ -218,7 +218,7 @@ fun MessagesBodyContent(
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            val messageList = messagesViewModel.getConversationMessages()
+            val messageList = messagesViewModel.getMessagesFromConversation()
             // Start with the more recent messages at the bottom
             items(messageList.reversed()) { message ->
                 SingleMessageContainer(
