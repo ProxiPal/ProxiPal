@@ -2,7 +2,9 @@ package com.mongodb.app.data.messages
 
 import com.mongodb.app.domain.FriendMessage
 import io.realm.kotlin.Realm
+import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.query.RealmQuery
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Contains necessary functions when working with [FriendMessage] objects
@@ -22,4 +24,9 @@ interface IMessagesRealm{
      * Creates a [FriendMessage] Realm object
      */
     suspend fun createMessage(newMessage: FriendMessage)
+
+    /**
+     * Gets a specific [FriendMessage] object
+     */
+    fun readMessage(id: String): Flow<ResultsChange<FriendMessage>>
 }

@@ -35,6 +35,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import org.mongodb.kbson.BsonObjectId
 import org.mongodb.kbson.ObjectId
 import java.util.SortedSet
 import kotlin.time.Duration.Companion.seconds
@@ -593,6 +594,13 @@ class RealmSyncRepository(
         realm.write {
             copyToRealm(newMessage, updatePolicy = UpdatePolicy.ALL)
         }
+    }
+
+    override fun readMessage(id: String): Flow<ResultsChange<FriendMessage>> {
+        // Comparing "object ids"
+        return realm.query<FriendMessage>("_id == $0", ObjectId(id))
+            .sort(Pair("_id", Sort.ASCENDING))
+            .asFlow()
     }
     // endregion Messages
 

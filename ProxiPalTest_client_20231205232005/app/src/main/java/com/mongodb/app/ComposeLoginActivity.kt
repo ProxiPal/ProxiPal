@@ -15,8 +15,10 @@ import com.mongodb.app.presentation.login.LoginEvent
 import com.mongodb.app.presentation.login.LoginViewModel
 import com.mongodb.app.ui.login.AccountScaffold
 
+import com.mongodb.app.ui.messages.MessagesScreen
 
 import com.mongodb.app.ui.theme.MyApplicationTheme
+import com.mongodb.app.ui.userprofiles.UserProfileScreen
 import kotlinx.coroutines.launch
 
 
@@ -43,8 +45,8 @@ class ComposeLoginActivity : ComponentActivity() {
             else
                 startActivity(Intent(
                     this,
-                    //CompassScreen::class.java
-                    UserProfileScreen::class.java
+                    MessagesScreen::class.java
+//                    UserProfileScreen::class.java
                 ))
             finish()
             return
@@ -65,8 +67,8 @@ class ComposeLoginActivity : ComponentActivity() {
                             )
                             else Intent(
                                 this@ComposeLoginActivity,
-                                //CompassScreen::class.java
-                                UserProfileScreen::class.java
+                                MessagesScreen::class.java
+//                                UserProfileScreen::class.java
                             )
                             startActivity(intent)
                             finish()

@@ -2,7 +2,9 @@ package com.mongodb.app.data.messages
 
 import com.mongodb.app.domain.FriendMessage
 import io.realm.kotlin.Realm
+import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.query.RealmQuery
+import kotlinx.coroutines.flow.Flow
 
 /**
  * A mock class to be used in preview Composable functions
@@ -17,6 +19,10 @@ class MockMessagesRepository : IMessagesRealm{
     }
 
     override suspend fun createMessage(newMessage: FriendMessage) {
+        TODO("Not yet implemented")
+    }
+
+    override fun readMessage(id: String): Flow<ResultsChange<FriendMessage>> {
         TODO("Not yet implemented")
     }
 }
