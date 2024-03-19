@@ -589,14 +589,9 @@ class RealmSyncRepository(
         return realm.query("ownerId == $0", currentUser.id)
     }
 
-    override suspend fun addMessage(message: String, timeSent: Long){
-        val friendMessage = FriendMessage().apply {
-            ownerId = currentUser.id
-            this.message = message
-            this.timeSent = timeSent
-        }
+    override suspend fun createMessage(newMessage: FriendMessage){
         realm.write {
-            copyToRealm(friendMessage, updatePolicy = UpdatePolicy.ALL)
+            copyToRealm(newMessage, updatePolicy = UpdatePolicy.ALL)
         }
     }
     // endregion Messages

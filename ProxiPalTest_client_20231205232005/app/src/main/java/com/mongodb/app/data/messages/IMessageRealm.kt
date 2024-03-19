@@ -19,7 +19,7 @@ interface IMessagesRealm{
     fun getQueryMessages(realm: Realm): RealmQuery<FriendMessage>
 
     /**
-     * Adds a message object to the Atlas database
+     * Creates a [FriendMessage] Realm object
      */
-    suspend fun addMessage(message: String, timeSent: Long)
+    suspend fun createMessage(newMessage: FriendMessage)
 }

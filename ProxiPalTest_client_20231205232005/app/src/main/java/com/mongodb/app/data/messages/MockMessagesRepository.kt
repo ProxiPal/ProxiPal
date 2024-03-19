@@ -16,7 +16,7 @@ class MockMessagesRepository : IMessagesRealm{
         TODO("Not yet implemented")
     }
 
-    override suspend fun addMessage(message: String, timeSent: Long) {
+    override suspend fun createMessage(newMessage: FriendMessage) {
         TODO("Not yet implemented")
     }
 }

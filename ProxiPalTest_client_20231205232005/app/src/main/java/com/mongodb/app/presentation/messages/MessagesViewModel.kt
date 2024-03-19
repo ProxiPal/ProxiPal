@@ -15,6 +15,7 @@ import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.messages.IConversationsRealm
 import com.mongodb.app.data.messages.IMessagesRealm
 import com.mongodb.app.domain.FriendConversation
+import com.mongodb.app.domain.FriendMessage
 import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.notifications.InitialResults
 import io.realm.kotlin.notifications.ResultsChange
@@ -89,14 +90,27 @@ class MessagesViewModel constructor(
      * Adds a friend message to the database and consequently to both users' message history
      */
     private suspend fun addMessageToDatabase(){
-        val timeSent: Long = getCurrentTime()
+        val newMessage = FriendMessage()
+            .also {
+                it.message = message.value
+                it.timeSent = getCurrentTime()
+                it.ownerId = repository.getCurrentUserId()
+            }
         Log.i(
             TAG(),
-            "MessagesViewModel: Message = \"${message.value}\" ;; Time = \"${timeSent}\""
+            "MessagesViewModel: New message... " +
+                    "Id = \"${newMessage._id}\"; " +
+                    "Message = \"${newMessage.message}\" ; " +
+                    "Time = \"${newMessage.timeSent}\""
         )
-        messagesRepository.addMessage(
-            message = message.value,
-            timeSent = timeSent
+
+        messagesRepository.createMessage(
+            newMessage = newMessage
+        )
+        // Add a reference to the new message in the corresponding conversation object
+        conversationsRepository.updateConversation(
+            usersInvolved = _usersInvolved,
+            messageId = newMessage._id.toString()
         )
     }
 
