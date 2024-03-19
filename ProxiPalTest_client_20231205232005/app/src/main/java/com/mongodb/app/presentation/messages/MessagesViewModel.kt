@@ -76,8 +76,6 @@ class MessagesViewModel constructor(
 
     fun sendMessage(){
         viewModelScope.launch {
-            getCurrentConversation()
-
             addMessageToDatabase()
             resetMessage()
         }
@@ -182,6 +180,10 @@ class MessagesViewModel constructor(
 
     fun updateConversationUsersInvolved(usersInvolved: SortedSet<String>){
         _usersInvolved = usersInvolved
+        // Get the corresponding conversation object with the given users involved
+        viewModelScope.launch {
+            getCurrentConversation()
+        }
     }
     // endregion Functions
 

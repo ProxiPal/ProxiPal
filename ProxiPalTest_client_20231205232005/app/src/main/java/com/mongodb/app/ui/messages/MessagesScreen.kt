@@ -92,7 +92,11 @@ class MessagesScreen : ComponentActivity() {
     }
 
     private val messagesViewModel: MessagesViewModel by viewModels {
-        MessagesViewModel.factory(repository, repository, repository, this)
+        MessagesViewModel.factory(
+            repository = repository,
+            messagesRealm = repository,
+            conversationsRealm = repository,
+            this)
     }
     // endregion Variables
 
