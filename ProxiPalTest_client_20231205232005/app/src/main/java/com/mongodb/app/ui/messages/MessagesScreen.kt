@@ -32,6 +32,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,7 +55,6 @@ import com.mongodb.app.TAG
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.messages.MESSAGE_WIDTH_WEIGHT
-import com.mongodb.app.data.messages.MOCK_MESSAGE_LIST
 import com.mongodb.app.data.messages.MockConversationRepository
 import com.mongodb.app.data.messages.MockMessagesRepository
 import com.mongodb.app.domain.FriendMessage
@@ -61,6 +66,7 @@ import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Date
@@ -221,23 +227,20 @@ fun MessagesBodyContent(
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            CoroutineScope(Dispatchers.IO).launch{
-                val messages = messagesViewModel.getMessagesFromConversation()
-                Log.i(
-                    TAG(),
-                    "MessagesScreen: Retrieved message amount = \"${messages.size}\""
+            val messages = messagesViewModel.currentMessages.toList()
+            Log.i(
+                TAG(),
+                "MessagesScreen: Retrieved message amount = \"${messages.size}\""
+            )
+            // These lines both show some message UI when running the app
+            //messagesViewModel.currentConversation!!.messagesSent
+            //messagesViewModel.conversationsListState
+            // Start with the more recent messages at the bottom
+            items(messagesViewModel.messagesListState) { message ->
+                SingleMessageContainer(
+                    isSenderMe = messagesViewModel.isMessageMine(message),
+                    message = message.message
                 )
-                // Start with the more recent messages at the bottom
-                items(messagesViewModel.getMessagesFromConversation()) { message ->
-                    Log.i(
-                        TAG(),
-                        "MessagesScreen: Retrieved items message = \"${message.message}\""
-                    )
-                    SingleMessageContainer(
-                        isSenderMe = messagesViewModel.isMessageMine(message),
-                        message = message.message
-                    )
-                }
             }
         }
         MessagesInputRow(
@@ -385,6 +388,7 @@ fun MessagesInputRow(
 //                    top = dimensionResource(id = R.dimen.messages_screen_message_input_padding)
 //                )
         )
+        // Button to send message
         IconButton(
             onClick = { messagesViewModel.sendMessage() },
             modifier = Modifier

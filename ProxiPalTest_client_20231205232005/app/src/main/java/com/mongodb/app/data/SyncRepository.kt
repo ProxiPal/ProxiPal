@@ -693,8 +693,8 @@ class RealmSyncRepository(
 
     override suspend fun readReferencedMessages(friendConversation: FriendConversation): MutableList<FriendMessage> {
         val messages: MutableList<FriendMessage> = mutableListOf()
-        for (messageId in friendConversation.messagesSent){
-            val localJob = CoroutineScope(Dispatchers.Main).async{
+        val localJob = CoroutineScope(Dispatchers.IO).async {
+            for (messageId in friendConversation.messagesSent){
                 val messageFlow: Flow<ResultsChange<FriendMessage>> = readMessage(messageId)
                 // Use .first instead of .collect
                 // Otherwise only the 1st message will be retrieved
@@ -703,16 +703,9 @@ class RealmSyncRepository(
                     messages.addAll(it.list)
                 }
             }
-            Log.i(
-                TAG(),
-                "RealmSyncRepository: (before) Referenced message amount = \"${messages.size}\""
-            )
-            localJob.await()
-            Log.i(
-                TAG(),
-                "RealmSyncRepository: (after) Referenced message amount = \"${messages.size}\""
-            )
         }
+        // Wait until all the messages have been retrieved
+        localJob.await()
         return messages
     }
 

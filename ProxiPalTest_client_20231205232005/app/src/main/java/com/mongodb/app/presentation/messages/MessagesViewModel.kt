@@ -23,6 +23,9 @@ import io.realm.kotlin.notifications.UpdatedResults
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Date
@@ -30,25 +33,50 @@ import java.util.SortedSet
 
 class MessagesViewModel(
     private var repository: SyncRepository,
-    private var messagesRepository: IMessagesRealm,
+    var messagesRepository: IMessagesRealm,
     private var conversationsRepository: IConversationsRealm
 ) : ViewModel(){
     // region Variables
     private val _message = mutableStateOf("")
     private var _usersInvolved: SortedSet<String> = sortedSetOf("")
+    private val _messagesListState: SnapshotStateList<FriendMessage> = mutableStateListOf()
     private val _conversationsListState: SnapshotStateList<FriendConversation> = mutableStateListOf()
     private var _currentConversation: FriendConversation? = null
+    private val _currentMessages: MutableList<FriendMessage> = mutableListOf()
     // endregion Variables
 
 
     // region Properties
     val message
         get() = _message
+    val messagesListState
+        get() = _messagesListState
     val conversationsListState
         get() = _conversationsListState
     val currentConversation
         get() = _currentConversation
+    val currentMessages
+        get() = _currentMessages
     // endregion Properties
+
+
+    init{
+        viewModelScope.launch {
+            while (true) {
+                delay(5000)
+                Log.i(
+                    TAG(),
+                    "MessagesViewModel: Before message count = \"${currentMessages.size}\""
+                )
+                getMessagesFromConversation()
+                readMessage()
+                Log.i(
+                    TAG(),
+                    "MessagesViewModel: After message count = \"${currentMessages.size}\""
+                )
+            }
+        }
+    }
 
 
     // region Functions
@@ -116,6 +144,42 @@ class MessagesViewModel(
     }
 
     /**
+     * Gets the (1st item in) list of [FriendMessage] objects for the current [FriendConversation]
+     */
+    suspend fun readMessage(){
+        // This logic is copied from the UserProfileViewModel class
+        messagesRepository.readMessage(currentConversation!!.messagesSent[0])
+            .collect {
+                    event: ResultsChange<FriendMessage> ->
+                when (event){
+                    is InitialResults -> {
+                        messagesListState.clear()
+                        messagesListState.addAll(event.list)
+                    }
+                    is UpdatedResults -> {
+                        if (event.deletions.isNotEmpty() && messagesListState.isNotEmpty()) {
+                            event.deletions.reversed().forEach {
+                                messagesListState.removeAt(it)
+                            }
+                        }
+                        if (event.insertions.isNotEmpty()) {
+                            event.insertions.forEach {
+                                messagesListState.add(it, event.list[it])
+                            }
+                        }
+                        if (event.changes.isNotEmpty()) {
+                            event.changes.forEach {
+                                messagesListState.removeAt(it)
+                                messagesListState.add(it, event.list[it])
+                            }
+                        }
+                    }
+                    else -> Unit // No-op
+                }
+            }
+    }
+
+    /**
      * Removes a [FriendMessage] object from the database
      */
     private fun deleteMessage(){
@@ -132,19 +196,24 @@ class MessagesViewModel(
     /**
      * Converts a [FriendConversation]'s list of message ID references to a list of [FriendMessage]s
      */
-    suspend fun getMessagesFromConversation(): MutableList<FriendMessage> {
-        var messages: MutableList<FriendMessage> = mutableListOf()
-        val localJob = CoroutineScope(Dispatchers.Main).async{
-            if (currentConversation != null){
-                messages = conversationsRepository.readReferencedMessages(currentConversation!!)
+    suspend fun getMessagesFromConversation() {
+        currentMessages.clear()
+        if (currentConversation != null){
+            CoroutineScope(Dispatchers.IO).async {
+                for (messageId in currentConversation!!.messagesSent){
+                    val messageFlow: Flow<ResultsChange<FriendMessage>> =
+                        messagesRepository.readMessage(messageId)
+                    // Use .first instead of .collect
+                    // Otherwise only the 1st message will be retrieved
+                    // ... since .collect does not terminate automatically (?)
+                    messageFlow.first{
+                        currentMessages.addAll(it.list)
+                    }
+                }
             }
+                // Wait until all the messages have been retrieved
+                .await()
         }
-        localJob.await()
-        Log.i(
-            TAG(),
-            "MessagesViewModel: Retrieved message amount = \"${messages.size}\""
-        )
-        return messages
     }
     // endregion Messages
 
