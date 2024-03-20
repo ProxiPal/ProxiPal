@@ -20,6 +20,9 @@ import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.notifications.InitialResults
 import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.notifications.UpdatedResults
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Date
@@ -129,42 +132,17 @@ class MessagesViewModel(
     /**
      * Converts a [FriendConversation]'s list of message ID references to a list of [FriendMessage]s
      */
-    fun getMessagesFromConversation(): MutableList<FriendMessage> {
-        if (currentConversation != null){
-            var messages: MutableList<FriendMessage> = mutableListOf()
-            viewModelScope.launch {
-//                messages = conversationsRepository.readReferencedMessages(currentConversation!!)
-                conversationsRepository.readReferencedMessages(currentConversation!!)
-            }
-            return messages
-        }
-        val messages: MutableList<FriendMessage> = mutableListOf()
-        if (currentConversation != null) {
-            for (messageId in currentConversation!!.messagesSent) {
-                // Need to launch every time, otherwise will lead to scenario where first message
-                // ... is able to be read, but will stop trying to get other messages
-                viewModelScope.launch {
-                    messagesRepository.readMessage(messageId)
-                        .collect { event: ResultsChange<FriendMessage> ->
-                            Log.i(
-                                TAG(),
-                                "MessagesViewModel: Message amount with message ID = " +
-                                        "\"${messageId}\" is \"${event.list.size}\""
-                            )
-                            when (event) {
-                                is InitialResults -> {
-                                    messages.addAll(event.list)
-                                }
-                                // Do nothing
-                                else -> Unit
-                            }
-                        }
-                }
+    suspend fun getMessagesFromConversation(): MutableList<FriendMessage> {
+        var messages: MutableList<FriendMessage> = mutableListOf()
+        val localJob = CoroutineScope(Dispatchers.Main).async{
+            if (currentConversation != null){
+                messages = conversationsRepository.readReferencedMessages(currentConversation!!)
             }
         }
+        localJob.await()
         Log.i(
             TAG(),
-            "MessagesViewModel: Total messages in list = \"${messages.size}\""
+            "MessagesViewModel: Retrieved message amount = \"${messages.size}\""
         )
         return messages
     }

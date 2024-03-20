@@ -52,12 +52,15 @@ import com.mongodb.app.data.messages.MESSAGE_WIDTH_WEIGHT
 import com.mongodb.app.data.messages.MOCK_MESSAGE_LIST
 import com.mongodb.app.data.messages.MockConversationRepository
 import com.mongodb.app.data.messages.MockMessagesRepository
+import com.mongodb.app.domain.FriendMessage
 import com.mongodb.app.presentation.messages.MessagesViewModel
 import com.mongodb.app.ui.theme.MessageColorMine
 import com.mongodb.app.ui.theme.MessageColorOther
 import com.mongodb.app.ui.theme.MessageInputBackgroundColor
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Date
@@ -218,13 +221,23 @@ fun MessagesBodyContent(
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            val messageList = messagesViewModel.getMessagesFromConversation()
-            // Start with the more recent messages at the bottom
-            items(messageList.reversed()) { message ->
-                SingleMessageContainer(
-                    isSenderMe = messagesViewModel.isMessageMine(message),
-                    message = message.message
+            CoroutineScope(Dispatchers.IO).launch{
+                val messages = messagesViewModel.getMessagesFromConversation()
+                Log.i(
+                    TAG(),
+                    "MessagesScreen: Retrieved message amount = \"${messages.size}\""
                 )
+                // Start with the more recent messages at the bottom
+                items(messagesViewModel.getMessagesFromConversation()) { message ->
+                    Log.i(
+                        TAG(),
+                        "MessagesScreen: Retrieved items message = \"${message.message}\""
+                    )
+                    SingleMessageContainer(
+                        isSenderMe = messagesViewModel.isMessageMine(message),
+                        message = message.message
+                    )
+                }
             }
         }
         MessagesInputRow(
