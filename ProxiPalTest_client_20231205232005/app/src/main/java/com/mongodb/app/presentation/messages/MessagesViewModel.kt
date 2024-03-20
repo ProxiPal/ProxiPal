@@ -60,26 +60,25 @@ class MessagesViewModel(
     // endregion Properties
 
 
-    init{
+    // region Functions
+    fun refreshMessages(){
         viewModelScope.launch {
-            while (true) {
-                delay(5000)
 //                Log.i(
 //                    TAG(),
 //                    "MessagesViewModel: Before message count = \"${currentMessages.size}\""
 //                )
-                getMessagesFromConversation()
-                readMessages()
+            // Get the messages from the latest conversation object
+            // This two must run together (not one or the other)
+            // TODO Can this be condensed into 1 function?
+            readMessagesWithForLoop()
+            readMessagesWithQuery()
 //                Log.i(
 //                    TAG(),
 //                    "MessagesViewModel: After message count = \"${currentMessages.size}\""
 //                )
-            }
         }
     }
 
-
-    // region Functions
     fun updateMessage(newMessage: String){
         _message.value = newMessage
     }
@@ -106,6 +105,9 @@ class MessagesViewModel(
         viewModelScope.launch {
             createMessage()
             resetMessage()
+            // Refresh the conversation object instance to the one saved in the database
+            // This allows keeping updated with the latest messages (namely the one just sent)
+            readConversation()
         }
     }
 
@@ -144,61 +146,9 @@ class MessagesViewModel(
     }
 
     /**
-     * Gets the (1st item in) list of [FriendMessage] objects for the current [FriendConversation]
-     */
-    private fun readMessages(){
-        viewModelScope.launch {
-            // This logic is copied from the UserProfileViewModel class
-            messagesRepository.readConversationMessages(currentConversation!!)
-                .collect {
-                        event: ResultsChange<FriendMessage> ->
-                    when (event){
-                        is InitialResults -> {
-                            messagesListState.clear()
-                            messagesListState.addAll(event.list)
-                        }
-                        is UpdatedResults -> {
-                            if (event.deletions.isNotEmpty() && messagesListState.isNotEmpty()) {
-                                event.deletions.reversed().forEach {
-                                    messagesListState.removeAt(it)
-                                }
-                            }
-                            if (event.insertions.isNotEmpty()) {
-                                event.insertions.forEach {
-                                    messagesListState.add(it, event.list[it])
-                                }
-                            }
-                            if (event.changes.isNotEmpty()) {
-                                event.changes.forEach {
-                                    messagesListState.removeAt(it)
-                                    messagesListState.add(it, event.list[it])
-                                }
-                            }
-                        }
-                        else -> Unit // No-op
-                    }
-                }
-        }
-    }
-
-    /**
-     * Removes a [FriendMessage] object from the database
-     */
-    private fun deleteMessage(){
-        // TODO
-    }
-
-    /**
-     * Checks if a specific message was sent by the current user
-     */
-    fun isMessageMine(message: FriendMessage): Boolean{
-        return message.ownerId == repository.getCurrentUserId()
-    }
-
-    /**
      * Converts a [FriendConversation]'s list of message ID references to a list of [FriendMessage]s
      */
-    suspend fun getMessagesFromConversation() {
+    private suspend fun readMessagesWithForLoop() {
         currentMessages.clear()
         if (currentConversation != null){
             CoroutineScope(Dispatchers.IO).async {
@@ -216,6 +166,56 @@ class MessagesViewModel(
                 // Wait until all the messages have been retrieved
                 .await()
         }
+    }
+
+    /**
+     * Gets the list of [FriendMessage] objects for the current [FriendConversation]
+     */
+    private suspend fun readMessagesWithQuery(){
+        // This logic is copied from the UserProfileViewModel class
+        messagesRepository.readConversationMessages(currentConversation!!)
+            .collect {
+                    event: ResultsChange<FriendMessage> ->
+                when (event){
+                    is InitialResults -> {
+                        messagesListState.clear()
+                        messagesListState.addAll(event.list)
+                    }
+                    is UpdatedResults -> {
+                        if (event.deletions.isNotEmpty() && messagesListState.isNotEmpty()) {
+                            event.deletions.reversed().forEach {
+                                messagesListState.removeAt(it)
+                            }
+                        }
+                        if (event.insertions.isNotEmpty()) {
+                            event.insertions.forEach {
+                                messagesListState.add(it, event.list[it])
+                            }
+                        }
+                        if (event.changes.isNotEmpty()) {
+                            event.changes.forEach {
+                                messagesListState.removeAt(it)
+                                messagesListState.add(it, event.list[it])
+                            }
+                        }
+                    }
+                    else -> Unit // No-op
+                }
+            }
+    }
+
+    /**
+     * Removes a [FriendMessage] object from the database
+     */
+    private fun deleteMessage(){
+        // TODO
+    }
+
+    /**
+     * Checks if a specific message was sent by the current user
+     */
+    fun isMessageMine(message: FriendMessage): Boolean{
+        return message.ownerId == repository.getCurrentUserId()
     }
     // endregion Messages
 

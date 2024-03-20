@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -374,6 +375,15 @@ fun MessagesInputRow(
                 color = MessageInputBackgroundColor
             )
     ) {
+        // Button to refresh message history
+        IconButton(
+            onClick = { messagesViewModel.refreshMessages() }
+        ) {
+            Icon(
+                imageVector = Icons.Default.Refresh,
+                contentDescription = null
+            )
+        }
         TextField(
             value = messagesViewModel.message.value,
             placeholder = {
@@ -392,8 +402,7 @@ fun MessagesInputRow(
         )
         // Button to send message
         IconButton(
-            onClick = { messagesViewModel.sendMessage() },
-            modifier = Modifier
+            onClick = { messagesViewModel.sendMessage() }
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.Send,
