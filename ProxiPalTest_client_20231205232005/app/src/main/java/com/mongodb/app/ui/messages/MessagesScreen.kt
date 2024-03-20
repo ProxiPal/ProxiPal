@@ -227,16 +227,18 @@ fun MessagesBodyContent(
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            val messages = messagesViewModel.currentMessages.toList()
             Log.i(
                 TAG(),
-                "MessagesScreen: Retrieved message amount = \"${messages.size}\""
+                "MessagesScreen: Retrieved message amount = " +
+                        "\"${messagesViewModel.currentMessages.toList().size}\"; " +
+                        "Alt message amount = " +
+                        "\"${messagesViewModel.messagesListState.size}\""
             )
             // These lines both show some message UI when running the app
             //messagesViewModel.currentConversation!!.messagesSent
             //messagesViewModel.conversationsListState
             // Start with the more recent messages at the bottom
-            items(messagesViewModel.messagesListState) { message ->
+            items(messagesViewModel.currentMessages.toList().reversed()) { message ->
                 SingleMessageContainer(
                     isSenderMe = messagesViewModel.isMessageMine(message),
                     message = message.message

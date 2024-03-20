@@ -36,9 +36,4 @@ interface IConversationsRealm {
      * Updates a [FriendConversation] object
      */
     suspend fun updateConversation(usersInvolved: SortedSet<String>, messageId: String, shouldAddMessage: Boolean)
-
-    /**
-     * Gets a list of all referenced [FriendMessage] objects of a specific [FriendConversation] object
-     */
-    suspend fun readReferencedMessages(friendConversation: FriendConversation): MutableList<FriendMessage>
 }

@@ -36,8 +36,4 @@ class MockConversationRepository: IConversationsRealm{
     ) {
         TODO("Not yet implemented")
     }
-
-    override suspend fun readReferencedMessages(friendConversation: FriendConversation): MutableList<FriendMessage> {
-        TODO("Not yet implemented")
-    }
 }

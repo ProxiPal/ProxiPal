@@ -64,16 +64,16 @@ class MessagesViewModel(
         viewModelScope.launch {
             while (true) {
                 delay(5000)
-                Log.i(
-                    TAG(),
-                    "MessagesViewModel: Before message count = \"${currentMessages.size}\""
-                )
+//                Log.i(
+//                    TAG(),
+//                    "MessagesViewModel: Before message count = \"${currentMessages.size}\""
+//                )
                 getMessagesFromConversation()
-                readMessage()
-                Log.i(
-                    TAG(),
-                    "MessagesViewModel: After message count = \"${currentMessages.size}\""
-                )
+                readMessages()
+//                Log.i(
+//                    TAG(),
+//                    "MessagesViewModel: After message count = \"${currentMessages.size}\""
+//                )
             }
         }
     }
@@ -146,37 +146,39 @@ class MessagesViewModel(
     /**
      * Gets the (1st item in) list of [FriendMessage] objects for the current [FriendConversation]
      */
-    suspend fun readMessage(){
-        // This logic is copied from the UserProfileViewModel class
-        messagesRepository.readMessage(currentConversation!!.messagesSent[0])
-            .collect {
-                    event: ResultsChange<FriendMessage> ->
-                when (event){
-                    is InitialResults -> {
-                        messagesListState.clear()
-                        messagesListState.addAll(event.list)
+    private fun readMessages(){
+        viewModelScope.launch {
+            // This logic is copied from the UserProfileViewModel class
+            messagesRepository.readConversationMessages(currentConversation!!)
+                .collect {
+                        event: ResultsChange<FriendMessage> ->
+                    when (event){
+                        is InitialResults -> {
+                            messagesListState.clear()
+                            messagesListState.addAll(event.list)
+                        }
+                        is UpdatedResults -> {
+                            if (event.deletions.isNotEmpty() && messagesListState.isNotEmpty()) {
+                                event.deletions.reversed().forEach {
+                                    messagesListState.removeAt(it)
+                                }
+                            }
+                            if (event.insertions.isNotEmpty()) {
+                                event.insertions.forEach {
+                                    messagesListState.add(it, event.list[it])
+                                }
+                            }
+                            if (event.changes.isNotEmpty()) {
+                                event.changes.forEach {
+                                    messagesListState.removeAt(it)
+                                    messagesListState.add(it, event.list[it])
+                                }
+                            }
+                        }
+                        else -> Unit // No-op
                     }
-                    is UpdatedResults -> {
-                        if (event.deletions.isNotEmpty() && messagesListState.isNotEmpty()) {
-                            event.deletions.reversed().forEach {
-                                messagesListState.removeAt(it)
-                            }
-                        }
-                        if (event.insertions.isNotEmpty()) {
-                            event.insertions.forEach {
-                                messagesListState.add(it, event.list[it])
-                            }
-                        }
-                        if (event.changes.isNotEmpty()) {
-                            event.changes.forEach {
-                                messagesListState.removeAt(it)
-                                messagesListState.add(it, event.list[it])
-                            }
-                        }
-                    }
-                    else -> Unit // No-op
                 }
-            }
+        }
     }
 
     /**

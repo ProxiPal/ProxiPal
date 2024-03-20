@@ -603,6 +603,12 @@ class RealmSyncRepository(
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
     }
+
+    override fun readConversationMessages(friendConversation: FriendConversation): Flow<ResultsChange<FriendMessage>> {
+        return realm.query<FriendMessage>("_id IN $0", friendConversation.messagesSent)
+            .sort(Pair("_id", Sort.ASCENDING))
+            .asFlow()
+    }
     // endregion Messages
 
 
@@ -691,23 +697,24 @@ class RealmSyncRepository(
         }
     }
 
-    override suspend fun readReferencedMessages(friendConversation: FriendConversation): MutableList<FriendMessage> {
-        val messages: MutableList<FriendMessage> = mutableListOf()
-        val localJob = CoroutineScope(Dispatchers.IO).async {
-            for (messageId in friendConversation.messagesSent){
-                val messageFlow: Flow<ResultsChange<FriendMessage>> = readMessage(messageId)
-                // Use .first instead of .collect
-                // Otherwise only the 1st message will be retrieved
-                // ... since .collect does not terminate automatically (?)
-                messageFlow.first{
-                    messages.addAll(it.list)
-                }
-            }
-        }
-        // Wait until all the messages have been retrieved
-        localJob.await()
-        return messages
-    }
+    // For future reference
+//    override suspend fun readReferencedMessages(friendConversation: FriendConversation): MutableList<FriendMessage> {
+//        val messages: MutableList<FriendMessage> = mutableListOf()
+//        val localJob = CoroutineScope(Dispatchers.IO).async {
+//            for (messageId in friendConversation.messagesSent){
+//                val messageFlow: Flow<ResultsChange<FriendMessage>> = readMessage(messageId)
+//                // Use .first instead of .collect
+//                // Otherwise only the 1st message will be retrieved
+//                // ... since .collect does not terminate automatically (?)
+//                messageFlow.first{
+//                    messages.addAll(it.list)
+//                }
+//            }
+//        }
+//        // Wait until all the messages have been retrieved
+//        localJob.await()
+//        return messages
+//    }
 
     // Extension function
     fun SortedSet<String>.toRealmList(): RealmList<String>{

@@ -1,5 +1,6 @@
 package com.mongodb.app.data.messages
 
+import com.mongodb.app.domain.FriendConversation
 import com.mongodb.app.domain.FriendMessage
 import io.realm.kotlin.Realm
 import io.realm.kotlin.notifications.ResultsChange
@@ -29,4 +30,9 @@ interface IMessagesRealm{
      * Gets a specific [FriendMessage] object
      */
     fun readMessage(id: String): Flow<ResultsChange<FriendMessage>>
+
+    /**
+     * Gets a list of [FriendMessage] objects from a given [FriendConversation]
+     */
+    fun readConversationMessages(friendConversation: FriendConversation): Flow<ResultsChange<FriendMessage>>
 }
