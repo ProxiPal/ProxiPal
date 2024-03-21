@@ -70,9 +70,11 @@ TODO List of tasks to do for messages screen
 | Add functionality where new messages in the friends screen are bolded if their time sent is more recent than the time
 ... you last read that conversation (timeRead will be a new field and will get updated when the user either opens or exits
 ... out of viewing the conversation.)
-- Add ability to tap and hold a message
+- Make changes to both friend profile picture and IDs of users involved
+... when navigating from friends screen to messages screen
+- Add contextual menu besides messages
 | Add ability to delete a message
-| Add ability to reply to a message
+| (Maybe) Add ability to reply to a message
 */
 
 
@@ -363,6 +365,12 @@ fun SingleMessage(
             bottomEnd = dimensionResource(id = R.dimen.messages_screen_message_container_rounding)
         )
 
+    // For adding long-press functionality:
+    // .clickable's onLongClick creates IDE error
+    // .combinedClickable's onLongClick creates IDE error
+    // .pointerInput's detectTapGestures's onLongPress creates IDE error only with Cards
+    // ... Box and Surface show no errors, but do not do anything when long-pressed
+    // Also, does not seem like GestureDetector.OnGestureListener works for long presses
     Card(
         colors = CardDefaults.cardColors(
             containerColor =
