@@ -605,7 +605,17 @@ class RealmSyncRepository(
     }
 
     override fun readConversationMessages(friendConversation: FriendConversation): Flow<ResultsChange<FriendMessage>> {
-        return realm.query<FriendMessage>("_id IN $0", friendConversation.messagesSent)
+        val idList: MutableList<ObjectId> = mutableListOf()
+        // Messages sent is a list of strings, but actual message ID is a ObjectId
+        // Convert list of strings to list of ObjectIds first before doing the query
+        for (messageSent in friendConversation.messagesSent){
+            idList.add(ObjectId(messageSent))
+//            Log.i(
+//                TAG(),
+//                "RealmSyncRepository: Just added ObjectID = \"${idList[idList.size - 1]}\""
+//            )
+        }
+        return realm.query<FriendMessage>("_id IN $0", idList)
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
     }
