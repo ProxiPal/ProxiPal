@@ -73,7 +73,7 @@ class MessagesViewModel(
                 "MessagesViewModel: Finished reading messages using for loop over message references"
             )
             readMessagesWithQuery()
-            // This does not called
+            // Code beyond this point does not get called
             Log.i(
                 TAG(),
                 "MessagesViewModel: Finished reading messages using \"a IN b\" RQL query"
@@ -110,11 +110,7 @@ class MessagesViewModel(
             // Refresh the conversation object instance to the one saved in the database
             // This allows keeping updated with the latest messages (namely the one just sent)
             readConversation()
-            // This does not get called
-            Log.i(
-                TAG(),
-                "MessagesViewModel: Todo..."
-            )
+            // Code beyond this point does not get called
         }
     }
 
@@ -189,37 +185,6 @@ class MessagesViewModel(
             return@withContext
         }
         return
-
-        // This logic is copied from the UserProfileViewModel class
-        messagesRepository.readConversationMessages(currentConversation!!)
-            .collect {
-                    event: ResultsChange<FriendMessage> ->
-                when (event){
-                    is InitialResults -> {
-                        messagesListState.clear()
-                        messagesListState.addAll(event.list)
-                    }
-                    is UpdatedResults -> {
-                        if (event.deletions.isNotEmpty() && messagesListState.isNotEmpty()) {
-                            event.deletions.reversed().forEach {
-                                messagesListState.removeAt(it)
-                            }
-                        }
-                        if (event.insertions.isNotEmpty()) {
-                            event.insertions.forEach {
-                                messagesListState.add(it, event.list[it])
-                            }
-                        }
-                        if (event.changes.isNotEmpty()) {
-                            event.changes.forEach {
-                                messagesListState.removeAt(it)
-                                messagesListState.add(it, event.list[it])
-                            }
-                        }
-                    }
-                    else -> Unit // No-op
-                }
-            }
     }
 
     /**

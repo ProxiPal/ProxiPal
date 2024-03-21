@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -33,12 +34,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,16 +53,12 @@ import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.messages.MESSAGE_WIDTH_WEIGHT
 import com.mongodb.app.data.messages.MockConversationRepository
 import com.mongodb.app.data.messages.MockMessagesRepository
-import com.mongodb.app.domain.FriendMessage
 import com.mongodb.app.presentation.messages.MessagesViewModel
 import com.mongodb.app.ui.theme.MessageColorMine
 import com.mongodb.app.ui.theme.MessageColorOther
 import com.mongodb.app.ui.theme.MessageInputBackgroundColor
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Date
@@ -75,15 +66,6 @@ import java.util.Date
 
 /*
 TODO List of tasks to do for messages screen
-- Update message UI
-| Add message when at top of message history (something like "No more messages to load")
-- Update database/collection workings
-| Add collection for FriendConversations (current FriendMessage one will become FriendMessages)
-    | Make a 1-to-many relationship from FriendConversations and FriendMessages (Each document is a single message,
-    ... which prevents both parties of a conversation from editing the same document(s) at the same time.
-    ... Also this is more ideal than directly embedding messages into a conversation as (1) Messages can get large if
-    ... adding photos to messages and (2) There may be a lot of messages in a conversation)
-- Add ability to add an image (see HomeScreen and HomeViewModel)
 - Show the most recent message for each corresponding conversation in the friends screen
 | Add functionality where new messages in the friends screen are bolded if their time sent is more recent than the time
 ... you last read that conversation (timeRead will be a new field and will get updated when the user either opens or exits
@@ -235,20 +217,65 @@ fun MessagesBodyContent(
                         "Alt message amount = " +
                         "\"${messagesViewModel.messagesListState.size}\""
             )
-            // These lines both show some message UI when running the app
-            //messagesViewModel.currentConversation!!.messagesSent
-            //messagesViewModel.conversationsListState
             // Start with the more recent messages at the bottom
-            items(messagesViewModel.currentMessages.toList().reversed()) { message ->
+//        val messages: List<FriendMessage> = listOf()
+            val messages = messagesViewModel.currentMessages.toList()
+
+
+            // Unimplemented for now
+//            // If no messages have been sent
+//            // Cannot put in items() as there would be no messages there to show,
+//            // ... thus items() would merely not do anything
+//            if (messagesViewModel.currentMessages.isEmpty()){
+//                MessagesNotifierText(
+//                    stringId = R.string.messages_screen_no_sent_messages
+//                )
+//            }
+
+
+            items(messages.reversed()) {
+                message ->
                 SingleMessageContainer(
                     isSenderMe = messagesViewModel.isMessageMine(message),
                     message = message.message
                 )
+                // If the sent message is the last in the list
+                // ... or in other words the first ever message sent
+                // Because the messages are shown starting from the bottom of the screen
+                // ... to make this appear at the very top, this should go after
+                // ... message composable
+                if (messages.indexOf(message) == 0){
+                    MessagesNotifierText(
+                        stringId = R.string.messages_screen_end_of_messages
+                    )
+                }
             }
         }
         MessagesInputRow(
             messagesViewModel = messagesViewModel,
             modifier = Modifier
+        )
+    }
+}
+
+/**
+ * Shows a single line of "useful" information to the user
+ */
+@Composable
+fun MessagesNotifierText(
+    @StringRes
+    stringId: Int,
+    modifier: Modifier = Modifier
+){
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp, bottom = 8.dp)
+    ){
+        Text(
+            text = stringResource(id = stringId),
+            style = MaterialTheme.typography.labelMedium
         )
     }
 }
