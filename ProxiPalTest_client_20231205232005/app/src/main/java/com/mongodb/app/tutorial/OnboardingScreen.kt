@@ -130,7 +130,7 @@ fun AppOnboarding(
                     },
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)
                 ) {
-                    Text(if (currentStep < progressSteps) "Next" else "Got it!")
+                    Text(if (currentStep < progressSteps) stringResource(R.string.next) else stringResource(R.string.got_it))
                 }
             },
             backgroundColor = Purple200,
@@ -174,7 +174,7 @@ fun LinearDeterminateIndicator(progress: Float) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(16.dp),
-            color = Color.Yellow
+            color = Color.Black
         )
     }
 }
@@ -184,7 +184,7 @@ fun CircleToBottomAppBar(circleOffset: Int) {
     Box (modifier = Modifier.fillMaxSize()){
         androidx.compose.material3.Icon(
             Icons.Outlined.Circle,
-            contentDescription = "Arrow Downward",
+            contentDescription = "Circle",
             tint = Color.White,
             modifier = Modifier
                 .align(alignment = Alignment.BottomCenter)
