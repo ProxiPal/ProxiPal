@@ -27,6 +27,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 import java.util.Date
 import java.util.SortedSet
@@ -63,19 +64,20 @@ class MessagesViewModel(
     // region Functions
     fun refreshMessages(){
         viewModelScope.launch {
-//                Log.i(
-//                    TAG(),
-//                    "MessagesViewModel: Before message count = \"${currentMessages.size}\""
-//                )
             // Get the messages from the latest conversation object
             // This two must run together (not one or the other)
             // TODO Can this be condensed into 1 function?
             readMessagesWithForLoop()
+            Log.i(
+                TAG(),
+                "MessagesViewModel: Finished reading messages using for loop over message references"
+            )
             readMessagesWithQuery()
-//                Log.i(
-//                    TAG(),
-//                    "MessagesViewModel: After message count = \"${currentMessages.size}\""
-//                )
+            // This does not called
+            Log.i(
+                TAG(),
+                "MessagesViewModel: Finished reading messages using \"a IN b\" RQL query"
+            )
         }
     }
 
@@ -108,6 +110,11 @@ class MessagesViewModel(
             // Refresh the conversation object instance to the one saved in the database
             // This allows keeping updated with the latest messages (namely the one just sent)
             readConversation()
+            // This does not get called
+            Log.i(
+                TAG(),
+                "MessagesViewModel: Todo..."
+            )
         }
     }
 
@@ -172,6 +179,17 @@ class MessagesViewModel(
      * Gets the list of [FriendMessage] objects for the current [FriendConversation]
      */
     private suspend fun readMessagesWithQuery(){
+        messagesRepository.readConversationMessages(currentConversation!!)
+            .collect{
+                messagesListState.clear()
+                messagesListState.addAll(it.list)
+                return@collect
+            }
+        withContext(Dispatchers.Main){
+            return@withContext
+        }
+        return
+
         // This logic is copied from the UserProfileViewModel class
         messagesRepository.readConversationMessages(currentConversation!!)
             .collect {
@@ -270,10 +288,13 @@ class MessagesViewModel(
                                 )
                             }
                         }
-                        Log.i(
-                            TAG(),
-                            "MessagesViewModel: Current conversation = \"${_currentConversation}\""
-                        )
+                        if (currentConversation != null){
+                            Log.i(
+                                TAG(),
+                                "MessagesViewModel: Current conversation = \"${currentConversation!!._id}\" has " +
+                                        "\"${currentConversation!!.messagesSent.size}\" messages sent"
+                            )
+                        }
                     }
                     is UpdatedResults -> {
                         if (event.deletions.isNotEmpty() && conversationsListState.isNotEmpty()) {
