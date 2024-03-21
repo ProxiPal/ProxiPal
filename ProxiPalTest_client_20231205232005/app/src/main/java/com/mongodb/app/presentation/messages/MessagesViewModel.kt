@@ -62,21 +62,19 @@ class MessagesViewModel(
 
 
     // region Functions
+    /**
+     * Gets the messages from the latest conversation object
+     */
     fun refreshMessages(){
         viewModelScope.launch {
-            // Get the messages from the latest conversation object
-            // This two must run together (not one or the other)
-            // TODO Can this be condensed into 1 function?
-            readMessagesWithForLoop()
-            Log.i(
-                TAG(),
-                "MessagesViewModel: Finished reading messages using for loop over message references"
-            )
-            readMessagesWithQuery()
+            // This method only works if running the below method with it
+//            readMessagesMultipleQueries()
+            // This method works by itself and alongside the above method
+            readMessagesSingleQuery()
             // Code beyond this point does not get called
             Log.i(
                 TAG(),
-                "MessagesViewModel: Finished reading messages using \"a IN b\" RQL query"
+                "MessagesViewModel: Finished reading messages using any combination of methods"
             )
         }
     }
@@ -149,9 +147,12 @@ class MessagesViewModel(
     }
 
     /**
-     * Converts a [FriendConversation]'s list of message ID references to a list of [FriendMessage]s
+     * Gets the list of [FriendMessage] objects for the current [FriendConversation]
+     * using multiple RQL queries.
+     * (Iterates through all referenced message IDs and queries messages one by one that
+     * correspond to each ID. Uses [IMessagesRealm.readMessage])
      */
-    private suspend fun readMessagesWithForLoop() {
+    private suspend fun readMessagesMultipleQueries() {
         currentMessages.clear()
         if (currentConversation != null){
             CoroutineScope(Dispatchers.IO).async {
@@ -169,21 +170,44 @@ class MessagesViewModel(
                 // Wait until all the messages have been retrieved
                 .await()
         }
+        Log.i(
+            TAG(),
+            "MessagesViewModel: Finished reading messages using for loop over message references"
+        )
     }
 
     /**
      * Gets the list of [FriendMessage] objects for the current [FriendConversation]
+     * using a single RQL query.
+     * (Iterates through all messages in the database and queries if its ID is in the list
+     * of referenced message IDs. Uses [IMessagesRealm.readConversationMessages])
      */
-    private suspend fun readMessagesWithQuery(){
+    private suspend fun readMessagesSingleQuery(){
         messagesRepository.readConversationMessages(currentConversation!!)
             .collect{
                 messagesListState.clear()
                 messagesListState.addAll(it.list)
+                Log.i(
+                    TAG(),
+                    "MessagesViewModel: (0) Finished reading messages using \"a IN b\" RQL query"
+                )
                 return@collect
             }
+        Log.i(
+            TAG(),
+            "MessagesViewModel: (1) Finished reading messages using \"a IN b\" RQL query"
+        )
         withContext(Dispatchers.Main){
+            Log.i(
+                TAG(),
+                "MessagesViewModel: (2) Finished reading messages using \"a IN b\" RQL query"
+            )
             return@withContext
         }
+        Log.i(
+            TAG(),
+            "MessagesViewModel: (3) Finished reading messages using \"a IN b\" RQL query"
+        )
         return
     }
 

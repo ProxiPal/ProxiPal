@@ -215,6 +215,7 @@ fun MessagesBodyContent(
             .fillMaxSize()
     ) {
         LazyColumn(
+            // Starts with the more recent messages at the bottom
             // Start at the bottom, then scroll up to show older messages
             reverseLayout = true,
             modifier = Modifier
@@ -228,22 +229,12 @@ fun MessagesBodyContent(
                         "Alt message amount = " +
                         "\"${messagesViewModel.messagesListState.size}\""
             )
-            // Start with the more recent messages at the bottom
-//        val messages: List<FriendMessage> = listOf()
-            val messages = messagesViewModel.currentMessages.toList()
 
-
-            // Unimplemented for now
-//            // If no messages have been sent
-//            // Cannot put in items() as there would be no messages there to show,
-//            // ... thus items() would merely not do anything
-//            if (messagesViewModel.currentMessages.isEmpty()){
-//                MessagesNotifierText(
-//                    stringId = R.string.messages_screen_no_sent_messages
-//                )
-//            }
-
-
+            // Uses "multiple query" method in MessagesViewModel
+//            val messages = messagesViewModel.currentMessages.toList()
+            // Uses "single query" method in MessagesViewModel
+            // As of now, keep using this method (see comments in MessagesViewModel for more)
+            val messages = messagesViewModel.messagesListState.toList()
             items(messages.reversed()) {
                 message ->
                 SingleMessageContainer(
@@ -257,9 +248,7 @@ fun MessagesBodyContent(
                 // ... to make this appear at the very top, this should go after
                 // ... message composable
                 if (messages.indexOf(message) == 0){
-                    MessagesNotifierText(
-                        stringId = R.string.messages_screen_end_of_messages
-                    )
+                    MessagesEndOfHistory()
                 }
             }
         }
@@ -271,12 +260,10 @@ fun MessagesBodyContent(
 }
 
 /**
- * Shows a single line of "useful" information to the user
+ * Shows a single line of text to designate the end of the user's message history
  */
 @Composable
-fun MessagesNotifierText(
-    @StringRes
-    stringId: Int,
+fun MessagesEndOfHistory(
     modifier: Modifier = Modifier
 ){
     Row(
@@ -286,12 +273,15 @@ fun MessagesNotifierText(
             .padding(top = 8.dp, bottom = 8.dp)
     ){
         Text(
-            text = stringResource(id = stringId),
+            text = stringResource(id = R.string.messages_screen_end_of_messages),
             style = MaterialTheme.typography.labelMedium
         )
     }
 }
 
+/**
+ * The container for a message's text as well as other features for a single message
+ */
 @Composable
 fun SingleMessageContainer(
     message: String,
