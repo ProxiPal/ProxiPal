@@ -9,6 +9,7 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,10 +22,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,6 +38,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,6 +61,7 @@ import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.messages.MESSAGE_WIDTH_WEIGHT
 import com.mongodb.app.data.messages.MockConversationRepository
 import com.mongodb.app.data.messages.MockMessagesRepository
+import com.mongodb.app.domain.FriendMessage
 import com.mongodb.app.presentation.messages.MessagesViewModel
 import com.mongodb.app.ui.theme.MessageColorMine
 import com.mongodb.app.ui.theme.MessageColorOther
@@ -66,15 +75,15 @@ import java.util.Date
 
 /*
 TODO List of tasks to do for messages screen
+- Make message history update continuously
 - Show the most recent message for each corresponding conversation in the friends screen
 | Add functionality where new messages in the friends screen are bolded if their time sent is more recent than the time
 ... you last read that conversation (timeRead will be a new field and will get updated when the user either opens or exits
 ... out of viewing the conversation.)
 - Make changes to both friend profile picture and IDs of users involved
 ... when navigating from friends screen to messages screen
-- Add contextual menu besides messages
-| Add ability to delete a message
-| (Maybe) Add ability to reply to a message
+- Add ability to delete a message
+- (Maybe) Add ability to reply to a message
 */
 
 
@@ -239,7 +248,8 @@ fun MessagesBodyContent(
                 message ->
                 SingleMessageContainer(
                     isSenderMe = messagesViewModel.isMessageMine(message),
-                    message = message.message
+                    message = message.message,
+                    messagesViewModel = messagesViewModel
                 )
                 // If the sent message is the last in the list
                 // ... or in other words the first ever message sent
@@ -286,6 +296,7 @@ fun MessagesNotifierText(
 fun SingleMessageContainer(
     message: String,
     isSenderMe: Boolean,
+    messagesViewModel: MessagesViewModel,
     modifier: Modifier = Modifier
 ) {
     val rowArrangement =
@@ -327,12 +338,11 @@ fun SingleMessageContainer(
                     isSenderMe = isSenderMe,
                     modifier = Modifier
                 )
-                // The "sent by" message label
-                Text(
-                    text =
-                    if (isSenderMe) stringResource(id = R.string.messages_screen_sent_by_me)
-                    else stringResource(id = R.string.messages_screen_sent_by_other, "someone"),
-                    style = MaterialTheme.typography.labelSmall
+                SingleMessageExtras(
+                    isSenderMe = isSenderMe,
+                    messagesViewModel = messagesViewModel,
+                    modifier = Modifier
+                        .fillMaxWidth()
                 )
             }
         }
@@ -345,6 +355,9 @@ fun SingleMessageContainer(
     }
 }
 
+/**
+ * Shows a container with only the message text inside it
+ */
 @Composable
 fun SingleMessage(
     message: String,
@@ -393,6 +406,84 @@ fun SingleMessage(
                     end = dimensionResource(id = R.dimen.messages_screen_message_horizontal_padding)
                 )
         )
+    }
+}
+
+/**
+ * Shows tiny details below the actual message, such as the contextual menu
+ */
+@Composable
+fun SingleMessageExtras(
+    isSenderMe: Boolean,
+    messagesViewModel: MessagesViewModel,
+    modifier: Modifier = Modifier,
+){
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = modifier
+    ){
+        // Show contextual menu entry point on the left
+        if (!isSenderMe){
+            MessagesContextualMenu(
+                messagesViewModel = messagesViewModel
+            )
+        }
+        // The "sent by" message label
+        Text(
+            text =
+            if (isSenderMe) stringResource(id = R.string.messages_screen_sent_by_me)
+            else stringResource(id = R.string.messages_screen_sent_by_other, "someone"),
+            style = MaterialTheme.typography.labelSmall
+        )
+        // Show contextual menu entry point on the right
+        if (isSenderMe){
+            MessagesContextualMenu(
+                messagesViewModel = messagesViewModel
+            )
+        }
+    }
+}
+
+/**
+ * Provides an additional menu with extra actions the user can take
+ */
+@Composable
+fun MessagesContextualMenu(
+    messagesViewModel: MessagesViewModel,
+    modifier: Modifier = Modifier
+){
+    var isContextualMenuOpen by rememberSaveable { mutableStateOf(false) }
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+    ) {
+        IconButton(
+            onClick = {
+                isContextualMenuOpen = true
+            }
+        ) {
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = "Open Contextual Menu"
+            )
+        }
+
+        DropdownMenu(
+            expanded = isContextualMenuOpen,
+            onDismissRequest = {
+                isContextualMenuOpen = false
+            }
+        ) {
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text = stringResource(R.string.delete)
+                    )
+                       },
+                onClick = { TODO() }
+            )
+        }
     }
 }
 
@@ -524,10 +615,21 @@ fun MessagesScreenLayoutPreview() {
 @Composable
 fun SingleMessageContainerPreview() {
     MyApplicationTheme {
-        SingleMessageContainer(
-            message = stringResource(id = R.string.user_profile_test_string),
-            isSenderMe = true
-        )
+        Column(){
+            val messagesViewModel = MessagesViewModel(
+                MockRepository(), MockMessagesRepository(), MockConversationRepository()
+            )
+            SingleMessageContainer(
+                message = stringResource(id = R.string.user_profile_test_string),
+                isSenderMe = false,
+                messagesViewModel = messagesViewModel
+            )
+            SingleMessageContainer(
+                message = stringResource(id = R.string.user_profile_test_string),
+                isSenderMe = true,
+                messagesViewModel = messagesViewModel
+            )
+        }
     }
 }
 // endregion PreviewFunctions
