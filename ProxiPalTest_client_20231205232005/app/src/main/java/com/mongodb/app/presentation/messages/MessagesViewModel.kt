@@ -33,6 +33,14 @@ import java.util.Calendar
 import java.util.Date
 import java.util.SortedSet
 
+
+// region Extensions
+fun String.toObjectId(): ObjectId {
+    return ObjectId(this)
+}
+// endregion Extensions
+
+
 class MessagesViewModel(
     private var repository: SyncRepository,
     var messagesRepository: IMessagesRealm,
@@ -155,7 +163,7 @@ class MessagesViewModel(
             CoroutineScope(Dispatchers.IO).async {
                 for (messageId in currentConversation!!.messagesSent){
                     val messageFlow: Flow<ResultsChange<FriendMessage>> =
-                        messagesRepository.readMessage(messageId)
+                        messagesRepository.readMessage(messageId.toObjectId())
                     // Use .first instead of .collect
                     // Otherwise only the 1st message will be retrieved
                     // ... since .collect does not terminate automatically (?)

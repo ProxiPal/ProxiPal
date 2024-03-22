@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import org.mongodb.kbson.ObjectId
 
 /**
- * Contains necessary functions when working with [FriendMessage] objects
+ * Contains necessary functions when working with [FriendMessage] objects and Atlas Realm
  */
 interface IMessagesRealm{
     /**
@@ -23,22 +23,22 @@ interface IMessagesRealm{
     fun getQueryMessages(realm: Realm): RealmQuery<FriendMessage>
 
     /**
-     * Creates a [FriendMessage] Realm object
+     * Creates a [FriendMessage] object
      */
     suspend fun createMessage(newMessage: FriendMessage)
 
     /**
      * Gets a specific [FriendMessage] object
      */
-    fun readMessage(id: String): Flow<ResultsChange<FriendMessage>>
+    fun readMessage(messageId: ObjectId): Flow<ResultsChange<FriendMessage>>
 
     /**
-     * Gets a list of [FriendMessage] objects from a given [FriendConversation]
+     * Gets a list of [FriendMessage] objects from a [FriendConversation]
      */
     fun readConversationMessages(friendConversation: FriendConversation): Flow<ResultsChange<FriendMessage>>
 
     /**
-     * Deletes a [FriendMessage] from the database
+     * Deletes a [FriendMessage]
      */
     suspend fun deleteMessage(messageId: ObjectId)
 }

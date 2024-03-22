@@ -24,7 +24,7 @@ class MockMessagesRepository : IMessagesRealm{
         TODO("Not yet implemented")
     }
 
-    override fun readMessage(id: String): Flow<ResultsChange<FriendMessage>> {
+    override fun readMessage(messageId: ObjectId): Flow<ResultsChange<FriendMessage>> {
         TODO("Not yet implemented")
     }
 

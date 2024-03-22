@@ -49,6 +49,23 @@ Contributions:
  */
 
 
+// region Extensions
+fun SortedSet<String>.toRealmList(): RealmList<String>{
+    val elementAmount = this.size
+    // Converts the original set to a list
+    val setToList = this.toList()
+    // Creates an empty realm list
+    val setToRealmList: RealmList<String> = realmListOf()
+    // Iterate through the list and set each element to the realm list
+    // Sets don't use indexes but list and realm list must
+    for (index in 0..<elementAmount){
+        setToRealmList.add(setToList[index])
+    }
+    return setToRealmList
+}
+// endregion Extensions
+
+
 /**
  * Repository for accessing Realm Sync.
  * Working functions and code for Item classes has been copied for UserProfile classes
@@ -597,9 +614,8 @@ class RealmSyncRepository(
         }
     }
 
-    override fun readMessage(id: String): Flow<ResultsChange<FriendMessage>> {
-        // Comparing "object ids"
-        return realm.query<FriendMessage>("_id == $0", ObjectId(id))
+    override fun readMessage(messageId: ObjectId): Flow<ResultsChange<FriendMessage>> {
+        return realm.query<FriendMessage>("_id == $0", messageId)
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
     }
@@ -666,8 +682,10 @@ class RealmSyncRepository(
         }
     }
 
+    /**
+     * Find all conversations where the current user is involved
+     */
     override fun getQueryConversations(realm: Realm): RealmQuery<FriendConversation> {
-        // Find all conversations where the current user is involved
         return realm.query("$0 IN usersInvolved", currentUser.id)
     }
 
@@ -690,6 +708,9 @@ class RealmSyncRepository(
         }
     }
 
+    /**
+     * Gets a [FriendConversation] with only the specified users involved
+     */
     private fun getRealmQuerySpecificConversation(usersInvolved: SortedSet<String>): RealmQuery<FriendConversation>{
         return realm.query<FriendConversation>("$0 == usersInvolved", usersInvolved)
     }
@@ -732,22 +753,7 @@ class RealmSyncRepository(
             }
         }
     }
-
-    // Extension function
-    fun SortedSet<String>.toRealmList(): RealmList<String>{
-        val elementAmount = this.size
-        // Converts the original set to a list
-        val setToList = this.toList()
-        // Creates an empty realm list
-        val setToRealmList: RealmList<String> = realmListOf()
-        // Iterate through the list and set each element to the realm list
-        // Sets don't use indexes but list and realm list must
-        for (index in 0..<elementAmount){
-            setToRealmList.add(setToList[index])
-        }
-        return setToRealmList
-    }
-    // endregion
+    // endregion Conversations
 }
 
 /**
