@@ -19,11 +19,7 @@ import com.mongodb.app.domain.FriendMessage
 import io.realm.kotlin.notifications.InitialResults
 import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.notifications.UpdatedResults
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.mongodb.kbson.ObjectId
@@ -45,12 +41,14 @@ class MessagesViewModel(
     private var conversationsRepository: IConversationsRealm
 ) : ViewModel(){
     // region Variables
+    /**
+     * For storing the current text the user is entering
+     */
     private val _message = mutableStateOf("")
     private var _usersInvolved: SortedSet<String> = sortedSetOf("")
     private val _messagesListState: SnapshotStateList<FriendMessage> = mutableStateListOf()
     private val _conversationsListState: SnapshotStateList<FriendConversation> = mutableStateListOf()
     private var _currentConversation: FriendConversation? = null
-    private val _currentMessages: MutableList<FriendMessage> = mutableListOf()
     // endregion Variables
 
 
@@ -63,8 +61,6 @@ class MessagesViewModel(
         get() = _conversationsListState
     val currentConversation
         get() = _currentConversation
-    val currentMessages
-        get() = _currentMessages
     // endregion Properties
 
 
@@ -74,15 +70,8 @@ class MessagesViewModel(
      */
     fun refreshMessages(){
         viewModelScope.launch {
-            // This method only works if running the below method with it
-//            readMessagesMultipleQueries()
-            // This method works by itself and alongside the above method
-            readMessagesSingleQuery()
+            readMessages()
             // Code beyond this point does not get called
-            Log.i(
-                TAG(),
-                "MessagesViewModel: Finished reading messages using any combination of methods"
-            )
         }
     }
 
@@ -149,52 +138,12 @@ class MessagesViewModel(
 
     /**
      * Gets the list of [FriendMessage] objects for the current [FriendConversation]
-     * using multiple RQL queries.
-     * (Iterates through all referenced message IDs and queries messages one by one that
-     * correspond to each ID. Uses [IMessagesRealm.readMessage])
      */
-    private suspend fun readMessagesMultipleQueries() {
-        currentMessages.clear()
-        if (currentConversation != null){
-            CoroutineScope(Dispatchers.IO).async {
-                for (messageId in currentConversation!!.messagesSent){
-                    val messageFlow: Flow<ResultsChange<FriendMessage>> =
-                        messagesRepository.readMessage(messageId.toObjectId())
-                    // Use .first instead of .collect
-                    // Otherwise only the 1st message will be retrieved
-                    // ... since .collect does not terminate automatically (?)
-                    messageFlow.first{
-                        currentMessages.addAll(it.list)
-                    }
-                }
-            }
-                // Wait until all the messages have been retrieved
-                .await()
-        }
-        Log.i(
-            TAG(),
-            "MessagesViewModel: Finished reading messages using for loop over message references"
-        )
-    }
-
-    /**
-     * Gets the list of [FriendMessage] objects for the current [FriendConversation]
-     * using a single RQL query.
-     * (Iterates through all messages in the database and queries if its ID is in the list
-     * of referenced message IDs. Uses [IMessagesRealm.readConversationMessages])
-     */
-    private suspend fun readMessagesSingleQuery(){
+    private suspend fun readMessages(){
         messagesRepository.readConversationMessages(currentConversation!!)
             .collect{
                 messagesListState.clear()
                 messagesListState.addAll(it.list)
-                Log.i(
-                    TAG(),
-                    "MessagesViewModel: TEMP; conversation messages = " +
-                            "\"${currentConversation!!.messagesSent}\"; " +
-                            "state list messages = \"${it.list}\""
-                )
-
                 Log.i(
                     TAG(),
                     "MessagesViewModel: (0) Finished reading messages using \"a IN b\" RQL query"
@@ -291,9 +240,6 @@ class MessagesViewModel(
                                     "${event.list.size}\""
                         )
                         when (event.list.size) {
-                            1 -> {
-                                _currentConversation = event.list[0]
-                            }
                             0 -> {
                                 // Before creating and saving a message in the database
                                 // ... check if there is the corresponding conversation object
@@ -303,10 +249,7 @@ class MessagesViewModel(
                                 createConversation()
                             }
                             else -> {
-                                Log.i(
-                                    TAG(),
-                                    "MessagesViewModel: Too many found current conversations; Skipping..."
-                                )
+                                _currentConversation = event.list[0]
                             }
                         }
                         if (currentConversation != null){

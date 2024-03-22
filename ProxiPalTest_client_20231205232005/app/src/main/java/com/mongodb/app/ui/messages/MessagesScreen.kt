@@ -224,15 +224,9 @@ fun MessagesBodyContent(
             Log.i(
                 TAG(),
                 "MessagesScreen: Retrieved message amount = " +
-                        "\"${messagesViewModel.currentMessages.toList().size}\"; " +
-                        "Alt message amount = " +
                         "\"${messagesViewModel.messagesListState.size}\""
             )
 
-            // Uses "multiple query" method in MessagesViewModel
-//            val friendMessages = messagesViewModel.currentMessages.toList()
-            // Uses "single query" method in MessagesViewModel
-            // As of now, keep using this method (see comments in MessagesViewModel for more)
             val friendMessages = messagesViewModel.messagesListState.toList()
             items(friendMessages.reversed()) {
                 friendMessage ->
