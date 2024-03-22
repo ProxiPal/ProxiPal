@@ -92,11 +92,9 @@ fun ScreenSettings(navController: NavHostController) {
                         context.startActivity(intent)
                     }
                     SettingsItem("User Filters") {
-                        Toast.makeText(context, "User Filters clicked!", Toast.LENGTH_SHORT).show()
                         navController.navigate(Routes.FilterScreen.route)
                     }
                     SettingsItem("Advanced Settings") {
-                        Toast.makeText(context, "Advanced Settings clicked!", Toast.LENGTH_SHORT).show()
                         navController.navigate(Routes.AdvancedScreenSettings.route)
                     }
                     SettingsItem("Privacy Policy") {

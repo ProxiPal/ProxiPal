@@ -25,10 +25,11 @@
         android:ems="10"
         android:inputType="text"
         android:text=""
+        android:paddingTop="300dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.796"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        tools:layout_editor_absoluteY="132dp" />
+        tools:layout_editor_absoluteY="282dp" />
 
     <Button
         android:id="@+id/translateEnglishToChineseButton"
@@ -43,11 +44,12 @@
 
     <TextView
         android:id="@+id/insertTextLabel"
-        android:layout_width="95dp"
-        android:layout_height="23dp"
-        android:layout_marginEnd="248dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="156dp"
         android:text="Insert Text:"
         android:textSize="18sp"
+        android:paddingTop="250dp"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:layout_editor_absoluteY="144dp" />
+        tools:layout_editor_absoluteY="252dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

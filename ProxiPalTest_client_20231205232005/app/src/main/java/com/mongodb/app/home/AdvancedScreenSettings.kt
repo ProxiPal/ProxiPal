@@ -34,6 +34,8 @@ import androidx.navigation.NavHostController
 import com.mongodb.app.R
 import com.mongodb.app.AllowNotificationsActivity
 import com.mongodb.app.LanguageActivity
+import com.mongodb.app.LanguageIdentificationActivity
+import com.mongodb.app.LanguageTranslationActivity
 import com.mongodb.app.PrivacyPolicyActivity
 import com.mongodb.app.navigation.Routes
 
@@ -81,10 +83,12 @@ fun AdvancedScreenSettings(navController: NavHostController) {
 
                 ){
                     SettingsItem("Language Identification") {
-
+                        val intent = Intent(context, LanguageIdentificationActivity::class.java)
+                        context.startActivity(intent)
                     }
                     SettingsItem("Language Translation") {
-
+                        val intent = Intent(context, LanguageTranslationActivity::class.java)
+                        context.startActivity(intent)
                     }
                 }
             }
@@ -98,11 +102,7 @@ private fun SettingsItem(settingName: String, onClick: () -> Unit) {
     Row(
         modifier = Modifier.clickable(onClick = onClick)
             .fillMaxWidth()
-
             .padding(vertical = 30.dp),
-
-
-
         verticalAlignment = Alignment.CenterVertically
 
     ) {
@@ -116,11 +116,8 @@ private fun SettingsItem(settingName: String, onClick: () -> Unit) {
             text = settingName,
             color = Color.White,
             fontSize = 40.sp,
-
             )
     }
-
-
 }
 
 // used for line breaks in rows
