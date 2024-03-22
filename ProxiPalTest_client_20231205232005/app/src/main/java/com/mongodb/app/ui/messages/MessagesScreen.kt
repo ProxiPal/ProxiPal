@@ -485,6 +485,7 @@ fun MessagesContextualMenu(
                         )
                     },
                     onClick = {
+                        isContextualMenuOpen = false
                         messagesViewModel.updateMessageStart()
                     }
                 )
@@ -494,7 +495,8 @@ fun MessagesContextualMenu(
                             text = stringResource(id = R.string.messages_screen_delete_message)
                         )
                     },
-                    onClick = { 
+                    onClick = {
+                        isContextualMenuOpen = false
                         messagesViewModel.deleteMessage(
                             friendMessage = friendMessage
                         )
@@ -510,6 +512,7 @@ fun MessagesContextualMenu(
                         )
                     },
                     onClick = {
+                        isContextualMenuOpen = false
                         messagesViewModel.replyMessageStart()
                     }
                 )

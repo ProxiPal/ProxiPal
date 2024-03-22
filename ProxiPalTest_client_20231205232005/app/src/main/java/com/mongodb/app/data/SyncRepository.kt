@@ -32,9 +32,7 @@ import io.realm.kotlin.types.geo.GeoCircle
 import io.realm.kotlin.types.geo.GeoPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.mongodb.kbson.ObjectId
@@ -239,11 +237,11 @@ class RealmSyncRepository(
                         activeSubscriptionType.name
                     )
                     add(
-                        getQueryMessages(realm),
+                        getRealmQueryMessages(realm),
                         _messagesSubscriptionName
                     )
                     add(
-                        getQueryConversations(realm),
+                        getRealmQueryConversations(realm),
                         _conversationsSubscriptionName
                     )
                 }
@@ -586,10 +584,10 @@ class RealmSyncRepository(
 
 
     // region Messages
-    override suspend fun updateSubscriptionsMessages() {
+    override suspend fun updateRealmSubscriptionsMessages() {
         // Add the messages query to the realm subscriptions
         realm.subscriptions.update {
-            add(getQueryMessages(realm), _messagesSubscriptionName)
+            add(getRealmQueryMessages(realm), _messagesSubscriptionName)
         }
         if (SHOULD_PRINT_REALM_CONFIG_INFO){
             for (subscription in realm.subscriptions){
@@ -603,7 +601,7 @@ class RealmSyncRepository(
         }
     }
 
-    override fun getQueryMessages(realm: Realm): RealmQuery<FriendMessage>{
+    override fun getRealmQueryMessages(realm: Realm): RealmQuery<FriendMessage>{
         // Find all messages sent by the current user
         return realm.query("ownerId == $0", currentUser.id)
     }
@@ -665,10 +663,10 @@ class RealmSyncRepository(
 
 
     // region Conversations
-    override suspend fun updateSubscriptionsConversations() {
+    override suspend fun updateRealmSubscriptionsConversations() {
         // Add the conversations query to the realm subscriptions
         realm.subscriptions.update {
-            add(getQueryConversations(realm), _conversationsSubscriptionName)
+            add(getRealmQueryConversations(realm), _conversationsSubscriptionName)
         }
         if (SHOULD_PRINT_REALM_CONFIG_INFO){
             for (subscription in realm.subscriptions){
@@ -685,7 +683,7 @@ class RealmSyncRepository(
     /**
      * Find all conversations where the current user is involved
      */
-    override fun getQueryConversations(realm: Realm): RealmQuery<FriendConversation> {
+    override fun getRealmQueryConversations(realm: Realm): RealmQuery<FriendConversation> {
         return realm.query("$0 IN usersInvolved", currentUser.id)
     }
 
@@ -721,14 +719,39 @@ class RealmSyncRepository(
             .asFlow()
     }
 
-    override suspend fun updateConversation(
-        usersInvolved: SortedSet<String>,
-        messageId: String,
+    override suspend fun updateConversationAdd(
+        friendConversation: FriendConversation,
+        messageId: ObjectId
+    ) {
+        updateConversation(
+            friendConversation = friendConversation,
+            messageId = messageId,
+            shouldAddMessage = true
+        )
+    }
+
+    override suspend fun updateConversationRemove(
+        friendConversation: FriendConversation,
+        messageId: ObjectId
+    ) {
+        updateConversation(
+            friendConversation = friendConversation,
+            messageId = messageId,
+            shouldAddMessage = false
+        )
+    }
+
+    /**
+     * To simplify common code for updating a conversation by either adding or removing a message
+     */
+    private suspend fun updateConversation(
+        friendConversation: FriendConversation,
+        messageId: ObjectId,
         shouldAddMessage: Boolean
     ) {
         // Queries inside write transaction are live objects
         // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
-        val frozenObjects = getRealmQuerySpecificConversation(usersInvolved)
+        val frozenObjects = getRealmQuerySpecificConversation(friendConversation.usersInvolved.toSortedSet())
             .find()
         // In case the query result list is empty, check first before calling ".first()"
         val frozenObject = if (frozenObjects.size > 0) frozenObjects.first() else null
@@ -736,11 +759,11 @@ class RealmSyncRepository(
             Log.i(
                 TAG(),
                 "RealmSyncRepository: Creating a new conversation object; " +
-                        "Users involved = \"${usersInvolved}\""
+                        "Users involved = \"${friendConversation.usersInvolved}\""
             )
             // Create a new conversation object
             createConversation(
-                usersInvolved = usersInvolved
+                usersInvolved = friendConversation.usersInvolved.toSortedSet()
             )
             return
         }

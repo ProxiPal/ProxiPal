@@ -16,14 +16,12 @@ import com.mongodb.app.data.messages.IConversationsRealm
 import com.mongodb.app.data.messages.IMessagesRealm
 import com.mongodb.app.domain.FriendConversation
 import com.mongodb.app.domain.FriendMessage
-import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.notifications.InitialResults
 import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.notifications.UpdatedResults
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -143,11 +141,9 @@ class MessagesViewModel(
             newMessage = newMessage
         )
         // Add a reference to the new message in the corresponding conversation object
-        conversationsRepository.updateConversation(
-            usersInvolved = _usersInvolved,
-            // Use .toHexString() instead of .toString()
-            messageId = newMessage._id.toHexString(),
-            shouldAddMessage = true
+        conversationsRepository.updateConversationAdd(
+            friendConversation = currentConversation!!,
+            messageId = newMessage._id
         )
     }
 
@@ -240,11 +236,9 @@ class MessagesViewModel(
             messagesRepository.deleteMessage(
                 messageId = friendMessage._id
             )
-            conversationsRepository.updateConversation(
-                usersInvolved = _usersInvolved,
-                // Use .toHexString() instead of .toString()
-                messageId = friendMessage._id.toHexString(),
-                shouldAddMessage = false
+            conversationsRepository.updateConversationRemove(
+                friendConversation = currentConversation!!,
+                messageId = friendMessage._id
             )
         }
     }

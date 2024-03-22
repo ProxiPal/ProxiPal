@@ -6,6 +6,7 @@ import io.realm.kotlin.Realm
 import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.query.RealmQuery
 import kotlinx.coroutines.flow.Flow
+import org.mongodb.kbson.ObjectId
 import java.util.SortedSet
 
 
@@ -13,11 +14,11 @@ import java.util.SortedSet
  * A mock class to be used in preview Composable functions
  */
 class MockConversationRepository: IConversationsRealm{
-    override suspend fun updateSubscriptionsConversations() {
+    override suspend fun updateRealmSubscriptionsConversations() {
         TODO("Not yet implemented")
     }
 
-    override fun getQueryConversations(realm: Realm): RealmQuery<FriendConversation> {
+    override fun getRealmQueryConversations(realm: Realm): RealmQuery<FriendConversation> {
         TODO("Not yet implemented")
     }
 
@@ -29,10 +30,16 @@ class MockConversationRepository: IConversationsRealm{
         TODO("Not yet implemented")
     }
 
-    override suspend fun updateConversation(
-        usersInvolved: SortedSet<String>,
-        messageId: String,
-        shouldAddMessage: Boolean
+    override suspend fun updateConversationAdd(
+        friendConversation: FriendConversation,
+        messageId: ObjectId
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun updateConversationRemove(
+        friendConversation: FriendConversation,
+        messageId: ObjectId
     ) {
         TODO("Not yet implemented")
     }

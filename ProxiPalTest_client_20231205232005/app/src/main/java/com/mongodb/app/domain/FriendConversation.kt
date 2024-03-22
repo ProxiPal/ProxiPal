@@ -40,14 +40,18 @@ class FriendConversation : RealmObject {
     /**
      * Add a reference to a [FriendMessage] object
      */
-    fun addMessage(messageId: String){
-        messagesSent.add(messageId)
+    fun addMessage(messageId: ObjectId){
+        // Do not use .toString(), it returns a string representation of the ID,
+        // ... not the ID value itself
+        messagesSent.add(messageId.toHexString())
     }
 
     /**
      * Removes a reference to a [FriendMessage] object
      */
-    fun removeMessage(messageId: String){
-        messagesSent.remove(messageId)
+    fun removeMessage(messageId: ObjectId){
+        // Do not use .toString(), it returns a string representation of the ID,
+        // ... not the ID value itself
+        messagesSent.remove(messageId.toHexString())
     }
 }

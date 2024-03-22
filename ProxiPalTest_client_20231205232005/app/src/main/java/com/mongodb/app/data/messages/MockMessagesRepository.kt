@@ -12,11 +12,11 @@ import org.mongodb.kbson.ObjectId
  * A mock class to be used in preview Composable functions
  */
 class MockMessagesRepository : IMessagesRealm{
-    override suspend fun updateSubscriptionsMessages() {
+    override suspend fun updateRealmSubscriptionsMessages() {
         TODO("Not yet implemented")
     }
 
-    override fun getQueryMessages(realm: Realm): RealmQuery<FriendMessage> {
+    override fun getRealmQueryMessages(realm: Realm): RealmQuery<FriendMessage> {
         TODO("Not yet implemented")
     }
 

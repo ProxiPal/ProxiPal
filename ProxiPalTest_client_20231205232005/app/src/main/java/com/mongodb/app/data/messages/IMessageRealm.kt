@@ -15,12 +15,12 @@ interface IMessagesRealm{
     /**
      * Updates the realm instance subscriptions for messages
      */
-    suspend fun updateSubscriptionsMessages()
+    suspend fun updateRealmSubscriptionsMessages()
 
     /**
      * Returns a query to be added as a subscription to the realm instance
      */
-    fun getQueryMessages(realm: Realm): RealmQuery<FriendMessage>
+    fun getRealmQueryMessages(realm: Realm): RealmQuery<FriendMessage>
 
     /**
      * Creates a [FriendMessage] object
