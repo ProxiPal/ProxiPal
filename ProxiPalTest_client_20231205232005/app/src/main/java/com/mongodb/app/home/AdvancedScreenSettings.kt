@@ -39,7 +39,7 @@ import com.mongodb.app.navigation.Routes
 
 //This is the code to edit the settings screen.
 @Composable
-fun ScreenSettings(navController: NavHostController) {
+fun AdvancedScreenSettings(navController: NavHostController) {
     val context = LocalContext.current
 
     Box(
@@ -67,7 +67,7 @@ fun ScreenSettings(navController: NavHostController) {
                     )
                 }
                 Text(
-                    text = "Settings",
+                    text = "Advanced",
                     color = Color.White,
                     fontSize = 25.sp,
                     modifier = Modifier.weight(1f),
@@ -80,28 +80,11 @@ fun ScreenSettings(navController: NavHostController) {
                     .fillMaxHeight()
 
                 ){
-                    SettingsItem("Profile Info") {
-                        Toast.makeText(context, "Profile Info clicked!", Toast.LENGTH_SHORT).show()
+                    SettingsItem("Language Identification") {
+
                     }
-                    SettingsItem("Language") {
-                        val intent = Intent(context, LanguageActivity::class.java)
-                        context.startActivity(intent)
-                    }
-                    SettingsItem("Allow Notifications") {
-                        val intent = Intent(context, AllowNotificationsActivity::class.java)
-                        context.startActivity(intent)
-                    }
-                    SettingsItem("User Filters") {
-                        Toast.makeText(context, "User Filters clicked!", Toast.LENGTH_SHORT).show()
-                        navController.navigate(Routes.FilterScreen.route)
-                    }
-                    SettingsItem("Advanced Settings") {
-                        Toast.makeText(context, "Advanced Settings clicked!", Toast.LENGTH_SHORT).show()
-                        navController.navigate(Routes.AdvancedScreenSettings.route)
-                    }
-                    SettingsItem("Privacy Policy") {
-                        val intent = Intent(context, PrivacyPolicyActivity::class.java)
-                        context.startActivity(intent)
+                    SettingsItem("Language Translation") {
+
                     }
                 }
             }
@@ -134,7 +117,7 @@ private fun SettingsItem(settingName: String, onClick: () -> Unit) {
             color = Color.White,
             fontSize = 40.sp,
 
-        )
+            )
     }
 
 
