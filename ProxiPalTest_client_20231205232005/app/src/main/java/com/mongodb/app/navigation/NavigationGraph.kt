@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.mongodb.app.home.AdvancedScreenSettings
 import com.mongodb.app.home.FilterScreen
 import com.mongodb.app.home.HomeScreen
 import com.mongodb.app.home.HomeViewModel
@@ -87,5 +88,9 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
         composable(Routes.FilterScreen.route){
             FilterScreen(navController)
         }
+        composable(Routes.AdvancedScreenSettings.route){
+            AdvancedScreenSettings(navController)
+        }
+
     }
 }
