@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.mongodb.kbson.ObjectId
 import java.util.Calendar
 import java.util.Date
 import java.util.SortedSet
@@ -112,10 +113,6 @@ class MessagesViewModel(
         }
     }
 
-    fun removeMessage(){
-        deleteMessage()
-    }
-
 
     // region Messages
     /**
@@ -189,6 +186,13 @@ class MessagesViewModel(
                 messagesListState.addAll(it.list)
                 Log.i(
                     TAG(),
+                    "MessagesViewModel: TEMP; conversation messages = " +
+                            "\"${currentConversation!!.messagesSent}\"; " +
+                            "state list messages = \"${it.list}\""
+                )
+
+                Log.i(
+                    TAG(),
                     "MessagesViewModel: (0) Finished reading messages using \"a IN b\" RQL query"
                 )
                 return@collect
@@ -212,10 +216,29 @@ class MessagesViewModel(
     }
 
     /**
+     * Starts the process for updating a [FriendMessage] in the database
+     */
+    fun updateMessageStart(){
+        // TODO
+    }
+
+    /**
      * Removes a [FriendMessage] object from the database
      */
-    private fun deleteMessage(){
-        // TODO
+    fun deleteMessage(friendMessage: FriendMessage){
+        viewModelScope.launch {
+            // Do not manually remove message ID reference from conversation object
+            // Results in an error saying you cannot modify list outside of write transaction
+            messagesRepository.deleteMessage(
+                messageId = friendMessage._id
+            )
+            conversationsRepository.updateConversation(
+                usersInvolved = _usersInvolved,
+                // Use .toHexString() instead of .toString()
+                messageId = friendMessage._id.toHexString(),
+                shouldAddMessage = false
+            )
+        }
     }
 
     /**
@@ -223,6 +246,13 @@ class MessagesViewModel(
      */
     fun isMessageMine(message: FriendMessage): Boolean{
         return message.ownerId == repository.getCurrentUserId()
+    }
+
+    /**
+     * Starts the process for replying to a message
+     */
+    fun replyMessageStart(){
+        // TODO
     }
     // endregion Messages
 
@@ -281,7 +311,8 @@ class MessagesViewModel(
                             Log.i(
                                 TAG(),
                                 "MessagesViewModel: Current conversation = \"${currentConversation!!._id}\" has " +
-                                        "\"${currentConversation!!.messagesSent.size}\" messages sent"
+                                        "\"${currentConversation!!.messagesSent.size}\" messages sent and" +
+                                        " users involved = \"${currentConversation!!.usersInvolved}\""
                             )
                         }
                     }

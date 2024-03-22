@@ -6,6 +6,7 @@ import io.realm.kotlin.Realm
 import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.query.RealmQuery
 import kotlinx.coroutines.flow.Flow
+import org.mongodb.kbson.ObjectId
 
 /**
  * Contains necessary functions when working with [FriendMessage] objects
@@ -35,4 +36,9 @@ interface IMessagesRealm{
      * Gets a list of [FriendMessage] objects from a given [FriendConversation]
      */
     fun readConversationMessages(friendConversation: FriendConversation): Flow<ResultsChange<FriendMessage>>
+
+    /**
+     * Deletes a [FriendMessage] from the database
+     */
+    suspend fun deleteMessage(messageId: ObjectId)
 }

@@ -619,6 +619,32 @@ class RealmSyncRepository(
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
     }
+
+    override suspend fun deleteMessage(messageId: ObjectId) {
+        // Similar process to updating a Realm object
+        // Involves frozen and live objects but deletion can only occur on live objects
+
+        // Queries inside write transaction are live objects
+        // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
+        // Only get the specific message being deleted
+        val frozenObjects = realm.query<FriendMessage>("_id == $0", messageId)
+            .find()
+
+        // In case the query result list is empty, check first before calling ".first()"
+        val frozenObject = (if (frozenObjects.size > 0) frozenObjects.first() else null) ?: return
+
+        Log.i(
+            TAG(),
+            "RealmSyncRepository: Deleting message with ID = \"${messageId}\"" +
+                    " and frozen object message = \"${frozenObject.message}\""
+        )
+        // Delete the object
+        realm.write {
+            findLatest(frozenObject)?.let {
+                delete(it)
+            }
+        }
+    }
     // endregion Messages
 
 

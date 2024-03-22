@@ -63,6 +63,9 @@
     <string name="messages_screen_empty_message_field">Type message here...</string>
     <string name="messages_screen_end_of_messages">You reached the end of your message history.</string>
     <string name="messages_screen_no_sent_messages">There are no messages to show.</string>
+    <string name="messages_screen_update_message">Edit</string>
+    <string name="messages_screen_delete_message">Delete</string>
+    <string name="messages_screen_reply_message">Reply</string>
 <!--    End messages screen strings-->
 
     <!-- NewFriendRequestNotificationService strings

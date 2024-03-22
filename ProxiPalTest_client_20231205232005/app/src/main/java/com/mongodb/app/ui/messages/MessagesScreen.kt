@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -231,15 +230,15 @@ fun MessagesBodyContent(
             )
 
             // Uses "multiple query" method in MessagesViewModel
-//            val messages = messagesViewModel.currentMessages.toList()
+//            val friendMessages = messagesViewModel.currentMessages.toList()
             // Uses "single query" method in MessagesViewModel
             // As of now, keep using this method (see comments in MessagesViewModel for more)
-            val messages = messagesViewModel.messagesListState.toList()
-            items(messages.reversed()) {
-                message ->
+            val friendMessages = messagesViewModel.messagesListState.toList()
+            items(friendMessages.reversed()) {
+                friendMessage ->
                 SingleMessageContainer(
-                    isSenderMe = messagesViewModel.isMessageMine(message),
-                    message = message.message,
+                    friendMessage = friendMessage,
+                    isSenderMe = messagesViewModel.isMessageMine(friendMessage),
                     messagesViewModel = messagesViewModel
                 )
                 // If the sent message is the last in the list
@@ -247,7 +246,7 @@ fun MessagesBodyContent(
                 // Because the messages are shown starting from the bottom of the screen
                 // ... to make this appear at the very top, this should go after
                 // ... message composable
-                if (messages.indexOf(message) == 0){
+                if (friendMessages.indexOf(friendMessage) == 0){
                     MessagesEndOfHistory()
                 }
             }
@@ -284,7 +283,7 @@ fun MessagesEndOfHistory(
  */
 @Composable
 fun SingleMessageContainer(
-    message: String,
+    friendMessage: FriendMessage,
     isSenderMe: Boolean,
     messagesViewModel: MessagesViewModel,
     modifier: Modifier = Modifier
@@ -324,16 +323,21 @@ fun SingleMessageContainer(
                 horizontalAlignment = columnAlignment
             ) {
                 SingleMessage(
-                    message = message,
+                    message = friendMessage.message,
                     isSenderMe = isSenderMe,
                     modifier = Modifier
                 )
-                SingleMessageExtras(
+                MessagesContextualMenu(
+                    friendMessage = friendMessage,
                     isSenderMe = isSenderMe,
-                    messagesViewModel = messagesViewModel,
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    messagesViewModel = messagesViewModel
                 )
+//                SingleMessageExtras(
+//                    isSenderMe = isSenderMe,
+//                    messagesViewModel = messagesViewModel,
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                )
             }
         }
         if (!isSenderMe) {
@@ -404,6 +408,7 @@ fun SingleMessage(
  */
 @Composable
 fun SingleMessageExtras(
+    friendMessage: FriendMessage,
     isSenderMe: Boolean,
     messagesViewModel: MessagesViewModel,
     modifier: Modifier = Modifier,
@@ -415,6 +420,8 @@ fun SingleMessageExtras(
         // Show contextual menu entry point on the left
         if (!isSenderMe){
             MessagesContextualMenu(
+                friendMessage = friendMessage,
+                isSenderMe = isSenderMe,
                 messagesViewModel = messagesViewModel
             )
         }
@@ -428,6 +435,8 @@ fun SingleMessageExtras(
         // Show contextual menu entry point on the right
         if (isSenderMe){
             MessagesContextualMenu(
+                friendMessage = friendMessage,
+                isSenderMe = isSenderMe,
                 messagesViewModel = messagesViewModel
             )
         }
@@ -439,6 +448,8 @@ fun SingleMessageExtras(
  */
 @Composable
 fun MessagesContextualMenu(
+    friendMessage: FriendMessage,
+    isSenderMe: Boolean,
     messagesViewModel: MessagesViewModel,
     modifier: Modifier = Modifier
 ){
@@ -465,14 +476,44 @@ fun MessagesContextualMenu(
                 isContextualMenuOpen = false
             }
         ) {
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        text = stringResource(R.string.delete)
-                    )
-                       },
-                onClick = { TODO() }
-            )
+            // Show options to either update or delete your messages
+            if (isSenderMe){
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = stringResource(id = R.string.messages_screen_update_message)
+                        )
+                    },
+                    onClick = {
+                        messagesViewModel.updateMessageStart()
+                    }
+                )
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = stringResource(id = R.string.messages_screen_delete_message)
+                        )
+                    },
+                    onClick = { 
+                        messagesViewModel.deleteMessage(
+                            friendMessage = friendMessage
+                        )
+                    }
+                )
+            }
+            // Show only an option to reply to another user's messages
+            else{
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = stringResource(id = R.string.messages_screen_reply_message)
+                        )
+                    },
+                    onClick = {
+                        messagesViewModel.replyMessageStart()
+                    }
+                )
+            }
         }
     }
 }
@@ -610,12 +651,18 @@ fun SingleMessageContainerPreview() {
                 MockRepository(), MockMessagesRepository(), MockConversationRepository()
             )
             SingleMessageContainer(
-                message = stringResource(id = R.string.user_profile_test_string),
+                friendMessage = FriendMessage().apply {
+                    message =
+                        stringResource(id = R.string.user_profile_test_string)
+                },
                 isSenderMe = false,
                 messagesViewModel = messagesViewModel
             )
             SingleMessageContainer(
-                message = stringResource(id = R.string.user_profile_test_string),
+                friendMessage = FriendMessage().apply {
+                    message =
+                        stringResource(id = R.string.user_profile_test_string)
+                },
                 isSenderMe = true,
                 messagesViewModel = messagesViewModel
             )
