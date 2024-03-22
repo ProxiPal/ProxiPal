@@ -203,7 +203,8 @@ class RealmSyncRepository(
     private val config: SyncConfiguration
     private val currentUser: User
         get() = app.currentUser!!
-    private val _messagesSubscriptionName: String = "MyFriendMessages"
+    private val _messagesSubscriptionNameMine: String = "MyFriendMessages"
+    private val _messagesSubscriptionNameOthers: String = "OthersFriendMessages"
     private val _conversationsSubscriptionName: String = "MyFriendConversations"
 
     init {
@@ -237,11 +238,15 @@ class RealmSyncRepository(
                         activeSubscriptionType.name
                     )
                     add(
-                        getRealmQueryMessages(realm),
-                        _messagesSubscriptionName
+                        getRealmQueryMyMessages(realm),
+                        _messagesSubscriptionNameMine
                     )
                     add(
-                        getRealmQueryConversations(realm),
+                        getRealmQueryOthersMessages(realm),
+                        _messagesSubscriptionNameOthers
+                    )
+                    add(
+                        getRealmQueryMyConversations(realm),
                         _conversationsSubscriptionName
                     )
                 }
@@ -591,7 +596,8 @@ class RealmSyncRepository(
     override suspend fun updateRealmSubscriptionsMessages() {
         // Add the messages query to the realm subscriptions
         realm.subscriptions.update {
-            add(getRealmQueryMessages(realm), _messagesSubscriptionName)
+            add(getRealmQueryMyMessages(realm), _messagesSubscriptionNameMine)
+            add(getRealmQueryOthersMessages(realm), _messagesSubscriptionNameOthers)
         }
         if (SHOULD_PRINT_REALM_CONFIG_INFO){
             for (subscription in realm.subscriptions){
@@ -605,9 +611,18 @@ class RealmSyncRepository(
         }
     }
 
-    override fun getRealmQueryMessages(realm: Realm): RealmQuery<FriendMessage>{
-        // Find all messages sent by the current user
+    /**
+     * Find all messages sent by the current user
+     */
+    override fun getRealmQueryMyMessages(realm: Realm): RealmQuery<FriendMessage>{
         return realm.query("ownerId == $0", currentUser.id)
+    }
+
+    /**
+     * Find all messages not sent by the current user
+     */
+    override fun getRealmQueryOthersMessages(realm: Realm): RealmQuery<FriendMessage> {
+        return realm.query("ownerId != $0", currentUser.id)
     }
 
     override suspend fun createMessage(newMessage: FriendMessage){
@@ -670,7 +685,7 @@ class RealmSyncRepository(
     override suspend fun updateRealmSubscriptionsConversations() {
         // Add the conversations query to the realm subscriptions
         realm.subscriptions.update {
-            add(getRealmQueryConversations(realm), _conversationsSubscriptionName)
+            add(getRealmQueryMyConversations(realm), _conversationsSubscriptionName)
         }
         if (SHOULD_PRINT_REALM_CONFIG_INFO){
             for (subscription in realm.subscriptions){
@@ -687,7 +702,7 @@ class RealmSyncRepository(
     /**
      * Find all conversations where the current user is involved
      */
-    override fun getRealmQueryConversations(realm: Realm): RealmQuery<FriendConversation> {
+    override fun getRealmQueryMyConversations(realm: Realm): RealmQuery<FriendConversation> {
         return realm.query("$0 IN usersInvolved", currentUser.id)
     }
 

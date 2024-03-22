@@ -16,7 +16,11 @@ class MockMessagesRepository : IMessagesRealm{
         TODO("Not yet implemented")
     }
 
-    override fun getRealmQueryMessages(realm: Realm): RealmQuery<FriendMessage> {
+    override fun getRealmQueryMyMessages(realm: Realm): RealmQuery<FriendMessage> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getRealmQueryOthersMessages(realm: Realm): RealmQuery<FriendMessage> {
         TODO("Not yet implemented")
     }
 

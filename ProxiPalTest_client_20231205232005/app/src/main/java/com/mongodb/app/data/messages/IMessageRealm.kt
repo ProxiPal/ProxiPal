@@ -20,7 +20,12 @@ interface IMessagesRealm{
     /**
      * Returns a query to be added as a subscription to the realm instance
      */
-    fun getRealmQueryMessages(realm: Realm): RealmQuery<FriendMessage>
+    fun getRealmQueryMyMessages(realm: Realm): RealmQuery<FriendMessage>
+
+    /**
+     * Returns a query to be added as a subscription to the realm instance
+     */
+    fun getRealmQueryOthersMessages(realm: Realm): RealmQuery<FriendMessage>
 
     /**
      * Creates a [FriendMessage] object

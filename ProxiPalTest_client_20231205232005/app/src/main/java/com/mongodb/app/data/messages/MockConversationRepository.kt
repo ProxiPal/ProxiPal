@@ -18,7 +18,7 @@ class MockConversationRepository: IConversationsRealm{
         TODO("Not yet implemented")
     }
 
-    override fun getRealmQueryConversations(realm: Realm): RealmQuery<FriendConversation> {
+    override fun getRealmQueryMyConversations(realm: Realm): RealmQuery<FriendConversation> {
         TODO("Not yet implemented")
     }
 

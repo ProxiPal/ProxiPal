@@ -21,7 +21,7 @@ interface IConversationsRealm {
     /**
      * Returns a query to be added as a subscription to the realm instance
      */
-    fun getRealmQueryConversations(realm: Realm): RealmQuery<FriendConversation>
+    fun getRealmQueryMyConversations(realm: Realm): RealmQuery<FriendConversation>
 
     /**
      * Creates a [FriendConversation] object for the specified users involved
