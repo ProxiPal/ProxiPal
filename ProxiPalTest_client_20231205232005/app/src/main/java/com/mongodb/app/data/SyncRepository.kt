@@ -6,6 +6,9 @@ import com.mongodb.app.app
 import com.mongodb.app.data.messages.IConversationsRealm
 import com.mongodb.app.data.messages.IMessagesRealm
 import com.mongodb.app.data.messages.SHOULD_PRINT_REALM_CONFIG_INFO
+import com.mongodb.app.data.messages.SubscriptionNameMyMessages
+import com.mongodb.app.data.messages.SubscriptionNameCurrentConversationMessages
+import com.mongodb.app.data.messages.SubscriptionNameMyFriendConversations
 import com.mongodb.app.data.userprofiles.SHOULD_USE_TASKS_ITEMS
 import com.mongodb.app.domain.FriendConversation
 import com.mongodb.app.domain.FriendMessage
@@ -48,6 +51,10 @@ Contributions:
 
 
 // region Extensions
+fun String.toObjectId(): ObjectId {
+    return ObjectId(this)
+}
+
 fun SortedSet<String>.toRealmList(): RealmList<String>{
     val elementAmount = this.size
     // Converts the original set to a list
@@ -60,6 +67,14 @@ fun SortedSet<String>.toRealmList(): RealmList<String>{
         setToRealmList.add(setToList[index])
     }
     return setToRealmList
+}
+
+fun RealmList<String>.toObjectIdList(): RealmList<ObjectId>{
+    val realmList: RealmList<ObjectId> = realmListOf()
+    for (string in this){
+        realmList.add(string.toObjectId())
+    }
+    return realmList
 }
 // endregion Extensions
 
@@ -203,9 +218,6 @@ class RealmSyncRepository(
     private val config: SyncConfiguration
     private val currentUser: User
         get() = app.currentUser!!
-    private val _messagesSubscriptionNameMine: String = "MyFriendMessages"
-    private val _messagesSubscriptionNameOthers: String = "OthersFriendMessages"
-    private val _conversationsSubscriptionName: String = "MyFriendConversations"
 
     init {
         Log.i(
@@ -237,17 +249,14 @@ class RealmSyncRepository(
                         getQueryUserProfiles(realm, activeSubscriptionType),
                         activeSubscriptionType.name
                     )
+                    // Create a dummy subscription on initialization
                     add(
-                        getRealmQueryMyMessages(realm),
-                        _messagesSubscriptionNameMine
+                        getQueryMyMessages(realm),
+                        SubscriptionNameMyMessages
                     )
                     add(
-                        getRealmQueryOthersMessages(realm),
-                        _messagesSubscriptionNameOthers
-                    )
-                    add(
-                        getRealmQueryMyConversations(realm),
-                        _conversationsSubscriptionName
+                        getQueryMyConversations(realm),
+                        SubscriptionNameMyFriendConversations
                     )
                 }
             }
@@ -258,6 +267,23 @@ class RealmSyncRepository(
             .build()
 
         realm = Realm.open(config)
+
+        // Mutable states must be updated on the UI thread
+        CoroutineScope(Dispatchers.Main).launch {
+            if (SHOULD_PRINT_REALM_CONFIG_INFO){
+                Log.i(
+                    TAG(),
+                    "RealmSyncRepository: Start of subscription synchronization"
+                )
+            }
+            realm.subscriptions.waitForSynchronization()
+            if (SHOULD_PRINT_REALM_CONFIG_INFO){
+                Log.i(
+                    TAG(),
+                    "RealmSyncRepository: End of subscription synchronization"
+                )
+            }
+        }
 
         if (SHOULD_PRINT_REALM_CONFIG_INFO) {
             // After configuration changes, realm stays the same but config changes every time
@@ -280,23 +306,6 @@ class RealmSyncRepository(
                     "RealmSyncRepository: Subscription = \"${subscription}\" ;; " +
                             "Subscription name = \"${subscription.name}\" ;; " +
                             "Subscription description = \"${subscription.queryDescription}\""
-                )
-            }
-        }
-
-        // Mutable states must be updated on the UI thread
-        CoroutineScope(Dispatchers.Main).launch {
-            if (SHOULD_PRINT_REALM_CONFIG_INFO){
-                Log.i(
-                    TAG(),
-                    "RealmSyncRepository: Start of subscription synchronization"
-                )
-            }
-            realm.subscriptions.waitForSynchronization()
-            if (SHOULD_PRINT_REALM_CONFIG_INFO){
-                Log.i(
-                    TAG(),
-                    "RealmSyncRepository: End of subscription synchronization"
                 )
             }
         }
@@ -593,36 +602,38 @@ class RealmSyncRepository(
 
 
     // region Messages
-    override suspend fun updateRealmSubscriptionsMessages() {
-        // Add the messages query to the realm subscriptions
-        realm.subscriptions.update {
-            add(getRealmQueryMyMessages(realm), _messagesSubscriptionNameMine)
-            add(getRealmQueryOthersMessages(realm), _messagesSubscriptionNameOthers)
-        }
-        if (SHOULD_PRINT_REALM_CONFIG_INFO){
-            for (subscription in realm.subscriptions){
-                Log.i(
-                    TAG(),
-                    "RealmSyncRepository: Message subscription = \"${subscription}\" ;; " +
-                            "Subscription name = \"${subscription.name}\" ;; " +
-                            "Subscription description = \"${subscription.queryDescription}\""
-                )
-            }
-        }
-    }
-
-    /**
-     * Find all messages sent by the current user
-     */
-    override fun getRealmQueryMyMessages(realm: Realm): RealmQuery<FriendMessage>{
+    private fun getQueryMyMessages(realm: Realm): RealmQuery<FriendMessage>{
         return realm.query("ownerId == $0", currentUser.id)
     }
 
-    /**
-     * Find all messages not sent by the current user
-     */
-    override fun getRealmQueryOthersMessages(realm: Realm): RealmQuery<FriendMessage> {
-        return realm.query("ownerId != $0", currentUser.id)
+    override suspend fun updateSubscriptionsMessages(friendConversation: FriendConversation) {
+        realm.subscriptions.update {
+            // Remove and re-add an updated subscription
+            // In case of switching between friend conversations, need to have a different subscription
+            remove(SubscriptionNameCurrentConversationMessages)
+            add(
+                getQueryConversationMessages(realm, friendConversation),
+                SubscriptionNameCurrentConversationMessages
+            )
+        }
+        realm.subscriptions.waitForSynchronization()
+//        realm.syncSession.downloadAllServerChanges()
+        Log.i(
+            TAG(),
+            "RealmSyncRepository: !! Subscription amount = \"${realm.subscriptions.size}\""
+        )
+        for (subscription in realm.subscriptions){
+            Log.i(
+                TAG(),
+                "RealmSyncRepository: !! Subscription = \"${subscription}\" ;; " +
+                        "Subscription name = \"${subscription.name}\" ;; " +
+                        "Subscription description = \"${subscription.queryDescription}\""
+            )
+        }
+    }
+
+    override fun getQueryConversationMessages(realm: Realm, friendConversation: FriendConversation): RealmQuery<FriendMessage> {
+        return realm.query("_id IN $0", friendConversation.messagesSent.toObjectIdList())
     }
 
     override suspend fun createMessage(newMessage: FriendMessage){
@@ -638,17 +649,9 @@ class RealmSyncRepository(
     }
 
     override fun readConversationMessages(friendConversation: FriendConversation): Flow<ResultsChange<FriendMessage>> {
-        val idList: MutableList<ObjectId> = mutableListOf()
         // Messages sent is a list of strings, but actual message ID is a ObjectId
         // Convert list of strings to list of ObjectIds first before doing the query
-        for (messageSent in friendConversation.messagesSent){
-            idList.add(ObjectId(messageSent))
-//            Log.i(
-//                TAG(),
-//                "RealmSyncRepository: Just added ObjectID = \"${idList[idList.size - 1]}\""
-//            )
-        }
-        return realm.query<FriendMessage>("_id IN $0", idList)
+        return getQueryConversationMessages(realm, friendConversation)
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
     }
@@ -682,27 +685,7 @@ class RealmSyncRepository(
 
 
     // region Conversations
-    override suspend fun updateRealmSubscriptionsConversations() {
-        // Add the conversations query to the realm subscriptions
-        realm.subscriptions.update {
-            add(getRealmQueryMyConversations(realm), _conversationsSubscriptionName)
-        }
-        if (SHOULD_PRINT_REALM_CONFIG_INFO){
-            for (subscription in realm.subscriptions){
-                Log.i(
-                    TAG(),
-                    "RealmSyncRepository: Conversation subscription = \"${subscription}\" ;; " +
-                            "Subscription name = \"${subscription.name}\" ;; " +
-                            "Subscription description = \"${subscription.queryDescription}\""
-                )
-            }
-        }
-    }
-
-    /**
-     * Find all conversations where the current user is involved
-     */
-    override fun getRealmQueryMyConversations(realm: Realm): RealmQuery<FriendConversation> {
+    override fun getQueryMyConversations(realm: Realm): RealmQuery<FriendConversation> {
         return realm.query("$0 IN usersInvolved", currentUser.id)
     }
 

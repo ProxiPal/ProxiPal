@@ -8,24 +8,24 @@ import io.realm.kotlin.query.RealmQuery
 import kotlinx.coroutines.flow.Flow
 import org.mongodb.kbson.ObjectId
 
+
+const val SubscriptionNameMyMessages = "MyMessages"
+
+const val SubscriptionNameCurrentConversationMessages = "CurrentConversationMessages"
+
 /**
  * Contains necessary functions when working with [FriendMessage] objects and Atlas Realm
  */
 interface IMessagesRealm{
     /**
-     * Updates the realm instance subscriptions for messages
+     * Updates the realm instance subscriptions for a specific [FriendConversation]'s [FriendMessage]s
      */
-    suspend fun updateRealmSubscriptionsMessages()
+    suspend fun updateSubscriptionsMessages(friendConversation: FriendConversation)
 
     /**
-     * Returns a query to be added as a subscription to the realm instance
+     * Returns a query for getting all [FriendMessage]s in a [FriendConversation]
      */
-    fun getRealmQueryMyMessages(realm: Realm): RealmQuery<FriendMessage>
-
-    /**
-     * Returns a query to be added as a subscription to the realm instance
-     */
-    fun getRealmQueryOthersMessages(realm: Realm): RealmQuery<FriendMessage>
+    fun getQueryConversationMessages(realm: Realm, friendConversation: FriendConversation): RealmQuery<FriendMessage>
 
     /**
      * Creates a [FriendMessage] object

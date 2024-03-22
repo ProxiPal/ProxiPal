@@ -14,11 +14,7 @@ import java.util.SortedSet
  * A mock class to be used in preview Composable functions
  */
 class MockConversationRepository: IConversationsRealm{
-    override suspend fun updateRealmSubscriptionsConversations() {
-        TODO("Not yet implemented")
-    }
-
-    override fun getRealmQueryMyConversations(realm: Realm): RealmQuery<FriendConversation> {
+    override fun getQueryMyConversations(realm: Realm): RealmQuery<FriendConversation> {
         TODO("Not yet implemented")
     }
 

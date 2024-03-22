@@ -28,13 +28,6 @@ import java.util.Date
 import java.util.SortedSet
 
 
-// region Extensions
-fun String.toObjectId(): ObjectId {
-    return ObjectId(this)
-}
-// endregion Extensions
-
-
 class MessagesViewModel(
     private var repository: SyncRepository,
     var messagesRepository: IMessagesRealm,
@@ -70,6 +63,7 @@ class MessagesViewModel(
      */
     fun refreshMessages(){
         viewModelScope.launch {
+            messagesRepository.updateSubscriptionsMessages(currentConversation!!)
             readMessages()
             // Code beyond this point does not get called
         }
@@ -210,19 +204,6 @@ class MessagesViewModel(
 
     // region Conversations
     /**
-     * Adds a [FriendConversation] object to the database
-     */
-    private suspend fun createConversation(){
-        Log.i(
-            TAG(),
-            "MessagesViewModel: Conversation users involved = \"${_usersInvolved}\""
-        )
-        conversationsRepository.createConversation(
-            usersInvolved = _usersInvolved
-        )
-    }
-
-    /**
      * Gets the current [FriendConversation] object, if it exists
      */
     private suspend fun readConversation(){
@@ -246,7 +227,9 @@ class MessagesViewModel(
                                 // ... to store a reference to the message
                                 // If not, create the conversation object first
                                 // If it exists already, get the corresponding conversation object
-                                createConversation()
+                                conversationsRepository.createConversation(
+                                    usersInvolved = _usersInvolved
+                                )
                             }
                             else -> {
                                 _currentConversation = event.list[0]
@@ -259,6 +242,7 @@ class MessagesViewModel(
                                         "\"${currentConversation!!.messagesSent.size}\" messages sent and" +
                                         " users involved = \"${currentConversation!!.usersInvolved}\""
                             )
+                            messagesRepository.updateSubscriptionsMessages(currentConversation!!)
                         }
                     }
                     is UpdatedResults -> {

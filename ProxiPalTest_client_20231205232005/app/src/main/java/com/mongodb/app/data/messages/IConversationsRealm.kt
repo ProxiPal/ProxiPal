@@ -9,19 +9,17 @@ import kotlinx.coroutines.flow.Flow
 import org.mongodb.kbson.ObjectId
 import java.util.SortedSet
 
+
+const val SubscriptionNameMyFriendConversations = "MyConversations"
+
 /**
  * Contains necessary functions when working with [FriendConversation] objects and the Atlas Realm
  */
 interface IConversationsRealm {
     /**
-     * Updates the realm instance subscriptions for conversations
+     * Returns a query for finding all [FriendConversation]s the user is involved in
      */
-    suspend fun updateRealmSubscriptionsConversations()
-
-    /**
-     * Returns a query to be added as a subscription to the realm instance
-     */
-    fun getRealmQueryMyConversations(realm: Realm): RealmQuery<FriendConversation>
+    fun getQueryMyConversations(realm: Realm): RealmQuery<FriendConversation>
 
     /**
      * Creates a [FriendConversation] object for the specified users involved

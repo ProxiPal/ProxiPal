@@ -125,3 +125,9 @@ Need to uninstall and re-install app, then realm subscriptions will update
 ## (App crashes immediately) Cannot change schema from {x} to {y}
 
 Uninstall and re-install app
+
+## To update Realm subscriptions without having to delete and re-install app
+
+Call "realm.subscriptions.update { remove(subscriptionName) }" before "realm.subscriptions.waitForSynchronization()"
+Basically, subscriptions tell what kind of data can be returned from the database. Any data that doesn't satisfy a subscription's query will not be returned and thus can never be recognized in the app, no matter how many times data is retrieved.
+As a side note, when updating subscriptions, sometimes messages would not be saved to the database yet conversations would have their ID references saved. Creating a new emulated device and running the app there for some reason fixes that.
