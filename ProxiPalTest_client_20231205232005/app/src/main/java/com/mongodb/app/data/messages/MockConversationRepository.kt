@@ -18,6 +18,13 @@ class MockConversationRepository: IConversationsRealm{
         TODO("Not yet implemented")
     }
 
+    override fun getQuerySpecificConversation(
+        realm: Realm,
+        usersInvolved: SortedSet<String>
+    ): RealmQuery<FriendConversation> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun createConversation(usersInvolved: SortedSet<String>) {
         TODO("Not yet implemented")
     }

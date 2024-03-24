@@ -75,14 +75,11 @@ import java.util.Date
 /*
 TODO List of tasks to do for messages screen
 - Make message history update continuously
-- Show the most recent message for each corresponding conversation in the friends screen
-| Add functionality where new messages in the friends screen are bolded if their time sent is more recent than the time
-... you last read that conversation (timeRead will be a new field and will get updated when the user either opens or exits
-... out of viewing the conversation.)
 - Make changes to both friend profile picture and IDs of users involved
 ... when navigating from friends screen to messages screen
-- Add ability to delete a message
-- (Maybe) Add ability to reply to a message
+- Add ability to update a message
+- Make messages, regardless of who sent it, appear for both sides
+... (Currently, deleted messages update correctly but new messages only show for the one who sent them)
 */
 
 
@@ -394,46 +391,6 @@ fun SingleMessage(
                     end = dimensionResource(id = R.dimen.messages_screen_message_horizontal_padding)
                 )
         )
-    }
-}
-
-/**
- * Shows tiny details below the actual message, such as the contextual menu
- */
-@Composable
-fun SingleMessageExtras(
-    friendMessage: FriendMessage,
-    isSenderMe: Boolean,
-    messagesViewModel: MessagesViewModel,
-    modifier: Modifier = Modifier,
-){
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = modifier
-    ){
-        // Show contextual menu entry point on the left
-        if (!isSenderMe){
-            MessagesContextualMenu(
-                friendMessage = friendMessage,
-                isSenderMe = isSenderMe,
-                messagesViewModel = messagesViewModel
-            )
-        }
-        // The "sent by" message label
-        Text(
-            text =
-            if (isSenderMe) stringResource(id = R.string.messages_screen_sent_by_me)
-            else stringResource(id = R.string.messages_screen_sent_by_other, "someone"),
-            style = MaterialTheme.typography.labelSmall
-        )
-        // Show contextual menu entry point on the right
-        if (isSenderMe){
-            MessagesContextualMenu(
-                friendMessage = friendMessage,
-                isSenderMe = isSenderMe,
-                messagesViewModel = messagesViewModel
-            )
-        }
     }
 }
 

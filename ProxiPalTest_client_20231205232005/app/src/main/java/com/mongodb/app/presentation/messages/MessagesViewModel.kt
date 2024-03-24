@@ -63,7 +63,6 @@ class MessagesViewModel(
      */
     fun refreshMessages(){
         viewModelScope.launch {
-            messagesRepository.updateSubscriptionsMessages(currentConversation!!)
             readMessages()
             // Code beyond this point does not get called
         }
@@ -242,7 +241,6 @@ class MessagesViewModel(
                                         "\"${currentConversation!!.messagesSent.size}\" messages sent and" +
                                         " users involved = \"${currentConversation!!.usersInvolved}\""
                             )
-                            messagesRepository.updateSubscriptionsMessages(currentConversation!!)
                         }
                     }
                     is UpdatedResults -> {

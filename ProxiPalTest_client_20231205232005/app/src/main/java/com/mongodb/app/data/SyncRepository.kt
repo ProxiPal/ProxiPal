@@ -6,8 +6,7 @@ import com.mongodb.app.app
 import com.mongodb.app.data.messages.IConversationsRealm
 import com.mongodb.app.data.messages.IMessagesRealm
 import com.mongodb.app.data.messages.SHOULD_PRINT_REALM_CONFIG_INFO
-import com.mongodb.app.data.messages.SubscriptionNameMyMessages
-import com.mongodb.app.data.messages.SubscriptionNameCurrentConversationMessages
+import com.mongodb.app.data.messages.SubscriptionNameAllMessages
 import com.mongodb.app.data.messages.SubscriptionNameMyFriendConversations
 import com.mongodb.app.data.userprofiles.SHOULD_USE_TASKS_ITEMS
 import com.mongodb.app.domain.FriendConversation
@@ -249,11 +248,13 @@ class RealmSyncRepository(
                         getQueryUserProfiles(realm, activeSubscriptionType),
                         activeSubscriptionType.name
                     )
-                    // Create a dummy subscription on initialization
+                    // Subscribe to receive any updates on all messages
+                    // Then can possibly query to get only specific messages
                     add(
-                        getQueryMyMessages(realm),
-                        SubscriptionNameMyMessages
+                        getQueryAllMessages(realm),
+                        SubscriptionNameAllMessages
                     )
+                    // Subscribe to receive any updates on only my conversations
                     add(
                         getQueryMyConversations(realm),
                         SubscriptionNameMyFriendConversations
@@ -274,6 +275,30 @@ class RealmSyncRepository(
                 Log.i(
                     TAG(),
                     "RealmSyncRepository: Start of subscription synchronization"
+                )
+            }
+            if (realm.subscriptions.size == 0){
+                val activeSubscriptionType = getActiveSubscriptionType(realm)
+                realm.subscriptions.update {
+                    add(
+                        getQueryUserProfiles(realm, activeSubscriptionType),
+                        activeSubscriptionType.name
+                    )
+                    // Subscribe to receive any updates on all messages
+                    // Then can possibly query to get only specific messages
+                    add(
+                        getQueryAllMessages(realm),
+                        SubscriptionNameAllMessages
+                    )
+                    // Subscribe to receive any updates on only my conversations
+                    add(
+                        getQueryMyConversations(realm),
+                        SubscriptionNameMyFriendConversations
+                    )
+                }
+                Log.i(
+                    TAG(),
+                    "RealmSyncRepository: Manually added subscriptions"
                 )
             }
             realm.subscriptions.waitForSynchronization()
@@ -602,37 +627,12 @@ class RealmSyncRepository(
 
 
     // region Messages
-    private fun getQueryMyMessages(realm: Realm): RealmQuery<FriendMessage>{
-        return realm.query("ownerId == $0", currentUser.id)
+    override fun getQueryAllMessages(realm: Realm): RealmQuery<FriendMessage> {
+        // Should return all messages since owner ID "0" should not be a valid ID
+        return realm.query("ownerId != $0", "0")
     }
 
-    override suspend fun updateSubscriptionsMessages(friendConversation: FriendConversation) {
-        realm.subscriptions.update {
-            // Remove and re-add an updated subscription
-            // In case of switching between friend conversations, need to have a different subscription
-            remove(SubscriptionNameCurrentConversationMessages)
-            add(
-                getQueryConversationMessages(realm, friendConversation),
-                SubscriptionNameCurrentConversationMessages
-            )
-        }
-        realm.subscriptions.waitForSynchronization()
-//        realm.syncSession.downloadAllServerChanges()
-        Log.i(
-            TAG(),
-            "RealmSyncRepository: !! Subscription amount = \"${realm.subscriptions.size}\""
-        )
-        for (subscription in realm.subscriptions){
-            Log.i(
-                TAG(),
-                "RealmSyncRepository: !! Subscription = \"${subscription}\" ;; " +
-                        "Subscription name = \"${subscription.name}\" ;; " +
-                        "Subscription description = \"${subscription.queryDescription}\""
-            )
-        }
-    }
-
-    override fun getQueryConversationMessages(realm: Realm, friendConversation: FriendConversation): RealmQuery<FriendMessage> {
+    override fun getQuerySpecificMessages(realm: Realm, friendConversation: FriendConversation): RealmQuery<FriendMessage> {
         return realm.query("_id IN $0", friendConversation.messagesSent.toObjectIdList())
     }
 
@@ -651,7 +651,7 @@ class RealmSyncRepository(
     override fun readConversationMessages(friendConversation: FriendConversation): Flow<ResultsChange<FriendMessage>> {
         // Messages sent is a list of strings, but actual message ID is a ObjectId
         // Convert list of strings to list of ObjectIds first before doing the query
-        return getQueryConversationMessages(realm, friendConversation)
+        return getQuerySpecificMessages(realm, friendConversation)
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
     }
@@ -708,15 +708,15 @@ class RealmSyncRepository(
         }
     }
 
-    /**
-     * Gets a [FriendConversation] with only the specified users involved
-     */
-    private fun getRealmQuerySpecificConversation(usersInvolved: SortedSet<String>): RealmQuery<FriendConversation>{
+    override fun getQuerySpecificConversation(
+        realm: Realm,
+        usersInvolved: SortedSet<String>
+    ): RealmQuery<FriendConversation> {
         return realm.query<FriendConversation>("$0 == usersInvolved", usersInvolved)
     }
 
     override fun readConversation(usersInvolved: SortedSet<String>): Flow<ResultsChange<FriendConversation>> {
-        return getRealmQuerySpecificConversation(usersInvolved)
+        return getQuerySpecificConversation(realm, usersInvolved)
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
     }
@@ -753,7 +753,10 @@ class RealmSyncRepository(
     ) {
         // Queries inside write transaction are live objects
         // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
-        val frozenObjects = getRealmQuerySpecificConversation(friendConversation.usersInvolved.toSortedSet())
+        val frozenObjects = getQuerySpecificConversation(
+            realm,
+            friendConversation.usersInvolved.toSortedSet()
+        )
             .find()
         // In case the query result list is empty, check first before calling ".first()"
         val frozenObject = if (frozenObjects.size > 0) frozenObjects.first() else null
