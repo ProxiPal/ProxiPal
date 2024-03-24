@@ -20,6 +20,7 @@ import io.realm.kotlin.notifications.InitialResults
 import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.notifications.UpdatedResults
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.mongodb.kbson.ObjectId
@@ -41,7 +42,6 @@ class MessagesViewModel(
     private var _usersInvolved: SortedSet<String> = sortedSetOf("")
     private val _messagesListState: SnapshotStateList<FriendMessage> = mutableStateListOf()
     private val _conversationsListState: SnapshotStateList<FriendConversation> = mutableStateListOf()
-    private var _currentConversation: FriendConversation? = null
     // endregion Variables
 
 
@@ -52,8 +52,11 @@ class MessagesViewModel(
         get() = _messagesListState
     val conversationsListState
         get() = _conversationsListState
-    val currentConversation
-        get() = _currentConversation
+    val currentConversation: FriendConversation?
+        get() {
+            return if (_conversationsListState.size > 0) _conversationsListState[0]
+            else null
+        }
     // endregion Properties
 
 
@@ -63,8 +66,12 @@ class MessagesViewModel(
      */
     fun refreshMessages(){
         viewModelScope.launch {
+            readConversation()
+            Log.i(
+                TAG(),
+                "MessagesViewModel: Finished reading conversation..."
+            )
             readMessages()
-            // Code beyond this point does not get called
         }
     }
 
@@ -97,7 +104,6 @@ class MessagesViewModel(
             // Refresh the conversation object instance to the one saved in the database
             // This allows keeping updated with the latest messages (namely the one just sent)
             readConversation()
-            // Code beyond this point does not get called
         }
     }
 
@@ -139,25 +145,14 @@ class MessagesViewModel(
                 messagesListState.addAll(it.list)
                 Log.i(
                     TAG(),
-                    "MessagesViewModel: (0) Finished reading messages using \"a IN b\" RQL query"
+                    "MessagesViewModel: Finished reading messages using \"a IN b\" RQL query"
                 )
                 return@collect
             }
-        Log.i(
-            TAG(),
-            "MessagesViewModel: (1) Finished reading messages using \"a IN b\" RQL query"
-        )
+        // Code beyond this point does not get called
         withContext(Dispatchers.Main){
-            Log.i(
-                TAG(),
-                "MessagesViewModel: (2) Finished reading messages using \"a IN b\" RQL query"
-            )
             return@withContext
         }
-        Log.i(
-            TAG(),
-            "MessagesViewModel: (3) Finished reading messages using \"a IN b\" RQL query"
-        )
         return
     }
 
@@ -206,63 +201,17 @@ class MessagesViewModel(
      * Gets the current [FriendConversation] object, if it exists
      */
     private suspend fun readConversation(){
-        // This logic is copied from the UserProfileViewModel class
+        // There should only be 1 conversation with only the specified users involved
         conversationsRepository.readConversation(_usersInvolved)
-            .collect {
-                    event: ResultsChange<FriendConversation> ->
-                when (event){
-                    is InitialResults -> {
-                        conversationsListState.clear()
-                        conversationsListState.addAll(event.list)
-                        Log.i(
-                            TAG(),
-                            "MessagesViewModel: Current conversation amount = \"" +
-                                    "${event.list.size}\""
-                        )
-                        when (event.list.size) {
-                            0 -> {
-                                // Before creating and saving a message in the database
-                                // ... check if there is the corresponding conversation object
-                                // ... to store a reference to the message
-                                // If not, create the conversation object first
-                                // If it exists already, get the corresponding conversation object
-                                conversationsRepository.createConversation(
-                                    usersInvolved = _usersInvolved
-                                )
-                            }
-                            else -> {
-                                _currentConversation = event.list[0]
-                            }
-                        }
-                        if (currentConversation != null){
-                            Log.i(
-                                TAG(),
-                                "MessagesViewModel: Current conversation = \"${currentConversation!!._id}\" has " +
-                                        "\"${currentConversation!!.messagesSent.size}\" messages sent and" +
-                                        " users involved = \"${currentConversation!!.usersInvolved}\""
-                            )
-                        }
-                    }
-                    is UpdatedResults -> {
-                        if (event.deletions.isNotEmpty() && conversationsListState.isNotEmpty()) {
-                            event.deletions.reversed().forEach {
-                                conversationsListState.removeAt(it)
-                            }
-                        }
-                        if (event.insertions.isNotEmpty()) {
-                            event.insertions.forEach {
-                                conversationsListState.add(it, event.list[it])
-                            }
-                        }
-                        if (event.changes.isNotEmpty()) {
-                            event.changes.forEach {
-                                conversationsListState.removeAt(it)
-                                conversationsListState.add(it, event.list[it])
-                            }
-                        }
-                    }
-                    else -> Unit // No-op
+            .first{
+                conversationsListState.clear()
+                // If a conversation object does not already exist, create it first
+                if (it.list.size == 0){
+                    conversationsRepository.createConversation(
+                        usersInvolved = _usersInvolved
+                    )
                 }
+                conversationsListState.addAll(it.list)
             }
     }
 
