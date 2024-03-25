@@ -16,14 +16,10 @@ import com.mongodb.app.data.messages.IConversationsRealm
 import com.mongodb.app.data.messages.IMessagesRealm
 import com.mongodb.app.domain.FriendConversation
 import com.mongodb.app.domain.FriendMessage
-import io.realm.kotlin.notifications.InitialResults
-import io.realm.kotlin.notifications.ResultsChange
-import io.realm.kotlin.notifications.UpdatedResults
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.mongodb.kbson.ObjectId
 import java.util.Calendar
 import java.util.Date
 import java.util.SortedSet
@@ -42,6 +38,7 @@ class MessagesViewModel(
     private var _usersInvolved: SortedSet<String> = sortedSetOf("")
     private val _messagesListState: SnapshotStateList<FriendMessage> = mutableStateListOf()
     private val _conversationsListState: SnapshotStateList<FriendConversation> = mutableStateListOf()
+    private var _friendMessageBeingEdited: FriendMessage? = null
     // endregion Variables
 
 
@@ -57,6 +54,8 @@ class MessagesViewModel(
             return if (_conversationsListState.size > 0) _conversationsListState[0]
             else null
         }
+    val friendMessageBeingEdited
+        get() = _friendMessageBeingEdited
     // endregion Properties
 
 
@@ -99,11 +98,22 @@ class MessagesViewModel(
 
     fun sendMessage(){
         viewModelScope.launch {
-            createMessage()
-            resetMessage()
-            // Refresh the conversation object instance to the one saved in the database
-            // This allows keeping updated with the latest messages (namely the one just sent)
-            readConversation()
+            // If not editing an already sent message
+            if (friendMessageBeingEdited == null){
+                createMessage()
+                resetMessage()
+                // Refresh the conversation object instance to the one saved in the database
+                // This allows keeping updated with the latest messages (namely the one just sent)
+                readConversation()
+            }
+            // If trying to send an updated message
+            else{
+                updateMessage()
+                resetMessage()
+                // Refresh the conversation object instance to the one saved in the database
+                // This allows keeping updated with the latest messages (namely the one just sent)
+                readConversation()
+            }
         }
     }
 
@@ -159,8 +169,32 @@ class MessagesViewModel(
     /**
      * Starts the process for updating a [FriendMessage] in the database
      */
-    fun updateMessageStart(){
-        // TODO
+    fun updateMessageStart(
+        friendMessageToEdit: FriendMessage
+    ){
+        _friendMessageBeingEdited = friendMessageToEdit
+        message.value = friendMessageToEdit.message
+    }
+
+    /**
+     * Updates a [FriendMessage] object in the database
+     */
+    private suspend fun updateMessage(){
+        if (friendMessageBeingEdited != null){
+            Log.i(
+                TAG(),
+                "MessagesViewModel: Updated message ID = \"${friendMessageBeingEdited!!._id.toHexString()}\"; " +
+                        "Updated message = \"${message.value}\""
+            )
+
+            messagesRepository.updateMessage(
+                messageId = friendMessageBeingEdited!!._id,
+                newMessage = message.value
+            )
+
+            // Reset the temporary variables for editing a message
+            _friendMessageBeingEdited = null
+        }
     }
 
     /**

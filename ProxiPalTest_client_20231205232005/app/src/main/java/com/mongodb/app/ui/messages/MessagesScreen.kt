@@ -77,9 +77,6 @@ TODO List of tasks to do for messages screen
 - Make message history update continuously
 - Make changes to both friend profile picture and IDs of users involved
 ... when navigating from friends screen to messages screen
-- Add ability to update a message
-- Make messages, regardless of who sent it, appear for both sides
-... (Currently, deleted messages update correctly but new messages only show for the one who sent them)
 */
 
 
@@ -224,8 +221,9 @@ fun MessagesBodyContent(
                         "\"${messagesViewModel.messagesListState.size}\""
             )
 
-            val friendMessages = messagesViewModel.messagesListState.toList()
-            items(friendMessages.reversed()) {
+            // Start with showing the most recent messages first
+            val friendMessages = messagesViewModel.messagesListState.toList().reversed()
+            items(friendMessages) {
                 friendMessage ->
                 SingleMessageContainer(
                     friendMessage = friendMessage,
@@ -237,7 +235,7 @@ fun MessagesBodyContent(
                 // Because the messages are shown starting from the bottom of the screen
                 // ... to make this appear at the very top, this should go after
                 // ... message composable
-                if (friendMessages.indexOf(friendMessage) == 0){
+                if (friendMessages.indexOf(friendMessage) == friendMessages.size - 1){
                     MessagesEndOfHistory()
                 }
             }
@@ -323,12 +321,6 @@ fun SingleMessageContainer(
                     isSenderMe = isSenderMe,
                     messagesViewModel = messagesViewModel
                 )
-//                SingleMessageExtras(
-//                    isSenderMe = isSenderMe,
-//                    messagesViewModel = messagesViewModel,
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                )
             }
         }
         if (!isSenderMe) {
@@ -437,7 +429,9 @@ fun MessagesContextualMenu(
                     },
                     onClick = {
                         isContextualMenuOpen = false
-                        messagesViewModel.updateMessageStart()
+                        messagesViewModel.updateMessageStart(
+                            friendMessageToEdit = friendMessage
+                        )
                     }
                 )
                 DropdownMenuItem(
@@ -600,7 +594,7 @@ fun MessagesScreenLayoutPreview() {
 @Composable
 fun SingleMessageContainerPreview() {
     MyApplicationTheme {
-        Column(){
+        Column{
             val messagesViewModel = MessagesViewModel(
                 MockRepository(), MockMessagesRepository(), MockConversationRepository()
             )

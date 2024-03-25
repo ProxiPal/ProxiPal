@@ -16,6 +16,10 @@ class MockMessagesRepository : IMessagesRealm{
         TODO("Not yet implemented")
     }
 
+    override fun getQuerySpecificMessage(realm: Realm, messageId: ObjectId): RealmQuery<FriendMessage> {
+        TODO("Not yet implemented")
+    }
+
     override fun getQuerySpecificMessages(
         realm: Realm,
         friendConversation: FriendConversation
@@ -32,6 +36,10 @@ class MockMessagesRepository : IMessagesRealm{
     }
 
     override fun readConversationMessages(friendConversation: FriendConversation): Flow<ResultsChange<FriendMessage>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun updateMessage(messageId: ObjectId, newMessage: String) {
         TODO("Not yet implemented")
     }
 

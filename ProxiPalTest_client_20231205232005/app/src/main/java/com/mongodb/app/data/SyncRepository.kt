@@ -632,6 +632,10 @@ class RealmSyncRepository(
         return realm.query("ownerId != $0", "0")
     }
 
+    override fun getQuerySpecificMessage(realm: Realm, messageId: ObjectId): RealmQuery<FriendMessage> {
+        return realm.query("_id == $0", messageId)
+    }
+
     override fun getQuerySpecificMessages(realm: Realm, friendConversation: FriendConversation): RealmQuery<FriendMessage> {
         return realm.query("_id IN $0", friendConversation.messagesSent.toObjectIdList())
     }
@@ -654,6 +658,24 @@ class RealmSyncRepository(
         return getQuerySpecificMessages(realm, friendConversation)
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
+    }
+
+    override suspend fun updateMessage(messageId: ObjectId, newMessage: String) {
+        // Queries inside write transaction are live objects
+        // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
+        val frozenObjects = getQuerySpecificMessage(
+            realm = realm,
+            messageId = messageId
+        )
+            .find()
+        // In case the query result list is empty, check first before calling ".first()"
+        val frozenObject = (if (frozenObjects.size > 0) frozenObjects.first() else null) ?: return
+        realm.write {
+            findLatest(frozenObject)?.let{
+                liveObject ->
+                liveObject.message = newMessage
+            }
+        }
     }
 
     override suspend fun deleteMessage(messageId: ObjectId) {
@@ -764,7 +786,7 @@ class RealmSyncRepository(
             Log.i(
                 TAG(),
                 "RealmSyncRepository: Creating a new conversation object; " +
-                        "Users involved = \"${friendConversation.usersInvolved}\""
+                        "ID = \"${friendConversation._id}\""
             )
             // Create a new conversation object
             createConversation(

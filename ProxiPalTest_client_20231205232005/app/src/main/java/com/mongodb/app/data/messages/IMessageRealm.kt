@@ -21,6 +21,11 @@ interface IMessagesRealm{
     fun getQueryAllMessages(realm: Realm): RealmQuery<FriendMessage>
 
     /**
+     * Returns a query for finding a specific [FriendMessage] object
+     */
+    fun getQuerySpecificMessage(realm: Realm, messageId: ObjectId): RealmQuery<FriendMessage>
+
+    /**
      * Returns a query for getting all [FriendMessage]s in a specified [FriendConversation]
      */
     fun getQuerySpecificMessages(realm: Realm, friendConversation: FriendConversation): RealmQuery<FriendMessage>
@@ -39,6 +44,11 @@ interface IMessagesRealm{
      * Gets a list of [FriendMessage] objects from a [FriendConversation]
      */
     fun readConversationMessages(friendConversation: FriendConversation): Flow<ResultsChange<FriendMessage>>
+
+    /**
+     * Updates a [FriendMessage] with a new message
+     */
+    suspend fun updateMessage(messageId: ObjectId, newMessage: String)
 
     /**
      * Deletes a [FriendMessage]
