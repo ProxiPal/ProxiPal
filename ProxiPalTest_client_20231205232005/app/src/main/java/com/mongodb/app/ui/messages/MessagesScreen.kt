@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
@@ -77,6 +78,21 @@ TODO List of tasks to do for messages screen
 - Make message history update continuously
 - Make changes to both friend profile picture and IDs of users involved
 ... when navigating from friends screen to messages screen
+- Add ability to reply to messages
+| Add a small label showing what the message is in response to
+| If the original message is updated or deleted, update the small label under the message reply appropriately
+| ... Need to update database schema and add "messageIdRepliedTo": String that is either
+| ... equal to the original message's ID if the message still exists or the empty string if the message doesn't exist
+- Add contextual menu "safety checks"
+| While editing a message, should not be able to access any additional contextual menu option
+| ... Also, make the "editing message..." tab show above text field
+| ... Cancel button clears both the tab and current message typed in
+| While replying to a message, should not be able to access any additional contextual menu option
+| ... Also, make the "replying to..." tab show above text field
+| ... Cancel button clears only the tab and not the current message typed in
+| While deleting a message
+| ... Also, make an alert dialog or something show before a user can actually delete a message
+| ... Cancel button is not present and refresh button is there instead
 */
 
 
@@ -240,9 +256,11 @@ fun MessagesBodyContent(
                 }
             }
         }
+        if (messagesViewModel.isUpdatingMessage()){
+            MessagesReplyUpdateRow()
+        }
         MessagesInputRow(
-            messagesViewModel = messagesViewModel,
-            modifier = Modifier
+            messagesViewModel = messagesViewModel
         )
     }
 }
@@ -443,7 +461,7 @@ fun MessagesContextualMenu(
                     onClick = {
                         isContextualMenuOpen = false
                         messagesViewModel.deleteMessage(
-                            friendMessage = friendMessage
+                            friendMessageToDelete = friendMessage
                         )
                     }
                 )
@@ -466,6 +484,30 @@ fun MessagesContextualMenu(
     }
 }
 
+@Composable
+fun MessagesReplyUpdateRow(
+    modifier: Modifier = Modifier
+){
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = modifier
+            .fillMaxWidth()
+    ){
+        Card(
+            modifier = Modifier
+        ){
+            Text(
+                text = "Replying to.../Editing ...",
+                modifier = Modifier
+                    .padding(top = 4.dp,
+                        start = 8.dp,
+                        end = 8.dp,
+                        bottom = 4.dp)
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessagesInputRow(
@@ -480,14 +522,27 @@ fun MessagesInputRow(
                 color = MessageInputBackgroundColor
             )
     ) {
-        // Button to refresh message history
-        IconButton(
-            onClick = { messagesViewModel.refreshMessages() }
-        ) {
-            Icon(
-                imageVector = Icons.Default.Refresh,
-                contentDescription = null
-            )
+        if (messagesViewModel.isUpdatingMessage()){
+            // Cancel button to cancel message updating
+            IconButton(
+                onClick = { messagesViewModel.updateMessageCancel() }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Cancel,
+                    contentDescription = null
+                )
+            }
+        }
+        else{
+            // Button to refresh message history
+            IconButton(
+                onClick = { messagesViewModel.refreshMessages() }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = null
+                )
+            }
         }
         TextField(
             value = messagesViewModel.message.value,

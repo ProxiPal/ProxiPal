@@ -177,6 +177,14 @@ class MessagesViewModel(
     }
 
     /**
+     * Cancels the process for updating a [FriendMessage]
+     */
+    fun updateMessageCancel(){
+        _friendMessageBeingEdited = null
+        message.value = ""
+    }
+
+    /**
      * Updates a [FriendMessage] object in the database
      */
     private suspend fun updateMessage(){
@@ -200,25 +208,32 @@ class MessagesViewModel(
     /**
      * Removes a [FriendMessage] object from the database
      */
-    fun deleteMessage(friendMessage: FriendMessage){
+    fun deleteMessage(friendMessageToDelete: FriendMessage){
         viewModelScope.launch {
             // Do not manually remove message ID reference from conversation object
             // Results in an error saying you cannot modify list outside of write transaction
             messagesRepository.deleteMessage(
-                messageId = friendMessage._id
+                messageId = friendMessageToDelete._id
             )
             conversationsRepository.updateConversationRemove(
                 friendConversation = currentConversation!!,
-                messageId = friendMessage._id
+                messageId = friendMessageToDelete._id
             )
         }
     }
 
     /**
-     * Checks if a specific message was sent by the current user
+     * Checks if a specific [FriendMessage] was sent by the current user
      */
     fun isMessageMine(message: FriendMessage): Boolean{
         return message.ownerId == repository.getCurrentUserId()
+    }
+
+    /**
+     * Checks if any [FriendMessage] is being updated
+     */
+    fun isUpdatingMessage(): Boolean{
+        return friendMessageBeingEdited != null
     }
 
     /**
