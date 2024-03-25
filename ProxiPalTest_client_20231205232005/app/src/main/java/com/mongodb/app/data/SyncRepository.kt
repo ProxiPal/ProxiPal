@@ -152,11 +152,11 @@ interface SyncRepository {
      * Returns a flow with nearby user profiles within a specified radius
      */
     fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double): Flow<ResultsChange<UserProfile>>
+    // endregion location
 
     suspend fun updateUserProfileInterests(interest:String)
 
     suspend fun updateUserProfileIndustries(industry:String)
-    // endregion location
 }
 
 
