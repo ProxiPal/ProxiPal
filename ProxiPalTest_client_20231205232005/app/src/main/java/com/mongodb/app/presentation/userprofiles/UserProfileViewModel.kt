@@ -87,9 +87,6 @@ class UserProfileViewModel constructor(
     private var _userProfileInterests: MutableList<String> = mutableListOf()
     private var _userProfileIndustries: MutableList<String> = mutableListOf()
 
-    // for tutorial, added by Marco Pacini
-    private var _showTutorial: MutableState<Boolean> = mutableStateOf(true)
-
 
 
     /*
@@ -127,7 +124,7 @@ class UserProfileViewModel constructor(
     val nearbyUserProfiles: List<UserProfile>
         get() = _nearbyUserProfiles
 
-    val proxmityRadius: State<Double>
+    val proximityRadius: State<Double>
         get() = _proximityRadius
 
 
@@ -149,9 +146,6 @@ class UserProfileViewModel constructor(
         get() = _userProfileInterests
     val userProfileIndustries: List<String>
         get() = _userProfileIndustries
-
-    val showTutorial: State<Boolean>
-        get() = _showTutorial
 
 
 
@@ -583,8 +577,8 @@ class UserProfileViewModel constructor(
      * Queries nearby user profiles and updates the nearby user profile list
      */
     fun fetchAndStoreNearbyUserProfiles() {
-        CoroutineScope(Dispatchers.Main).launch {
-            repository.getNearbyUserProfileList(userProfileLatitude.value, userProfileLongitude.value, 0.1)
+        CoroutineScope(Dispatchers.IO).launch {
+            repository.getNearbyUserProfileList(userProfileLatitude.value, userProfileLongitude.value, proximityRadius.value)
                 .collect { resultsChange: ResultsChange<UserProfile> ->
                     _nearbyUserProfiles.clear()
                     _nearbyUserProfiles.addAll(resultsChange.list)

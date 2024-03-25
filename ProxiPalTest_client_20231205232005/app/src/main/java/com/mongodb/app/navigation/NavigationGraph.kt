@@ -36,7 +36,7 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
     var state by remember{ mutableStateOf(false)}
     val navController = rememberNavController()
     var startDest = Routes.UserProfileScreen.route
-    if (userProfileViewModel.showTutorial.value){
+    if (userProfileViewModel.userProfileListState.isEmpty()){
         startDest = Routes.OnboardingScreen.route
     }
     NavHost(navController = navController, startDestination = startDest) {
