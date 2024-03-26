@@ -39,7 +39,7 @@ class MessagesViewModel(
     private var _usersInvolved: SortedSet<String> = sortedSetOf("")
     private val _messagesListState: SnapshotStateList<FriendMessage> = mutableStateListOf()
     private val _conversationsListState: SnapshotStateList<FriendConversation> = mutableStateListOf()
-    private var _friendMessageBeingEdited: FriendMessage? = null
+    private var _friendMessageUnderActionFocus: FriendMessage? = null
     private val _currentAction = mutableStateOf(MessagesUserAction.IDLE)
     // endregion Variables
 
@@ -56,8 +56,8 @@ class MessagesViewModel(
             return if (_conversationsListState.size > 0) _conversationsListState[0]
             else null
         }
-    val friendMessageBeingEdited
-        get() = _friendMessageBeingEdited
+    val friendMessageUnderActionFocus
+        get() = _friendMessageUnderActionFocus
     val currentAction
         get() = _currentAction
     // endregion Properties
@@ -173,7 +173,7 @@ class MessagesViewModel(
         friendMessageToEdit: FriendMessage
     ){
         currentAction.value = MessagesUserAction.UPDATE
-        _friendMessageBeingEdited = friendMessageToEdit
+        _friendMessageUnderActionFocus = friendMessageToEdit
         message.value = friendMessageToEdit.message
     }
 
@@ -182,7 +182,7 @@ class MessagesViewModel(
      */
     fun updateMessageEnd(){
         currentAction.value = MessagesUserAction.IDLE
-        _friendMessageBeingEdited = null
+        _friendMessageUnderActionFocus = null
         message.value = ""
     }
 
@@ -190,27 +190,31 @@ class MessagesViewModel(
      * Updates a [FriendMessage] object in the database
      */
     private suspend fun updateMessage(){
-        if (friendMessageBeingEdited != null){
+        if (friendMessageUnderActionFocus != null){
             Log.i(
                 TAG(),
-                "MessagesViewModel: Updated message ID = \"${friendMessageBeingEdited!!._id.toHexString()}\"; " +
+                "MessagesViewModel: Updated message ID = \"${friendMessageUnderActionFocus!!._id.toHexString()}\"; " +
                         "Updated message = \"${message.value}\""
             )
 
             messagesRepository.updateMessage(
-                messageId = friendMessageBeingEdited!!._id,
+                messageId = friendMessageUnderActionFocus!!._id,
                 newMessage = message.value
             )
             updateMessageEnd()
         }
     }
 
-    fun deleteMessageStart(){
+    fun deleteMessageStart(
+        friendMessageToDelete: FriendMessage
+    ){
         currentAction.value = MessagesUserAction.DELETE
+        _friendMessageUnderActionFocus = friendMessageToDelete
     }
 
     fun deleteMessageEnd(){
         currentAction.value = MessagesUserAction.IDLE
+        _friendMessageUnderActionFocus = null
     }
 
     /**
@@ -230,12 +234,16 @@ class MessagesViewModel(
         }
     }
 
-    fun replyMessageStart(){
+    fun replyMessageStart(
+        friendMessageBeingRepliedTo: FriendMessage
+    ){
         currentAction.value = MessagesUserAction.REPLY
+        _friendMessageUnderActionFocus = friendMessageBeingRepliedTo
     }
 
     fun replyMessageEnd(){
         currentAction.value = MessagesUserAction.IDLE
+        _friendMessageUnderActionFocus = null
     }
 
     /**

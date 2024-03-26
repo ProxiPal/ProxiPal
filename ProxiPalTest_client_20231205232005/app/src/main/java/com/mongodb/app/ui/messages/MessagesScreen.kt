@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -36,6 +37,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -221,6 +223,23 @@ fun MessagesBodyContent(
     messagesViewModel: MessagesViewModel,
     modifier: Modifier = Modifier
 ) {
+    if (messagesViewModel.isDeletingMessage()){
+        MessagesDeleteAlert(
+            onDismissRequest = {
+                messagesViewModel.deleteMessageEnd()
+                               },
+            onDismissButtonClick = {
+                                   messagesViewModel.deleteMessageEnd()
+            },
+            onConfirmButtonClick = {
+                messagesViewModel.deleteMessage(
+                    friendMessageToDelete = messagesViewModel.friendMessageUnderActionFocus!!
+                )
+                messagesViewModel.deleteMessageEnd()
+            }
+        )
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -474,7 +493,7 @@ fun MessagesContextualMenu(
                         isContextualMenuOpen = false
                         if (messagesViewModel.isNotPerformingAnyContextualMenuAction())
                         {
-                            messagesViewModel.deleteMessage(
+                            messagesViewModel.deleteMessageStart(
                                 friendMessageToDelete = friendMessage
                             )
                         }
@@ -493,7 +512,9 @@ fun MessagesContextualMenu(
                         isContextualMenuOpen = false
                         if (messagesViewModel.isNotPerformingAnyContextualMenuAction())
                         {
-                            messagesViewModel.replyMessageStart()
+                            messagesViewModel.replyMessageStart(
+                                friendMessageBeingRepliedTo = friendMessage
+                            )
                         }
                     }
                 )
@@ -526,6 +547,42 @@ fun MessagesReplyUpdateRow(
             )
         }
     }
+}
+
+@Composable
+fun MessagesDeleteAlert(
+    onDismissRequest: (() -> Unit),
+    onDismissButtonClick: (() -> Unit),
+    onConfirmButtonClick: (() -> Unit),
+    modifier: Modifier = Modifier
+){
+    AlertDialog(
+        onDismissRequest = { onDismissRequest() },
+        dismissButton = {
+                        TextButton(
+                            onClick = { onDismissButtonClick() }
+                        ) {
+                            Text(
+                                text = "No"
+                            )
+                        }
+        },
+        confirmButton = { 
+                        TextButton(
+                            onClick = { onConfirmButtonClick() }
+                        ) {
+                            Text(
+                                text = "Yes"
+                            )
+                        }
+        },
+        text = {
+            Text(
+                text = "Are you sure you want to delete this message?"
+            )
+        },
+        modifier = modifier
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
