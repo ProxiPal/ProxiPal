@@ -187,7 +187,7 @@ class UserProfileScreen : ComponentActivity() {
 
         setContent {
             MyApplicationTheme {
-                NavigationGraph(toolbarViewModel, userProfileViewModel, homeViewModel = HomeViewModel())
+                NavigationGraph(toolbarViewModel, userProfileViewModel, homeViewModel = HomeViewModel(repository = repository))
             }
         }
     }
@@ -251,7 +251,7 @@ fun UserProfileLayoutPreview() {
             ),
             toolbarViewModel = ToolbarViewModel(repository),
             navController = rememberNavController(),
-            homeViewModel = HomeViewModel()
+            homeViewModel = HomeViewModel(repository = repository)
         )
     }
 }

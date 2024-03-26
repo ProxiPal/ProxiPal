@@ -89,8 +89,8 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
         composable(Routes.ScreenSettings.route){
             ScreenSettings(navController = navController)
         }
-        composable(Routes.FilterScreen.route){
-            FilterScreen(navController)
+        composable(Routes.FilterScreen.route) {
+            FilterScreen(navController = navController, viewModel = userProfileViewModel) //march17
         }
         composable(Routes.OnboardingScreen.route){
             OnboardingScreen(

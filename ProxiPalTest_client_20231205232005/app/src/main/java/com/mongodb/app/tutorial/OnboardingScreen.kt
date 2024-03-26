@@ -235,7 +235,7 @@ fun UserProfileLayoutWithCircle() {
                 ),
                 toolbarViewModel = ToolbarViewModel(repository),
                 navController = rememberNavController(),
-                homeViewModel = HomeViewModel()
+                homeViewModel = HomeViewModel(repository)
             )
             CircleToBottomAppBar(0)
         }
