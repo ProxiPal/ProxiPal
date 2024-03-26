@@ -197,7 +197,7 @@ class RealmSyncRepository(
         config = SyncConfiguration.Builder(currentUser, set)
             .initialSubscriptions { realm ->
                 // Subscribe to the active subscriptionType - first time defaults to MINE
-                val activeSubscriptionType = SubscriptionType.ALL
+                val activeSubscriptionType = getActiveSubscriptionType(realm)
                 if (SHOULD_USE_TASKS_ITEMS) {
                     add(
                         getQueryItems(realm, activeSubscriptionType),
@@ -461,6 +461,7 @@ class RealmSyncRepository(
             SubscriptionType.MINE -> realm.query("ownerId == $0", currentUser.id)
             SubscriptionType.ALL -> realm.query()
         }
+
     // endregion User profiles
 
     // Contribution: Marco Pacini
@@ -546,6 +547,7 @@ class RealmSyncRepository(
             center = GeoPoint.create(userLatitude, userLongitude),
             radius = Distance.fromKilometers(radiusInKilometers)
         )
+        /*
         val interestsQueryPart = if (selectedInterests.isNotEmpty()) {
             selectedInterests.joinToString(prefix = "interests IN [", postfix = "]", separator = ", ") { "'$it'" }
         } else ""
@@ -567,6 +569,10 @@ class RealmSyncRepository(
         }
 
         return realm.query<UserProfile>(query, currentUser.id).find().asFlow()
+         */
+        
+        // TODO: FOR TESTING THE NEARBY USER LIST DISPLAY, THIS SHOULD SHOW ALL USER PROFILES IF IT WORKS
+        return realm.query<UserProfile>("owner_id == $0", currentUser.id).find().asFlow()
     }
 
 
