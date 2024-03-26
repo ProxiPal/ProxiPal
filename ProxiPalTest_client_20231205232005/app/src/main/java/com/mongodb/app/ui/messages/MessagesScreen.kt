@@ -352,11 +352,31 @@ fun SingleMessageContainer(
                     isSenderMe = isSenderMe,
                     modifier = Modifier
                 )
-                MessagesContextualMenu(
-                    friendMessage = friendMessage,
-                    isSenderMe = isSenderMe,
-                    messagesViewModel = messagesViewModel
-                )
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ){
+                    if (friendMessage.isUpdated()){
+                        Text(
+                            text = stringResource(id = R.string.messages_screen_updated_message_label),
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier
+                                .padding(start = 4.dp)
+                        )
+                    }
+                    else{
+                        Spacer(
+                            modifier = Modifier
+                        )
+                    }
+                    MessagesContextualMenu(
+                        friendMessage = friendMessage,
+                        isSenderMe = isSenderMe,
+                        messagesViewModel = messagesViewModel
+                    )
+                }
             }
         }
         if (!isSenderMe) {

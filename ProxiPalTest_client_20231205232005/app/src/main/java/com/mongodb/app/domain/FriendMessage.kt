@@ -47,4 +47,18 @@ class FriendMessage : RealmObject {
         result = 31 * result + messageIdRepliedTo.hashCode()
         return result
     }
+
+    /**
+     * Checks if a specific [FriendMessage] has been updated
+     */
+    fun isUpdated(): Boolean{
+        return hasBeenUpdated
+    }
+
+    /**
+     * Checks if a specific [FriendMessage] is a reply to another [FriendMessage]
+     */
+    fun isAReply(): Boolean{
+        return messageIdRepliedTo.isNotEmpty()
+    }
 }

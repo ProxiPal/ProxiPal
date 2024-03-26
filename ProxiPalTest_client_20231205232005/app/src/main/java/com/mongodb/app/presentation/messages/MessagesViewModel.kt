@@ -175,6 +175,8 @@ class MessagesViewModel(
         return
     }
 
+
+    // region Updating
     /**
      * Starts the process for updating a [FriendMessage] in the database
      */
@@ -195,6 +197,12 @@ class MessagesViewModel(
         message.value = ""
     }
 
+    fun isUpdatingMessage(): Boolean{
+        return currentAction.value == MessagesUserAction.UPDATE
+    }
+    // endregion Updating
+
+
     /**
      * Updates a [FriendMessage] object in the database
      */
@@ -214,6 +222,8 @@ class MessagesViewModel(
         }
     }
 
+
+    // region Deleting
     fun deleteMessageStart(
         friendMessageToDelete: FriendMessage
     ){
@@ -225,6 +235,12 @@ class MessagesViewModel(
         currentAction.value = MessagesUserAction.IDLE
         _friendMessageUnderActionFocus = null
     }
+
+    fun isDeletingMessage(): Boolean{
+        return currentAction.value == MessagesUserAction.DELETE
+    }
+    // endregion Deleting
+
 
     /**
      * Removes a [FriendMessage] object from the database
@@ -243,6 +259,8 @@ class MessagesViewModel(
         }
     }
 
+
+    // region Replying
     fun replyMessageStart(
         friendMessageBeingRepliedTo: FriendMessage
     ){
@@ -254,6 +272,12 @@ class MessagesViewModel(
         currentAction.value = MessagesUserAction.IDLE
         _friendMessageUnderActionFocus = null
     }
+
+    fun isReplyingToMessage(): Boolean{
+        return currentAction.value == MessagesUserAction.REPLY
+    }
+    // endregion Replying
+
 
     /**
      * Checks if a specific [FriendMessage] was sent by the current user
@@ -267,18 +291,6 @@ class MessagesViewModel(
      */
     fun isNotPerformingAnyContextualMenuAction(): Boolean{
         return !(isUpdatingMessage() || isDeletingMessage() || isReplyingToMessage())
-    }
-
-    fun isUpdatingMessage(): Boolean{
-        return currentAction.value == MessagesUserAction.UPDATE
-    }
-
-    fun isDeletingMessage(): Boolean{
-        return currentAction.value == MessagesUserAction.DELETE
-    }
-
-    fun isReplyingToMessage(): Boolean{
-        return currentAction.value == MessagesUserAction.REPLY
     }
     // endregion Messages
 
