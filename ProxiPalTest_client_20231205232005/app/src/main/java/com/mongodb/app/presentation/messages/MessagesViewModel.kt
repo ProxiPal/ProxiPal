@@ -262,7 +262,6 @@ class MessagesViewModel(
 
     fun isUpdatingMessage(): Boolean{
         return currentAction.value == MessagesUserAction.UPDATE
-//        return friendMessageBeingEdited != null
     }
 
     fun isDeletingMessage(): Boolean{

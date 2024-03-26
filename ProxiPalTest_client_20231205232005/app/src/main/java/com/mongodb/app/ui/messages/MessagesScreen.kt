@@ -61,6 +61,7 @@ import com.mongodb.app.R
 import com.mongodb.app.TAG
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
+import com.mongodb.app.data.messages.LONG_MESSAGE_CHARACTER_THRESHOLD
 import com.mongodb.app.data.messages.MESSAGE_WIDTH_WEIGHT
 import com.mongodb.app.data.messages.MessagesUserAction
 import com.mongodb.app.data.messages.MockConversationRepository
@@ -87,16 +88,6 @@ TODO List of tasks to do for messages screen
 | If the original message is updated or deleted, update the small label under the message reply appropriately
 | ... Need to update database schema and add "messageIdRepliedTo": String that is either
 | ... equal to the original message's ID if the message still exists or the empty string if the message doesn't exist
-- Add contextual menu "safety checks"
-| While editing a message, should not be able to access any additional contextual menu option
-| ... Also, make the "editing message..." tab show above text field
-| ... Cancel button clears both the tab and current message typed in
-| While replying to a message, should not be able to access any additional contextual menu option
-| ... Also, make the "replying to..." tab show above text field
-| ... Cancel button clears only the tab and not the current message typed in
-| While deleting a message
-| ... Also, make an alert dialog or something show before a user can actually delete a message
-| ... Cancel button is not present and refresh button is there instead
 */
 
 
@@ -541,15 +532,14 @@ fun MessagesReplyUpdateRow(
         ) {
             val messageUnderActionFocus: String? =
                 messagesViewModel.friendMessageUnderActionFocus?.message
-            val messageSubstring: String? = messageUnderActionFocus?.substring(0, 10)
-            val messageToDisplay = if (messageSubstring == null) {
+            val messageToDisplay = if (messageUnderActionFocus == null) {
                 stringResource(id = R.string.messages_screen_message_reference_invalid)
-            } else if (messageUnderActionFocus.length <= 10) {
+            } else if (messageUnderActionFocus.length <= LONG_MESSAGE_CHARACTER_THRESHOLD) {
                 stringResource(id = R.string.messages_screen_message_reference_short,
-                    messageSubstring)
+                    messageUnderActionFocus)
             } else {
                 stringResource(id = R.string.messages_screen_message_reference_long,
-                    messageSubstring)
+                    messageUnderActionFocus.substring(0, LONG_MESSAGE_CHARACTER_THRESHOLD))
             }
             Text(
                 // Message variable should not be null at this point

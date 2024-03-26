@@ -131,3 +131,7 @@ Uninstall and re-install app
 Call "realm.subscriptions.update { remove(subscriptionName) }" before "realm.subscriptions.waitForSynchronization()"
 Basically, subscriptions tell what kind of data can be returned from the database. Any data that doesn't satisfy a subscription's query will not be returned and thus can never be recognized in the app, no matter how many times data is retrieved.
 As a side note, when updating subscriptions, sometimes messages would not be saved to the database yet conversations would have their ID references saved. Creating a new emulated device and running the app there for some reason fixes that.
+
+## Message history on multiple devices are not the same and the database is not synced correctly with one of the devices
+
+Uninstall the app on both devices, then re-run the app on them. Message history should now be synced up to the database and regular create, update, and delete operations should work again.
