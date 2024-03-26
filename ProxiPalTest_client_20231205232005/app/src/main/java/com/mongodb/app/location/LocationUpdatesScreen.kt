@@ -2,6 +2,7 @@ package com.mongodb.app.location
 import android.Manifest
 import android.annotation.SuppressLint
 import android.os.Looper
+import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement

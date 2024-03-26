@@ -152,6 +152,13 @@
     <string name="others">Others</string>
     <string name="apply_filter">Apply Filter</string>
     <string name="cancel_Filter">Cancel</string>
+    <string name="report">Report</string>
+    <string name="spam">Spam</string>
+    <string name="inappropriate">Inappropriate Content</string>
+    <string name="harassment">Harassment</string>
+    <string name="comments">Additional comments (optional):</string>
+    <string name="reportuser">Report User</string>
+    <string name="report_subheading">Please select a reason for reporting:</string>
 
 
 </resources>

@@ -9,9 +9,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import com.mongodb.app.ui.theme.MyApplicationTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,7 +48,8 @@ fun Friendslist() {
                         focusedIndicatorColor = Color.Transparent, // Hide the indicator line when focused
                         unfocusedIndicatorColor = Color.Transparent
                     ),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .fillMaxWidth()
                         .padding(start = 30.dp)
                 )
@@ -102,5 +105,13 @@ fun Friendslist() {
                 }
             }
         }
+    }
+}
+
+@Composable
+@Preview
+fun friendslistPreview(){
+    MyApplicationTheme {
+        Friendslist()
     }
 }
