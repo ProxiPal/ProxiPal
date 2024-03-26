@@ -4,6 +4,7 @@ import android.util.Log
 import com.mongodb.app.TAG
 import com.mongodb.app.domain.Item
 import com.mongodb.app.app
+import com.mongodb.app.domain.Report
 import com.mongodb.app.domain.UserProfile
 import com.mongodb.app.location.CustomGeoPoint
 import io.realm.kotlin.Realm
@@ -156,6 +157,8 @@ interface SyncRepository {
     suspend fun updateUserProfileInterests(interest:String)
 
     suspend fun updateUserProfileIndustries(industry:String)
+
+    suspend fun addReport(reasonsList: List<String>, reportedUser: String, userComments: String)
     // endregion location
 }
 
@@ -276,6 +279,16 @@ class RealmSyncRepository(
         }
     }
 
+
+    // start of user report queries
+    override suspend fun addReport(reasonsList: List<String>, reportedUser: String, userComments: String){
+        val task = Report().apply{
+            userReported = reportedUser
+            reasons = reasonsList as RealmList<String>
+            comments = userComments
+            ownerId = currentUser.id
+        }
+    }
 
     override suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType) {
         realm.subscriptions.update {
@@ -647,8 +660,6 @@ class RealmSyncRepository(
         }
     }
 
-
-
 }
 
 /**
@@ -687,6 +698,8 @@ class MockRepository : SyncRepository {
     override suspend fun updateUserProfileInterests(interest:String) = Unit
 
     override suspend fun updateUserProfileIndustries(industry:String) = Unit
+
+    override suspend fun addReport(reasonsList: List<String>, reportedUser: String, userComments: String) = Unit
 
     companion object {
         const val MOCK_OWNER_ID_MINE = "A"
