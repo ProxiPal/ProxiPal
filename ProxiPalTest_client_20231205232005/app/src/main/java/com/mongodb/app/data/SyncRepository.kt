@@ -71,7 +71,17 @@ fun SortedSet<String>.toRealmList(): RealmList<String>{
 fun RealmList<String>.toObjectIdList(): RealmList<ObjectId>{
     val realmList: RealmList<ObjectId> = realmListOf()
     for (string in this){
-        realmList.add(string.toObjectId())
+        try{
+            realmList.add(string.toObjectId())
+        }
+        catch (e: Exception){
+            Log.i(
+                TAG(),
+                "Caught exception \"${e}\" while converting a list of strings to ObjectIds; " +
+                        "Returning an empty list instead"
+            )
+            return realmListOf()
+        }
     }
     return realmList
 }
@@ -674,6 +684,7 @@ class RealmSyncRepository(
             findLatest(frozenObject)?.let{
                 liveObject ->
                 liveObject.message = newMessage
+                liveObject.hasBeenUpdated = true
             }
         }
     }
@@ -718,7 +729,8 @@ class RealmSyncRepository(
             "RealmSyncRepository: Conversation users involved = \"" +
                     "${usersInvolvedRealmList}\""
         )
-        val messagesSentRealmList: RealmList<String> = realmListOf("")
+        // Empty list of messages
+        val messagesSentRealmList: RealmList<String> = realmListOf()
 
         val friendConversation = FriendConversation().apply{
             this.usersInvolved = usersInvolvedRealmList
@@ -735,6 +747,13 @@ class RealmSyncRepository(
         usersInvolved: SortedSet<String>
     ): RealmQuery<FriendConversation> {
         return realm.query<FriendConversation>("$0 == usersInvolved", usersInvolved)
+    }
+
+    override fun getQuerySpecificConversation(
+        realm: Realm,
+        conversationId: ObjectId
+    ): RealmQuery<FriendConversation> {
+        return realm.query<FriendConversation>("_id == $0", conversationId)
     }
 
     override fun readConversation(usersInvolved: SortedSet<String>): Flow<ResultsChange<FriendConversation>> {

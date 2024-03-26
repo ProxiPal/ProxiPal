@@ -72,7 +72,7 @@ class MessagesViewModel(
             readConversation()
             Log.i(
                 TAG(),
-                "MessagesViewModel: Finished reading conversation..."
+                "MessagesViewModel: Finished reading conversation = \"${currentConversation?._id}\""
             )
             readMessages()
         }
@@ -123,11 +123,20 @@ class MessagesViewModel(
      * Adds a [FriendMessage] object to the database
      */
     private suspend fun createMessage(){
+        val messageIdRepliedTo: String = if (friendMessageUnderActionFocus == null || !isReplyingToMessage()){
+            ""
+        }
+        // Is replying to a message, get its ID to reference it in the replying message
+        else{
+            friendMessageUnderActionFocus!!._id.toHexString()
+        }
         val newMessage = FriendMessage()
             .also {
                 it.message = message.value
                 it.timeSent = getCurrentTime()
                 it.ownerId = repository.getCurrentUserId()
+                it.hasBeenUpdated = false
+                it.messageIdRepliedTo = messageIdRepliedTo
             }
         Log.i(
             TAG(),

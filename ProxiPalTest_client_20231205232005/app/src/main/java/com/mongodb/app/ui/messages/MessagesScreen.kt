@@ -86,8 +86,6 @@ TODO List of tasks to do for messages screen
 - Add ability to reply to messages
 | Add a small label showing what the message is in response to
 | If the original message is updated or deleted, update the small label under the message reply appropriately
-| ... Need to update database schema and add "messageIdRepliedTo": String that is either
-| ... equal to the original message's ID if the message still exists or the empty string if the message doesn't exist
 */
 
 

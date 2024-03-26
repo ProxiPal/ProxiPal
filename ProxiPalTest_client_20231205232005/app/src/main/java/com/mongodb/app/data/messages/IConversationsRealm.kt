@@ -27,6 +27,11 @@ interface IConversationsRealm {
     fun getQuerySpecificConversation(realm: Realm, usersInvolved: SortedSet<String>): RealmQuery<FriendConversation>
 
     /**
+     * Returns a query for finding a specific [FriendConversation] by its [ObjectId]
+     */
+    fun getQuerySpecificConversation(realm: Realm, conversationId: ObjectId): RealmQuery<FriendConversation>
+
+    /**
      * Creates a [FriendConversation] object for the specified users involved
      */
     suspend fun createConversation(usersInvolved: SortedSet<String>)

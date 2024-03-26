@@ -15,9 +15,16 @@ class FriendMessage : RealmObject {
     // Cannot use BsonDateTime, also Bson timestamp is for Mongo internal use
     var timeSent: Long = Long.MIN_VALUE
     /**
-     * The app ID of the user who sent the message
+     * The ObjectId of the user who sent the message
      */
     var ownerId: String = ""
+    var hasBeenUpdated: Boolean = false
+    /**
+     * The ObjectId of the [FriendMessage] replying to
+     * (Or the empty string if this is not a reply or "deleted" if the original message was deleted)
+     */
+    var messageIdRepliedTo: String = ""
+
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
@@ -26,6 +33,8 @@ class FriendMessage : RealmObject {
         if (this.message != other.message) return false
         if (this.timeSent != other.timeSent) return false
         if (this.ownerId != other.ownerId) return false
+        if (this.hasBeenUpdated != other.hasBeenUpdated) return false
+        if (this.messageIdRepliedTo != other.messageIdRepliedTo) return false
         return true
     }
 
@@ -34,6 +43,8 @@ class FriendMessage : RealmObject {
         result = 31 * result + message.hashCode()
         result = 31 * result + timeSent.hashCode()
         result = 31 * result + ownerId.hashCode()
+        result = 31 * result + hasBeenUpdated.hashCode()
+        result = 31 * result + messageIdRepliedTo.hashCode()
         return result
     }
 }
