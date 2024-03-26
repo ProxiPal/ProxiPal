@@ -112,7 +112,8 @@ class MessagesScreen : ComponentActivity() {
             repository = repository,
             messagesRealm = repository,
             conversationsRealm = repository,
-            this)
+            this
+        )
     }
     // endregion Variables
 
@@ -223,13 +224,13 @@ fun MessagesBodyContent(
     messagesViewModel: MessagesViewModel,
     modifier: Modifier = Modifier
 ) {
-    if (messagesViewModel.isDeletingMessage()){
+    if (messagesViewModel.isDeletingMessage()) {
         MessagesDeleteAlert(
             onDismissRequest = {
                 messagesViewModel.deleteMessageEnd()
-                               },
+            },
             onDismissButtonClick = {
-                                   messagesViewModel.deleteMessageEnd()
+                messagesViewModel.deleteMessageEnd()
             },
             onConfirmButtonClick = {
                 messagesViewModel.deleteMessage(
@@ -260,8 +261,7 @@ fun MessagesBodyContent(
 
             // Start with showing the most recent messages first
             val friendMessages = messagesViewModel.messagesListState.toList().reversed()
-            items(friendMessages) {
-                friendMessage ->
+            items(friendMessages) { friendMessage ->
                 SingleMessageContainer(
                     friendMessage = friendMessage,
                     isSenderMe = messagesViewModel.isMessageMine(friendMessage),
@@ -272,19 +272,20 @@ fun MessagesBodyContent(
                 // Because the messages are shown starting from the bottom of the screen
                 // ... to make this appear at the very top, this should go after
                 // ... message composable
-                if (friendMessages.indexOf(friendMessage) == friendMessages.size - 1){
+                if (friendMessages.indexOf(friendMessage) == friendMessages.size - 1) {
                     MessagesEndOfHistory()
                 }
             }
         }
-        if (messagesViewModel.isReplyingToMessage()){
+        if (messagesViewModel.isReplyingToMessage()) {
             MessagesReplyUpdateRow(
-                tabStringId = R.string.messages_screen_reply_message
+                messagesViewModel = messagesViewModel,
+                tabStringId = R.string.messages_screen_reply_message_notifier
             )
-        }
-        else if (messagesViewModel.isUpdatingMessage()){
+        } else if (messagesViewModel.isUpdatingMessage()) {
             MessagesReplyUpdateRow(
-                tabStringId = R.string.messages_screen_update_message
+                messagesViewModel = messagesViewModel,
+                tabStringId = R.string.messages_screen_update_message_notifier
             )
         }
         MessagesInputRow(
@@ -299,13 +300,13 @@ fun MessagesBodyContent(
 @Composable
 fun MessagesEndOfHistory(
     modifier: Modifier = Modifier
-){
+) {
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = modifier
             .fillMaxWidth()
             .padding(top = 8.dp, bottom = 8.dp)
-    ){
+    ) {
         Text(
             text = stringResource(id = R.string.messages_screen_end_of_messages),
             style = MaterialTheme.typography.labelMedium
@@ -441,7 +442,7 @@ fun MessagesContextualMenu(
     isSenderMe: Boolean,
     messagesViewModel: MessagesViewModel,
     modifier: Modifier = Modifier
-){
+) {
     var isContextualMenuOpen by rememberSaveable { mutableStateOf(false) }
 
     Box(
@@ -466,17 +467,16 @@ fun MessagesContextualMenu(
             }
         ) {
             // Show options to either update or delete your messages
-            if (isSenderMe){
+            if (isSenderMe) {
                 DropdownMenuItem(
                     text = {
                         Text(
-                            text = stringResource(id = R.string.messages_screen_update_message)
+                            text = stringResource(id = R.string.messages_screen_update_message_contextual_menu)
                         )
                     },
                     onClick = {
                         isContextualMenuOpen = false
-                        if (messagesViewModel.isNotPerformingAnyContextualMenuAction())
-                        {
+                        if (messagesViewModel.isNotPerformingAnyContextualMenuAction()) {
                             messagesViewModel.updateMessageStart(
                                 friendMessageToEdit = friendMessage
                             )
@@ -486,13 +486,12 @@ fun MessagesContextualMenu(
                 DropdownMenuItem(
                     text = {
                         Text(
-                            text = stringResource(id = R.string.messages_screen_delete_message)
+                            text = stringResource(id = R.string.messages_screen_delete_message_contextual_menu)
                         )
                     },
                     onClick = {
                         isContextualMenuOpen = false
-                        if (messagesViewModel.isNotPerformingAnyContextualMenuAction())
-                        {
+                        if (messagesViewModel.isNotPerformingAnyContextualMenuAction()) {
                             messagesViewModel.deleteMessageStart(
                                 friendMessageToDelete = friendMessage
                             )
@@ -501,17 +500,16 @@ fun MessagesContextualMenu(
                 )
             }
             // Show only an option to reply to another user's messages
-            else{
+            else {
                 DropdownMenuItem(
                     text = {
                         Text(
-                            text = stringResource(id = R.string.messages_screen_reply_message)
+                            text = stringResource(id = R.string.messages_screen_reply_message_contextual_menu)
                         )
                     },
                     onClick = {
                         isContextualMenuOpen = false
-                        if (messagesViewModel.isNotPerformingAnyContextualMenuAction())
-                        {
+                        if (messagesViewModel.isNotPerformingAnyContextualMenuAction()) {
                             messagesViewModel.replyMessageStart(
                                 friendMessageBeingRepliedTo = friendMessage
                             )
@@ -525,25 +523,44 @@ fun MessagesContextualMenu(
 
 @Composable
 fun MessagesReplyUpdateRow(
+    messagesViewModel: MessagesViewModel,
     @StringRes
     tabStringId: Int,
     modifier: Modifier = Modifier
-){
+) {
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = modifier
             .fillMaxWidth()
-    ){
+    ) {
         Card(
             modifier = Modifier
-        ){
+                .padding(
+                    all = 4.dp
+                )
+        ) {
+            val messageUnderActionFocus: String? =
+                messagesViewModel.friendMessageUnderActionFocus?.message
+            val messageSubstring: String? = messageUnderActionFocus?.substring(0, 10)
+            val messageToDisplay = if (messageSubstring == null) {
+                stringResource(id = R.string.messages_screen_message_reference_invalid)
+            } else if (messageUnderActionFocus.length <= 10) {
+                stringResource(id = R.string.messages_screen_message_reference_short,
+                    messageSubstring)
+            } else {
+                stringResource(id = R.string.messages_screen_message_reference_long,
+                    messageSubstring)
+            }
             Text(
-                text = stringResource(id = tabStringId),
+                // Message variable should not be null at this point
+                text = stringResource(id = tabStringId, messageToDisplay),
                 modifier = Modifier
-                    .padding(top = 4.dp,
+                    .padding(
+                        top = 4.dp,
                         start = 8.dp,
                         end = 8.dp,
-                        bottom = 4.dp)
+                        bottom = 4.dp
+                    )
             )
         }
     }
@@ -555,30 +572,30 @@ fun MessagesDeleteAlert(
     onDismissButtonClick: (() -> Unit),
     onConfirmButtonClick: (() -> Unit),
     modifier: Modifier = Modifier
-){
+) {
     AlertDialog(
         onDismissRequest = { onDismissRequest() },
         dismissButton = {
-                        TextButton(
-                            onClick = { onDismissButtonClick() }
-                        ) {
-                            Text(
-                                text = "No"
-                            )
-                        }
+            TextButton(
+                onClick = { onDismissButtonClick() }
+            ) {
+                Text(
+                    text = stringResource(id = R.string.messages_screen_delete_message_dismiss)
+                )
+            }
         },
-        confirmButton = { 
-                        TextButton(
-                            onClick = { onConfirmButtonClick() }
-                        ) {
-                            Text(
-                                text = "Yes"
-                            )
-                        }
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirmButtonClick() }
+            ) {
+                Text(
+                    text = stringResource(id = R.string.messages_screen_delete_message_confirm)
+                )
+            }
         },
         text = {
             Text(
-                text = "Are you sure you want to delete this message?"
+                text = stringResource(id = R.string.messages_screen_delete_message_warning_text)
             )
         },
         modifier = modifier
@@ -599,7 +616,7 @@ fun MessagesInputRow(
                 color = MessageInputBackgroundColor
             )
     ) {
-        val onIconButtonClick: (() -> Unit) = when(messagesViewModel.currentAction.value){
+        val onIconButtonClick: (() -> Unit) = when (messagesViewModel.currentAction.value) {
             // Refresh current message history
             MessagesUserAction.IDLE -> {
                 messagesViewModel::refreshMessages
@@ -617,7 +634,7 @@ fun MessagesInputRow(
                 messagesViewModel::replyMessageEnd
             }
         }
-        val iconImageVector = when(messagesViewModel.currentAction.value){
+        val iconImageVector = when (messagesViewModel.currentAction.value) {
             MessagesUserAction.IDLE -> Icons.Default.Refresh
             MessagesUserAction.UPDATE -> Icons.Default.Cancel
             MessagesUserAction.DELETE -> Icons.Default.Cancel
@@ -665,11 +682,11 @@ fun MessagesInputRow(
 // region PreviewFunctions
 @Preview(showBackground = true)
 @Composable
-fun TimePreview(){
+fun TimePreview() {
     MyApplicationTheme {
         // There are many established ways online to get the system time as a number
         // ... but using Calendar.getInstance() might be the most common answer
-        Column{
+        Column {
             // Note, numerical values are in milliseconds, not seconds
             // Dates are in PDT, but millisecond times are in GMT (?)
 
@@ -693,7 +710,7 @@ fun TimePreview(){
 //            Text(
 //                text = "Local date time = \n\"${LocalDateTime.now()}\""
 //            )
-            
+
 //            // This works too
 //            Text(
 //                text = "Instant time = \n\"${Instant.now().epochSecond}\""
@@ -737,7 +754,7 @@ fun MessagesScreenLayoutPreview() {
 @Composable
 fun SingleMessageContainerPreview() {
     MyApplicationTheme {
-        Column{
+        Column {
             val messagesViewModel = MessagesViewModel(
                 MockRepository(), MockMessagesRepository(), MockConversationRepository()
             )

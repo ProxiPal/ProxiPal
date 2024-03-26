@@ -63,9 +63,17 @@
     <string name="messages_screen_empty_message_field">Type message here...</string>
     <string name="messages_screen_end_of_messages">You reached the end of your message history.</string>
     <string name="messages_screen_no_sent_messages">There are no messages to show.</string>
-    <string name="messages_screen_update_message">Edit</string>
-    <string name="messages_screen_delete_message">Delete</string>
-    <string name="messages_screen_reply_message">Reply</string>
+    <string name="messages_screen_update_message_contextual_menu">Edit</string>
+    <string name="messages_screen_delete_message_contextual_menu">Delete</string>
+    <string name="messages_screen_reply_message_contextual_menu">Reply</string>
+    <string name="messages_screen_update_message_notifier">Editing message %s</string>
+    <string name="messages_screen_delete_message_warning_text">Are you sure you want to delete this message?</string>
+    <string name="messages_screen_delete_message_confirm">Yes</string>
+    <string name="messages_screen_delete_message_dismiss">No</string>
+    <string name="messages_screen_reply_message_notifier">Replying to message %s</string>
+    <string name="messages_screen_message_reference_invalid">\{null\}</string>
+    <string name="messages_screen_message_reference_short">\"%s\"</string>
+    <string name="messages_screen_message_reference_long">\"%s…\"</string>
 <!--    End messages screen strings-->
 
     <!-- NewFriendRequestNotificationService strings
