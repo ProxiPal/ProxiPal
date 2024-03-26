@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -59,6 +60,7 @@ import com.mongodb.app.TAG
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.messages.MESSAGE_WIDTH_WEIGHT
+import com.mongodb.app.data.messages.MessagesUserAction
 import com.mongodb.app.data.messages.MockConversationRepository
 import com.mongodb.app.data.messages.MockMessagesRepository
 import com.mongodb.app.domain.FriendMessage
@@ -256,8 +258,15 @@ fun MessagesBodyContent(
                 }
             }
         }
-        if (messagesViewModel.isUpdatingMessage()){
-            MessagesReplyUpdateRow()
+        if (messagesViewModel.isReplyingToMessage()){
+            MessagesReplyUpdateRow(
+                tabStringId = R.string.messages_screen_reply_message
+            )
+        }
+        else if (messagesViewModel.isUpdatingMessage()){
+            MessagesReplyUpdateRow(
+                tabStringId = R.string.messages_screen_update_message
+            )
         }
         MessagesInputRow(
             messagesViewModel = messagesViewModel
@@ -447,9 +456,12 @@ fun MessagesContextualMenu(
                     },
                     onClick = {
                         isContextualMenuOpen = false
-                        messagesViewModel.updateMessageStart(
-                            friendMessageToEdit = friendMessage
-                        )
+                        if (messagesViewModel.isNotPerformingAnyContextualMenuAction())
+                        {
+                            messagesViewModel.updateMessageStart(
+                                friendMessageToEdit = friendMessage
+                            )
+                        }
                     }
                 )
                 DropdownMenuItem(
@@ -460,9 +472,12 @@ fun MessagesContextualMenu(
                     },
                     onClick = {
                         isContextualMenuOpen = false
-                        messagesViewModel.deleteMessage(
-                            friendMessageToDelete = friendMessage
-                        )
+                        if (messagesViewModel.isNotPerformingAnyContextualMenuAction())
+                        {
+                            messagesViewModel.deleteMessage(
+                                friendMessageToDelete = friendMessage
+                            )
+                        }
                     }
                 )
             }
@@ -476,7 +491,10 @@ fun MessagesContextualMenu(
                     },
                     onClick = {
                         isContextualMenuOpen = false
-                        messagesViewModel.replyMessageStart()
+                        if (messagesViewModel.isNotPerformingAnyContextualMenuAction())
+                        {
+                            messagesViewModel.replyMessageStart()
+                        }
                     }
                 )
             }
@@ -486,6 +504,8 @@ fun MessagesContextualMenu(
 
 @Composable
 fun MessagesReplyUpdateRow(
+    @StringRes
+    tabStringId: Int,
     modifier: Modifier = Modifier
 ){
     Row(
@@ -497,7 +517,7 @@ fun MessagesReplyUpdateRow(
             modifier = Modifier
         ){
             Text(
-                text = "Replying to.../Editing ...",
+                text = stringResource(id = tabStringId),
                 modifier = Modifier
                     .padding(top = 4.dp,
                         start = 8.dp,
@@ -522,27 +542,38 @@ fun MessagesInputRow(
                 color = MessageInputBackgroundColor
             )
     ) {
-        if (messagesViewModel.isUpdatingMessage()){
-            // Cancel button to cancel message updating
-            IconButton(
-                onClick = { messagesViewModel.updateMessageCancel() }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Cancel,
-                    contentDescription = null
-                )
+        val onIconButtonClick: (() -> Unit) = when(messagesViewModel.currentAction.value){
+            // Refresh current message history
+            MessagesUserAction.IDLE -> {
+                messagesViewModel::refreshMessages
+            }
+            // Cancel process to update messages
+            MessagesUserAction.UPDATE -> {
+                messagesViewModel::updateMessageEnd
+            }
+            // Cancel process to delete message
+            MessagesUserAction.DELETE -> {
+                messagesViewModel::deleteMessageEnd
+            }
+            // Cancel process to reply to an message
+            MessagesUserAction.REPLY -> {
+                messagesViewModel::replyMessageEnd
             }
         }
-        else{
-            // Button to refresh message history
-            IconButton(
-                onClick = { messagesViewModel.refreshMessages() }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = null
-                )
-            }
+        val iconImageVector = when(messagesViewModel.currentAction.value){
+            MessagesUserAction.IDLE -> Icons.Default.Refresh
+            MessagesUserAction.UPDATE -> Icons.Default.Cancel
+            MessagesUserAction.DELETE -> Icons.Default.Cancel
+            MessagesUserAction.REPLY -> Icons.Default.Cancel
+        }
+        // Button to refresh message history
+        IconButton(
+            onClick = { onIconButtonClick() }
+        ) {
+            Icon(
+                imageVector = iconImageVector,
+                contentDescription = null
+            )
         }
         TextField(
             value = messagesViewModel.message.value,
@@ -560,7 +591,7 @@ fun MessagesInputRow(
 //                    top = dimensionResource(id = R.dimen.messages_screen_message_input_padding)
 //                )
         )
-        // Button to send message
+        // Button to send/update message
         IconButton(
             onClick = { messagesViewModel.sendMessage() }
         ) {

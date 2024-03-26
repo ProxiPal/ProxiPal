@@ -14,6 +14,7 @@ import com.mongodb.app.TAG
 import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.messages.IConversationsRealm
 import com.mongodb.app.data.messages.IMessagesRealm
+import com.mongodb.app.data.messages.MessagesUserAction
 import com.mongodb.app.domain.FriendConversation
 import com.mongodb.app.domain.FriendMessage
 import kotlinx.coroutines.Dispatchers
@@ -39,6 +40,7 @@ class MessagesViewModel(
     private val _messagesListState: SnapshotStateList<FriendMessage> = mutableStateListOf()
     private val _conversationsListState: SnapshotStateList<FriendConversation> = mutableStateListOf()
     private var _friendMessageBeingEdited: FriendMessage? = null
+    private val _currentAction = mutableStateOf(MessagesUserAction.IDLE)
     // endregion Variables
 
 
@@ -56,6 +58,8 @@ class MessagesViewModel(
         }
     val friendMessageBeingEdited
         get() = _friendMessageBeingEdited
+    val currentAction
+        get() = _currentAction
     // endregion Properties
 
 
@@ -98,22 +102,18 @@ class MessagesViewModel(
 
     fun sendMessage(){
         viewModelScope.launch {
-            // If not editing an already sent message
-            if (friendMessageBeingEdited == null){
-                createMessage()
-                resetMessage()
-                // Refresh the conversation object instance to the one saved in the database
-                // This allows keeping updated with the latest messages (namely the one just sent)
-                readConversation()
-            }
-            // If trying to send an updated message
-            else{
+            // Updates a message
+            if (isUpdatingMessage()){
                 updateMessage()
-                resetMessage()
-                // Refresh the conversation object instance to the one saved in the database
-                // This allows keeping updated with the latest messages (namely the one just sent)
-                readConversation()
             }
+            // Creates or replies to a message
+            else{
+                createMessage()
+            }
+            resetMessage()
+            // Refresh the conversation object instance to the one saved in the database
+            // This allows keeping updated with the latest messages (namely the one just sent)
+            readConversation()
         }
     }
 
@@ -159,7 +159,7 @@ class MessagesViewModel(
                 )
                 return@collect
             }
-        // Code beyond this point does not get called
+        // Code beyond this point does not get called, regardless of return statements (?)
         withContext(Dispatchers.Main){
             return@withContext
         }
@@ -172,14 +172,16 @@ class MessagesViewModel(
     fun updateMessageStart(
         friendMessageToEdit: FriendMessage
     ){
+        currentAction.value = MessagesUserAction.UPDATE
         _friendMessageBeingEdited = friendMessageToEdit
         message.value = friendMessageToEdit.message
     }
 
     /**
-     * Cancels the process for updating a [FriendMessage]
+     * Ends/Cancels the process for updating a [FriendMessage]
      */
-    fun updateMessageCancel(){
+    fun updateMessageEnd(){
+        currentAction.value = MessagesUserAction.IDLE
         _friendMessageBeingEdited = null
         message.value = ""
     }
@@ -199,10 +201,16 @@ class MessagesViewModel(
                 messageId = friendMessageBeingEdited!!._id,
                 newMessage = message.value
             )
-
-            // Reset the temporary variables for editing a message
-            _friendMessageBeingEdited = null
+            updateMessageEnd()
         }
+    }
+
+    fun deleteMessageStart(){
+        currentAction.value = MessagesUserAction.DELETE
+    }
+
+    fun deleteMessageEnd(){
+        currentAction.value = MessagesUserAction.IDLE
     }
 
     /**
@@ -222,6 +230,14 @@ class MessagesViewModel(
         }
     }
 
+    fun replyMessageStart(){
+        currentAction.value = MessagesUserAction.REPLY
+    }
+
+    fun replyMessageEnd(){
+        currentAction.value = MessagesUserAction.IDLE
+    }
+
     /**
      * Checks if a specific [FriendMessage] was sent by the current user
      */
@@ -230,17 +246,23 @@ class MessagesViewModel(
     }
 
     /**
-     * Checks if any [FriendMessage] is being updated
+     * Checks if the user is not either updating, deleting, or replying to a message
      */
-    fun isUpdatingMessage(): Boolean{
-        return friendMessageBeingEdited != null
+    fun isNotPerformingAnyContextualMenuAction(): Boolean{
+        return !(isUpdatingMessage() || isDeletingMessage() || isReplyingToMessage())
     }
 
-    /**
-     * Starts the process for replying to a message
-     */
-    fun replyMessageStart(){
-        // TODO
+    fun isUpdatingMessage(): Boolean{
+        return currentAction.value == MessagesUserAction.UPDATE
+//        return friendMessageBeingEdited != null
+    }
+
+    fun isDeletingMessage(): Boolean{
+        return currentAction.value == MessagesUserAction.DELETE
+    }
+
+    fun isReplyingToMessage(): Boolean{
+        return currentAction.value == MessagesUserAction.REPLY
     }
     // endregion Messages
 
