@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -353,22 +354,16 @@ fun SingleMessageContainer(
                     modifier = Modifier
                 )
                 Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = rowArrangement,
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(top = 4.dp)
                 ){
-                    if (friendMessage.isUpdated()){
-                        Text(
-                            text = stringResource(id = R.string.messages_screen_updated_message_label),
-                            style = MaterialTheme.typography.labelSmall,
-                            modifier = Modifier
-                                .padding(start = 4.dp)
-                        )
-                    }
-                    else{
-                        Spacer(
-                            modifier = Modifier
+                    // Row under message that contains contextual menu and any necessary labels
+                    if (isSenderMe){
+                        MessagesExtrasLabel(
+                            friendMessage = friendMessage
                         )
                     }
                     MessagesContextualMenu(
@@ -376,6 +371,11 @@ fun SingleMessageContainer(
                         isSenderMe = isSenderMe,
                         messagesViewModel = messagesViewModel
                     )
+                    if (!isSenderMe){
+                        MessagesExtrasLabel(
+                            friendMessage = friendMessage
+                        )
+                    }
                 }
             }
         }
@@ -443,6 +443,25 @@ fun SingleMessage(
 }
 
 /**
+ * Shows some extra information about a message via a label
+ */
+@Composable
+fun MessagesExtrasLabel(
+    friendMessage: FriendMessage,
+    modifier: Modifier = Modifier
+){
+    // Label showing that a message has been edited
+    if (friendMessage.isUpdated()){
+        Text(
+            text = stringResource(id = R.string.messages_screen_updated_message_label),
+            style = MaterialTheme.typography.labelSmall,
+            modifier = modifier
+                .padding(start = 4.dp)
+        )
+    }
+}
+
+/**
  * Provides an additional menu with extra actions the user can take
  */
 @Composable
@@ -458,16 +477,24 @@ fun MessagesContextualMenu(
         contentAlignment = Alignment.Center,
         modifier = modifier
     ) {
-        IconButton(
-            onClick = {
-                isContextualMenuOpen = true
-            }
-        ) {
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = "Open Contextual Menu"
-            )
-        }
+//        IconButton(
+//            onClick = {
+//                isContextualMenuOpen = true
+//            }
+//        ) {
+//            Icon(
+//                imageVector = Icons.Default.MoreVert,
+//                contentDescription = "Open Contextual Menu"
+//            )
+//        }
+        Icon(
+            imageVector = Icons.Default.MoreVert,
+            contentDescription = "Open Contextual Menu",
+            modifier = Modifier
+                .clickable {
+                    isContextualMenuOpen = true
+                }
+        )
 
         DropdownMenu(
             expanded = isContextualMenuOpen,
@@ -778,6 +805,22 @@ fun SingleMessageContainerPreview() {
                 friendMessage = FriendMessage().apply {
                     message =
                         stringResource(id = R.string.user_profile_test_string)
+                },
+                isSenderMe = true,
+                messagesViewModel = messagesViewModel
+            )
+            SingleMessageContainer(
+                friendMessage = FriendMessage().apply {
+                    message =
+                        "a"
+                },
+                isSenderMe = false,
+                messagesViewModel = messagesViewModel
+            )
+            SingleMessageContainer(
+                friendMessage = FriendMessage().apply {
+                    message =
+                        "z"
                 },
                 isSenderMe = true,
                 messagesViewModel = messagesViewModel
