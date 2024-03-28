@@ -1,7 +1,6 @@
 package com.mongodb.app.presentation.userprofiles
 
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
@@ -12,7 +11,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
-import com.mongodb.app.TAG
 import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT
 import com.mongodb.app.data.USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT
@@ -78,6 +76,10 @@ class UserProfileViewModel constructor(
     // for current user's interests/industries, added by Vichet Chim
     private var _userProfileInterests: MutableList<String> = mutableListOf()
     private var _userProfileIndustries: MutableList<String> = mutableListOf()
+
+    private var _reasons: MutableList<String> = mutableListOf()
+    private var _comments: MutableState<String> = mutableStateOf("")
+    private var _reportedUser: MutableState<String> = mutableStateOf("")
 
 
 
@@ -548,6 +550,14 @@ class UserProfileViewModel constructor(
         viewModelScope.launch {
             repository.updateUserProfileIndustries(
                 industry = industry
+            )
+        }
+    }
+
+    fun reportUser(reportedUser: String, reasons: List<String>, comments: String ){
+        viewModelScope.launch{
+            repository.addReport(
+                reportedUser =reportedUser, reasonsList = reasons, userComments = comments
             )
         }
     }

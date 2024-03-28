@@ -11,7 +11,6 @@ import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.annotations.ExperimentalGeoSpatialApi
 import io.realm.kotlin.ext.query
-import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.mongodb.User
 import io.realm.kotlin.mongodb.exceptions.SyncException
 import io.realm.kotlin.mongodb.subscriptions
@@ -287,6 +286,9 @@ class RealmSyncRepository(
             reasons = reasonsList as RealmList<String>
             comments = userComments
             ownerId = currentUser.id
+        }
+        realm.write{
+            copyToRealm(task)
         }
     }
 

@@ -1,18 +1,15 @@
 package com.mongodb.app.friends
 
-import android.provider.Settings.Global.getString
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
 
 import androidx.compose.material.IconButton
@@ -24,11 +21,9 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -38,13 +33,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mongodb.app.R
+import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.theme.MyApplicationTheme
 
 @Composable
-fun ReportDropDownMenu(onReport: (reason: String) -> Unit ){
+fun ReportDropDownMenu(onReport: (reason: String) -> Unit, userProfileViewModel: UserProfileViewModel ){
     val context = LocalContext.current
     var expanded by remember { mutableStateOf(false)}
     var showReportOptions by remember { mutableStateOf(false) }
@@ -66,7 +61,7 @@ fun ReportDropDownMenu(onReport: (reason: String) -> Unit ){
     }
     if (showReportOptions) {
         ReportOptionsDialog(
-            onDismiss = { showReportOptions = false }
+            onDismiss = { showReportOptions = false }, userProfileViewModel = userProfileViewModel
         )
     }
 }
@@ -74,9 +69,19 @@ fun ReportDropDownMenu(onReport: (reason: String) -> Unit ){
 
 @Composable
 fun ReportOptionsDialog(
-    onDismiss: () -> Unit,
+    onDismiss: () -> Unit, userProfileViewModel: UserProfileViewModel
 ) {
     var comments by remember { mutableStateOf("")}
+    var test = listOf("test")
+
+    val context = LocalContext.current
+    val reasons = listOf(
+        context.getString(R.string.inappropriate),
+        context.getString(R.string.harassment),
+        context.getString(R.string.spam),
+        context.getString(R.string.others)
+    )
+    val checkboxStates = remember {mutableStateMapOf<String, Boolean>().withDefault{false}}
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -88,7 +93,7 @@ fun ReportOptionsDialog(
                     text = stringResource(id = R.string.report_subheading),
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
-                ReportCheckBox()
+                ReportCheckBox(reasons, checkboxStates)
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = stringResource(id = R.string.comments),
@@ -104,8 +109,10 @@ fun ReportOptionsDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-
+                    Log.d("reasons list", checkboxStates.toString())
+                    userProfileViewModel.reportUser(reportedUser = "test", reasons = test, comments =comments)
                     onDismiss()
+
                 }
             ) {
                 Text(text = stringResource(id = R.string.report))
@@ -123,15 +130,15 @@ fun ReportOptionsDialog(
 
 
 @Composable
-fun ReportCheckBox(){
-    val context = LocalContext.current
-    val reasons = listOf(
-        context.getString(R.string.inappropriate),
-        context.getString(R.string.harassment),
-        context.getString(R.string.spam),
-        context.getString(R.string.others)
-    )
-    val checkboxStates = remember {mutableStateMapOf<String, Boolean>().withDefault{false}}
+fun ReportCheckBox(reasons: List<String>, checkboxStates:MutableMap<String, Boolean>){
+//    val context = LocalContext.current
+//    val reasons = listOf(
+//        context.getString(R.string.inappropriate),
+//        context.getString(R.string.harassment),
+//        context.getString(R.string.spam),
+//        context.getString(R.string.others)
+//    )
+//    val checkboxStates = remember {mutableStateMapOf<String, Boolean>().withDefault{false}}
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Center){
         reasons.forEach{ reason ->
             Row(
@@ -153,13 +160,13 @@ fun ReportCheckBox(){
             }
         }
     }
+    Log.d("reasons list2", checkboxStates.toString())
 }
 
 @Composable
-@Preview
-fun ReportPreview(){
+fun ReportPreview(userProfileViewModel: UserProfileViewModel){
     MyApplicationTheme {
-        ReportDropDownMenu(onReport ={"test"})
+        ReportDropDownMenu(onReport ={"test"}, userProfileViewModel = userProfileViewModel)
         //ReportOptionsDialog(onDismiss = { /*TODO*/ })
             
         }
