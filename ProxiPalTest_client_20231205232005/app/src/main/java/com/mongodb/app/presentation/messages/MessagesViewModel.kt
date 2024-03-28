@@ -18,6 +18,7 @@ import com.mongodb.app.data.messages.MessagesUserAction
 import com.mongodb.app.data.toObjectId
 import com.mongodb.app.domain.FriendConversation
 import com.mongodb.app.domain.FriendMessage
+import com.mongodb.app.ui.messages.empty
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -74,25 +75,34 @@ class MessagesViewModel(
 
     // region Functions
     /**
-     * Gets the messages from the latest conversation object
+     * Retrieves the latest [FriendConversation] object from the database and its referenced [FriendMessage]s
      */
     fun refreshMessages(){
         viewModelScope.launch {
+            // Load the conversation object first
             readConversation()
             Log.i(
                 TAG(),
                 "MessagesViewModel: Finished reading conversation = \"${currentConversation?._id}\""
             )
+            // Then load the conversation's corresponding messages
+            // This should also be called last because code beyond this point does not get called
             readMessages()
         }
     }
 
+    /**
+     * Updates the text that gets displayed in the input field row at the bottom of the messages screen
+     */
     fun updateMessage(newMessage: String){
         _message.value = newMessage
     }
 
+    /**
+     * Resets the text that gets displayed in the input field row at the bottom of the messages screen
+     */
     private fun resetMessage(){
-        _message.value = ""
+        _message.value = String.empty
     }
 
 
@@ -113,6 +123,10 @@ class MessagesViewModel(
     // endregion DateTime
 
 
+    /**
+     * Called when a user sends a new, updates an existing, or creates a reply message.
+     * Deleting a message is handled using [deleteMessage]
+     */
     fun sendMessage(){
         // Do not create a message if it does not contain anything
         if (message.value.isEmpty()){
@@ -129,9 +143,7 @@ class MessagesViewModel(
                 createMessage()
             }
             resetMessage()
-            // Refresh the conversation object instance to the one saved in the database
-            // This allows keeping updated with the latest messages (namely the one just sent)
-            readConversation()
+            refreshMessages()
         }
     }
 
@@ -256,7 +268,7 @@ class MessagesViewModel(
     }
 
     /**
-     * Starts the process for updating a [FriendMessage] in the database
+     * Starts the process for updating a [FriendMessage]
      */
     fun updateMessageStart(
         friendMessageToEdit: FriendMessage
@@ -267,7 +279,7 @@ class MessagesViewModel(
     }
 
     /**
-     * Ends/Cancels the process for updating a [FriendMessage]
+     * Ends the process for updating a [FriendMessage]
      */
     fun updateMessageEnd(){
         currentAction.value = MessagesUserAction.IDLE
@@ -275,6 +287,9 @@ class MessagesViewModel(
         message.value = ""
     }
 
+    /**
+     * Checks if the user is currently updating a message
+     */
     fun isUpdatingMessage(): Boolean{
         return currentAction.value == MessagesUserAction.UPDATE
     }
@@ -299,6 +314,9 @@ class MessagesViewModel(
         }
     }
 
+    /**
+     * Starts the process for deleting a message
+     */
     fun deleteMessageStart(
         friendMessageToDelete: FriendMessage
     ){
@@ -306,11 +324,17 @@ class MessagesViewModel(
         _friendMessageUnderActionFocus = friendMessageToDelete
     }
 
+    /**
+     * Ends the process for deleting a message
+     */
     fun deleteMessageEnd(){
         currentAction.value = MessagesUserAction.IDLE
         _friendMessageUnderActionFocus = null
     }
 
+    /**
+     * Checks if the user is currently deleting a message
+     */
     fun isDeletingMessage(): Boolean{
         return currentAction.value == MessagesUserAction.DELETE
     }
@@ -318,6 +342,9 @@ class MessagesViewModel(
 
 
     // region Replying
+    /**
+     * Starts the process for creating a reply message
+     */
     fun replyMessageStart(
         friendMessageBeingRepliedTo: FriendMessage
     ){
@@ -325,11 +352,17 @@ class MessagesViewModel(
         _friendMessageUnderActionFocus = friendMessageBeingRepliedTo
     }
 
+    /**
+     * Ends the process for creating a reply message
+     */
     fun replyMessageEnd(){
         currentAction.value = MessagesUserAction.IDLE
         _friendMessageUnderActionFocus = null
     }
 
+    /**
+     * Checks if the user is currently replying to a message
+     */
     fun isReplyingToMessage(): Boolean{
         return currentAction.value == MessagesUserAction.REPLY
     }
@@ -358,17 +391,9 @@ class MessagesViewModel(
      */
     private suspend fun readConversation(){
         if (_usersInvolved == null){
-            Log.i(
-                TAG(),
-                "MessagesViewModel: Skipped reading; Users involved is null"
-            )
             return
         }
 
-        Log.i(
-            TAG(),
-            "MessagesViewModel: Started reading; Conversation is = \"$currentConversation\""
-        )
         // There should only be 1 conversation with only the specified users involved
         conversationsRepository.readConversation(_usersInvolved!!)
             .first{
@@ -388,10 +413,6 @@ class MessagesViewModel(
                 }
                 conversationsListState.addAll(it.list)
             }
-        Log.i(
-            TAG(),
-            "MessagesViewModel: Done reading; Conversation is now = \"${currentConversation}\""
-        )
     }
 
     /**
@@ -399,11 +420,7 @@ class MessagesViewModel(
      */
     fun updateUsersInvolved(usersInvolved: SortedSet<String>){
         _usersInvolved = usersInvolved
-        // Get the corresponding conversation object with the given users involved
-        viewModelScope.launch {
-            readConversation()
-            readMessages()
-        }
+        refreshMessages()
     }
     // endregion Conversations
 
