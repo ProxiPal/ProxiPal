@@ -73,6 +73,7 @@
     <string name="messages_screen_reply_message_contextual_menu">Reply</string>
     <string name="messages_screen_reply_message_notifier">Replying to message %s</string>
     <string name="messages_screen_replied_message_label">Replied to %s</string>
+    <string name="messages_screen_updated_and_replied_message_label">Edited; Replied to %s</string>
     <string name="messages_screen_message_reference_invalid">\{null\}</string>
     <string name="messages_screen_message_reference_short">\"%s\"</string>
     <string name="messages_screen_message_reference_long">\"%s…\"</string>

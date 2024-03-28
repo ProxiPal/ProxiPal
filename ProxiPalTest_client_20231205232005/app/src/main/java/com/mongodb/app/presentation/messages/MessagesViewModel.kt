@@ -18,10 +18,7 @@ import com.mongodb.app.data.messages.MessagesUserAction
 import com.mongodb.app.data.toObjectId
 import com.mongodb.app.domain.FriendConversation
 import com.mongodb.app.domain.FriendMessage
-import com.mongodb.app.ui.messages.empty
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -50,7 +47,7 @@ class MessagesViewModel(
     /**
      * Maps the [ObjectId] of a [FriendMessage] reply to the message of the [FriendMessage] replying to
      */
-    private val _messageIdRepliesToOriginalMessages = mutableMapOf<ObjectId, String>()
+    private val _messageIdRepliesToOriginalMessages = mutableMapOf<ObjectId, String?>()
     // endregion Variables
 
 
@@ -177,13 +174,14 @@ class MessagesViewModel(
     private suspend fun readMessages(){
         messagesRepository.readConversationMessages(currentConversation!!)
             .collect{
+                // Read each retrieved message and read their original messages, if any
                 messageIdRepliesToOriginalMessages.clear()
                 it.list.forEach {
                     friendMessage ->
+                    // If the message is a reply to another message
                     if (friendMessage.messageIdRepliedTo.isNotEmpty()){
-                        messageIdRepliesToOriginalMessages[
-                                friendMessage._id
-                        ] = readMessageReply(friendMessage)
+                        messageIdRepliesToOriginalMessages[friendMessage._id] =
+                            readMessageReply(friendMessage)
                     }
                 }
 
@@ -202,8 +200,8 @@ class MessagesViewModel(
         return
     }
 
-    suspend fun readMessageReply(friendMessageReply: FriendMessage): String {
-        var originalMessage = String.empty
+    private suspend fun readMessageReply(friendMessageReply: FriendMessage): String? {
+        var originalMessage: String? = null
         // If the supplied message is not actually a reply to another message
         // ... return an empty string
         return if (friendMessageReply.messageIdRepliedTo.isEmpty()){
@@ -211,8 +209,14 @@ class MessagesViewModel(
         } else{
             messagesRepository.readMessage(friendMessageReply.messageIdRepliedTo.toObjectId())
                 .first{
-                    // Assuming the returned list of friend messages has size of exactly 1
-                    originalMessage = it.list[0].message
+                    // If the original message no longer exists (such as from the original
+                    // ... sender deleting it), show the original message as null
+                    if (it.list.size == 0){
+                        return@first true
+                    }
+                    else{
+                        originalMessage = it.list[0].message
+                    }
                     true
                 }
             originalMessage

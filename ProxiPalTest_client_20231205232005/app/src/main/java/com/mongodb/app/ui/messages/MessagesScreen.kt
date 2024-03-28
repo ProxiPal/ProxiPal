@@ -85,9 +85,6 @@ TODO List of tasks to do for messages screen
 - Make message history update continuously
 - Make changes to both friend profile picture and IDs of users involved
 ... when navigating from friends screen to messages screen
-- Add ability to reply to messages
-| Add a small label showing what the message is in response to
-| If the original message is updated or deleted, update the small label under the message reply appropriately
 */
 
 
@@ -460,25 +457,34 @@ fun MessagesExtrasLabel(
     messagesViewModel: MessagesViewModel,
     modifier: Modifier = Modifier
 ){
-    var originalMessage: String? = String.empty
-//    LaunchedEffect(true) {
-//        originalMessage = messagesViewModel.readMessageReply(friendMessage)
-//    }
-    originalMessage = messagesViewModel.messageIdRepliesToOriginalMessages[friendMessage._id]
+    // Get the original message that the current specified message is replying to
+    // This will be either the original message or null if it doesn't exist
+    val originalMessage = messagesViewModel.messageIdRepliesToOriginalMessages[friendMessage._id]
+    val originalMessageShortened: String = if (originalMessage == null){
+        stringResource(id = R.string.messages_screen_message_reference_invalid)
+    }
+    else if (originalMessage.length <= LONG_MESSAGE_CHARACTER_THRESHOLD){
+        stringResource(id = R.string.messages_screen_message_reference_short,
+            originalMessage)
+    }
+    else{
+        stringResource(id = R.string.messages_screen_message_reference_long,
+            originalMessage.substring(0, 10))
+    }
 
     // Label showing that a message has been edited and is a reply
-    val text = if (friendMessage.isUpdated() && friendMessage.isAReply()
-        && originalMessage != null){
-        "Reply & Edited"
+    val text = if (friendMessage.isUpdated() && friendMessage.isAReply()){
+        stringResource(id = R.string.messages_screen_updated_and_replied_message_label,
+            originalMessageShortened)
     }
     // Label showing that a message has been edited
     else if (friendMessage.isUpdated()){
         stringResource(id = R.string.messages_screen_updated_message_label)
     }
     // Label showing that a message is a reply to another message
-    else if (friendMessage.isAReply() && originalMessage != null){
+    else if (friendMessage.isAReply()){
         stringResource(id = R.string.messages_screen_replied_message_label,
-            originalMessage)
+            originalMessageShortened)
     }
     // Label showing that a message neither has been edited or is a reply
     else{
