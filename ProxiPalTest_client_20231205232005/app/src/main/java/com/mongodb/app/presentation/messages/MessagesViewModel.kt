@@ -15,12 +15,17 @@ import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.messages.IConversationsRealm
 import com.mongodb.app.data.messages.IMessagesRealm
 import com.mongodb.app.data.messages.MessagesUserAction
+import com.mongodb.app.data.toObjectId
 import com.mongodb.app.domain.FriendConversation
 import com.mongodb.app.domain.FriendMessage
+import com.mongodb.app.ui.messages.empty
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.mongodb.kbson.ObjectId
 import java.util.Calendar
 import java.util.Date
 import java.util.SortedSet
@@ -41,6 +46,11 @@ class MessagesViewModel(
     private val _conversationsListState: SnapshotStateList<FriendConversation> = mutableStateListOf()
     private var _friendMessageUnderActionFocus: FriendMessage? = null
     private val _currentAction = mutableStateOf(MessagesUserAction.IDLE)
+
+    /**
+     * Maps the [ObjectId] of a [FriendMessage] reply to the message of the [FriendMessage] replying to
+     */
+    private val _messageIdRepliesToOriginalMessages = mutableMapOf<ObjectId, String>()
     // endregion Variables
 
 
@@ -60,6 +70,8 @@ class MessagesViewModel(
         get() = _friendMessageUnderActionFocus
     val currentAction
         get() = _currentAction
+    val messageIdRepliesToOriginalMessages
+        get() = _messageIdRepliesToOriginalMessages
     // endregion Properties
 
 
@@ -101,6 +113,11 @@ class MessagesViewModel(
     }
 
     fun sendMessage(){
+        // Do not create a message if it does not contain anything
+        if (message.value.isEmpty()){
+            return
+        }
+
         viewModelScope.launch {
             // Updates a message
             if (isUpdatingMessage()){
@@ -160,6 +177,16 @@ class MessagesViewModel(
     private suspend fun readMessages(){
         messagesRepository.readConversationMessages(currentConversation!!)
             .collect{
+                messageIdRepliesToOriginalMessages.clear()
+                it.list.forEach {
+                    friendMessage ->
+                    if (friendMessage.messageIdRepliedTo.isNotEmpty()){
+                        messageIdRepliesToOriginalMessages[
+                                friendMessage._id
+                        ] = readMessageReply(friendMessage)
+                    }
+                }
+
                 messagesListState.clear()
                 messagesListState.addAll(it.list)
                 Log.i(
@@ -173,6 +200,23 @@ class MessagesViewModel(
             return@withContext
         }
         return
+    }
+
+    suspend fun readMessageReply(friendMessageReply: FriendMessage): String {
+        var originalMessage = String.empty
+        // If the supplied message is not actually a reply to another message
+        // ... return an empty string
+        return if (friendMessageReply.messageIdRepliedTo.isEmpty()){
+            originalMessage
+        } else{
+            messagesRepository.readMessage(friendMessageReply.messageIdRepliedTo.toObjectId())
+                .first{
+                    // Assuming the returned list of friend messages has size of exactly 1
+                    originalMessage = it.list[0].message
+                    true
+                }
+            originalMessage
+        }
     }
 
 

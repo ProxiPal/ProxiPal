@@ -42,6 +42,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -88,6 +89,12 @@ TODO List of tasks to do for messages screen
 | Add a small label showing what the message is in response to
 | If the original message is updated or deleted, update the small label under the message reply appropriately
 */
+
+
+// region Extensions
+val String.Companion.empty: String
+    get() { return "" }
+// endregion Extensions
 
 
 class MessagesScreen : ComponentActivity() {
@@ -363,6 +370,7 @@ fun SingleMessageContainer(
                     // Row under message that contains contextual menu and any necessary labels
                     if (isSenderMe){
                         MessagesExtrasLabel(
+                            messagesViewModel = messagesViewModel,
                             friendMessage = friendMessage
                         )
                     }
@@ -373,6 +381,7 @@ fun SingleMessageContainer(
                     )
                     if (!isSenderMe){
                         MessagesExtrasLabel(
+                            messagesViewModel = messagesViewModel,
                             friendMessage = friendMessage
                         )
                     }
@@ -448,17 +457,45 @@ fun SingleMessage(
 @Composable
 fun MessagesExtrasLabel(
     friendMessage: FriendMessage,
+    messagesViewModel: MessagesViewModel,
     modifier: Modifier = Modifier
 ){
-    // Label showing that a message has been edited
-    if (friendMessage.isUpdated()){
-        Text(
-            text = stringResource(id = R.string.messages_screen_updated_message_label),
-            style = MaterialTheme.typography.labelSmall,
-            modifier = modifier
-                .padding(start = 4.dp)
-        )
+    var originalMessage: String? = String.empty
+//    LaunchedEffect(true) {
+//        originalMessage = messagesViewModel.readMessageReply(friendMessage)
+//    }
+    originalMessage = messagesViewModel.messageIdRepliesToOriginalMessages[friendMessage._id]
+
+    // Label showing that a message has been edited and is a reply
+    val text = if (friendMessage.isUpdated() && friendMessage.isAReply()
+        && originalMessage != null){
+        "Reply & Edited"
     }
+    // Label showing that a message has been edited
+    else if (friendMessage.isUpdated()){
+        stringResource(id = R.string.messages_screen_updated_message_label)
+    }
+    // Label showing that a message is a reply to another message
+    else if (friendMessage.isAReply() && originalMessage != null){
+        stringResource(id = R.string.messages_screen_replied_message_label,
+            originalMessage)
+    }
+    // Label showing that a message neither has been edited or is a reply
+    else{
+        String.empty
+    }
+    Log.i(
+        "TAG()",
+        "MessagesScreen: Friend message = \"${friendMessage._id}\" " +
+                "replied to message with ID = \"${friendMessage.messageIdRepliedTo}\" " +
+                "and it has message = \"${originalMessage}\""
+    )
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall,
+        modifier = modifier
+            .padding(start = 4.dp)
+    )
 }
 
 /**
