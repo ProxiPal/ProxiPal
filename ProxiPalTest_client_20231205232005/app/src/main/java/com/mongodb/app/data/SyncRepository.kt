@@ -344,6 +344,11 @@ class RealmSyncRepository(
                 )
             }
         }
+
+        Log.i(
+            TAG(),
+            "RealmSyncRepository: Realm is now set up"
+        )
     }
 
 
@@ -722,6 +727,20 @@ class RealmSyncRepository(
         return realm.query("$0 IN usersInvolved", currentUser.id)
     }
 
+    override fun getQuerySpecificConversation(
+        realm: Realm,
+        usersInvolved: SortedSet<String>
+    ): RealmQuery<FriendConversation> {
+        return realm.query<FriendConversation>("usersInvolved == $0", usersInvolved)
+    }
+
+    override fun getQuerySpecificConversation(
+        realm: Realm,
+        conversationId: ObjectId
+    ): RealmQuery<FriendConversation> {
+        return realm.query<FriendConversation>("_id == $0", conversationId)
+    }
+
     override suspend fun createConversation(usersInvolved: SortedSet<String>) {
         val usersInvolvedRealmList: RealmList<String> = usersInvolved.toRealmList()
         Log.i(
@@ -740,20 +759,6 @@ class RealmSyncRepository(
         realm.write{
             copyToRealm(friendConversation, updatePolicy = UpdatePolicy.ALL)
         }
-    }
-
-    override fun getQuerySpecificConversation(
-        realm: Realm,
-        usersInvolved: SortedSet<String>
-    ): RealmQuery<FriendConversation> {
-        return realm.query<FriendConversation>("$0 == usersInvolved", usersInvolved)
-    }
-
-    override fun getQuerySpecificConversation(
-        realm: Realm,
-        conversationId: ObjectId
-    ): RealmQuery<FriendConversation> {
-        return realm.query<FriendConversation>("_id == $0", conversationId)
     }
 
     override fun readConversation(usersInvolved: SortedSet<String>): Flow<ResultsChange<FriendConversation>> {
@@ -807,6 +812,7 @@ class RealmSyncRepository(
                 "RealmSyncRepository: Creating a new conversation object; " +
                         "ID = \"${friendConversation._id}\""
             )
+            // TODO MessagesViewModel already creates a conversation if it doesn't exist
             // Create a new conversation object
             createConversation(
                 usersInvolved = friendConversation.usersInvolved.toSortedSet()

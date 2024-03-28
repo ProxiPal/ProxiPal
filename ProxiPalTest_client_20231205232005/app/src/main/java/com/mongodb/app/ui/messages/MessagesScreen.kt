@@ -82,7 +82,6 @@ import java.util.Date
 
 /*
 TODO List of tasks to do for messages screen
-- Make message history update continuously
 - Make changes to both friend profile picture and IDs of users involved
 ... when navigating from friends screen to messages screen
 */

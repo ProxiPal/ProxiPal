@@ -38,7 +38,7 @@ class MessagesViewModel(
      * For storing the current text the user is entering
      */
     private val _message = mutableStateOf("")
-    private var _usersInvolved: SortedSet<String> = sortedSetOf("")
+    private var _usersInvolved: SortedSet<String>? = null
     private val _messagesListState: SnapshotStateList<FriendMessage> = mutableStateListOf()
     private val _conversationsListState: SnapshotStateList<FriendConversation> = mutableStateListOf()
     private var _friendMessageUnderActionFocus: FriendMessage? = null
@@ -56,9 +56,9 @@ class MessagesViewModel(
         get() = _message
     val messagesListState
         get() = _messagesListState
-    val conversationsListState
+    private val conversationsListState
         get() = _conversationsListState
-    val currentConversation: FriendConversation?
+    private val currentConversation: FriendConversation?
         get() {
             return if (_conversationsListState.size > 0) _conversationsListState[0]
             else null
@@ -95,6 +95,8 @@ class MessagesViewModel(
         _message.value = ""
     }
 
+
+    // region DateTime
     /**
      * Returns the amount of ms since the epoch time
      */
@@ -108,6 +110,8 @@ class MessagesViewModel(
     private fun getDateFromTime(time: Long): Date{
         return Date(time)
     }
+    // endregion DateTime
+
 
     fun sendMessage(){
         // Do not create a message if it does not contain anything
@@ -168,6 +172,8 @@ class MessagesViewModel(
         )
     }
 
+
+    // region Reading
     /**
      * Gets the list of [FriendMessage] objects for the current [FriendConversation]
      */
@@ -200,6 +206,10 @@ class MessagesViewModel(
         return
     }
 
+    /**
+     * Gets the [FriendMessage] the specified [FriendMessage] is a reply to, if the original
+     * message still exists
+     */
     private suspend fun readMessageReply(friendMessageReply: FriendMessage): String? {
         var originalMessage: String? = null
         // If the supplied message is not actually a reply to another message
@@ -222,9 +232,29 @@ class MessagesViewModel(
             originalMessage
         }
     }
+    // endregion Reading
 
 
     // region Updating
+    /**
+     * Updates a [FriendMessage] object in the database
+     */
+    private suspend fun updateMessage(){
+        if (friendMessageUnderActionFocus != null){
+            Log.i(
+                TAG(),
+                "MessagesViewModel: Updated message ID = \"${friendMessageUnderActionFocus!!._id.toHexString()}\"; " +
+                        "Updated message = \"${message.value}\""
+            )
+
+            messagesRepository.updateMessage(
+                messageId = friendMessageUnderActionFocus!!._id,
+                newMessage = message.value
+            )
+            updateMessageEnd()
+        }
+    }
+
     /**
      * Starts the process for updating a [FriendMessage] in the database
      */
@@ -251,45 +281,7 @@ class MessagesViewModel(
     // endregion Updating
 
 
-    /**
-     * Updates a [FriendMessage] object in the database
-     */
-    private suspend fun updateMessage(){
-        if (friendMessageUnderActionFocus != null){
-            Log.i(
-                TAG(),
-                "MessagesViewModel: Updated message ID = \"${friendMessageUnderActionFocus!!._id.toHexString()}\"; " +
-                        "Updated message = \"${message.value}\""
-            )
-
-            messagesRepository.updateMessage(
-                messageId = friendMessageUnderActionFocus!!._id,
-                newMessage = message.value
-            )
-            updateMessageEnd()
-        }
-    }
-
-
     // region Deleting
-    fun deleteMessageStart(
-        friendMessageToDelete: FriendMessage
-    ){
-        currentAction.value = MessagesUserAction.DELETE
-        _friendMessageUnderActionFocus = friendMessageToDelete
-    }
-
-    fun deleteMessageEnd(){
-        currentAction.value = MessagesUserAction.IDLE
-        _friendMessageUnderActionFocus = null
-    }
-
-    fun isDeletingMessage(): Boolean{
-        return currentAction.value == MessagesUserAction.DELETE
-    }
-    // endregion Deleting
-
-
     /**
      * Removes a [FriendMessage] object from the database
      */
@@ -306,6 +298,23 @@ class MessagesViewModel(
             )
         }
     }
+
+    fun deleteMessageStart(
+        friendMessageToDelete: FriendMessage
+    ){
+        currentAction.value = MessagesUserAction.DELETE
+        _friendMessageUnderActionFocus = friendMessageToDelete
+    }
+
+    fun deleteMessageEnd(){
+        currentAction.value = MessagesUserAction.IDLE
+        _friendMessageUnderActionFocus = null
+    }
+
+    fun isDeletingMessage(): Boolean{
+        return currentAction.value == MessagesUserAction.DELETE
+    }
+    // endregion Deleting
 
 
     // region Replying
@@ -348,18 +357,41 @@ class MessagesViewModel(
      * Gets the current [FriendConversation] object, if it exists
      */
     private suspend fun readConversation(){
+        if (_usersInvolved == null){
+            Log.i(
+                TAG(),
+                "MessagesViewModel: Skipped reading; Users involved is null"
+            )
+            return
+        }
+
+        Log.i(
+            TAG(),
+            "MessagesViewModel: Started reading; Conversation is = \"$currentConversation\""
+        )
         // There should only be 1 conversation with only the specified users involved
-        conversationsRepository.readConversation(_usersInvolved)
+        conversationsRepository.readConversation(_usersInvolved!!)
             .first{
                 conversationsListState.clear()
                 // If a conversation object does not already exist, create it first
                 if (it.list.size == 0){
                     conversationsRepository.createConversation(
-                        usersInvolved = _usersInvolved
+                        usersInvolved = _usersInvolved!!
+                    )
+                }
+                it.list.forEach {
+                    i ->
+                    Log.i(
+                        TAG(),
+                        "\"MessagesViewModel: Single conversation object = \"${i}\""
                     )
                 }
                 conversationsListState.addAll(it.list)
             }
+        Log.i(
+            TAG(),
+            "MessagesViewModel: Done reading; Conversation is now = \"${currentConversation}\""
+        )
     }
 
     /**
@@ -370,8 +402,12 @@ class MessagesViewModel(
         // Get the corresponding conversation object with the given users involved
         viewModelScope.launch {
             readConversation()
+            readMessages()
         }
     }
+    // endregion Conversations
+
+
     // endregion Functions
 
 
