@@ -97,6 +97,15 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     implementation ("androidx.compose.material:material-icons-extended:1.6.3")
 
+    // Programmer: Brian Poon
+    // These two are used for Google ML Kit Language Identification
+    implementation("com.google.mlkit:language-id:17.0.5")
+    implementation("com.google.android.gms:play-services-mlkit-language-id:17.0.0")
+
+    // Programmer: Brian Poon
+    // This is used for Google ML Kit Translation
+    implementation("com.google.mlkit:translate:17.0.2")
+
 
 
 }

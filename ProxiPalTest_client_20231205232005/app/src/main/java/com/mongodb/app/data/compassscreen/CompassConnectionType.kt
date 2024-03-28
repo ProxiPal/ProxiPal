@@ -1,5 +1,12 @@
 package com.mongodb.app.data.compassscreen
 
+
+/*
+Contributions:
+- Kevin Kubota (entire file)
+ */
+
+
 /**
  * Denotes what state a user is in
  * <pre></pre>

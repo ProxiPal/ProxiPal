@@ -1,9 +1,9 @@
 package com.mongodb.app.presentation.compassscreen
 
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
@@ -14,8 +14,12 @@ import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.compassscreen.CompassConnectionType
 import com.mongodb.app.data.compassscreen.KM_PER_ONE_LATITUDE_DIFF
 import com.mongodb.app.data.compassscreen.KM_PER_ONE_LONGITUDE_DIFF
+import com.mongodb.app.data.compassscreen.MILES_PER_ONE_LATITUDE_DIFF
+import com.mongodb.app.data.compassscreen.MILES_PER_ONE_LONGITUDE_DIFF
 import com.mongodb.app.data.compassscreen.MS_BETWEEN_LOCATION_UPDATES
+import com.mongodb.app.data.compassscreen.SHOULD_USE_METRIC_SYSTEM
 import com.mongodb.app.data.compassscreen.UserLocation
+import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.atan2
@@ -23,38 +27,36 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.random.Random
 
+
+/*
+Contributions:
+- Kevin Kubota (entire file)
+ */
+
+
 class CompassViewModel constructor(
     private var repository: SyncRepository
-    ): ViewModel() {
+) : ViewModel() {
     /*
     ===== Variables =====
      */
-    // TODO Replace this with the actual location data
-    private val _currentUserLocation: MutableState<UserLocation> = mutableStateOf(
-        UserLocation(0.0, 0.0)
-    )
-
-    // TODO Replace this with the actual location data
     private val _matchedUserLocation: MutableState<UserLocation> = mutableStateOf(
         UserLocation(0.0, 0.0)
     )
 
-    private val _bearing: MutableState<Double> = mutableStateOf(0.0)
+    private val _bearing: MutableState<Double> = mutableDoubleStateOf(0.0)
 
-    private val _distance: MutableState<Double> = mutableStateOf(0.0)
+    private val _distance: MutableState<Double> = mutableDoubleStateOf(0.0)
 
     private val _connectionType: MutableState<CompassConnectionType> =
         mutableStateOf(CompassConnectionType.OFFLINE)
+
+    private lateinit var _userProfileViewModel: UserProfileViewModel
 
 
     /*
     ===== Properties =====
      */
-    // TODO Replace this with the actual location data
-    val currentUserLocation: State<UserLocation>
-        get() = _currentUserLocation
-
-    // TODO Replace this with the actual location data
     val matchedUserLocation: State<UserLocation>
         get() = _matchedUserLocation
 
@@ -68,10 +70,7 @@ class CompassViewModel constructor(
         get() = _connectionType
 
 
-    init{
-        // TODO Temporary setting, replace this with actual values later
-        _currentUserLocation.value.latitude = 0.0
-        _currentUserLocation.value.longitude = 0.0
+    init {
         _matchedUserLocation.value.latitude = 0.0
         _matchedUserLocation.value.longitude = 0.0
 
@@ -90,7 +89,7 @@ class CompassViewModel constructor(
                     modelClass: Class<T>,
                     handle: SavedStateHandle
                 ): T {
-                    return CompassViewModel (repository) as T
+                    return CompassViewModel(repository) as T
                 }
             }
         }
@@ -111,60 +110,64 @@ class CompassViewModel constructor(
     }
 
     /**
+     * Function to set view model instances. Should be called immediately after initialization
+     */
+    fun setViewModels(userProfileViewModel: UserProfileViewModel) {
+        _userProfileViewModel = userProfileViewModel
+    }
+
+    /**
      * Temporary function for updating matching users' locations
      */
-    private fun updateUserLocations(){
+    private fun updateUserLocations() {
         // Update user location values by a random value in range [-10, 10]
         val minimum = -10.0
         val maximum = 10.0
-        updateCurrentUserLatitude(Random.nextDouble(minimum, maximum))
-        updateCurrentUserLongitude(Random.nextDouble(minimum, maximum) * 2)
-        updateMatchedUserLatitude(Random.nextDouble(minimum, maximum))
-        updateMatchedUserLongitude(Random.nextDouble(minimum, maximum) * 2)
-        updateMeasurements()
+        updateMatchedUserLatitude(
+            _userProfileViewModel.userProfileLatitude.value
+                    + Random.nextDouble(minimum, maximum))
+        updateMatchedUserLongitude(
+            _userProfileViewModel.userProfileLongitude.value
+                    + Random.nextDouble(minimum, maximum) * 2)
+    }
+
+    /**
+     * Returns a formatted string of the current user's location
+     */
+    fun getCurrentUserLocation(): String {
+        return "(${_userProfileViewModel.userProfileLatitude.value}, " +
+                "${_userProfileViewModel.userProfileLongitude.value})"
+    }
+
+    /**
+     * Returns a formatted string of the matched user's location
+     */
+    fun getMatchedUserLocation(): String{
+        // TODO Need to change this to the actual location when device connection code gets working
+        return "(${matchedUserLocation.value.latitude}, " +
+                "${matchedUserLocation.value.longitude})"
     }
 
     /**
      * Checks if a value is a valid latitude value
      */
-    private fun isValidLatitude(latitude: Double): Boolean{
+    private fun isValidLatitude(latitude: Double): Boolean {
         return latitude in -90.0..90.0
     }
 
     /**
      * Checks if a value is a valid longitude value
      */
-    private fun isValidLongitude(longitude: Double): Boolean{
+    private fun isValidLongitude(longitude: Double): Boolean {
         return longitude in -180.0..180.0
-    }
-
-    /**
-     * Updates the current user's latitude
-     */
-    private fun updateCurrentUserLatitude(newLatitude: Double){
-        if (isValidLatitude(newLatitude)){
-            _currentUserLocation.value.latitude = newLatitude
-            updateMeasurements()
-        }
-    }
-
-    /**
-     * Updates the current user's longitude
-     */
-    private fun updateCurrentUserLongitude(newLongitude: Double){
-        if (isValidLongitude(newLongitude)){
-            _currentUserLocation.value.longitude = newLongitude
-            updateMeasurements()
-        }
     }
 
     /**
      * Updates the matched user's latitude
      */
     fun updateMatchedUserLatitude(newLatitude: Double) {
-        if (isValidLatitude(newLatitude)){
+        if (isValidLatitude(newLatitude)) {
             _matchedUserLocation.value.latitude = newLatitude
-            updateMeasurements()
         }
     }
 
@@ -172,25 +175,24 @@ class CompassViewModel constructor(
      * Updates the matched user's longitude
      */
     fun updateMatchedUserLongitude(newLongitude: Double) {
-        if (isValidLongitude(newLongitude)){
+        if (isValidLongitude(newLongitude)) {
             _matchedUserLocation.value.longitude = newLongitude
-            updateMeasurements()
         }
     }
 
     /**
      * Updates both the bearing and distance measurements
      */
-    private fun updateMeasurements(){
+    private fun updateMeasurements() {
         _bearing.value = calculateBearingBetweenPoints(
-            startLatitude = currentUserLocation.value.latitude,
-            startLongitude = currentUserLocation.value.longitude,
+            startLatitude = _userProfileViewModel.userProfileLatitude.value,
+            startLongitude = _userProfileViewModel.userProfileLongitude.value,
             endLatitude = matchedUserLocation.value.latitude,
             endLongitude = matchedUserLocation.value.longitude
         )
         _distance.value = calculateDistanceBetweenPoints(
-            startLatitude = currentUserLocation.value.latitude,
-            startLongitude = currentUserLocation.value.longitude,
+            startLatitude = _userProfileViewModel.userProfileLatitude.value,
+            startLongitude = _userProfileViewModel.userProfileLongitude.value,
             endLatitude = matchedUserLocation.value.latitude,
             endLongitude = matchedUserLocation.value.longitude
         )
@@ -242,18 +244,27 @@ class CompassViewModel constructor(
     ): Double {
         // Using the distance formula
         // Make sure to take into account the actual distance between points
-        val deltaLatitude = (endLatitude - startLatitude) * KM_PER_ONE_LATITUDE_DIFF
-        val deltaLongitude = (endLongitude - startLongitude) * KM_PER_ONE_LONGITUDE_DIFF
+        var deltaLatitude = (endLatitude - startLatitude)
+        deltaLatitude *=
+            if (SHOULD_USE_METRIC_SYSTEM) KM_PER_ONE_LATITUDE_DIFF
+            else MILES_PER_ONE_LATITUDE_DIFF
+        var deltaLongitude = (endLongitude - startLongitude)
+        deltaLongitude *=
+            if (SHOULD_USE_METRIC_SYSTEM) KM_PER_ONE_LONGITUDE_DIFF
+            else MILES_PER_ONE_LONGITUDE_DIFF
         return sqrt(deltaLatitude.pow(2) + deltaLongitude.pow(2))
     }
 
-    fun updateConnectionType(newCompassConnectionType: CompassConnectionType){
+    /**
+     * Called by [CompassNearbyAPI]'s [CompassNearbyAPI.updateConnectionType] function
+     */
+    fun updateConnectionType(newCompassConnectionType: CompassConnectionType) {
         _connectionType.value = newCompassConnectionType
-        if (connectionType.value == CompassConnectionType.MEETING){
-            // TODO Temporary updating of user locations, replace this with actual values later
-            viewModelScope.launch{
-                while (connectionType.value != CompassConnectionType.OFFLINE){
+        if (connectionType.value == CompassConnectionType.MEETING) {
+            viewModelScope.launch {
+                while (connectionType.value != CompassConnectionType.OFFLINE) {
                     updateUserLocations()
+                    updateMeasurements()
                     delay(MS_BETWEEN_LOCATION_UPDATES)
                 }
             }
