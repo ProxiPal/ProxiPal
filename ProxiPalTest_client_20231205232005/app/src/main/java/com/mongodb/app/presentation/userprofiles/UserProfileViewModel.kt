@@ -79,6 +79,10 @@ class UserProfileViewModel constructor(
     private var _userProfileInterests: MutableList<String> = mutableListOf()
     private var _userProfileIndustries: MutableList<String> = mutableListOf()
 
+    private val _selectedInterests = mutableStateOf<List<String>>(emptyList())
+    private val _selectedIndustries = mutableStateOf<List<String>>(emptyList())
+    private val _otherFilters = mutableStateOf<List<String>>(emptyList())
+
 
 
     /*
@@ -112,7 +116,7 @@ class UserProfileViewModel constructor(
     val nearbyUserProfiles: List<UserProfile>
         get() = _nearbyUserProfiles
 
-    val proxmityRadius: State<Double>
+    val proximityRadius: State<Double>
         get() = _proximityRadius
 
 
@@ -135,12 +139,17 @@ class UserProfileViewModel constructor(
     val userProfileIndustries: List<String>
         get() = _userProfileIndustries
 
+    val selectedInterests: State<List<String>> = _selectedInterests
+    val selectedIndustries: State<List<String>> = _selectedIndustries
+    val otherFilters: State<List<String>> = _otherFilters
+
 
 
 
 
     init {
         getUserProfile()
+        loadUserFilterSelections()
     }
 
     companion object {
@@ -498,9 +507,9 @@ class UserProfileViewModel constructor(
     /**
      * Queries nearby user profiles and updates the nearby user profile list
      */
-    fun fetchAndStoreNearbyUserProfiles() {
+    fun fetchAndStoreNearbyUserProfiles(selectedInterests: List<String> = emptyList(), selectedIndustries: List<String> = emptyList(), otherFilters: List<String> = emptyList()) {
         CoroutineScope(Dispatchers.Main).launch {
-            repository.getNearbyUserProfileList(userProfileLatitude.value, userProfileLongitude.value, 0.1)
+            repository.getNearbyUserProfileList(userProfileLatitude.value, userProfileLongitude.value, 0.1, selectedInterests = selectedInterests, selectedIndustries = selectedIndustries, otherFilters = otherFilters)
                 .collect { resultsChange: ResultsChange<UserProfile> ->
                     _nearbyUserProfiles.clear()
                     _nearbyUserProfiles.addAll(resultsChange.list)
@@ -551,5 +560,36 @@ class UserProfileViewModel constructor(
             )
         }
     }
+
+    fun saveUserFilterSelections(selectedInterests: Set<String>, selectedIndustries: Set<String>, otherFilters: List<String>) {
+        viewModelScope.launch {
+            repository.updateUserSelectedFilters(selectedInterests.toList(), selectedIndustries.toList(), otherFilters)
+        }
+    }
+    fun loadUserFilterSelections() {
+        viewModelScope.launch {
+            repository.getUserProfileList().collect { resultsChange ->
+                val userProfile = resultsChange.list.firstOrNull() // Assuming you want the first profile
+                userProfile?.let {
+                    _selectedInterests.value = it.selectedInterests
+                    _selectedIndustries.value = it.selectedIndustries
+                    _otherFilters.value = it.otherFilters
+                }
+            }
+        }
+    }
+    fun clearUserFilterSelections() {
+        // Reset local state
+        _selectedInterests.value = emptyList()
+        _selectedIndustries.value = emptyList()
+        _otherFilters.value = emptyList()
+
+        // Clear selections in the database or reset to default values
+        viewModelScope.launch {
+            repository.clearUserSelectedFilters()
+        }
+    }
+
+
 
 }

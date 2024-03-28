@@ -115,7 +115,7 @@
     <string name="permissions_required_by">Location permissions required by Proxipal</string>
     <string name="requires_permissions">Proxipal requires location permissions</string>
 
-    <string name="proximity_radius_text">Searching for users within %1$.2f miles</string>
+    <string name="proximity_radius_text">Searching for users within %1$.2f meters</string>
     <string name="server_client_id">06277155842-cvp1gfmpl2euecgn1bsaaf4c1il2nnpa.apps.googleusercontent.com</string>
     <string name="title_activity_reset_password1">ResetPassword1</string>
 
@@ -152,6 +152,15 @@
     <string name="others">Others</string>
     <string name="apply_filter">Apply Filter</string>
     <string name="cancel_Filter">Cancel</string>
+
+
+    <!-- Tutorial -->
+    <string name="this_is_the_profile_screen_here_you_can_edit_your_profile_and_add_photos">This is the profile screen, here you can edit your profile and add photos!</string>
+    <string name="this_is_the_connect_screen_here_you_can_connect_with_nearby_users_and_start_looking_for_friends">This is the connect screen, here you can connect with nearby users and start looking for friends!</string>
+    <string name="this_is_the_friends_screen_here_you_can_exchange_messages_with_friends">This is the friends screen, here you can exchange messages with friends!</string>
+    <string name="great_you_re_all_set">Great! You\'re all set!</string>
+    <string name="welcome_to_appname">Welcome to Proxipal!</string>
+    <string name="got_it">Got it!</string>
 
 
 </resources>

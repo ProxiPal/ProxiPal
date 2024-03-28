@@ -18,6 +18,7 @@ import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.ui.tasks.ConnectWithOthersScreen
 import com.mongodb.app.location.LocationPermissionScreen
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
+import com.mongodb.app.tutorial.OnboardingScreen
 import com.mongodb.app.ui.userprofiles.IndustryScreen
 import com.mongodb.app.ui.userprofiles.InterestScreen
 
@@ -35,7 +36,11 @@ import com.mongodb.app.ui.userprofiles.UserProfileLayout
 fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: UserProfileViewModel, homeViewModel: HomeViewModel) {
     var state by remember{ mutableStateOf(false)}
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Routes.UserProfileScreen.route) {
+    var startDest = Routes.UserProfileScreen.route
+    if (userProfileViewModel.userProfileListState.isEmpty()){
+        startDest = Routes.OnboardingScreen.route
+    }
+    NavHost(navController = navController, startDestination = startDest) {
         composable(Routes.UserProfileScreen.route) {
             //checks if its the user's first time login in, added by Vichet Chim
             if (userProfileViewModel.userProfileListState.isEmpty()){
@@ -85,8 +90,16 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
         composable(Routes.ScreenSettings.route){
             ScreenSettings(navController = navController)
         }
-        composable(Routes.FilterScreen.route){
-            FilterScreen(navController)
+        composable(Routes.FilterScreen.route) {
+            FilterScreen(navController = navController, viewModel = userProfileViewModel) //march17
+        }
+        composable(Routes.OnboardingScreen.route){
+            OnboardingScreen(
+                userProfileViewModel = userProfileViewModel,
+                toolbarViewModel = toolbarViewModel,
+                navController = navController,
+                homeViewModel = homeViewModel
+                )
         }
         composable(Routes.AdvancedScreenSettings.route){
             AdvancedScreenSettings(navController)

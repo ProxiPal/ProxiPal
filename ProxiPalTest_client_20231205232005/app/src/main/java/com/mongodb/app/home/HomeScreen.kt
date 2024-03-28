@@ -162,7 +162,7 @@ fun ProfilePhotosSection(
                 count = bitmaps.size,
                 state = pagerState,
                 modifier = Modifier
-                    .height(127.dp)
+                    .height(150.dp)
                     .padding(bottom = 1.dp)
             ) { page ->
                 Box(

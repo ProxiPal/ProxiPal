@@ -29,7 +29,7 @@ import androidx.compose.ui.text.font.FontStyle
  */
 @Composable
 fun ProximityRadiusAdjuster(userProfileViewModel: UserProfileViewModel) {
-    var sliderPosition by remember { mutableFloatStateOf(0.1f) }
+    var sliderPosition by remember { mutableFloatStateOf(userProfileViewModel.proximityRadius.value.toFloat()) }
     Column {
         Slider(
             value = sliderPosition,

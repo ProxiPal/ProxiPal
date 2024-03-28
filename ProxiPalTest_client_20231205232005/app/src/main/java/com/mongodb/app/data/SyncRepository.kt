@@ -27,6 +27,7 @@ import io.realm.kotlin.types.geo.GeoPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
@@ -151,12 +152,20 @@ interface SyncRepository {
     /**
      * Returns a flow with nearby user profiles within a specified radius
      */
-    fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double): Flow<ResultsChange<UserProfile>>
+    fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double, selectedInterests: List<String> = emptyList(), selectedIndustries: List<String> = emptyList(), otherFilters: List<String> = emptyList()): Flow<ResultsChange<UserProfile>>
+    // endregion location
 
     suspend fun updateUserProfileInterests(interest:String)
 
     suspend fun updateUserProfileIndustries(industry:String)
-    // endregion location
+
+    //march16 George Fu
+    suspend fun updateUserProfilePhotos(photoList: List<String>)
+    fun getUserProfilePhotos(): Flow<List<String>>
+
+    //march17 George Fu
+    suspend fun updateUserSelectedFilters(selectedInterests: List<String>, selectedIndustries: List<String>, otherFilters: List<String>)
+    suspend fun clearUserSelectedFilters()
 }
 
 
@@ -417,6 +426,7 @@ class RealmSyncRepository(
             SubscriptionType.MINE -> realm.query("ownerId == $0", currentUser.id)
             SubscriptionType.ALL -> realm.query()
         }
+
     // endregion User profiles
 
     // Contribution: Marco Pacini
@@ -497,13 +507,37 @@ class RealmSyncRepository(
      * [userLatitude] and [userLongitude] are the current user's location, used to form center of the search radius.
      */
     @OptIn(ExperimentalGeoSpatialApi::class)
-    override fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double): Flow<ResultsChange<UserProfile>>{
+    override fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double, selectedInterests: List<String>, selectedIndustries: List<String>, otherFilters: List<String>): Flow<ResultsChange<UserProfile>>{
         val circleAroundUser = GeoCircle.create(
             center = GeoPoint.create(userLatitude, userLongitude),
             radius = Distance.fromKilometers(radiusInKilometers)
         )
-        return realm.query<UserProfile>("location GEOWITHIN $circleAroundUser").query("ownerId != $0", currentUser.id).find().asFlow()
+        val interestsQueryPart = if (selectedInterests.isNotEmpty()) {
+            selectedInterests.joinToString(prefix = "interests IN [", postfix = "]", separator = ", ") { "'$it'" }
+        } else ""
+
+        val industriesQueryPart = if (selectedIndustries.isNotEmpty()) {
+            selectedIndustries.joinToString(prefix = "industries IN [", postfix = "]", separator = ", ") { "'$it'" }
+        } else ""
+
+        val otherFiltersQueryPart = if (otherFilters.isNotEmpty()) {
+            otherFilters.joinToString(prefix = "otherFilters IN [", postfix = "]", separator = ", ") { "'$it'" }
+        } else ""
+
+        val filterQueries = listOf(interestsQueryPart, industriesQueryPart, otherFiltersQueryPart).filter { it.isNotEmpty() }.joinToString(separator = " OR ")
+
+        val query = if (filterQueries.isNotEmpty()) {
+            "location GEOWITHIN $circleAroundUser AND ownerId != $0 AND ($filterQueries)"
+        } else {
+            "location GEOWITHIN $circleAroundUser AND ownerId != $0"
+        }
+
+        return realm.query<UserProfile>(query, currentUser.id).find().asFlow()
+
+        // TODO: TESTING THE NEARBY USER LIST DISPLAY WITH BELOW STATEMENT SHOULD SHOW ALL USERS IN DATABASE
+        //return realm.query<UserProfile>("owner_id == $0", currentUser.id).find().asFlow()
     }
+
 
     //endregion location
 
@@ -647,6 +681,47 @@ class RealmSyncRepository(
         }
     }
 
+    //march16 George Fu
+    override suspend fun updateUserProfilePhotos(photoList: List<String>) {
+        realm.write {
+            val userProfile = query<UserProfile>().find().firstOrNull()
+            userProfile?.let {
+                it.profilePhotos.clear()
+                it.profilePhotos.addAll(photoList)
+            }
+        }
+    }
+
+    override fun getUserProfilePhotos(): Flow<List<String>> = flow {
+        val userProfile = realm.query<UserProfile>().find().firstOrNull()
+        emit(userProfile?.profilePhotos?.toList() ?: emptyList())
+    }
+    //march17 George Fu
+    override suspend fun updateUserSelectedFilters(selectedInterests: List<String>, selectedIndustries: List<String>, otherFilters: List<String>) {
+        realm.write {
+            val userProfile = query<UserProfile>().find().firstOrNull() ?: return@write
+            userProfile.selectedInterests.clear()
+            userProfile.selectedInterests.addAll(selectedInterests)
+            userProfile.selectedIndustries.clear()
+            userProfile.selectedIndustries.addAll(selectedIndustries)
+            userProfile.otherFilters.clear()
+            userProfile.otherFilters.addAll(otherFilters)
+        }
+    }
+    override suspend fun clearUserSelectedFilters() {
+        realm.write {
+            // Assuming you have a method to get the current user's profile
+            val userProfile = query<UserProfile>("ownerId == $0", app.currentUser!!.id).first().find()
+            userProfile?.let { profile ->
+                // Clear or reset the selections
+                profile.selectedInterests.clear()
+                profile.selectedIndustries.clear()
+                profile.otherFilters.clear()
+
+            }
+        }
+    }
+
 
 
 }
@@ -682,11 +757,19 @@ class MockRepository : SyncRepository {
     override suspend fun updateUserProfileLocation(latitude: Double, longitude: Double) =
         Unit
 
-    override fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double): Flow<ResultsChange<UserProfile>> = flowOf()
+    override fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double, selectedInterests: List<String>, selectedIndustries: List<String>, otherFilters: List<String>): Flow<ResultsChange<UserProfile>> = flowOf()
 
     override suspend fun updateUserProfileInterests(interest:String) = Unit
 
     override suspend fun updateUserProfileIndustries(industry:String) = Unit
+
+    //march16 George Fu
+    override suspend fun updateUserProfilePhotos(photoList: List<String>) = Unit
+    override fun getUserProfilePhotos(): Flow<List<String>> = flowOf(listOf())
+
+    //march17 George Fu
+    override suspend fun updateUserSelectedFilters(selectedInterests: List<String>, selectedIndustries: List<String>, otherFilters: List<String>) = Unit
+    override suspend fun clearUserSelectedFilters() = Unit
 
     companion object {
         const val MOCK_OWNER_ID_MINE = "A"

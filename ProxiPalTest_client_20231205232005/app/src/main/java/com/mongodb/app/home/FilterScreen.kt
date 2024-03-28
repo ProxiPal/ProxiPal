@@ -1,8 +1,6 @@
 package com.mongodb.app.home
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -29,125 +27,114 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.res.stringResource
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.navigation.NavHostController
-import com.mongodb.app.R
-import com.mongodb.app.navigation.Routes
+import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import kotlinx.coroutines.launch
 
 
 //ADDED BY GEORGE FU
-/*
-class MainActivity : ComponentActivity() {
 
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            FilterScreen()
-        }
-    }
-}
-*/
 
 //created a Filter Screen
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FilterScreen(navController: NavHostController) {
-    //snack bar is so that a confirmation message appears when the user clicks "apply filter"
+fun FilterScreen(navController: NavHostController, viewModel: UserProfileViewModel) {
     val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope() //
-    var userInputChips by remember { mutableStateOf(listOf<String>()) }
-    var otherChips by remember { mutableStateOf(listOf<String>()) }
-    var selectedInterests by remember { mutableStateOf(setOf<String>()) }
-    var selectedIndustries by remember { mutableStateOf(setOf<String>()) }
+    val coroutineScope = rememberCoroutineScope()
 
     val interests = listOf("Gaming", "Music", "Activity", "Fashion", "Nature", "Food/Drinks", "Technology", "Arts/Culture", "Travel")
     val industries = listOf("Technology", "Healthcare", "Finance", "Education", "Service Industry", "Retail", "Manufacturing", "Arts/Entertainment")
 
-    val interestsLabel = stringResource(id = R.string.interests)
-    val industryLabel = stringResource(id = R.string.industry)
-    val othersLabel = stringResource(id = R.string.others)
-    val applyFilterLabel = stringResource(id = R.string.apply_filter)
-    val cancelFilterLabel = stringResource(id = R.string.cancel)
+    // State initialization
+    val selectedInterests = remember { mutableStateOf(viewModel.selectedInterests.value.toSet()) }
+    val selectedIndustries = remember { mutableStateOf(viewModel.selectedIndustries.value.toSet()) }
+    var otherChips = remember { mutableStateOf(viewModel.otherFilters.value) }
+
 
 
     Scaffold(
-        topBar = {
-            FilterTopAppBar { navController.navigateUp() }
-        },
+        topBar = { FilterTopAppBar { navController.navigateUp() } },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         content = { padding ->
             Column(modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)) {
+                // SearchBar for adding other chips dynamically
                 SearchBar(
                     onDone = { inputText ->
-                        if (inputText.isNotBlank() && !userInputChips.contains(inputText) && userInputChips.size < 8) { //ensures only 8 inputs are allowed in the searchbar
-                            otherChips = otherChips + inputText
+                        if (inputText.isNotBlank() && !otherChips.value.contains(inputText)) {
+                            otherChips.value = otherChips.value + listOf(inputText)
                         }
                     },
-                    isInputEnabled = otherChips.size < 8
+                    isInputEnabled = otherChips.value.size < 8 // Limit to 8
                 )
-                Text(interestsLabel, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(8.dp))
+
+                // Interests Section
+                Text("Interests", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(8.dp))
                 DefaultChipsLayout(
                     chips = interests,
-                    selectedChips = selectedInterests,
+                    selectedChips = selectedInterests.value,
                     onChipClick = { chip ->
-                        selectedInterests = selectedInterests.toMutableSet().also {
-                            if (it.contains(chip)) it.remove(chip) else it.add(chip)
+                        val currentSelection = selectedInterests.value.toMutableSet()
+                        if (currentSelection.contains(chip)) {
+                            currentSelection.remove(chip)
+                        } else {
+                            currentSelection.add(chip)
                         }
+                        selectedInterests.value = currentSelection
                     }
                 )
 
-                Text(industryLabel, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(8.dp))
+                // Industries Section
+                Text("Industries", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(8.dp))
                 DefaultChipsLayout(
                     chips = industries,
-                    selectedChips = selectedIndustries,
+                    selectedChips = selectedIndustries.value,
                     onChipClick = { chip ->
-                        selectedIndustries = selectedIndustries.toMutableSet().also {
-                            if (it.contains(chip)) it.remove(chip) else it.add(chip)
+                        val currentSelection = selectedIndustries.value.toMutableSet()
+                        if (currentSelection.contains(chip)) {
+                            currentSelection.remove(chip)
+                        } else {
+                            currentSelection.add(chip)
                         }
+                        selectedIndustries.value = currentSelection
                     }
                 )
 
-                Text(othersLabel, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(8.dp))
-                ChipsLayout(chips = otherChips, onDeleteChip = { index ->
-                    otherChips = otherChips.toMutableList().also { it.removeAt(index) }
+                // Others Section for dynamic chip addition based on user input
+                Text("Others", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(8.dp))
+                ChipsLayout(chips = otherChips.value, onDeleteChip = { index ->
+                    otherChips.value = otherChips.value.toMutableList().also { it.removeAt(index) }
+
                 })
                 Spacer(modifier = Modifier.weight(1f))
 
-                // Padding between "Others" section and the buttons
-                Spacer(modifier = Modifier.height(16.dp))
 
                 // Apply Filter button
                 Button(
                     onClick = {
+                        viewModel.saveUserFilterSelections(selectedInterests.value, selectedIndustries.value, otherChips.value)
                         coroutineScope.launch {
                             snackbarHostState.showSnackbar("Filters saved")
                         }
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
-                    Text(applyFilterLabel)
+                    Text("Apply Filter")
                 }
 
                 // Cancel button
                 OutlinedButton(
                     onClick = {
-                        selectedInterests = emptySet()
-                        selectedIndustries = emptySet()
-                        otherChips = listOf()
+                        viewModel.clearUserFilterSelections()
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar("Filters Unsaved, Let's Apply Some Filters")
+                        }
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
-                    Text(cancelFilterLabel)
+                    Text("Cancel")
                 }
             }
         }

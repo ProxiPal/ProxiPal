@@ -38,6 +38,14 @@ class UserProfile : RealmObject {
     var interests : RealmList<String> = realmListOf()
     var industries : RealmList<String> = realmListOf()
 
+    //march16 George Fu
+    var profilePhotos: RealmList<String> = realmListOf()
+
+    //march17 George Fu
+    var selectedInterests : RealmList<String> = realmListOf()
+    var selectedIndustries : RealmList<String> = realmListOf()
+    var otherFilters : RealmList<String> = realmListOf()
+
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
         if (other !is UserProfile) return false
