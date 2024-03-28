@@ -547,7 +547,6 @@ class RealmSyncRepository(
             center = GeoPoint.create(userLatitude, userLongitude),
             radius = Distance.fromKilometers(radiusInKilometers)
         )
-        /*
         val interestsQueryPart = if (selectedInterests.isNotEmpty()) {
             selectedInterests.joinToString(prefix = "interests IN [", postfix = "]", separator = ", ") { "'$it'" }
         } else ""
@@ -569,10 +568,9 @@ class RealmSyncRepository(
         }
 
         return realm.query<UserProfile>(query, currentUser.id).find().asFlow()
-         */
-        
-        // TODO: FOR TESTING THE NEARBY USER LIST DISPLAY, THIS SHOULD SHOW ALL USER PROFILES IF IT WORKS
-        return realm.query<UserProfile>("owner_id == $0", currentUser.id).find().asFlow()
+
+        // TODO: TESTING THE NEARBY USER LIST DISPLAY WITH BELOW STATEMENT SHOULD SHOW ALL USERS IN DATABASE
+        //return realm.query<UserProfile>("owner_id == $0", currentUser.id).find().asFlow()
     }
 
 
