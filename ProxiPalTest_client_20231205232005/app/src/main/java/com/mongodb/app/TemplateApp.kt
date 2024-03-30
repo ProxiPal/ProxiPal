@@ -5,8 +5,9 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.util.Log
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.LocaleListCompat
+import android.widget.Toast
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
 import io.realm.kotlin.mongodb.App
 import io.realm.kotlin.mongodb.AppConfiguration
 
@@ -25,6 +26,7 @@ class TemplateApp: Application() {
         super.onCreate()
         createNewFriendRequestNotificationChannel() // Create notification channel for new friend request push notifications
         createTestNotificationPermissionsNotificationChannel() // Create notification channel for testing notification permissions
+        getFirebaseMessagingToken() // Get Device FCM Token
 
 
 
@@ -89,4 +91,28 @@ class TemplateApp: Application() {
         // Creates the notification channel
         notificationManager.createNotificationChannel(channel)
     }
+
+    // Programmer: Brian Poon
+    private fun getFirebaseMessagingToken() {
+        // Get instance of FirebaseMessaging
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            // Check if token retrieval was successful
+            if (!task.isSuccessful) {
+                // Log an error message if token retrieval failed
+                Log.w(TAG(), "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
+
+            // Token retrieval was successful, retrieve the token
+            val token = task.result
+
+            // Display Token with a Toast
+            val msg = "THE TOKEN IS $token"
+            // Show token in a Toast message
+            Toast.makeText(baseContext, msg, Toast.LENGTH_LONG).show()
+            // Log token for debugging purposes
+            Log.d(TAG(), msg)
+        })
+    }
+
 }
