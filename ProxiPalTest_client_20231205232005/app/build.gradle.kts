@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     kotlin("android")
     id("io.realm.kotlin") version "1.13.0"
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -105,6 +106,16 @@ dependencies {
     // Programmer: Brian Poon
     // This is used for Google ML Kit Translation
     implementation("com.google.mlkit:translate:17.0.2")
+
+    /*
+    Programmer: Brian Poon
+    Added dependencies for MyFirebaseMsgService Push Notification
+    */
+    // Import the Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:32.2.2"))
+    // When using the BoM, don't specify versions in Firebase dependencies
+    implementation("com.google.firebase:firebase-messaging")
+
 
 
 
