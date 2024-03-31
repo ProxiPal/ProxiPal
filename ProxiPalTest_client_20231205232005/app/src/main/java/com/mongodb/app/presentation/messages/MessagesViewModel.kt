@@ -92,38 +92,6 @@ class MessagesViewModel(
     }
 
     /**
-     * Updates the text that gets displayed in the input field row at the bottom of the messages screen
-     */
-    fun updateMessage(newMessage: String){
-        _message.value = newMessage
-    }
-
-    /**
-     * Resets the text that gets displayed in the input field row at the bottom of the messages screen
-     */
-    private fun resetMessage(){
-        _message.value = String.empty
-    }
-
-
-    // region DateTime
-    /**
-     * Returns the amount of ms since the epoch time
-     */
-    private fun getCurrentTime(): Long{
-        return Calendar.getInstance().timeInMillis
-    }
-
-    /**
-     * Returns a [Date] object given how many milliseconds since the epoch time
-     */
-    private fun getDateFromTime(time: Long): Date{
-        return Date(time)
-    }
-    // endregion DateTime
-
-
-    /**
      * Called when a user sends a new, updates an existing, or creates a reply message.
      * Deleting a message is handled using [deleteMessage]
      */
@@ -146,6 +114,38 @@ class MessagesViewModel(
             refreshMessages()
         }
     }
+
+    /**
+     * Updates the text that gets displayed in the input field row at the bottom of the messages screen
+     */
+    fun updateMessage(newMessage: String){
+        _message.value = newMessage
+    }
+
+    /**
+     * Resets the text that gets displayed in the input field row at the bottom of the messages screen
+     */
+    private fun resetMessage(){
+        _message.value = String.empty
+        currentAction.value = MessagesUserAction.IDLE
+    }
+
+
+    // region DateTime
+    /**
+     * Returns the amount of ms since the epoch time
+     */
+    private fun getCurrentTime(): Long{
+        return Calendar.getInstance().timeInMillis
+    }
+
+    /**
+     * Returns a [Date] object given how many milliseconds since the epoch time
+     */
+    private fun getDateFromTime(time: Long): Date{
+        return Date(time)
+    }
+    // endregion DateTime
 
 
     // region Messages
