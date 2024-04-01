@@ -298,7 +298,10 @@ fun MessagesEndOfHistory(
         horizontalArrangement = Arrangement.Center,
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 8.dp, bottom = 8.dp)
+            .padding(
+                top = dimensionResource(id = R.dimen.messages_screen_message_history_message_vertical_padding),
+                bottom = dimensionResource(id = R.dimen.messages_screen_message_history_message_vertical_padding)
+            )
     ) {
         Text(
             text = stringResource(id = R.string.messages_screen_end_of_messages),
@@ -468,7 +471,7 @@ fun MessagesExtrasLabel(
     }
     else{
         stringResource(id = R.string.messages_screen_message_reference_long,
-            originalMessage.substring(0, 10))
+            originalMessage.substring(0, LONG_MESSAGE_CHARACTER_THRESHOLD))
     }
 
     // Label showing that a message has been edited and is a reply
@@ -499,7 +502,7 @@ fun MessagesExtrasLabel(
         text = text,
         style = MaterialTheme.typography.labelSmall,
         modifier = modifier
-            .padding(start = 4.dp)
+            .padding(start = dimensionResource(id = R.dimen.messages_screen_extras_label_start_padding))
     )
 }
 
@@ -614,7 +617,7 @@ fun MessagesReplyUpdateRow(
         Card(
             modifier = Modifier
                 .padding(
-                    all = 4.dp
+                    all = dimensionResource(id = R.dimen.messages_screen_reply_update_card_all_padding)
                 )
         ) {
             val messageUnderActionFocus: String? =
@@ -633,10 +636,10 @@ fun MessagesReplyUpdateRow(
                 text = stringResource(id = tabStringId, messageToDisplay),
                 modifier = Modifier
                     .padding(
-                        top = 4.dp,
-                        start = 8.dp,
-                        end = 8.dp,
-                        bottom = 4.dp
+                        top = dimensionResource(id = R.dimen.messages_screen_reply_update_row_vertical_padding),
+                        start = dimensionResource(id = R.dimen.messages_screen_reply_update_row_horizontal_padding),
+                        end = dimensionResource(id = R.dimen.messages_screen_reply_update_row_horizontal_padding),
+                        bottom = dimensionResource(id = R.dimen.messages_screen_reply_update_row_vertical_padding)
                     )
             )
         }
@@ -714,10 +717,11 @@ fun MessagesInputRow(
         val iconImageVector = when (messagesViewModel.currentAction.value) {
             MessagesUserAction.IDLE -> Icons.Default.Refresh
             MessagesUserAction.UPDATE -> Icons.Default.Cancel
-            MessagesUserAction.DELETE -> Icons.Default.Cancel
+            // Cancel action is via an alert dialog, not this button
+            MessagesUserAction.DELETE -> Icons.Default.Refresh
             MessagesUserAction.REPLY -> Icons.Default.Cancel
         }
-        // Button to refresh message history
+        // Button to either refresh message history or cancel a contextual menu action
         IconButton(
             onClick = { onIconButtonClick() }
         ) {
@@ -736,6 +740,8 @@ fun MessagesInputRow(
             onValueChange = { messagesViewModel.updateMessage(it) },
             singleLine = true,
             modifier = Modifier
+                // Make the text field fill the remaining middle space between the
+                // ... refresh/cancel and send buttons
                 .weight(1f)
             // Padding causes the messages' UI to go too large for some reason
 //                .padding(
