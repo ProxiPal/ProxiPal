@@ -194,7 +194,7 @@ class RealmSyncRepository(
         config = SyncConfiguration.Builder(currentUser, set)
             .initialSubscriptions { realm ->
                 // Subscribe to the active subscriptionType - first time defaults to MINE
-                val activeSubscriptionType = getActiveSubscriptionType(realm)
+                val activeSubscriptionType = SubscriptionType.ALL
                 if (SHOULD_USE_TASKS_ITEMS) {
                     add(
                         getQueryItems(realm, activeSubscriptionType),
@@ -527,10 +527,10 @@ class RealmSyncRepository(
             "location GEOWITHIN $circleAroundUser AND ownerId != $0"
         }
 
-        return realm.query<UserProfile>(query, currentUser.id).find().asFlow()
+        //return realm.query<UserProfile>(query, currentUser.id).find().asFlow()
 
         // TODO: TESTING THE NEARBY USER LIST DISPLAY WITH BELOW STATEMENT SHOULD SHOW ALL USERS IN DATABASE
-        //return realm.query<UserProfile>("ownerId == $0", currentUser.id).find().asFlow()
+        return realm.query<UserProfile>("ownerId != $0", currentUser.id).find().asFlow()
     }
 
 
