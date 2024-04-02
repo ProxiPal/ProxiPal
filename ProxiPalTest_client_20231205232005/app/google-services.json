@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "847161776515",
+    "project_id": "proxipal-36c3b",
+    "storage_bucket": "proxipal-36c3b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:847161776515:android:102b2218ef9f3fdf14beb6",
+        "android_client_info": {
+          "package_name": "com.mongodb.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAofighY5a_Hkj8m2k3jeVcxSMtqvjaBvQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
