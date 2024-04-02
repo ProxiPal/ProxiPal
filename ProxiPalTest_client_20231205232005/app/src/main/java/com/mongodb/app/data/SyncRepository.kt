@@ -321,7 +321,7 @@ class RealmSyncRepository(
      */
     // region User profiles
     override fun getCurrentUserProfileList(): Flow<ResultsChange<UserProfile>> {
-        return realm.query<UserProfile>("owner_id == $0", currentUser.id)
+        return realm.query<UserProfile>("ownerId == $0", currentUser.id)
             .asFlow()
     }
 
@@ -530,7 +530,7 @@ class RealmSyncRepository(
         return realm.query<UserProfile>(query, currentUser.id).find().asFlow()
 
         // TODO: TESTING THE NEARBY USER LIST DISPLAY WITH BELOW STATEMENT SHOULD SHOW ALL USERS IN DATABASE
-        //return realm.query<UserProfile>("owner_id == $0", currentUser.id).find().asFlow()
+        //return realm.query<UserProfile>("ownerId == $0", currentUser.id).find().asFlow()
     }
 
 
