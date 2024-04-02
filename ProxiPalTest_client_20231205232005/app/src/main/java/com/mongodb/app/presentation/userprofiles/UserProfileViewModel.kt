@@ -509,7 +509,7 @@ class UserProfileViewModel constructor(
      */
     fun fetchAndStoreNearbyUserProfiles(selectedInterests: List<String> = emptyList(), selectedIndustries: List<String> = emptyList(), otherFilters: List<String> = emptyList()) {
         CoroutineScope(Dispatchers.Main).launch {
-            repository.getNearbyUserProfileList(userProfileLatitude.value, userProfileLongitude.value, 0.1, selectedInterests = selectedInterests, selectedIndustries = selectedIndustries, otherFilters = otherFilters)
+            repository.getNearbyUserProfileList(userProfileLatitude.value, userProfileLongitude.value, proximityRadius.value, selectedInterests = selectedInterests, selectedIndustries = selectedIndustries, otherFilters = otherFilters)
                 .collect { resultsChange: ResultsChange<UserProfile> ->
                     _nearbyUserProfiles.clear()
                     _nearbyUserProfiles.addAll(resultsChange.list)
