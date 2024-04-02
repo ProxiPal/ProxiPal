@@ -109,10 +109,9 @@ interface SyncRepository {
      */
     // region User profiles
     /**
-     * Returns a flow with the current user's profile.
-     * Modified by Marco Pacini to fix issues
+     * Returns a flow with the user profiles for the current subscription.
      */
-    fun getCurrentUserProfileList(): Flow<ResultsChange<UserProfile>>
+    fun getUserProfileList(): Flow<ResultsChange<UserProfile>>
 
     /**
      * Adds a user profile that belongs to the current user using the specified parameters
@@ -320,8 +319,9 @@ class RealmSyncRepository(
     Deleting has not been testing for functionality and may not be necessary, for now
      */
     // region User profiles
-    override fun getCurrentUserProfileList(): Flow<ResultsChange<UserProfile>> {
-        return realm.query<UserProfile>("owner_id == $0", currentUser.id)
+    override fun getUserProfileList(): Flow<ResultsChange<UserProfile>> {
+        return realm.query<UserProfile>()
+            .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
     }
 
@@ -358,7 +358,10 @@ class RealmSyncRepository(
     override suspend fun updateUserProfile(firstName: String, lastName: String, biography: String, instagramHandle: String, twitterHandle: String, linktreeHandle: String, linkedinHandle: String) {
         // Queries inside write transaction are live objects
         // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
-        val frozenUserProfile = getCurrentUserProfile(realm = realm).find()
+        val frozenUserProfile = getQueryUserProfiles(
+            realm = realm,
+            subscriptionType = getActiveSubscriptionType(realm)
+        ).find()
         // In case the query result list is empty, check first before calling ".first()"
         val frozenFirstUserProfile = if (frozenUserProfile.size > 0) {
             frozenUserProfile.first()
@@ -424,10 +427,6 @@ class RealmSyncRepository(
             SubscriptionType.ALL -> realm.query()
         }
 
-    private fun getCurrentUserProfile(realm: Realm) : RealmQuery<UserProfile>{
-        return realm.query("ownerId == $0", currentUser.id)
-    }
-
     // endregion User profiles
 
     // Contribution: Marco Pacini
@@ -438,7 +437,10 @@ class RealmSyncRepository(
     override suspend fun updateUserProfileLocation(latitude: Double, longitude: Double) {
         // Queries inside write transaction are live objects
         // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
-        val frozenUserProfile = getCurrentUserProfile(realm = realm).find()
+        val frozenUserProfile = getQueryUserProfiles(
+            realm = realm,
+            subscriptionType = getActiveSubscriptionType(realm)
+        ).find()
         // In case the query result list is empty, check first before calling ".first()"
         val frozenFirstUserProfile = if (frozenUserProfile.size > 0) {
             frozenUserProfile.first()
@@ -466,7 +468,10 @@ class RealmSyncRepository(
             )
             return
         }
-        when (getCurrentUserProfile(realm = realm).find().size) {
+        when (getQueryUserProfiles(
+            realm = realm,
+            subscriptionType = getActiveSubscriptionType(realm)
+        ).find().size) {
             // Create a new profile for the user if they do not have one already in the database
             // This may not be necessary as users will get their initial profiles added to the database
             // ... once they register an account and deleting their profile will only occur when
@@ -540,7 +545,10 @@ class RealmSyncRepository(
     override suspend fun updateUserProfileInterests(interest:String) {
         // Queries inside write transaction are live objects
         // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
-        val frozenUserProfile = getCurrentUserProfile(realm = realm).find()
+        val frozenUserProfile = getQueryUserProfiles(
+            realm = realm,
+            subscriptionType = getActiveSubscriptionType(realm)
+        ).find()
         // In case the query result list is empty, check first before calling ".first()"
         val frozenFirstUserProfile = if (frozenUserProfile.size > 0) {
             frozenUserProfile.first()
@@ -566,7 +574,10 @@ class RealmSyncRepository(
             )
             return
         }
-        when (getCurrentUserProfile(realm = realm).find().size) {
+        when (getQueryUserProfiles(
+            realm = realm,
+            subscriptionType = getActiveSubscriptionType(realm)
+        ).find().size) {
             // Create a new profile for the user if they do not have one already in the database
             // This may not be necessary as users will get their initial profiles added to the database
             // ... once they register an account and deleting their profile will only occur when
@@ -604,7 +615,10 @@ class RealmSyncRepository(
     override suspend fun updateUserProfileIndustries(industry:String) {
         // Queries inside write transaction are live objects
         // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
-        val frozenUserProfile = getCurrentUserProfile(realm = realm).find()
+        val frozenUserProfile = getQueryUserProfiles(
+            realm = realm,
+            subscriptionType = getActiveSubscriptionType(realm)
+        ).find()
         // In case the query result list is empty, check first before calling ".first()"
         val frozenFirstUserProfile = if (frozenUserProfile.size > 0) {
             frozenUserProfile.first()
@@ -630,7 +644,10 @@ class RealmSyncRepository(
             )
             return
         }
-        when (getCurrentUserProfile(realm = realm).find().size) {
+        when (getQueryUserProfiles(
+            realm = realm,
+            subscriptionType = getActiveSubscriptionType(realm)
+        ).find().size) {
             // Create a new profile for the user if they do not have one already in the database
             // This may not be necessary as users will get their initial profiles added to the database
             // ... once they register an account and deleting their profile will only occur when
@@ -727,7 +744,7 @@ class MockRepository : SyncRepository {
 
 
     // Contributed by Kevin Kubota
-    override fun getCurrentUserProfileList(): Flow<ResultsChange<UserProfile>> = flowOf() // modified by Marco
+    override fun getUserProfileList(): Flow<ResultsChange<UserProfile>> = flowOf()
     override suspend fun addUserProfile(firstName: String, lastName: String, biography: String, instagramHandle: String, twitterHandle: String, linktreeHandle: String, linkedinHandle: String) =
         Unit
     override suspend fun updateUserProfile(firstName: String, lastName: String, biography: String, instagramHandle: String, twitterHandle: String, linktreeHandle: String, linkedinHandle: String) =

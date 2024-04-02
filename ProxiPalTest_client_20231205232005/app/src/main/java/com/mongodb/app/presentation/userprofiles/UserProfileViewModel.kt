@@ -189,7 +189,7 @@ class UserProfileViewModel constructor(
      */
     private fun getUserProfile(){
         viewModelScope.launch {
-            repository.getCurrentUserProfileList()
+            repository.getUserProfileList()
                 .collect { event: ResultsChange<UserProfile> ->
                     when (event) {
                         is InitialResults -> {
@@ -568,7 +568,7 @@ class UserProfileViewModel constructor(
     }
     fun loadUserFilterSelections() {
         viewModelScope.launch {
-            repository.getCurrentUserProfileList().collect { resultsChange ->
+            repository.getUserProfileList().collect { resultsChange ->
                 val userProfile = resultsChange.list.firstOrNull() // Assuming you want the first profile
                 userProfile?.let {
                     _selectedInterests.value = it.selectedInterests
