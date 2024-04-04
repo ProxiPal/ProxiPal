@@ -81,13 +81,6 @@ import java.util.Date
 import java.util.SortedSet
 
 
-/*
-TODO List of tasks to do for messages screen
-- Make changes to both friend profile picture and IDs of users involved
-... when navigating from friends screen to messages screen
-*/
-
-
 // region Extensions
 val String.Companion.empty: String
     get() { return "" }
@@ -192,8 +185,7 @@ fun MessagesTopBar(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Image(
-                        // TODO Change this to a person's profile picture
-                        painter = painterResource(id = R.drawable.linkedin),
+                        painter = painterResource(id = R.drawable.default_user_icon),
                         contentDescription = null,
                         // Crops the image to fit (the circular shape space)
                         contentScale = ContentScale.Crop,
