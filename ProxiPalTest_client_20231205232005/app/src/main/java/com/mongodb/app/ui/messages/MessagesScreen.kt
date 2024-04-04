@@ -157,7 +157,9 @@ fun MessagesScreenLayout(
 
     Scaffold(
         topBar = {
-            MessagesTopBar()
+            MessagesTopBar(
+                messagesViewModel = messagesViewModel
+            )
         },
         modifier = modifier
         // Pad the body of content so it does not get cut off by the scaffold top bar
@@ -176,6 +178,7 @@ fun MessagesScreenLayout(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessagesTopBar(
+    messagesViewModel: MessagesViewModel,
     modifier: Modifier = Modifier
 ) {
     // Back button is automatically handled by the navigation code (?)
@@ -199,9 +202,8 @@ fun MessagesTopBar(
                             .size(dimensionResource(id = R.dimen.messages_screen_profile_picture_size))
                     )
                     Text(
-                        text = stringResource(
-                            id = R.string.app_name
-                        ),
+                        // TODO Change this to a person's actual name, not user ID
+                        text = messagesViewModel.getOtherUserInvolved(),
                         color = Color.Black,
                         style = MaterialTheme.typography.labelLarge
                     )

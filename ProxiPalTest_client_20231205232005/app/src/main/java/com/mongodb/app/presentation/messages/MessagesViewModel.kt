@@ -131,6 +131,35 @@ class MessagesViewModel(
         currentAction.value = MessagesUserAction.IDLE
     }
 
+    /**
+     * Gets the ID of the other user involved in the current conversation
+     * (There should only currently be 2 users involved per conversation,
+     * 1 being the current user and the other being another user.
+     * This function returns the other user.)
+     */
+    fun getOtherUserInvolved(): String{
+        // Users involved list is not set yet
+        if (_usersInvolved == null){
+            return String.empty
+        }
+        // Users involved list has the wrong amount of users
+        if (_usersInvolved!!.size > MAX_USERS_PER_CONVERSATION){
+            return String.empty
+        }
+        // Users involved list does not contain the current user
+        if (!_usersInvolved!!.contains(repository.getCurrentUserId())){
+            return String.empty
+        }
+        // Search through all the friend IDs in the users involved list
+        for (userID in _usersInvolved!!){
+            // Return the other user's ID (the one not equal to the current user's)
+            if (!userID.equals(repository.getCurrentUserId())){
+                return userID
+            }
+        }
+        return String.empty
+    }
+
 
     // region DateTime
     /**
