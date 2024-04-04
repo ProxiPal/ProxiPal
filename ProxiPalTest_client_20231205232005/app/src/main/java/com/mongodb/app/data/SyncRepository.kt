@@ -165,6 +165,11 @@ interface SyncRepository {
      */
     // region User profiles
     /**
+     * Returns the specified [UserProfile]
+     */
+    fun readUserProfile(realm: Realm, ownerId: String): Flow<ResultsChange<UserProfile>>
+
+    /**
      * Returns a flow with the user profiles for the current subscription.
      */
     fun getUserProfileList(): Flow<ResultsChange<UserProfile>>
@@ -443,6 +448,12 @@ class RealmSyncRepository(
     Deleting has not been testing for functionality and may not be necessary, for now
      */
     // region User profiles
+    override fun readUserProfile(realm: Realm, ownerId: String): Flow<ResultsChange<UserProfile>> {
+        return realm.query<UserProfile>("ownerId == $0", ownerId)
+            .sort(Pair("_id", Sort.ASCENDING))
+            .asFlow()
+    }
+
     override fun getUserProfileList(): Flow<ResultsChange<UserProfile>> {
         return realm.query<UserProfile>()
             .sort(Pair("_id", Sort.ASCENDING))
@@ -813,8 +824,8 @@ class RealmSyncRepository(
                 "RealmSyncRepository: Creating a new conversation object; " +
                         "ID = \"${friendConversation._id}\""
             )
-            // TODO MessagesViewModel already creates a conversation if it doesn't exist
-            // Create a new conversation object
+            // This is more of a safety check
+            // Create a new conversation object if it was somehow deleted before or during the updating process
             createConversation(
                 usersInvolved = friendConversation.usersInvolved.toSortedSet()
             )
@@ -855,6 +866,9 @@ class MockRepository : SyncRepository {
 
 
     // Contributed by Kevin Kubota
+    override fun readUserProfile(realm: Realm, ownerId: String): Flow<ResultsChange<UserProfile>> {
+        TODO("Not yet implemented")
+    }
     override fun getUserProfileList(): Flow<ResultsChange<UserProfile>> = flowOf()
     override suspend fun addUserProfile(firstName: String, lastName: String, biography: String) =
         Unit
