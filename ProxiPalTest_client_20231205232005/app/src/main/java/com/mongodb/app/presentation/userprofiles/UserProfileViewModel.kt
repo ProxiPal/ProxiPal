@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -46,7 +47,7 @@ sealed class AddUserProfileEvent {
     class Error(val message: String, val throwable: Throwable) : AddUserProfileEvent()
 }
 
-class UserProfileViewModel constructor(
+class UserProfileViewModel(
     private var repository: SyncRepository,
     val userProfileListState: SnapshotStateList<UserProfile> = mutableStateListOf()
 ) : ViewModel() {
@@ -68,12 +69,12 @@ class UserProfileViewModel constructor(
     private val _isEditingUserProfile: MutableState<Boolean> = mutableStateOf(false)
 
     // for current user's location, added by Marco Pacini
-    private val _userProfileLatitude: MutableState<Double> = mutableStateOf(0.0)
-    private val _userProfileLongitude: MutableState<Double> = mutableStateOf(0.0)
+    private val _userProfileLatitude: MutableState<Double> = mutableDoubleStateOf(0.0)
+    private val _userProfileLongitude: MutableState<Double> = mutableDoubleStateOf(0.0)
 
     private val _nearbyUserProfiles: MutableList<UserProfile> = mutableListOf()
 
-    private val _proximityRadius: MutableState<Double> = mutableStateOf(0.1)
+    private val _proximityRadius: MutableState<Double> = mutableDoubleStateOf(0.1)
 
 
     /*
@@ -188,11 +189,7 @@ class UserProfileViewModel constructor(
                                         "UPViewModel: InitialResults; Getting current user's user profile..."
                                     )
                                     // Load the saved profile details
-                                    _userProfileFirstName.value = event.list[0].firstName
-                                    _userProfileLastName.value = event.list[0].lastName
-                                    _userProfileBiography.value = event.list[0].biography
-                                    _userProfileLatitude.value = event.list[0].location?.latitude!!
-                                    _userProfileLongitude.value = event.list[0].location?.longitude!!
+                                    setUserProfileVariables(event.list[0])
                                 }
                                 else -> {
                                     Log.i(
@@ -201,11 +198,7 @@ class UserProfileViewModel constructor(
                                                 "Retrieving only the first user profile instance..."
                                     )
                                     // Load the saved profile details
-                                    _userProfileFirstName.value = event.list[0].firstName
-                                    _userProfileLastName.value = event.list[0].lastName
-                                    _userProfileBiography.value = event.list[0].biography
-                                    _userProfileLatitude.value = event.list[0].location?.latitude!!
-                                    _userProfileLongitude.value = event.list[0].location?.longitude!!
+                                    setUserProfileVariables(event.list[0])
                                 }
                             }
                         }
@@ -231,6 +224,14 @@ class UserProfileViewModel constructor(
                     }
                 }
         }
+    }
+
+    private fun setUserProfileVariables(userProfile: UserProfile){
+        _userProfileFirstName.value = userProfile.firstName
+        _userProfileLastName.value = userProfile.lastName
+        _userProfileBiography.value = userProfile.biography
+        _userProfileLatitude.value = userProfile.location?.latitude!!
+        _userProfileLongitude.value = userProfile.location?.longitude!!
     }
 
     /**
