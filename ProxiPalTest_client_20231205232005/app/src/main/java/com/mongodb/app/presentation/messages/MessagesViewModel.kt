@@ -14,6 +14,7 @@ import com.mongodb.app.TAG
 import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.messages.IConversationsRealm
 import com.mongodb.app.data.messages.IMessagesRealm
+import com.mongodb.app.data.messages.MAX_USERS_PER_CONVERSATION
 import com.mongodb.app.data.messages.MessagesUserAction
 import com.mongodb.app.data.toObjectId
 import com.mongodb.app.domain.FriendConversation
@@ -419,6 +420,20 @@ class MessagesViewModel(
      * Updates a [FriendConversation]'s users involved field
      */
     fun updateUsersInvolved(usersInvolved: SortedSet<String>){
+        // A safety check that adds the current user if not involved in the conversation already
+        if (!usersInvolved.contains(repository.getCurrentUserId())){
+            usersInvolved.add(repository.getCurrentUserId())
+        }
+
+        // Skip if the number of users involved is invalid
+        if (usersInvolved.size > MAX_USERS_PER_CONVERSATION || usersInvolved.size <= 1){
+            Log.i(
+                TAG(),
+                "MessagesViewModel: Skipping conversation users involved updating"
+            )
+            return
+        }
+
         _usersInvolved = usersInvolved
         refreshMessages()
     }

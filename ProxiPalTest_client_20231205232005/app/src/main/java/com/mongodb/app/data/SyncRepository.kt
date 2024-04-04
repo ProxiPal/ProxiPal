@@ -14,6 +14,7 @@ import com.mongodb.app.domain.FriendMessage
 import com.mongodb.app.domain.Item
 import com.mongodb.app.domain.UserProfile
 import com.mongodb.app.location.CustomGeoPoint
+import com.mongodb.app.ui.messages.empty
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.annotations.ExperimentalGeoSpatialApi
@@ -840,7 +841,7 @@ class MockRepository : SyncRepository {
     override fun pauseSync() = Unit
     override fun resumeSync() = Unit
     override fun getCurrentUserId(): String {
-        TODO("Not yet implemented")
+        return String.empty
     }
 
     override fun close() = Unit

@@ -19,3 +19,8 @@ const val SHOULD_PRINT_REALM_CONFIG_INFO = false
  * How many characters makes a message "long"
  */
 const val LONG_MESSAGE_CHARACTER_THRESHOLD = 10
+
+/**
+ * How many users maximum can be in a conversation at once
+ */
+const val MAX_USERS_PER_CONVERSATION = 2

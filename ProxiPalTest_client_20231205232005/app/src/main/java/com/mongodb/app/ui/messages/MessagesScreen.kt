@@ -78,6 +78,7 @@ import com.mongodb.app.ui.theme.Purple200
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Date
+import java.util.SortedSet
 
 
 /*
@@ -127,11 +128,11 @@ class MessagesScreen : ComponentActivity() {
             // Student account
             "6570119696faac878ad696a5"
         )
-        messagesViewModel.updateUsersInvolved(usersInvolved)
 
         setContent {
             MessagesScreenLayout(
-                messagesViewModel = messagesViewModel
+                messagesViewModel = messagesViewModel,
+                conversationUsersInvolved = usersInvolved
             )
         }
     }
@@ -147,8 +148,13 @@ class MessagesScreen : ComponentActivity() {
 @Composable
 fun MessagesScreenLayout(
     messagesViewModel: MessagesViewModel,
+    conversationUsersInvolved: SortedSet<String>,
     modifier: Modifier = Modifier
 ) {
+    messagesViewModel.updateUsersInvolved(
+        usersInvolved = conversationUsersInvolved
+    )
+
     Scaffold(
         topBar = {
             MessagesTopBar()
@@ -828,7 +834,8 @@ fun MessagesScreenLayoutPreview() {
                 repository = mockSyncRepository,
                 messagesRepository = mockMessagesRepository,
                 conversationsRepository = mockConversationRepository
-            )
+            ),
+            conversationUsersInvolved = sortedSetOf(String.empty)
         )
     }
 }
