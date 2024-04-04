@@ -19,6 +19,7 @@ import com.mongodb.app.data.messages.MessagesUserAction
 import com.mongodb.app.data.toObjectId
 import com.mongodb.app.domain.FriendConversation
 import com.mongodb.app.domain.FriendMessage
+import com.mongodb.app.domain.UserProfile
 import com.mongodb.app.ui.messages.empty
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -45,6 +46,7 @@ class MessagesViewModel(
     private val _conversationsListState: SnapshotStateList<FriendConversation> = mutableStateListOf()
     private var _friendMessageUnderActionFocus: FriendMessage? = null
     private val _currentAction = mutableStateOf(MessagesUserAction.IDLE)
+    private var _otherUserProfile: UserProfile? = null
 
     /**
      * Maps the [ObjectId] of a [FriendMessage] reply to the message of the [FriendMessage] replying to
@@ -71,6 +73,8 @@ class MessagesViewModel(
         get() = _currentAction
     val messageIdRepliesToOriginalMessages
         get() = _messageIdRepliesToOriginalMessages
+    val otherUserProfile
+        get() = _otherUserProfile
     // endregion Properties
 
 
@@ -131,13 +135,39 @@ class MessagesViewModel(
         currentAction.value = MessagesUserAction.IDLE
     }
 
+
+    // region OtherUser
+    /**
+     * Gets the [UserProfile] of the other user involved in a [FriendConversation]
+     */
+    private fun readOtherUserProfile(){
+        val otherUserId = getOtherUserInvolvedId()
+        viewModelScope.launch {
+            if (otherUserId.isEmpty()){
+                return@launch
+            }
+            else {
+                repository.readUserProfile(otherUserId)
+                    .first{
+                        _otherUserProfile = if (it.list.size > 0){
+                            it.list[0]
+                        } else{
+                            null
+                        }
+                        true
+                    }
+                otherUserProfile
+            }
+        }
+    }
+
     /**
      * Gets the ID of the other user involved in the current conversation
      * (There should only currently be 2 users involved per conversation,
      * 1 being the current user and the other being another user.
      * This function returns the other user.)
      */
-    fun getOtherUserInvolved(): String{
+    private fun getOtherUserInvolvedId(): String{
         // Users involved list is not set yet
         if (_usersInvolved == null){
             return String.empty
@@ -159,6 +189,7 @@ class MessagesViewModel(
         }
         return String.empty
     }
+    // endregion OtherUser
 
 
     // region DateTime
@@ -464,6 +495,7 @@ class MessagesViewModel(
         }
 
         _usersInvolved = usersInvolved
+        readOtherUserProfile()
         refreshMessages()
     }
     // endregion Conversations

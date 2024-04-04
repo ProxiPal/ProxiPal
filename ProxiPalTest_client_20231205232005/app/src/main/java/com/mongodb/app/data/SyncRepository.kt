@@ -167,7 +167,7 @@ interface SyncRepository {
     /**
      * Returns the specified [UserProfile]
      */
-    fun readUserProfile(realm: Realm, ownerId: String): Flow<ResultsChange<UserProfile>>
+    fun readUserProfile(ownerId: String): Flow<ResultsChange<UserProfile>>
 
     /**
      * Returns a flow with the user profiles for the current subscription.
@@ -448,7 +448,7 @@ class RealmSyncRepository(
     Deleting has not been testing for functionality and may not be necessary, for now
      */
     // region User profiles
-    override fun readUserProfile(realm: Realm, ownerId: String): Flow<ResultsChange<UserProfile>> {
+    override fun readUserProfile(ownerId: String): Flow<ResultsChange<UserProfile>> {
         return realm.query<UserProfile>("ownerId == $0", ownerId)
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
@@ -866,7 +866,7 @@ class MockRepository : SyncRepository {
 
 
     // Contributed by Kevin Kubota
-    override fun readUserProfile(realm: Realm, ownerId: String): Flow<ResultsChange<UserProfile>> {
+    override fun readUserProfile(ownerId: String): Flow<ResultsChange<UserProfile>> {
         TODO("Not yet implemented")
     }
     override fun getUserProfileList(): Flow<ResultsChange<UserProfile>> = flowOf()
