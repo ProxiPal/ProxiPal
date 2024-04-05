@@ -193,7 +193,6 @@ fun MessagesTopBar(
                             .size(dimensionResource(id = R.dimen.messages_screen_profile_picture_size))
                     )
                     Text(
-                        // TODO Change this to a person's actual name, not user ID
                         text = if (messagesViewModel.otherUserProfile != null){
                             messagesViewModel.otherUserProfile!!.firstName
                                                                               }

@@ -161,7 +161,7 @@ class UserProfileViewModel(
      */
     private fun getUserProfile(){
         viewModelScope.launch {
-            repository.getUserProfileList()
+            repository.readUserProfiles()
                 .collect { event: ResultsChange<UserProfile> ->
                     Log.i(
                         TAG(),

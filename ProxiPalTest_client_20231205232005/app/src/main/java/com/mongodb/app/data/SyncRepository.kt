@@ -89,6 +89,9 @@ fun RealmList<String>.toObjectIdList(): RealmList<ObjectId>{
 // endregion Extensions
 
 
+private const val SubscriptionNameAllUserProfiles = "AllUserProfiles"
+
+
 /**
  * Repository for accessing Realm Sync.
  * Working functions and code for Item classes has been copied for UserProfile classes
@@ -165,14 +168,24 @@ interface SyncRepository {
      */
     // region User profiles
     /**
+     * Returns a query to get a specific [UserProfile]
+     */
+    fun getQuerySpecificUserProfile(realm: Realm, ownerId: String): RealmQuery<UserProfile>
+
+    /**
+     * Returns a query to get all [UserProfile]s
+     */
+    fun getQueryAllUserProfiles(realm: Realm): RealmQuery<UserProfile>
+
+    /**
      * Returns the specified [UserProfile]
      */
     fun readUserProfile(ownerId: String): Flow<ResultsChange<UserProfile>>
 
     /**
-     * Returns a flow with the user profiles for the current subscription.
+     * Returns all [UserProfile] objects
      */
-    fun getUserProfileList(): Flow<ResultsChange<UserProfile>>
+    fun readUserProfiles(): Flow<ResultsChange<UserProfile>>
 
     /**
      * Adds a user profile that belongs to the current user using the specified parameters
@@ -234,6 +247,7 @@ class RealmSyncRepository(
     private val currentUser: User
         get() = app.currentUser!!
 
+
     init {
         Log.i(
             TAG(),
@@ -262,7 +276,7 @@ class RealmSyncRepository(
                 } else {
                     add(
                         getQueryUserProfiles(realm, activeSubscriptionType),
-                        activeSubscriptionType.name
+                        SubscriptionNameAllUserProfiles
                     )
                     // Subscribe to receive any updates on all messages
                     // Then can possibly query to get only specific messages
@@ -448,14 +462,26 @@ class RealmSyncRepository(
     Deleting has not been testing for functionality and may not be necessary, for now
      */
     // region User profiles
-    override fun readUserProfile(ownerId: String): Flow<ResultsChange<UserProfile>> {
+    override fun getQuerySpecificUserProfile(
+        realm: Realm,
+        ownerId: String
+    ): RealmQuery<UserProfile> {
         return realm.query<UserProfile>("ownerId == $0", ownerId)
+    }
+
+    override fun getQueryAllUserProfiles(realm: Realm): RealmQuery<UserProfile> {
+        // Should return all user profiles as "0" should be an invalid ID
+        return realm.query<UserProfile>("ownerId != $0", "0")
+    }
+
+    override fun readUserProfile(ownerId: String): Flow<ResultsChange<UserProfile>> {
+        return getQuerySpecificUserProfile(realm, ownerId)
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
     }
 
-    override fun getUserProfileList(): Flow<ResultsChange<UserProfile>> {
-        return realm.query<UserProfile>()
+    override fun readUserProfiles(): Flow<ResultsChange<UserProfile>> {
+        return getQueryAllUserProfiles(realm)
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
     }
@@ -866,10 +892,21 @@ class MockRepository : SyncRepository {
 
 
     // Contributed by Kevin Kubota
+    override fun getQuerySpecificUserProfile(
+        realm: Realm,
+        ownerId: String
+    ): RealmQuery<UserProfile> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getQueryAllUserProfiles(realm: Realm): RealmQuery<UserProfile> {
+        TODO("Not yet implemented")
+    }
+
     override fun readUserProfile(ownerId: String): Flow<ResultsChange<UserProfile>> {
         TODO("Not yet implemented")
     }
-    override fun getUserProfileList(): Flow<ResultsChange<UserProfile>> = flowOf()
+    override fun readUserProfiles(): Flow<ResultsChange<UserProfile>> = flowOf()
     override suspend fun addUserProfile(firstName: String, lastName: String, biography: String) =
         Unit
     override suspend fun updateUserProfile(firstName: String, lastName: String, biography: String) =
