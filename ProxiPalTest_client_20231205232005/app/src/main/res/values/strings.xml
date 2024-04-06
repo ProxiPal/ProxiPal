@@ -163,6 +163,8 @@
     <string name="got_it">Got it!</string>
     <string name="delete_account">Delete Account</string>
     <string name="delete_account_confirmation_message">If you delete your account you will lose all your data. This action cannot be reversed.</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="confirm">Confirm</string>
 
 
 </resources>
