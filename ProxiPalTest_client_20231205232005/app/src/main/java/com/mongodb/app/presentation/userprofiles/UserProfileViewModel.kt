@@ -12,11 +12,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
-import com.mongodb.app.TAG
 import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT
 import com.mongodb.app.data.USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT
 import com.mongodb.app.domain.UserProfile
+import com.mongodb.app.presentation.tasks.AddItemEvent
 import io.realm.kotlin.notifications.InitialResults
 import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.notifications.UpdatedResults
@@ -168,6 +168,7 @@ class UserProfileViewModel constructor(
                 }
             }
         }
+
     }
 
 
@@ -591,5 +592,18 @@ class UserProfileViewModel constructor(
     }
 
 
+//    fun addReport(userReported: String, reasons: List<String>, comment: String) {
+//        CoroutineScope(Dispatchers.IO).launch {
+//            runCatching {
+//                repository.addReport(reportedUser = userReported, reasonsList = reasons, comment = comment)
+//            }.onSuccess { Log.d("test", "working") }
+//                .onFailure { Log.d("test", "not working") }
+//        }
+//    }
 
+    fun addReport(userReported: String, reasons: List<String>, comment: String) {
+        viewModelScope.launch{
+            repository.addReport(reportedUser = userReported, reasonsList = reasons,comment =comment)
+        }
+    }
 }

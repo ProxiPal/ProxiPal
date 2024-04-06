@@ -9,6 +9,8 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.mongodb.app.friends.ReportDropDownMenu
+import com.mongodb.app.friends.ReportViewModel
 import com.mongodb.app.home.AdvancedScreenSettings
 import com.mongodb.app.home.FilterScreen
 import com.mongodb.app.home.HomeScreen
@@ -33,7 +35,7 @@ import com.mongodb.app.ui.userprofiles.UserProfileLayout
  * Navigation graph for the different screens in Proxipal
  */
 @Composable
-fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: UserProfileViewModel, homeViewModel: HomeViewModel) {
+fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: UserProfileViewModel, homeViewModel: HomeViewModel, reportViewModel: ReportViewModel) {
     var state by remember{ mutableStateOf(false)}
     val navController = rememberNavController()
     var startDest = Routes.UserProfileScreen.route
@@ -77,7 +79,8 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
             ConnectWithOthersScreen(
                 toolbarViewModel = toolbarViewModel,
                 navController = navController,
-                userProfileViewModel = userProfileViewModel
+                userProfileViewModel = userProfileViewModel,
+                reportViewModel = reportViewModel
             )
         }
         composable(Routes.LocationPermissionsScreen.route) {
@@ -98,11 +101,16 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
                 userProfileViewModel = userProfileViewModel,
                 toolbarViewModel = toolbarViewModel,
                 navController = navController,
-                homeViewModel = homeViewModel
+                homeViewModel = homeViewModel,
+                reportViewModel= reportViewModel
                 )
         }
         composable(Routes.AdvancedScreenSettings.route){
             AdvancedScreenSettings(navController)
+        }
+
+        composable(Routes.ReportScreen.route){
+            ReportDropDownMenu(reportViewModel = reportViewModel)
         }
 
     }

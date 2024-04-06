@@ -44,8 +44,10 @@ class SubscriptionTypeViewModel(
             runCatching {
                 if (SHOULD_USE_TASKS_ITEMS)
                     repository.updateSubscriptionsItems(subscriptionType)
-                else
+                else {
                     repository.updateSubscriptionsUserProfiles(subscriptionType)
+                    repository.updateSubscriptionsReports(subscriptionType)
+                }
                 _subscriptionType.value = subscriptionType
             }.onSuccess {
                 withContext(Dispatchers.Main) {

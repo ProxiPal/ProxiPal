@@ -43,6 +43,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.mongodb.app.R
 import com.mongodb.app.data.MockRepository
+import com.mongodb.app.friends.ReportViewModel
 import com.mongodb.app.home.HomeViewModel
 import com.mongodb.app.location.UserProfileDisplayList
 import com.mongodb.app.navigation.Routes
@@ -96,7 +97,8 @@ fun AppOnboarding(
     toolbarViewModel: ToolbarViewModel,
     navController: NavHostController,
     homeViewModel: HomeViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    reportViewModel: ReportViewModel
 )
 {
     var currentStep by remember { mutableIntStateOf(0) }
@@ -154,7 +156,8 @@ fun AppOnboarding(
                 ConnectWithOthersScreen(
                     toolbarViewModel = toolbarViewModel,
                     navController = navController,
-                    userProfileViewModel = userProfileViewModel
+                    userProfileViewModel = userProfileViewModel,
+                    reportViewModel = reportViewModel
                 )
                 CircleToBottomAppBar(circleOffset)
             }
@@ -201,6 +204,7 @@ fun OnboardingScreen(
     toolbarViewModel: ToolbarViewModel,
     navController: NavHostController,
     homeViewModel: HomeViewModel,
+    reportViewModel: ReportViewModel,
     modifier: Modifier = Modifier
 ) {
     Surface(color = Color.White) {
@@ -213,7 +217,8 @@ fun OnboardingScreen(
                 userProfileViewModel = userProfileViewModel,
                 toolbarViewModel = toolbarViewModel,
                 navController = navController,
-                homeViewModel = homeViewModel
+                homeViewModel = homeViewModel,
+                reportViewModel = reportViewModel
             )
         }
     }

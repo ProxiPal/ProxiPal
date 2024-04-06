@@ -96,6 +96,8 @@ class ComposeLoginActivity : ComponentActivity() {
                         }
 
                         is LoginEvent.ShowMessage -> event.process()
+
+                        else -> {}
                     }
                 }
         }

@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.mongodb.app.R
 import com.mongodb.app.app
+import com.mongodb.app.friends.ReportViewModel
 import com.mongodb.app.location.LocationUpdatesScreen
 import com.mongodb.app.navigation.Routes
 import com.mongodb.app.presentation.tasks.ToolbarEvent
@@ -68,7 +69,8 @@ fun ConnectWithOthersScreen (
     toolbarViewModel: ToolbarViewModel,
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    userProfileViewModel: UserProfileViewModel
+    userProfileViewModel: UserProfileViewModel,
+    reportViewModel: ReportViewModel
 ){
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -80,7 +82,7 @@ fun ConnectWithOthersScreen (
         }
 
     ) {
-        LocationUpdatesScreen(userProfileViewModel = userProfileViewModel)
+        LocationUpdatesScreen(userProfileViewModel = userProfileViewModel, reportViewModel = reportViewModel)
     }
 }
 

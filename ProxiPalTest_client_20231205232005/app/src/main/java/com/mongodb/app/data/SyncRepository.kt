@@ -4,6 +4,7 @@ import android.util.Log
 import com.mongodb.app.TAG
 import com.mongodb.app.domain.Item
 import com.mongodb.app.app
+import com.mongodb.app.domain.Report
 import com.mongodb.app.domain.UserProfile
 import com.mongodb.app.location.CustomGeoPoint
 import io.realm.kotlin.Realm
@@ -87,10 +88,14 @@ interface SyncRepository {
      */
     suspend fun addTask(taskSummary: String)
 
+    suspend fun addReport(reportedUser: String, reasonsList: List<String>, comment: String)
+
     /**
      * Updates the Sync subscriptions based on the specified [SubscriptionType].
      */
     suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType)
+
+    suspend fun updateSubscriptionsReports(subscriptionType: SubscriptionType)
 
     /**
      * Deletes a given task.
@@ -190,7 +195,7 @@ class RealmSyncRepository(
         // ... the app will crash if querying anything other than B.
         // If errors still persist, try deleting and re-running the app.
         val set = if (SHOULD_USE_TASKS_ITEMS) setOf(Item::class)
-        else setOf(UserProfile::class, CustomGeoPoint::class)
+        else setOf(UserProfile::class, CustomGeoPoint::class, Report::class)
         config = SyncConfiguration.Builder(currentUser, set)
             .initialSubscriptions { realm ->
                 // Subscribe to the active subscriptionType - first time defaults to MINE
@@ -205,6 +210,7 @@ class RealmSyncRepository(
                         getQueryUserProfiles(realm, activeSubscriptionType),
                         activeSubscriptionType.name
                     )
+                    add(getQueryReports(realm, activeSubscriptionType),activeSubscriptionType.name)
                 }
             }
             .errorHandler { session: SyncSession, error: SyncException ->
@@ -231,6 +237,7 @@ class RealmSyncRepository(
             realm.subscriptions.waitForSynchronization()
         }
     }
+
 
 
     /*
@@ -286,6 +293,19 @@ class RealmSyncRepository(
         }
     }
 
+    override suspend fun addReport(reportedUser: String, reasonsList: List<String>, comment: String) {
+        val report = Report().apply {
+            userReported = reportedUser
+            reasons.addAll(reasonsList)
+            comments = comment
+            ownerId = currentUser.id
+        }
+        Log.d("report", report.toString())
+        realm.write{
+            copyToRealm(report, updatePolicy = UpdatePolicy.ALL)
+        }
+    }
+
 
     override suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType) {
         realm.subscriptions.update {
@@ -293,6 +313,17 @@ class RealmSyncRepository(
             val query = when (subscriptionType) {
                 SubscriptionType.MINE -> getQueryItems(realm, SubscriptionType.MINE)
                 SubscriptionType.ALL -> getQueryItems(realm, SubscriptionType.ALL)
+            }
+            add(query, subscriptionType.name)
+        }
+    }
+
+    override suspend fun updateSubscriptionsReports(subscriptionType: SubscriptionType) {
+        realm.subscriptions.update {
+            removeAll()
+            val query = when (subscriptionType) {
+                SubscriptionType.MINE -> getQueryReports(realm, SubscriptionType.MINE)
+                SubscriptionType.ALL -> getQueryReports(realm, SubscriptionType.ALL)
             }
             add(query, subscriptionType.name)
         }
@@ -308,6 +339,12 @@ class RealmSyncRepository(
     override fun isTaskMine(task: Item): Boolean = task.owner_id == currentUser.id
 
     private fun getQueryItems(realm: Realm, subscriptionType: SubscriptionType): RealmQuery<Item> =
+        when (subscriptionType) {
+            SubscriptionType.MINE -> realm.query("owner_id == $0", currentUser.id)
+            SubscriptionType.ALL -> realm.query()
+        }
+
+    private fun getQueryReports(realm: Realm, subscriptionType: SubscriptionType): RealmQuery<Item> =
         when (subscriptionType) {
             SubscriptionType.MINE -> realm.query("owner_id == $0", currentUser.id)
             SubscriptionType.ALL -> realm.query()
@@ -721,7 +758,11 @@ class MockRepository : SyncRepository {
     override fun getTaskList(): Flow<ResultsChange<Item>> = flowOf()
     override suspend fun toggleIsComplete(task: Item) = Unit
     override suspend fun addTask(taskSummary: String) = Unit
+
+    override suspend fun addReport(reportedUser: String, reasonsList: List<String>, comment: String) = Unit
     override suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType) = Unit
+
+    override suspend fun updateSubscriptionsReports(subscriptionType: SubscriptionType) = Unit
     override suspend fun deleteTask(task: Item) = Unit
     override fun isTaskMine(task: Item): Boolean = task.owner_id == MOCK_OWNER_ID_MINE
 

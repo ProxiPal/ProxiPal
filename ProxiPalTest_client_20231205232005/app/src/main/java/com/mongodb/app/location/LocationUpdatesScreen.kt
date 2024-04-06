@@ -33,6 +33,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.mongodb.app.R
+import com.mongodb.app.friends.ReportViewModel
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.theme.Purple200
 import com.mongodb.app.ui.theme.Purple500
@@ -49,7 +50,7 @@ import java.util.concurrent.TimeUnit
 
 @SuppressLint("MissingPermission")
 @Composable
-fun LocationUpdatesScreen(userProfileViewModel: UserProfileViewModel) {
+fun LocationUpdatesScreen(userProfileViewModel: UserProfileViewModel, reportViewModel: ReportViewModel) {
     val permissions = listOf(
         Manifest.permission.ACCESS_COARSE_LOCATION,
         Manifest.permission.ACCESS_FINE_LOCATION,
@@ -61,7 +62,8 @@ fun LocationUpdatesScreen(userProfileViewModel: UserProfileViewModel) {
     ) {
         LocationUpdatesContent(
             usePreciseLocation = it.contains(Manifest.permission.ACCESS_FINE_LOCATION),
-            userProfileViewModel = userProfileViewModel
+            userProfileViewModel = userProfileViewModel,
+            reportViewModel = reportViewModel
         )
     }
 }
@@ -70,7 +72,7 @@ fun LocationUpdatesScreen(userProfileViewModel: UserProfileViewModel) {
     anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
 )
 @Composable
-fun LocationUpdatesContent(usePreciseLocation: Boolean, userProfileViewModel: UserProfileViewModel) {
+fun LocationUpdatesContent(usePreciseLocation: Boolean, userProfileViewModel: UserProfileViewModel, reportViewModel: ReportViewModel) {
     // The location request that defines the location updates
     var locationRequest by remember {
         mutableStateOf<LocationRequest?>(null)
@@ -168,7 +170,7 @@ fun LocationUpdatesContent(usePreciseLocation: Boolean, userProfileViewModel: Us
                 )
             )
         }
-        UserProfileDisplayList(userProfiles = userProfileViewModel.nearbyUserProfiles, isLookingForUsers)
+        UserProfileDisplayList(userProfiles = userProfileViewModel.nearbyUserProfiles, isLookingForUsers , reportViewModel = reportViewModel)
     }
 }
 
