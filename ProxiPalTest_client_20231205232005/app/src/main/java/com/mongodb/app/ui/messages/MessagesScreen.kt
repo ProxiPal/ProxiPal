@@ -108,11 +108,6 @@ class MessagesScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Log.i(
-            TAG(),
-            "MessagesScreen: Start of OnCreate()"
-        )
-
         // TODO These values are hardcoded for now
         val usersInvolved = sortedSetOf(
             // Gmail account

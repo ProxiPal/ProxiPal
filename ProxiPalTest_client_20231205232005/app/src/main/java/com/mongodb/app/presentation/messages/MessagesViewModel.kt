@@ -86,10 +86,6 @@ class MessagesViewModel(
         viewModelScope.launch {
             // Load the conversation object first
             readConversation()
-            Log.i(
-                TAG(),
-                "MessagesViewModel: Finished reading conversation = \"${currentConversation?._id}\""
-            )
             // Then load the conversation's corresponding messages
             // This should also be called last because code beyond this point does not get called
             readMessages()
@@ -142,10 +138,6 @@ class MessagesViewModel(
      */
     private fun readOtherUserProfile(){
         val otherUserId = getOtherUserInvolvedId()
-        Log.i(
-            TAG(),
-            "MessagesViewModel: Other user ID = \"$otherUserId\""
-        )
         viewModelScope.launch {
             if (otherUserId.isEmpty()){
                 return@launch
@@ -267,10 +259,6 @@ class MessagesViewModel(
 
                 messagesListState.clear()
                 messagesListState.addAll(it.list)
-                Log.i(
-                    TAG(),
-                    "MessagesViewModel: Finished reading messages using \"a IN b\" RQL query"
-                )
                 return@collect
             }
         // Code beyond this point does not get called, regardless of return statements (?)

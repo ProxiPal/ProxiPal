@@ -76,7 +76,7 @@ fun RealmList<String>.toObjectIdList(): RealmList<ObjectId>{
             realmList.add(string.toObjectId())
         }
         catch (e: Exception){
-            Log.i(
+            Log.e(
                 TAG(),
                 "Caught exception \"${e}\" while converting a list of strings to ObjectIds; " +
                         "Returning an empty list instead"
@@ -249,10 +249,6 @@ class RealmSyncRepository(
 
 
     init {
-        Log.i(
-            TAG(),
-            "RealmSyncRepository: Start of Init{}"
-        )
         // Contributed by Kevin Kubota
         // This assignment impacts what type of object can be queried.
         // If trying to query A when the sync configuration is set for B,
@@ -301,18 +297,13 @@ class RealmSyncRepository(
 
         // Mutable states must be updated on the UI thread
         CoroutineScope(Dispatchers.Main).launch {
-            if (SHOULD_PRINT_REALM_CONFIG_INFO){
-                Log.i(
-                    TAG(),
-                    "RealmSyncRepository: Start of subscription synchronization"
-                )
-            }
+            // Manually adding subscriptions
             if (realm.subscriptions.size == 0){
                 val activeSubscriptionType = getActiveSubscriptionType(realm)
                 realm.subscriptions.update {
                     add(
-                        getQueryUserProfiles(realm, activeSubscriptionType),
-                        activeSubscriptionType.name
+                        getQueryAllUserProfiles(realm),
+                        SubscriptionNameAllUserProfiles
                     )
                     // Subscribe to receive any updates on all messages
                     // Then can possibly query to get only specific messages
@@ -326,35 +317,13 @@ class RealmSyncRepository(
                         SubscriptionNameMyFriendConversations
                     )
                 }
-                Log.i(
-                    TAG(),
-                    "RealmSyncRepository: Manually added subscriptions"
-                )
             }
             realm.subscriptions.waitForSynchronization()
-            if (SHOULD_PRINT_REALM_CONFIG_INFO){
-                Log.i(
-                    TAG(),
-                    "RealmSyncRepository: End of subscription synchronization"
-                )
-            }
         }
 
         if (SHOULD_PRINT_REALM_CONFIG_INFO) {
             // After configuration changes, realm stays the same but config changes every time
             // This leads to the app crashing when trying to interact with Realm after a configuration change
-            Log.i(
-                TAG(),
-                "RealmSyncRepository: Realm = \"${realm}\""
-            )
-            Log.i(
-                TAG(),
-                "RealmSyncRepository: Config = \"${config}\""
-            )
-            Log.i(
-                TAG(),
-                "RealmSyncRepository: Subscription amount = \"${realm.subscriptions.size}\""
-            )
             for (subscription in realm.subscriptions){
                 Log.i(
                     TAG(),
@@ -517,12 +486,6 @@ class RealmSyncRepository(
             null
         }
         if (frozenFirstUserProfile == null) {
-            Log.i(
-                TAG(),
-                "RealmSyncRepository: Creating a new user profile with the given parameters for " +
-                        "current user ID = \"${currentUser.id}\"...; " +
-                        "Skipping rest of user profile update function..."
-            )
             // Create a new user profile before applying the updated changes
             addUserProfile(
                 firstName = firstName,
@@ -530,31 +493,6 @@ class RealmSyncRepository(
                 biography = biography
             )
             return
-        }
-        when (getQueryUserProfiles(
-            realm = realm,
-            subscriptionType = getActiveSubscriptionType(realm)
-        ).find().size) {
-            // Create a new profile for the user if they do not have one already in the database
-            // This may not be necessary as users will get their initial profiles added to the database
-            // ... once they register an account and deleting their profile will only occur when
-            // ... deleting their account (unsure if account deletion will be implemented)
-            0 -> {
-                Log.i(
-                    TAG(),
-                    "RealmSyncRepository: No user profiles found with owner ID \"${currentUser.id}\""
-                )
-            }
-
-            1 -> Log.i(
-                TAG(),
-                "RealmSyncRepository: Exactly 1 user profile found with owner ID \"${currentUser.id}\""
-            )
-
-            else -> Log.i(
-                TAG(),
-                "RealmSyncRepository: Multiple user profiles found with owner ID \"${currentUser.id}\""
-            )
         }
         realm.write {
             findLatest(frozenFirstUserProfile)?.let { liveUserProfile ->
@@ -616,12 +554,6 @@ class RealmSyncRepository(
             null
         }
         if (frozenFirstUserProfile == null) {
-            Log.i(
-                TAG(),
-                "RealmSyncRepository: Creating a new user profile with the given parameters for " +
-                        "current user ID = \"${currentUser.id}\"...; " +
-                        "Skipping rest of user profile update function..."
-            )
             // Create a new user profile before applying the updated changes
             addUserProfile(
                 firstName = "empty",
@@ -629,31 +561,6 @@ class RealmSyncRepository(
                 biography = "empty"
             )
             return
-        }
-        when (getQueryUserProfiles(
-            realm = realm,
-            subscriptionType = getActiveSubscriptionType(realm)
-        ).find().size) {
-            // Create a new profile for the user if they do not have one already in the database
-            // This may not be necessary as users will get their initial profiles added to the database
-            // ... once they register an account and deleting their profile will only occur when
-            // ... deleting their account (unsure if account deletion will be implemented)
-            0 -> {
-                Log.i(
-                    TAG(),
-                    "RealmSyncRepository: No user profiles found with owner ID \"${currentUser.id}\""
-                )
-            }
-
-            1 -> Log.i(
-                TAG(),
-                "RealmSyncRepository: Exactly 1 user profile found with owner ID \"${currentUser.id}\""
-            )
-
-            else -> Log.i(
-                TAG(),
-                "RealmSyncRepository: Multiple user profiles found with owner ID \"${currentUser.id}\""
-            )
         }
         realm.write {
             findLatest(frozenFirstUserProfile)?.let { liveUserProfile ->
@@ -745,11 +652,6 @@ class RealmSyncRepository(
         // In case the query result list is empty, check first before calling ".first()"
         val frozenObject = (if (frozenObjects.size > 0) frozenObjects.first() else null) ?: return
 
-        Log.i(
-            TAG(),
-            "RealmSyncRepository: Deleting message with ID = \"${messageId}\"" +
-                    " and frozen object message = \"${frozenObject.message}\""
-        )
         // Delete the object
         realm.write {
             findLatest(frozenObject)?.let {
@@ -783,7 +685,7 @@ class RealmSyncRepository(
         val usersInvolvedRealmList: RealmList<String> = usersInvolved.toRealmList()
         Log.i(
             TAG(),
-            "RealmSyncRepository: Conversation users involved = \"" +
+            "RealmSyncRepository: Creating a conversation for users = \"" +
                     "${usersInvolvedRealmList}\""
         )
         // Empty list of messages
@@ -847,8 +749,8 @@ class RealmSyncRepository(
         if (frozenObject == null) {
             Log.i(
                 TAG(),
-                "RealmSyncRepository: Creating a new conversation object; " +
-                        "ID = \"${friendConversation._id}\""
+                "RealmSyncRepository: Could not update conversation with ID = \"${friendConversation._id}\"; " +
+                        "Creating a new conversation object instead"
             )
             // This is more of a safety check
             // Create a new conversation object if it was somehow deleted before or during the updating process

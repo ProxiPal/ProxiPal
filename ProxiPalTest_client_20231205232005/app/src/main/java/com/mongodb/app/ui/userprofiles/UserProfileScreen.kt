@@ -111,25 +111,8 @@ class UserProfileScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Log.i(
-            TAG(),
-            "UPScreen: Start of OnCreate()"
-        )
-
         // region ViewModel events
         lifecycleScope.launch {
-            userProfileViewModel.event
-                .collect {
-                    Log.i(
-                        TAG(),
-                        "UPScreen: Tried to modify or remove a user profile that doesn't belong to the current user."
-                    )
-                    Toast.makeText(
-                        this@UserProfileScreen,
-                        getString(R.string.user_profile_permissions_warning),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
         }
 
         lifecycleScope.launch {
