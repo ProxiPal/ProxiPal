@@ -45,9 +45,9 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
     NavHost(navController = navController, startDestination = startDest) {
         composable(Routes.UserProfileScreen.route) {
             //checks if its the user's first time login in, added by Vichet Chim
-            if (userProfileViewModel.userProfileListState.isEmpty()){
-                state = true
-            }
+//            if (userProfileViewModel.userProfileListState.isEmpty()){
+//                state = true
+//            }
             if (state){ // displays user setup screens
                 ProfileSetupScaffold(
                     userProfileViewModel = userProfileViewModel,
@@ -110,7 +110,7 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
         }
 
         composable(Routes.ReportScreen.route){
-            ReportDropDownMenu(reportViewModel = reportViewModel)
+            ReportDropDownMenu(reportedUser= "test",reportViewModel = reportViewModel)
         }
 
     }

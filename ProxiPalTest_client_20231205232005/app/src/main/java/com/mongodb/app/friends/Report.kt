@@ -40,7 +40,7 @@ import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.theme.MyApplicationTheme
 
 @Composable
-fun ReportDropDownMenu(reportViewModel: ReportViewModel){
+fun ReportDropDownMenu(reportedUser : String,reportViewModel: ReportViewModel){
     val context = LocalContext.current
     var expanded by remember { mutableStateOf(false)}
     var showReportOptions by remember { mutableStateOf(false) }
@@ -62,7 +62,7 @@ fun ReportDropDownMenu(reportViewModel: ReportViewModel){
     }
     if (showReportOptions) {
         ReportOptionsDialog(
-            onDismiss = { showReportOptions = false }, reportViewModel = reportViewModel
+            onDismiss = { showReportOptions = false }, reportViewModel = reportViewModel, reportedUser = reportedUser
         )
     }
 }
@@ -70,11 +70,9 @@ fun ReportDropDownMenu(reportViewModel: ReportViewModel){
 
 @Composable
 fun ReportOptionsDialog(
-    onDismiss: () -> Unit, reportViewModel: ReportViewModel
+    onDismiss: () -> Unit, reportViewModel: ReportViewModel, reportedUser: String
 ) {
     var comments by remember { mutableStateOf("")}
-    val test = listOf("test", "testing1")
-
     val context = LocalContext.current
     val reasons = listOf(
         context.getString(R.string.inappropriate),
@@ -110,8 +108,9 @@ fun ReportOptionsDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    Log.d("reasons list", checkboxStates.toString())
-                    reportViewModel.addReport(userReported = "testing",reasons=test, comment=comments)
+                    val checkedReasons = getCheckedReasons(checkboxStates)
+                    Log.d("reasons list", checkedReasons.toString())
+                    reportViewModel.addReport(userReported =reportedUser ,reasons=checkedReasons, comment=comments)
                     onDismiss()
 
                 }
@@ -127,6 +126,10 @@ fun ReportOptionsDialog(
             }
         }
     )
+}
+
+private fun getCheckedReasons(checkboxStates: Map<String, Boolean>): List<String> {
+    return checkboxStates.filterValues { it }.keys.toList()
 }
 
 
@@ -161,13 +164,12 @@ fun ReportCheckBox(reasons: List<String>, checkboxStates:MutableMap<String, Bool
             }
         }
     }
-    Log.d("reasons list2", checkboxStates.toString())
 }
 
 @Composable
 fun ReportPreview(reportViewModel:ReportViewModel){
     MyApplicationTheme {
-        ReportDropDownMenu(reportViewModel = reportViewModel)
+        ReportDropDownMenu(reportedUser = "test", reportViewModel= reportViewModel)
         //ReportOptionsDialog(onDismiss = { /*TODO*/ })
 
     }

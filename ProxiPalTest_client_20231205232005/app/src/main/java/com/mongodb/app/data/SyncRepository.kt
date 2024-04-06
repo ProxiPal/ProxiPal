@@ -12,6 +12,7 @@ import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.annotations.ExperimentalGeoSpatialApi
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.ext.realmListOf
+import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.mongodb.User
 import io.realm.kotlin.mongodb.exceptions.SyncException
 import io.realm.kotlin.mongodb.subscriptions
@@ -210,7 +211,8 @@ class RealmSyncRepository(
                         getQueryUserProfiles(realm, activeSubscriptionType),
                         activeSubscriptionType.name
                     )
-                    add(getQueryReports(realm, activeSubscriptionType),activeSubscriptionType.name)
+                    add(getQueryReports(realm, activeSubscriptionType),
+                        activeSubscriptionType.name)
                 }
             }
             .errorHandler { session: SyncSession, error: SyncException ->
@@ -294,15 +296,15 @@ class RealmSyncRepository(
     }
 
     override suspend fun addReport(reportedUser: String, reasonsList: List<String>, comment: String) {
+        val reasonRealmList = reasonsList.toRealmList()
         val report = Report().apply {
-            userReported = reportedUser
-            reasons.addAll(reasonsList)
-            comments = comment
-            ownerId = currentUser.id
+            this.userReported = reportedUser
+            this.reasons = reasonRealmList
+            this.comments = comment
+            this.ownerId = currentUser.id
         }
-        Log.d("report", report.toString())
         realm.write{
-            copyToRealm(report, updatePolicy = UpdatePolicy.ALL)
+            copyToRealm(report,updatePolicy = UpdatePolicy.ALL)
         }
     }
 
@@ -329,6 +331,7 @@ class RealmSyncRepository(
         }
     }
 
+
     override suspend fun deleteTask(task: Item) {
         realm.write {
             delete(findLatest(task)!!)
@@ -344,11 +347,13 @@ class RealmSyncRepository(
             SubscriptionType.ALL -> realm.query()
         }
 
-    private fun getQueryReports(realm: Realm, subscriptionType: SubscriptionType): RealmQuery<Item> =
+    private fun getQueryReports(realm: Realm, subscriptionType: SubscriptionType): RealmQuery<Report> =
         when (subscriptionType) {
-            SubscriptionType.MINE -> realm.query("owner_id == $0", currentUser.id)
+            SubscriptionType.MINE -> realm.query("ownerId == $0", currentUser.id)
             SubscriptionType.ALL -> realm.query()
         }
+
+
     // endregion Tasks/Items
 
     // Contributed by Kevin Kubota

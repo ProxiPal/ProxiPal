@@ -5,13 +5,16 @@ import android.util.Log
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
+import com.mongodb.app.data.SubscriptionType
 import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.presentation.tasks.AddItemEvent
 import com.mongodb.app.presentation.tasks.AddItemViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 
@@ -19,13 +22,23 @@ class ReportViewModel(
     private val repository: SyncRepository
 ) : ViewModel() {
 
+//    fun addReport(userReported: String, reasons: List<String>, comment: String) {
+//        CoroutineScope(Dispatchers.IO).launch {
+//            runCatching {
+//                repository.addReport(reportedUser = userReported, reasonsList = reasons, comment = comment)
+//                repository.updateSubscriptionsReports(SubscriptionType.MINE)
+//            }.onSuccess { Log.d("test", "working") }
+//                .onFailure { Log.d("test", "not working") }
+//        }
+//    }
+
     fun addReport(userReported: String, reasons: List<String>, comment: String) {
-        CoroutineScope(Dispatchers.IO).launch {
+        viewModelScope.launch(){
             runCatching {
-                repository.addReport(reportedUser = userReported, reasonsList = reasons, comment = comment)
-            }.onSuccess { Log.d("test", "working") }
-                .onFailure { Log.d("test", "not working") }
-        }
+            repository.addReport(reportedUser = userReported, reasonsList = reasons,comment =comment)
+
+        }.onSuccess { Log.d("test", "working") }
+                .onFailure { Log.d("test", "not working") }}
     }
 companion object {
     fun factory(

@@ -87,7 +87,7 @@ fun UserProfileCard(userProfile: UserProfile, onItemClick: (UserProfile) -> Unit
                 text = userProfile.biography,
                 style = MaterialTheme.typography.bodySmall
             )
-            ReportDropDownMenu( reportViewModel = reporViewModel)
+            ReportDropDownMenu(reportedUser = userProfile._id.toString(),reportViewModel = reporViewModel)
         }
     }
 }
