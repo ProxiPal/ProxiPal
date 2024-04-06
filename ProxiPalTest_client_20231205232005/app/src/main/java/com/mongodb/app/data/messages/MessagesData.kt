@@ -13,7 +13,7 @@ const val MESSAGE_WIDTH_WEIGHT = 0.4f
  * A debugging switch variable on whether to print log messages about Realm instances
  * and their configuration details
  */
-const val SHOULD_PRINT_REALM_CONFIG_INFO = true
+const val SHOULD_PRINT_REALM_CONFIG_INFO = false
 
 /**
  * How many characters makes a message "long"

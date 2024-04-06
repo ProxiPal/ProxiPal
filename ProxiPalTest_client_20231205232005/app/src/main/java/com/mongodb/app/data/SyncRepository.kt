@@ -275,7 +275,7 @@ class RealmSyncRepository(
                     )
                 } else {
                     add(
-                        getQueryUserProfiles(realm, activeSubscriptionType),
+                        getQueryAllUserProfiles(realm),
                         SubscriptionNameAllUserProfiles
                     )
                     // Subscribe to receive any updates on all messages
@@ -592,8 +592,8 @@ class RealmSyncRepository(
     ): RealmQuery<UserProfile> =
         when (subscriptionType) {
             // Make sure the fields referenced in the query exactly match their name in the database
-            SubscriptionType.MINE -> realm.query("ownerId == $0", currentUser.id)
-            SubscriptionType.ALL -> realm.query()
+            SubscriptionType.MINE -> getQuerySpecificUserProfile(realm, currentUser.id)
+            SubscriptionType.ALL -> getQueryAllUserProfiles(realm)
         }
     // endregion User profiles
 
