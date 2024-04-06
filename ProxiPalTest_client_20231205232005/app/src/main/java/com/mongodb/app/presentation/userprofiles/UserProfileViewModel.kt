@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -161,67 +162,21 @@ class UserProfileViewModel(
      */
     private fun getUserProfile(){
         viewModelScope.launch {
-            repository.readUserProfiles()
-                .collect { event: ResultsChange<UserProfile> ->
-                    Log.i(
-                        TAG(),
-                        "UPViewModel: Current user's user profile amount = \"${event.list.size}\""
-                    )
-                    when (event) {
-                        is InitialResults -> {
-                            userProfileListState.clear()
-                            userProfileListState.addAll(event.list)
-                            // The user should not have more than 1 user profile,
-                            // ... but will allow the app to run and not throw an exception for now
-                            when (event.list.size){
-                                0 -> {
-                                    Log.i(
-                                        TAG(),
-                                        "UPViewModel: InitialResults; Current user has no user profile created"
-                                    )
-                                    // When trying to update a user profile that is not saved in the database
-                                    // ... the SyncRepository will handle creating a new user profile before
-                                    // ... making the updated changes
-                                }
-                                1 -> {
-                                    Log.i(
-                                        TAG(),
-                                        "UPViewModel: InitialResults; Getting current user's user profile..."
-                                    )
-                                    // Load the saved profile details
-                                    setUserProfileVariables(event.list[0])
-                                }
-                                else -> {
-                                    Log.i(
-                                        TAG(),
-                                        "UPViewModel: InitialResults; Current user has more than 1 user profile; " +
-                                                "Retrieving only the first user profile instance..."
-                                    )
-                                    // Load the saved profile details
-                                    setUserProfileVariables(event.list[0])
-                                }
-                            }
-                        }
-                        is UpdatedResults -> {
-                            if (event.deletions.isNotEmpty() && userProfileListState.isNotEmpty()) {
-                                event.deletions.reversed().forEach {
-                                    userProfileListState.removeAt(it)
-                                }
-                            }
-                            if (event.insertions.isNotEmpty()) {
-                                event.insertions.forEach {
-                                    userProfileListState.add(it, event.list[it])
-                                }
-                            }
-                            if (event.changes.isNotEmpty()) {
-                                event.changes.forEach {
-                                    userProfileListState.removeAt(it)
-                                    userProfileListState.add(it, event.list[it])
-                                }
-                            }
-                        }
-                        else -> Unit // No-op
+            repository.readUserProfile(repository.getCurrentUserId())
+                .first{
+                    userProfileListState.clear()
+                    userProfileListState.addAll(it.list)
+                    // When trying to update a user profile that is not saved in the database
+                    // ... the SyncRepository will handle creating a new user profile before
+                    // ... making the updated changes
+                    if (it.list.size > 0){
+                        Log.i(
+                            TAG(),
+                            "UserProfileViewModel: Current user's profile = \"${it.list[0]._id}\""
+                        )
+                        setUserProfileVariables(it.list[0])
                     }
+                    true
                 }
         }
     }
