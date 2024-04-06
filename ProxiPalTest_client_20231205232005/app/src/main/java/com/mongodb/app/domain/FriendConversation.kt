@@ -6,6 +6,13 @@ import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 import org.mongodb.kbson.ObjectId
 
+
+/*
+Contributions:
+- Kevin Kubota (everything in this file)
+ */
+
+
 /**
  * A database object for uniquely identifying a friend conversation
  */

@@ -80,6 +80,12 @@ import java.util.Date
 import java.util.SortedSet
 
 
+/*
+Contributions:
+- Kevin Kubota (everything in this file, except for potential screen navigation logic)
+ */
+
+
 // region Extensions
 val String.Companion.empty: String
     get() { return "" }

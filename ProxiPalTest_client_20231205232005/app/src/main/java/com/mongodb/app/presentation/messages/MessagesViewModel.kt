@@ -31,6 +31,12 @@ import java.util.Date
 import java.util.SortedSet
 
 
+/*
+Contributions:
+- Kevin Kubota (everything in this file)
+ */
+
+
 class MessagesViewModel(
     private var repository: SyncRepository,
     private var messagesRepository: IMessagesRealm,

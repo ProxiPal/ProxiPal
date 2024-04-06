@@ -1,6 +1,12 @@
 package com.mongodb.app.data.messages
 
 
+/*
+Contributions:
+- Kevin Kubota (everything in this file)
+ */
+
+
 /**
  * Designates what message-related action is currently being taken by the user
  */

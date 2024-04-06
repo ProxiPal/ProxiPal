@@ -45,7 +45,9 @@ import kotlin.time.Duration.Companion.seconds
 
 /*
 Contributions:
-- Kevin Kubota (added functions relating to user profiles, see below)
+- Kevin Kubota (Review #1: added functions relating to user profiles, see below)
+- Kevin Kubota (Review #3: Implemented functions for friend conversations and messages;
+... This mainly includes everything in the regions named "Messages" and "Conversations")
 - Marco Pacini (location related tasks only)
  */
 
