@@ -11,15 +11,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -31,6 +34,10 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.mongodb.app.R
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
+import com.mongodb.app.ui.theme.Purple200
+import com.mongodb.app.ui.theme.Purple500
+import com.mongodb.app.ui.theme.Purple700
+import com.mongodb.app.ui.theme.Teal200
 import java.util.concurrent.TimeUnit
 
 // Contribution: Marco Pacini
@@ -72,6 +79,12 @@ fun LocationUpdatesContent(usePreciseLocation: Boolean, userProfileViewModel: Us
     var locationUpdates by remember {
         mutableStateOf("")
     }
+    var latitudeUpdateText by remember {
+        mutableStateOf("")
+    }
+    var longitudeUpdateText by remember {
+        mutableStateOf("")
+    }
     var isLookingForUsers by remember{
         mutableStateOf(false)
     }
@@ -81,11 +94,15 @@ fun LocationUpdatesContent(usePreciseLocation: Boolean, userProfileViewModel: Us
         LocationUpdatesEffect(locationRequest!!) { result ->
             // For each result update the text
             for (currentLocation in result.locations) {
+                /*
                 locationUpdates = "System time: ${System.currentTimeMillis()}:\n" +
                         "Latitude: ${currentLocation.latitude}\n" +
                         "Longitude: ${currentLocation.longitude}\n" +
                         "Accuracy: ${currentLocation.accuracy}\n\n" //+
                         //locationUpdates
+                 */
+                latitudeUpdateText = "Lat: ${"%.4f".format(currentLocation.latitude)}"
+                longitudeUpdateText= "Lon: ${"%.4f".format(currentLocation.longitude)}"
 
                 // Update the user's the latitude and longitude
                 userProfileViewModel.setUserProfileLocation(currentLocation.latitude, currentLocation.longitude)
@@ -132,7 +149,25 @@ fun LocationUpdatesContent(usePreciseLocation: Boolean, userProfileViewModel: Us
             )
         }
         ProximityRadiusAdjuster(userProfileViewModel)
-        Text(text = locationUpdates)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
+            Text(
+                text = latitudeUpdateText,
+                style = TextStyle(
+                    brush = Brush.linearGradient(
+                        colors = listOf(Purple200, Purple500, Teal200)
+                    )
+                )
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = longitudeUpdateText,
+                style = TextStyle(
+                    brush = Brush.linearGradient(
+                        colors = listOf(Purple200, Purple500, Teal200)
+                    )
+                )
+            )
+        }
         UserProfileDisplayList(userProfiles = userProfileViewModel.nearbyUserProfiles, isLookingForUsers)
     }
 }

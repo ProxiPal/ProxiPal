@@ -20,19 +20,47 @@ import com.google.android.gms.nearby.connection.PayloadTransferUpdate
 import com.google.android.gms.nearby.connection.Strategy
 import com.mongodb.app.TAG
 import com.mongodb.app.data.compassscreen.CompassConnectionType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-class CompassCommunication constructor(
+
+/*
+ * TODO Important: This does not currently work with emulators. This MAY work with physical devices, but has yet to be tested
+ * So far, this can get emulators to recognize each other unlike Wifi P2P Direct, but
+ * they cannot yet actually connect to each other.
+ * This must be tested with physical Android devices, which we do not currently have ready.
+ */
+/*
+Contributions:
+- Kevin Kubota (entire file)
+ */
+
+
+/**
+ * Handles the connection logic between devices using the Nearby API
+ */
+class CompassNearbyAPI constructor(
     private val userId: String,
-    private val packageName: String
+    private val packageName: String,
+    private val activity: Activity? = null
 ) {
     /*
     ===== Variables =====
      */
     /**
      * From Nearby Connections API, how to discover and connect to other devices.
-     * P2P_STAR = Can discover multiple devices, but can only communicate with 1 at a time
+     * P2P_STAR = Can discover multiple devices, but can only communicate with 1 at a time.
+     * This should be the same for both devices that wish to connect with each other
      */
-    private val strategy: Strategy = Strategy.P2P_STAR
+    private val strategy: Strategy = Strategy.P2P_POINT_TO_POINT
+
+    /**
+     * This should uniquely identify the app from other apps (such as the app package name)
+     * and should be the same for both devices that wish to connect with each other
+     */
+    private val serviceId: String = packageName //"120001"
 
     private lateinit var connectionsClient: ConnectionsClient
 
@@ -59,9 +87,13 @@ class CompassCommunication constructor(
      */
     // region CallbackObjects
     /**
-     * Callback for receiving payloads
+     * Payload:
+     * Callback for receiving payloads (any kind of data, and no limit to data)
      */
     private val payloadCallback: PayloadCallback = object : PayloadCallback() {
+        /**
+         * Tells app when it's receiving a message
+         */
         override fun onPayloadReceived(endpointId: String, payload: Payload) {
             Log.i(
                 TAG(),
@@ -74,6 +106,9 @@ class CompassCommunication constructor(
             }
         }
 
+        /**
+         * Tracks the status of both incoming and outgoing messages
+         */
         override fun onPayloadTransferUpdate(endpointId: String, update: PayloadTransferUpdate) {
             Log.i(
                 TAG(),
@@ -90,16 +125,26 @@ class CompassCommunication constructor(
         }
     }
 
+    /**
+     * Advertising:
+     * Callback to inform you when someone who noticed your advertisement wants to connect
+     */
     private val connectionLifecycleCallback = object : ConnectionLifecycleCallback() {
+        /**
+         * Tells you that someone has noticed your advertisement and wants to connect
+         */
         override fun onConnectionInitiated(endpointId: String, info: ConnectionInfo) {
             Log.i(
                 TAG(),
                 "CompassCommunication: Start of OnConnectionInitiated()"
             )
             connectionsClient.acceptConnection(endpointId, payloadCallback)
-            // TODO For privacy concerns, should see https://developer.android.com/codelabs/nearby-connections#5
+            // For privacy concerns, should see https://developer.android.com/codelabs/nearby-connections#5
         }
 
+        /**
+         * Tells you whether the connection between you and the sender was established
+         */
         override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {
             Log.i(
                 TAG(),
@@ -116,6 +161,9 @@ class CompassCommunication constructor(
             }
         }
 
+        /**
+         * Tells you that the connection is no longer active
+         */
         override fun onDisconnected(endpointId: String) {
             Log.i(
                 TAG(),
@@ -124,19 +172,44 @@ class CompassCommunication constructor(
         }
     }
 
+    /**
+     * (So far, this is the only functionality that gets called when using emulators.)
+     * Discovery:
+     * Callback similar to the callback used for advertising
+     */
     private val endpointDiscoveryCallback = object : EndpointDiscoveryCallback() {
+        /**
+         * Called every time an advertisement is detected
+         */
         override fun onEndpointFound(endpointId: String, info: DiscoveredEndpointInfo) {
             Log.i(
                 TAG(),
-                "CompassCommunication: Start of OnEndpointFound()"
+                "CompassCommunication: Start of OnEndpointFound() ;; " +
+                        "endpointId = \"$endpointId\" ;; " +
+                        "endpointInfo = \"$info\""
             )
-            connectionsClient.requestConnection(
-                userId,
-                packageName,
-                connectionLifecycleCallback
-            )
+            // Temporarily creating an infinite loop to check if connections can be established overtime
+            // After done, remove the while loop and just have the single requestConnection call
+            CoroutineScope(Dispatchers.Main).launch {
+                while (true){
+                    Log.i(
+                        TAG(),
+                        "CompassCommunication: Requesting connection..."
+                    )
+                    connectionsClient.requestConnection(
+//                userId,
+                        "Device A",
+                        endpointId,
+                        connectionLifecycleCallback
+                    )
+                    delay(8000)
+                }
+            }
         }
 
+        /**
+         * Called every time an advertisement is no longer available
+         */
         override fun onEndpointLost(endpointId: String) {
             Log.i(
                 TAG(),
@@ -198,10 +271,15 @@ class CompassCommunication constructor(
      * Starts advertising, or allowing other users nearby the possibility to connect with you
      */
     private fun startAdvertising() {
+        Log.i(
+            TAG(),
+            "CompassCommunication: Start of advertising"
+        )
         val options = AdvertisingOptions.Builder().setStrategy(strategy).build()
-        // TODO Advertising may fail, so need to handle cases when it does
+        // Advertising may fail, so need to handle cases if it does
         connectionsClient.startAdvertising(
-            userId,
+//            userId,
+            "Device A",
             packageName,
             connectionLifecycleCallback,
             options
@@ -212,8 +290,16 @@ class CompassCommunication constructor(
      * Starts discovering, or finding other users nearby to connect to
      */
     private fun startDiscovery() {
+        Log.i(
+            TAG(),
+            "CompassCommunication: Start of discovery"
+        )
         val options = DiscoveryOptions.Builder().setStrategy(strategy).build()
-        connectionsClient.startDiscovery(packageName, endpointDiscoveryCallback, options)
+        connectionsClient.startDiscovery(
+//            packageName,
+            serviceId,
+            endpointDiscoveryCallback,
+            options)
     }
 
     private fun disconnect() {
@@ -232,16 +318,18 @@ class CompassCommunication constructor(
      * Updates the current connection type
      */
     fun updateConnectionType(newConnectionType: CompassConnectionType) {
-        // Can only transition from OFFLINE to WAITING
-        if (_connectionType.value == CompassConnectionType.OFFLINE && newConnectionType != CompassConnectionType.MEETING){
-            _connectionType.value = newConnectionType
-            compassViewModel.updateConnectionType(newConnectionType)
-        }
-        // Can only transition from MEETING to OFFLINE
-        else if (_connectionType.value == CompassConnectionType.MEETING && newConnectionType != CompassConnectionType.OFFLINE){
-            _connectionType.value = newConnectionType
-            compassViewModel.updateConnectionType(newConnectionType)
-        }
+//        // Can only transition from OFFLINE to WAITING
+//        if (_connectionType.value == CompassConnectionType.OFFLINE && newConnectionType != CompassConnectionType.MEETING){
+//            _connectionType.value = newConnectionType
+//            compassViewModel.updateConnectionType(newConnectionType)
+//        }
+//        // Can only transition from MEETING to OFFLINE
+//        else if (_connectionType.value == CompassConnectionType.MEETING && newConnectionType != CompassConnectionType.OFFLINE){
+//            _connectionType.value = newConnectionType
+//            compassViewModel.updateConnectionType(newConnectionType)
+//        }
+        _connectionType.value = newConnectionType
+        compassViewModel.updateConnectionType(newConnectionType)
         when (connectionType.value) {
             CompassConnectionType.OFFLINE -> {
                 Log.i(
@@ -262,12 +350,6 @@ class CompassCommunication constructor(
                 Log.i(
                     TAG(),
                     "CompassCommunication: Now MEETING"
-                )
-            }
-            else -> {
-                Log.i(
-                    TAG(),
-                    "CompassCommunication: Unknown connection type \"${connectionType.value}\""
                 )
             }
         }

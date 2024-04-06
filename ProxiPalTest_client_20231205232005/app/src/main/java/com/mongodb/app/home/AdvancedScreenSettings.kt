@@ -34,12 +34,14 @@ import androidx.navigation.NavHostController
 import com.mongodb.app.R
 import com.mongodb.app.AllowNotificationsActivity
 import com.mongodb.app.LanguageActivity
+import com.mongodb.app.LanguageIdentificationActivity
+import com.mongodb.app.LanguageTranslationActivity
 import com.mongodb.app.PrivacyPolicyActivity
 import com.mongodb.app.navigation.Routes
 
 //This is the code to edit the settings screen.
 @Composable
-fun ScreenSettings(navController: NavHostController) {
+fun AdvancedScreenSettings(navController: NavHostController) {
     val context = LocalContext.current
 
     Box(
@@ -67,7 +69,7 @@ fun ScreenSettings(navController: NavHostController) {
                     )
                 }
                 Text(
-                    text = "Settings",
+                    text = "Advanced",
                     color = Color.White,
                     fontSize = 25.sp,
                     modifier = Modifier.weight(1f),
@@ -80,25 +82,12 @@ fun ScreenSettings(navController: NavHostController) {
                     .fillMaxHeight()
 
                 ){
-                    SettingsItem("Profile Info") {
-                        Toast.makeText(context, "Profile Info clicked!", Toast.LENGTH_SHORT).show()
-                    }
-                    SettingsItem("Language") {
-                        val intent = Intent(context, LanguageActivity::class.java)
+                    SettingsItem("Language Identification") {
+                        val intent = Intent(context, LanguageIdentificationActivity::class.java)
                         context.startActivity(intent)
                     }
-                    SettingsItem("Allow Notifications") {
-                        val intent = Intent(context, AllowNotificationsActivity::class.java)
-                        context.startActivity(intent)
-                    }
-                    SettingsItem("User Filters") {
-                        navController.navigate(Routes.FilterScreen.route)
-                    }
-                    SettingsItem("Advanced Settings") {
-                        navController.navigate(Routes.AdvancedScreenSettings.route)
-                    }
-                    SettingsItem("Privacy Policy") {
-                        val intent = Intent(context, PrivacyPolicyActivity::class.java)
+                    SettingsItem("Language Translation") {
+                        val intent = Intent(context, LanguageTranslationActivity::class.java)
                         context.startActivity(intent)
                     }
                 }
@@ -113,11 +102,7 @@ private fun SettingsItem(settingName: String, onClick: () -> Unit) {
     Row(
         modifier = Modifier.clickable(onClick = onClick)
             .fillMaxWidth()
-
             .padding(vertical = 30.dp),
-
-
-
         verticalAlignment = Alignment.CenterVertically
 
     ) {
@@ -131,11 +116,8 @@ private fun SettingsItem(settingName: String, onClick: () -> Unit) {
             text = settingName,
             color = Color.White,
             fontSize = 40.sp,
-
-        )
+            )
     }
-
-
 }
 
 // used for line breaks in rows

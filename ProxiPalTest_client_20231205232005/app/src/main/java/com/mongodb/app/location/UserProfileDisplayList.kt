@@ -1,4 +1,5 @@
 package com.mongodb.app.location
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.horizontalScroll
@@ -39,25 +40,29 @@ import com.mongodb.app.domain.UserProfile
 fun UserProfileDisplayList(userProfiles: List<UserProfile>, isLookingForUsers: Boolean) {
     if (isLookingForUsers){
         if (userProfiles.isEmpty()){
-            LazyColumn (
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                contentPadding = PaddingValues(16.dp)
-            ) {
-                item {
-                    EmptyListCard()
+            Box(Modifier.fillMaxSize()){
+                LazyColumn (
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    contentPadding = PaddingValues(16.dp)
+                ) {
+                    item {
+                        EmptyListCard()
+                    }
                 }
             }
         }
         else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                contentPadding = PaddingValues(16.dp)
-            ) {
-                items(userProfiles) { userProfile ->
-                    UserProfileCard(userProfile)
-                    Spacer(modifier = Modifier.height(16.dp))
+            Box(Modifier.fillMaxSize()){
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    contentPadding = PaddingValues(16.dp)
+                ) {
+                    items(userProfiles) { userProfile ->
+                        UserProfileCard(userProfile, onItemClick = { /*TODO*/ })
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
             }
         }
@@ -66,15 +71,16 @@ fun UserProfileDisplayList(userProfiles: List<UserProfile>, isLookingForUsers: B
 
 // A card to display a single user profile in a clean UI
 @Composable
-fun UserProfileCard(userProfile: UserProfile) {
+fun UserProfileCard(userProfile: UserProfile, onItemClick: (UserProfile) -> Unit) {
     Card(
-        modifier = Modifier.size(width = 240.dp, height = 80.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onItemClick(userProfile) }, // Make the card clickable
         elevation = 6.dp
     ) {
         Column(
             modifier = Modifier
                 .padding(10.dp)
-                .horizontalScroll(rememberScrollState())
         ) {
             Text(
                 text = userProfile.firstName,
@@ -98,7 +104,6 @@ fun EmptyListCard() {
         Column(
             modifier = Modifier
                 .padding(10.dp)
-                .horizontalScroll(rememberScrollState())
         ) {
             Text(
                 text = stringResource(R.string.searching_for_nearby_users),

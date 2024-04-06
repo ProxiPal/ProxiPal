@@ -28,10 +28,16 @@ import com.mongodb.app.TAG
 import com.mongodb.app.data.compassscreen.ALL_NEARBY_API_PERMISSIONS
 import com.mongodb.app.ui.theme.MyApplicationTheme
 
-// TODO Should navigate to CompassScreen.kt after a user accepts permissions here
+
+/*
+Contributions:
+- Kevin Kubota (entire file, excluding navigation between screens, if any)
+ */
+
+
 /**
  * Displays the screen for the user to accept or deny permissions needed for communicating
- * with their matched user
+ * with their matched user. Should show this screen first, if necessary, before CompassScreen
  */
 class CompassPermissions : ComponentActivity() {
     /*
@@ -99,7 +105,7 @@ fun CompassPermissionsLayout(
     )
 }
 
-// TODO Currently permissions are asked every single time the user enters this screen
+// TODO Permissions should not be asked every single time the user enters this screen if already granted
 /**
  * Displays an alert dialog to let user decide whether to accept or deny permissions
  * for connecting to other devices

@@ -1,7 +1,6 @@
 package com.mongodb.app.presentation.userprofiles
 
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableDoubleStateOf
@@ -13,12 +12,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
-import com.mongodb.app.TAG
+import com.mongodb.app.app
 import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.userprofiles.USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT
 import com.mongodb.app.data.userprofiles.USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT
 import com.mongodb.app.domain.UserProfile
-import com.mongodb.app.ui.userprofiles.UserProfileUiState
 import io.realm.kotlin.notifications.InitialResults
 import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.notifications.UpdatedResults
@@ -31,6 +29,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 
@@ -38,6 +37,7 @@ import kotlinx.coroutines.withContext
 Contributions:
 - Kevin Kubota (all user profile UI, except for navigation between screens)
 - Marco Pacini (location related tasks only)
+- Vichet Chim (user's interest/industry)
  */
 
 
@@ -55,10 +55,6 @@ class UserProfileViewModel(
     /*
     ===== Variables =====
      */
-    // Accessible and editable only in this class
-    // A "data holder observable flow" for current and new states
-    private val _userProfileUiState = MutableStateFlow(UserProfileUiState())
-
     private val _event: MutableSharedFlow<UserProfileViewEvent> = MutableSharedFlow()
 
     private val _addUserProfileEvent: MutableSharedFlow<AddUserProfileEvent> = MutableSharedFlow()
@@ -78,13 +74,25 @@ class UserProfileViewModel(
     private val _proximityRadius: MutableState<Double> = mutableDoubleStateOf(0.1)
 
 
+    //added by George Fu for Social media handling
+    private val _userProfileInstagramHandle: MutableState<String> = mutableStateOf("")
+    private val _userProfileTwitterHandle: MutableState<String> = mutableStateOf("")
+    private val _userProfileLinktreeHandle: MutableState<String> = mutableStateOf("")
+    private val _userProfilelinkedinHandle: MutableState<String> = mutableStateOf("")
+
+    // for current user's interests/industries, added by Vichet Chim
+    private var _userProfileInterests: MutableList<String> = mutableListOf()
+    private var _userProfileIndustries: MutableList<String> = mutableListOf()
+
+    private val _selectedInterests = mutableStateOf<List<String>>(emptyList())
+    private val _selectedIndustries = mutableStateOf<List<String>>(emptyList())
+    private val _otherFilters = mutableStateOf<List<String>>(emptyList())
+
+
+
     /*
     ===== Properties =====
      */
-    // Read-only state flow for access outside this class
-    val userProfileUiState: StateFlow<UserProfileUiState>
-        get() = _userProfileUiState.asStateFlow()
-
     val userProfileFirstName: State<String>
         get() = _userProfileFirstName
 
@@ -113,16 +121,40 @@ class UserProfileViewModel(
     val nearbyUserProfiles: List<UserProfile>
         get() = _nearbyUserProfiles
 
-    val proxmityRadius: State<Double>
+    val proximityRadius: State<Double>
         get() = _proximityRadius
 
 
+    //George Fu For Social Media
+    val userProfileInstagramHandle: State<String>
+        get() = _userProfileInstagramHandle
+
+    val userProfileTwitterHandle: State<String>
+        get() = _userProfileTwitterHandle
+
+    val userProfileLinktreeHandle: State<String>
+        get() = _userProfileLinktreeHandle
+
+    val userProfilelinkedinHandle: State<String>
+        get() = _userProfilelinkedinHandle
+
+    // for current user's interests/industries, added by Vichet Chim
+    val userProfileInterests: List<String>
+        get() = _userProfileInterests
+    val userProfileIndustries: List<String>
+        get() = _userProfileIndustries
+
+    val selectedInterests: State<List<String>> = _selectedInterests
+    val selectedIndustries: State<List<String>> = _selectedIndustries
+    val otherFilters: State<List<String>> = _otherFilters
+
+
+
+
+
     init {
-        Log.i(
-            TAG(),
-            "UPViewModel: Start of Init{}"
-        )
         getUserProfile()
+        loadUserFilterSelections()
     }
 
     companion object {
@@ -162,6 +194,7 @@ class UserProfileViewModel(
      */
     private fun getUserProfile(){
         viewModelScope.launch {
+          /*
             repository.readUserProfile(repository.getCurrentUserId())
                 .first{
                     userProfileListState.clear()
@@ -175,10 +208,81 @@ class UserProfileViewModel(
                             "UserProfileViewModel: Current user's profile = \"${it.list[0]._id}\""
                         )
                         setUserProfileVariables(it.list[0])
+                        */
+            repository.getCurrentUserProfileList()
+                .collect { event: ResultsChange<UserProfile> ->
+                    when (event) {
+                        is InitialResults -> {
+                            userProfileListState.clear()
+                            userProfileListState.addAll(event.list)
+                            // The user should not have more than 1 user profile,
+                            // ... but will allow the app to run and not throw an exception for now
+                            when (event.list.size){
+                                0 -> {
+                                    // When trying to update a user profile that is not saved in the database
+                                    // ... the SyncRepository will handle creating a new user profile before
+                                    // ... making the updated changes
+                                }
+                                1 -> {
+                                    // Load the saved profile details
+                                    _userProfileFirstName.value = event.list[0].firstName
+                                    _userProfileLastName.value = event.list[0].lastName
+                                    _userProfileBiography.value = event.list[0].biography
+                                    _userProfileLatitude.value = event.list[0].location?.latitude!!
+                                    _userProfileLongitude.value = event.list[0].location?.longitude!!
+
+                                    _userProfileInstagramHandle.value = event.list[0].instagramHandle
+                                    _userProfileTwitterHandle.value = event.list[0].twitterHandle
+                                    _userProfileLinktreeHandle.value = event.list[0].linktreeHandle
+                                    _userProfilelinkedinHandle.value = event.list[0].linkedinHandle
+
+                                    _userProfileInterests = event.list[0].interests.toList().toMutableList()
+                                    _userProfileIndustries = event.list[0].industries.toList().toMutableList()
+
+                                }
+                                else -> {
+                                    // Load the saved profile details
+                                    _userProfileFirstName.value = event.list[0].firstName
+                                    _userProfileLastName.value = event.list[0].lastName
+                                    _userProfileBiography.value = event.list[0].biography
+                                    _userProfileLatitude.value = event.list[0].location?.latitude!!
+                                    _userProfileLongitude.value = event.list[0].location?.longitude!!
+
+                                    _userProfileInstagramHandle.value = event.list[0].instagramHandle
+                                    _userProfileTwitterHandle.value = event.list[0].twitterHandle
+                                    _userProfileLinktreeHandle.value = event.list[0].linktreeHandle
+                                    _userProfilelinkedinHandle.value = event.list[0].linkedinHandle
+
+                                    _userProfileInterests = event.list[0].interests.toList().toMutableList()
+                                    _userProfileIndustries = event.list[0].industries.toList().toMutableList()
+
+                                }
+                            }
+                        }
+                        is UpdatedResults -> {
+                            if (event.deletions.isNotEmpty() && userProfileListState.isNotEmpty()) {
+                                event.deletions.reversed().forEach {
+                                    userProfileListState.removeAt(it)
+                                }
+                            }
+                            if (event.insertions.isNotEmpty()) {
+                                event.insertions.forEach {
+                                    userProfileListState.add(it, event.list[it])
+                                }
+                            }
+                            if (event.changes.isNotEmpty()) {
+                                event.changes.forEach {
+                                    userProfileListState.removeAt(it)
+                                    userProfileListState.add(it, event.list[it])
+                                }
+                            }
+                        }
+                        else -> Unit // No-op
                     }
                     true
                 }
         }
+      /*
     }
 
     private fun setUserProfileVariables(userProfile: UserProfile){
@@ -187,7 +291,9 @@ class UserProfileViewModel(
         _userProfileBiography.value = userProfile.biography
         _userProfileLatitude.value = userProfile.location?.latitude!!
         _userProfileLongitude.value = userProfile.location?.longitude!!
+        */
     }
+
 
     /**
      * Updates the current user's user profile, if it exists
@@ -197,7 +303,12 @@ class UserProfileViewModel(
             repository.updateUserProfile(
                 firstName = userProfileFirstName.value,
                 lastName = userProfileLastName.value,
-                biography = userProfileBiography.value
+                biography = userProfileBiography.value,
+                //George Fu For Social Media
+                instagramHandle = userProfileInstagramHandle.value,
+                twitterHandle = userProfileTwitterHandle.value,
+                linktreeHandle = userProfileLinktreeHandle.value,
+                linkedinHandle = userProfilelinkedinHandle.value
             )
         }
     }
@@ -205,6 +316,9 @@ class UserProfileViewModel(
     /**
      * Updates the user profile's location
      */
+
+
+
     fun setUserProfileLocation(latitude: Double, longitude: Double){
         _userProfileLatitude.value = latitude
         _userProfileLongitude.value = longitude
@@ -213,6 +327,86 @@ class UserProfileViewModel(
             repository.updateUserProfileLocation(
                 latitude = userProfileLatitude.value,
                 longitude = userProfileLongitude.value
+            )
+        }
+    }
+
+    //Function for users to set up their LinkTree Handle - George Fu
+    fun setUserProfileLinktreeHandle(newLinktreeHandle: String) {
+        // Update the Linktree handle state
+        _userProfileLinktreeHandle.value = newLinktreeHandle
+
+        // Call the repository function to update the user profile in the database
+        // Make sure to pass all necessary information to update the profile
+        viewModelScope.launch {
+            repository.updateUserProfile(
+                firstName = _userProfileFirstName.value,
+                lastName = _userProfileLastName.value,
+                biography = _userProfileBiography.value,
+                instagramHandle = _userProfileInstagramHandle.value, // Keep existing Instagram handle
+                twitterHandle = _userProfileTwitterHandle.value,
+                linktreeHandle = newLinktreeHandle,
+                linkedinHandle = _userProfilelinkedinHandle.value
+            )
+        }
+    }
+    //Function For Users to Set up Twitter Handle - George Fu
+    fun setUserProfileTwitterHandle(newTwitterHandle: String) {
+        // Update the Twitter handle state
+        _userProfileTwitterHandle.value = newTwitterHandle
+
+        // Call the repository function to update the user profile in the database
+        // Make sure to pass all necessary information to update the profile
+        viewModelScope.launch {
+            repository.updateUserProfile(
+                firstName = _userProfileFirstName.value,
+                lastName = _userProfileLastName.value,
+                biography = _userProfileBiography.value,
+                instagramHandle = _userProfileInstagramHandle.value, // Keep existing Instagram handle
+                twitterHandle = newTwitterHandle, // Add the new Twitter handle
+                linktreeHandle = _userProfileLinktreeHandle.value,
+                linkedinHandle = _userProfilelinkedinHandle.value
+            )
+        }
+    }
+    //Function For Users to Set up Instagram Handle - George Fu
+    fun setUserProfileInstagramHandle(newInstagramHandle: String) {
+        // Update the Instagram handle state
+        _userProfileInstagramHandle.value = newInstagramHandle
+
+        // Call the repository function to update the user profile in the database
+        // Make sure to pass all necessary information to update the profile
+        viewModelScope.launch {
+            repository.updateUserProfile(
+                firstName = _userProfileFirstName.value,
+                lastName = _userProfileLastName.value,
+                biography = _userProfileBiography.value,
+                instagramHandle = newInstagramHandle, // Pass the new Instagram handle
+                twitterHandle = _userProfileTwitterHandle.value,
+                linktreeHandle = _userProfileLinktreeHandle.value,
+                linkedinHandle = _userProfilelinkedinHandle.value
+
+            )
+        }
+    }
+
+    //Function For Users to Set up LinkedIn Handle - George Fu
+    fun setUserProfilelinkedinHandle(newlinkedinHandle: String) {
+        // Update the linkedin handle state
+        _userProfilelinkedinHandle.value = newlinkedinHandle
+
+        // Call the repository function to update the user profile in the database
+        // Make sure to pass all necessary information to update the profile
+        viewModelScope.launch {
+            repository.updateUserProfile(
+                firstName = _userProfileFirstName.value,
+                lastName = _userProfileLastName.value,
+                biography = _userProfileBiography.value,
+                instagramHandle = _userProfileInstagramHandle.value, // Pass the new Instagram handle
+                twitterHandle = _userProfileTwitterHandle.value,
+                linktreeHandle = _userProfileLinktreeHandle.value,
+                linkedinHandle = newlinkedinHandle
+
             )
         }
     }
@@ -310,8 +504,14 @@ class UserProfileViewModel(
                 repository.addUserProfile(
                     firstName = userProfileFirstName.value,
                     lastName = userProfileLastName.value,
-                    biography = userProfileBiography.value
+                    biography = userProfileBiography.value,
+                    //George Fu For Social Media Handling
+                    instagramHandle = userProfileInstagramHandle.value,
+                    twitterHandle = userProfileTwitterHandle.value,
+                    linktreeHandle = userProfileLinktreeHandle.value,
+                    linkedinHandle = userProfilelinkedinHandle.value
                 )
+
             }.onSuccess {
                 withContext(Dispatchers.Main) {
                     _addUserProfileEvent.emit(AddUserProfileEvent.Info("UPViewModel: Successfully added user profile " +
@@ -338,9 +538,9 @@ class UserProfileViewModel(
     /**
      * Queries nearby user profiles and updates the nearby user profile list
      */
-    fun fetchAndStoreNearbyUserProfiles() {
+    fun fetchAndStoreNearbyUserProfiles(selectedInterests: List<String> = emptyList(), selectedIndustries: List<String> = emptyList(), otherFilters: List<String> = emptyList()) {
         CoroutineScope(Dispatchers.Main).launch {
-            repository.getNearbyUserProfileList(userProfileLatitude.value, userProfileLongitude.value, 0.1)
+            repository.getNearbyUserProfileList(userProfileLatitude.value, userProfileLongitude.value, proximityRadius.value, selectedInterests = selectedInterests, selectedIndustries = selectedIndustries, otherFilters = otherFilters)
                 .collect { resultsChange: ResultsChange<UserProfile> ->
                     _nearbyUserProfiles.clear()
                     _nearbyUserProfiles.addAll(resultsChange.list)
@@ -351,4 +551,82 @@ class UserProfileViewModel(
     fun updateProximityRadius(radiusInKilometers: Double){
         _proximityRadius.value = radiusInKilometers
     }
-}
+
+
+    //toggle user's interest
+    fun toggleInterest(interest: String){
+        if (_userProfileInterests.contains(interest)) {
+            _userProfileInterests.remove(interest)
+        }  else{
+            _userProfileInterests.add(interest)
+        }
+        updateUserInterests(interest)
+    }
+
+
+    // update user interests' list
+    private fun updateUserInterests(interest:String) {
+    viewModelScope.launch {
+        repository.updateUserProfileInterests(
+            interest = interest
+        )
+    }
+    }
+
+    //toggle user's industry
+    fun toggleIndustry(industry: String){
+        if (_userProfileIndustries.contains(industry)) {
+            _userProfileIndustries.remove(industry)
+        }  else{
+            _userProfileIndustries.add(industry)
+        }
+        updateUserIndustries(industry)
+    }
+
+    // update user industries' list
+    private fun updateUserIndustries(industry:String) {
+        viewModelScope.launch {
+            repository.updateUserProfileIndustries(
+                industry = industry
+            )
+        }
+    }
+
+    fun saveUserFilterSelections(selectedInterests: Set<String>, selectedIndustries: Set<String>, otherFilters: List<String>) {
+        viewModelScope.launch {
+            repository.updateUserSelectedFilters(selectedInterests.toList(), selectedIndustries.toList(), otherFilters)
+        }
+    }
+    fun loadUserFilterSelections() {
+        viewModelScope.launch {
+            repository.getCurrentUserProfileList().collect { resultsChange ->
+                val userProfile = resultsChange.list.firstOrNull() // Assuming you want the first profile
+                userProfile?.let {
+                    _selectedInterests.value = it.selectedInterests
+                    _selectedIndustries.value = it.selectedIndustries
+                    _otherFilters.value = it.otherFilters
+                }
+            }
+        }
+    }
+    fun clearUserFilterSelections() {
+        // Reset local state
+        _selectedInterests.value = emptyList()
+        _selectedIndustries.value = emptyList()
+        _otherFilters.value = emptyList()
+
+        // Clear selections in the database or reset to default values
+        viewModelScope.launch {
+            repository.clearUserSelectedFilters()
+        }
+    }
+
+    fun deleteAccount() {
+        runBlocking {
+            app.currentUser?.delete()
+        }
+        }
+    }
+
+
+

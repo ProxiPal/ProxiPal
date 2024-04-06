@@ -2,7 +2,12 @@
 
 package com.mongodb.app.ui.compassscreen
 
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.content.Context
+import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.net.wifi.p2p.WifiP2pManager
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -34,7 +39,9 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -44,26 +51,25 @@ import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.compassscreen.ALL_NEARBY_API_PERMISSIONS
 import com.mongodb.app.data.compassscreen.ALL_NEARBY_API_PERMISSIONS_ARRAY
+import com.mongodb.app.data.compassscreen.ALL_WIFIP2P_PERMISSIONS
 import com.mongodb.app.data.compassscreen.CompassConnectionType
-import com.mongodb.app.presentation.compassscreen.CompassCommunication
+import com.mongodb.app.presentation.compassscreen.CompassNearbyAPI
 import com.mongodb.app.presentation.compassscreen.CompassViewModel
+import com.mongodb.app.presentation.compassscreen.WiFiDirectBroadcastReceiver
+import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.components.SingleButtonRow
 import com.mongodb.app.ui.components.SingleTextRow
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
 import kotlinx.coroutines.launch
 
+
 /*
-TODO Current plan for order of events (See CompassConnectionType.kt for more)
-(1) When searching for other users to connect to
-(a) Use case #8
-(2) When selecting a user to connect to
-(a) Start discovering and advertising
-(b) Have a variable set to other user's ID and only connect to a device with that ID
-(c) If successful, use connection lifecycle object to show each other's location
-(3) If a user cancels the connection
-(a) Show the cancellation message to both users
+Contributions:
+- Kevin Kubota (entire file, excluding navigation between screens)
  */
+
+
 class CompassScreen : ComponentActivity() {
     /*
     ===== Variables =====
@@ -77,14 +83,44 @@ class CompassScreen : ComponentActivity() {
         CompassViewModel.factory(repository, this)
     }
 
-    // App will crash if trying to set package name at this point
-    // ... so set it later
-    private var compassCommunication: CompassCommunication? = null
+    // TODO May need to use UserProfileViewModel instance created in UserProfileScreen instead of this
+    private val userProfileViewModel: UserProfileViewModel by viewModels{
+        UserProfileViewModel.factory(repository, this)
+    }
+
+
+    // region NearbyAPI
+    private lateinit var compassNearbyAPI: CompassNearbyAPI
 
     /**
      * Request code for verifying call to [requestPermissions]
      */
     private val REQUEST_CODE_REQUIRED_PERMISSIONS = 1
+    // endregion NearbyAPI
+
+
+    // region WifiP2P
+//    private val manager: WifiP2pManager? by lazy(LazyThreadSafetyMode.NONE) {
+//        getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager?
+//    }
+
+    private lateinit var channel: WifiP2pManager.Channel
+    private lateinit var manager: WifiP2pManager
+
+    private var receiver: WiFiDirectBroadcastReceiver? = null
+
+    private val intentFilter = IntentFilter().apply {
+        addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION)
+        addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION)
+        addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)
+        addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)
+
+        // These may not be necessary
+        addAction(BluetoothDevice.ACTION_FOUND)
+        addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
+        addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+    }
+    // endregion WifiP2P
 
 
     /*
@@ -98,6 +134,7 @@ class CompassScreen : ComponentActivity() {
             "CompassScreen: Start of OnCreate()"
         )
 
+        // Needed when working with either the Nearby API or Wifi P2P Direct
         verifyPermissions2()
 
         // Need to update repository when a configuration change occurs
@@ -106,19 +143,31 @@ class CompassScreen : ComponentActivity() {
             newRepository = repository
         )
 
-        compassCommunication = CompassCommunication(
+        compassViewModel.setViewModels(userProfileViewModel)
+
+
+        // region NearbyAPI
+        compassNearbyAPI = CompassNearbyAPI(
             userId = repository.getCurrentUserId(),
             packageName = packageName
         )
         // Need to create connections client in compass screen communication class
-        compassCommunication!!.setConnectionsClient(this)
-        compassCommunication!!.setCompassViewModel(compassViewModel)
+        compassNearbyAPI.setConnectionsClient(this)
+        compassNearbyAPI.setCompassViewModel(compassViewModel)
+        // endregion NearbyAPI
+
+
+        // region WifiP2P
+        manager = getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager
+        channel = manager.initialize(this, mainLooper, null)
+        // endregion WifiP2P
+
 
         setContent {
             MyApplicationTheme {
                 CompassScreenLayout(
                     compassViewModel = compassViewModel,
-                    compassCommunication = compassCommunication!!
+                    compassNearbyAPI = compassNearbyAPI
                 )
             }
         }
@@ -128,9 +177,41 @@ class CompassScreen : ComponentActivity() {
     override fun onStart() {
         super.onStart()
 
+
+        // region NearbyAPI
         // This screen is entered only when the matched user accepts the connection
         // ... so as soon as this screen is shown, start the connection process
-        compassCommunication!!.updateConnectionType(CompassConnectionType.WAITING)
+        compassNearbyAPI.updateConnectionType(CompassConnectionType.WAITING)
+
+        // TODO Temporarily and quickly allow showing compass updating
+        compassNearbyAPI.updateConnectionType(CompassConnectionType.MEETING)
+        // endregion NearbyAPI
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+
+        // region WifiP2P
+        // Register the broadcast receiver with the intent values to be matched
+        receiver = WiFiDirectBroadcastReceiver(manager, channel, this)
+        registerReceiver(receiver, intentFilter)
+
+        receiver?.discoverPeers()
+        receiver?.requestPeers()
+
+        receiver?.tempCheckForPeers()
+        // endregion WifiP2P
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+
+        // region WifiP2P
+        // Unregister the broadcast receiver
+        unregisterReceiver(receiver)
+        // endregion WifiP2P
     }
 
     @Deprecated("Deprecated in Java")
@@ -157,14 +238,19 @@ class CompassScreen : ComponentActivity() {
 
     @CallSuper
     override fun onStop() {
-        compassCommunication!!.updateConnectionType(CompassConnectionType.OFFLINE)
+        // region NearbyAPI
+        compassNearbyAPI.updateConnectionType(CompassConnectionType.OFFLINE)
         // Release all assets when the Nearby API is no longer necessary
-        compassCommunication!!.releaseAssets()
+        compassNearbyAPI.releaseAssets()
+        // endregion NearbyAPI
+
+
         super.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+
         // Repository must be closed to free resources
         repository.close()
     }
@@ -207,6 +293,7 @@ class CompassScreen : ComponentActivity() {
     }
 
     private fun verifyPermissions2(){
+        // TODO Should show permission rationale with shouldShowRequestPermissionRationale()
         val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()){
                 isGranted: Boolean ->
             Log.i(
@@ -215,7 +302,7 @@ class CompassScreen : ComponentActivity() {
             )
         }
 
-        for (permission in ALL_NEARBY_API_PERMISSIONS){
+        for (permission in ALL_NEARBY_API_PERMISSIONS + ALL_WIFIP2P_PERMISSIONS){
             when {
                 ContextCompat.checkSelfPermission(this, permission)
                         == PackageManager.PERMISSION_GRANTED -> {
@@ -232,7 +319,7 @@ class CompassScreen : ComponentActivity() {
                         TAG(),
                         "CompassScreen: Permission denied = \"$permission\""
                     )
-                    // TODO Show some UI for rationale behind requesting a permission
+                    // Show some UI for rationale behind requesting a permission here
                 }
 
                 else -> {
@@ -266,7 +353,7 @@ class CompassScreen : ComponentActivity() {
 @Composable
 fun CompassScreenLayout(
     compassViewModel: CompassViewModel,
-    compassCommunication: CompassCommunication,
+    compassNearbyAPI: CompassNearbyAPI,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -278,7 +365,7 @@ fun CompassScreenLayout(
     ) { innerPadding ->
         CompassScreenBodyContent(
             compassViewModel = compassViewModel,
-            compassCommunication = compassCommunication,
+            compassNearbyAPI = compassNearbyAPI,
             modifier = Modifier
                 .padding(innerPadding)
         )
@@ -293,8 +380,6 @@ fun CompassScreenLayout(
 fun CompassScreenTopBar(
     modifier: Modifier = Modifier
 ) {
-    // Back button is automatically handled by the navigation code (?)
-    // ... so it's not programmed here
     CenterAlignedTopAppBar(
         title = {
             Row(
@@ -322,15 +407,21 @@ fun CompassScreenTopBar(
 @Composable
 fun CompassScreenBodyContent(
     compassViewModel: CompassViewModel,
-    compassCommunication: CompassCommunication,
+    compassNearbyAPI: CompassNearbyAPI,
     modifier: Modifier = Modifier
 ) {
+    val onBackButtonClick = {
+//        compassNearbyAPI.updateConnectionType(CompassConnectionType.OFFLINE)
+
+        // TODO Remove this later; Right now is for temporarily and quickly showing compass updating
+        compassNearbyAPI.updateConnectionType(CompassConnectionType.MEETING)
+    }
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        when (compassCommunication.connectionType.value) {
+        when (compassNearbyAPI.connectionType.value) {
             CompassConnectionType.MEETING -> {
                 CompassScreenCompassVisual(
                     compassViewModel = compassViewModel
@@ -343,36 +434,43 @@ fun CompassScreenBodyContent(
                     measurementText = R.string.compass_screen_distance_message,
                     measurement = compassViewModel.distance.value
                 )
-                CompassScreenReturnButton(
-                    onButtonClick = {
-                        compassCommunication.updateConnectionType(CompassConnectionType.OFFLINE)
-                    }
+                CompassScreenCurrentLocations(
+                    compassViewModel = compassViewModel,
+                    modifier = Modifier
+                        .padding(top = 8.dp, bottom = 8.dp)
                 )
-                TempCompassScreenLocationUpdating(
-                    compassViewModel = compassViewModel
+                CompassScreenReturnButton(
+                    compassNearbyAPI = compassNearbyAPI,
+                    onButtonClick = {
+                        compassNearbyAPI.updateConnectionType(CompassConnectionType.OFFLINE)
+                    }
                 )
             }
             // Connection is not yet established with matched user
             // Show button to go back
             CompassConnectionType.WAITING -> {
                 SingleTextRow(
-                    textId = R.string.compass_screen_awaiting_connection_message
+                    textId = R.string.compass_screen_awaiting_connection_message,
+                    isTextBold = false,
+                    modifier = Modifier
+                        .padding(top = 8.dp, bottom = 8.dp)
                 )
                 CompassScreenReturnButton(
-                    onButtonClick = {
-                        compassCommunication.updateConnectionType(CompassConnectionType.OFFLINE)
-                    }
+                    compassNearbyAPI = compassNearbyAPI,
+                    onButtonClick = { onBackButtonClick() }
                 )
             }
             // The current or matched user canceled the connection
             CompassConnectionType.OFFLINE -> {
                 SingleTextRow(
-                    textId = R.string.compass_screen_canceled_connection_message
+                    textId = R.string.compass_screen_canceled_connection_message,
+                    isTextBold = false,
+                    modifier = Modifier
+                        .padding(top = 8.dp, bottom = 8.dp)
                 )
                 CompassScreenReturnButton(
-                    onButtonClick = {
-                        compassCommunication.updateConnectionType(CompassConnectionType.OFFLINE)
-                    }
+                    compassNearbyAPI = compassNearbyAPI,
+                    onButtonClick = { onBackButtonClick() }
                 )
             }
         }
@@ -419,7 +517,8 @@ fun CompassScreenMeasurementText(
             .fillMaxWidth()
     ) {
         Text(
-            text = stringResource(id = measurementText, measurement)
+            text = stringResource(id = measurementText, measurement),
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -429,6 +528,7 @@ fun CompassScreenMeasurementText(
  */
 @Composable
 fun CompassScreenReturnButton(
+    compassNearbyAPI: CompassNearbyAPI,
     onButtonClick: (() -> Unit),
     modifier: Modifier = Modifier
 ) {
@@ -436,7 +536,11 @@ fun CompassScreenReturnButton(
         onButtonClick = {
             onButtonClick()
         },
-        textId = R.string.compass_screen_return_button,
+        textId =
+        if (compassNearbyAPI.connectionType.value == CompassConnectionType.MEETING)
+            R.string.compass_screen_cancel_button
+        else
+            R.string.compass_screen_return_button,
         modifier = modifier
     )
 }
@@ -445,7 +549,7 @@ fun CompassScreenReturnButton(
  * Displays temporary text showing users' locations
  */
 @Composable
-fun TempCompassScreenLocationUpdating(
+fun CompassScreenCurrentLocations(
     compassViewModel: CompassViewModel,
     modifier: Modifier = Modifier
 ) {
@@ -457,9 +561,7 @@ fun TempCompassScreenLocationUpdating(
                 .fillMaxWidth()
         ) {
             Text(
-                text = "Current location:\n" +
-                        "\t\t${compassViewModel.currentUserLocation.value.latitude}\n" +
-                        "\t\t${compassViewModel.currentUserLocation.value.longitude}"
+                text = "Current location:\n${compassViewModel.getCurrentUserLocation()}"
             )
         }
         Row(
@@ -467,9 +569,7 @@ fun TempCompassScreenLocationUpdating(
                 .fillMaxWidth()
         ) {
             Text(
-                text = "Match location:\n" +
-                        "\t\t${compassViewModel.matchedUserLocation.value.latitude}\n" +
-                        "\t\t${compassViewModel.matchedUserLocation.value.longitude}"
+                text = "Match location:\n${compassViewModel.getMatchedUserLocation()}"
             )
         }
     }
@@ -483,7 +583,7 @@ fun CompassScreenLayoutPreview() {
         val compassViewModel = CompassViewModel(repository = repository)
         CompassScreenLayout(
             compassViewModel = compassViewModel,
-            compassCommunication = CompassCommunication(
+            compassNearbyAPI = CompassNearbyAPI(
                 userId = "fakeUserId",
                 packageName = "fakePackageName"
             )

@@ -23,28 +23,36 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -80,6 +88,8 @@ class UserProfileScreen : ComponentActivity() {
     /*
     ===== Variables =====
      */
+
+
     private val repository = RealmSyncRepository { _, error ->
         // Sync errors come from a background thread so route the Toast through the UI thread
         lifecycleScope.launch {
@@ -103,6 +113,7 @@ class UserProfileScreen : ComponentActivity() {
     private val toolbarViewModel: ToolbarViewModel by viewModels {
         ToolbarViewModel.factory(repository, this)
     }
+
 
 
     /*
@@ -163,7 +174,7 @@ class UserProfileScreen : ComponentActivity() {
 
         setContent {
             MyApplicationTheme {
-                NavigationGraph(toolbarViewModel, userProfileViewModel, homeViewModel = HomeViewModel())
+                NavigationGraph(toolbarViewModel, userProfileViewModel, homeViewModel = HomeViewModel(repository = repository))
             }
         }
     }
@@ -195,7 +206,6 @@ fun UserProfileLayout(
 ) {
     Scaffold(
         topBar = {
-//            UserProfileTopBar()
             // This top bar is used because it already has logging out of account implemented
             TaskAppToolbar(viewModel = toolbarViewModel, navController = navController)
         },
@@ -205,9 +215,10 @@ fun UserProfileLayout(
         Column {
             UserProfileBody(
                 contentPadding = innerPadding,
-                userProfileViewModel = userProfileViewModel
+                userProfileViewModel = userProfileViewModel,
+                toolbarViewModel = toolbarViewModel
             )
-            HomeScreen(navController = navController, viewModel = homeViewModel)
+            HomeScreen(navController = navController, viewModel = homeViewModel, userProfileViewModel = userProfileViewModel)
         }
     }
 }
@@ -227,38 +238,8 @@ fun UserProfileLayoutPreview() {
             ),
             toolbarViewModel = ToolbarViewModel(repository),
             navController = rememberNavController(),
-            homeViewModel = HomeViewModel()
+            homeViewModel = HomeViewModel(repository = repository)
         )
-    }
-}
-
-/**
- * The top bar portion of the user profile screen
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-@Deprecated(
-    message = "Unused in favor of the existing template's top bar, which already has account log out functionality implemented"
-)
-fun UserProfileTopBar(modifier: Modifier = Modifier) {
-    CenterAlignedTopAppBar(
-        title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = stringResource(id = R.string.user_profile_header),
-                    style = MaterialTheme.typography.displayLarge
-                )
-            }
-        },
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun UserProfileTopBarPreview() {
-    MyApplicationTheme {
-        UserProfileTopBar()
     }
 }
 
@@ -268,6 +249,7 @@ fun UserProfileTopBarPreview() {
 @Composable
 fun UserProfileBody(
     userProfileViewModel: UserProfileViewModel,
+    toolbarViewModel: ToolbarViewModel,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues? = null
 ) {
@@ -338,7 +320,11 @@ fun UserProfileBody(
             onDiscardEditButtonClick = {
                 userProfileViewModel.discardUserProfileChanges()
                 isCardExpanded = false
-            }
+            },
+            onDeleteAccountConfirmed = {
+                userProfileViewModel.deleteAccount()
+            },
+            toolbarViewModel = toolbarViewModel
         )
     }
 }
@@ -351,11 +337,13 @@ fun UserProfileBodyPreview() {
         val userProfiles = (1..30).map { index ->
             MockRepository.getMockUserProfile(index)
         }.toMutableStateList()
+
         UserProfileBody(
             userProfileViewModel = UserProfileViewModel(
                 repository = repository,
-                userProfileListState = userProfiles
-            )
+                userProfileListState = userProfiles,
+            ),
+            toolbarViewModel = ToolbarViewModel(repository=repository)
         )
     }
 }
@@ -469,9 +457,12 @@ fun UserProfileLayoutRowPreview() {
 fun UserProfileEditButtons(
     isEditingUserProfile: Boolean,
     onEditButtonClick: (() -> Unit),
-    onDiscardEditButtonClick: (() -> Unit),
+    onDiscardEditButtonClick: () -> Unit,
+    onDeleteAccountConfirmed: () -> Unit,
+    toolbarViewModel: ToolbarViewModel,
     modifier: Modifier = Modifier
 ) {
+    var showDeleteConfirmationDialog by remember { mutableStateOf(false) }
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         modifier = modifier
@@ -502,16 +493,134 @@ fun UserProfileEditButtons(
             }
         }
     }
+    if (isEditingUserProfile){
+        Button(onClick = {showDeleteConfirmationDialog = true}){
+            Text(
+                text = stringResource(id = R.string.delete_account)
+            )
+        }
+    }
+    DeleteConfirmationDialog(
+        showDeleteConfirmationDialog = showDeleteConfirmationDialog,
+        onDeleteAccountConfirmed =  onDeleteAccountConfirmed,
+        onDismissRequest = { showDeleteConfirmationDialog= false },
+        toolbarViewModel = toolbarViewModel
+    )
+
+//    if (showDeleteConfirmationDialog) {
+//        AlertDialog(onDismissRequest = { showDeleteConfirmationDialog = false}) {
+//            Surface(
+//                modifier=Modifier.fillMaxWidth(),
+////                tonalElevation = AlertDialogDefaults.TonalElevation,
+//                color = Color.White,
+//                shape = RoundedCornerShape(12.dp)
+//            ) {
+//            Column(modifier=Modifier.padding(16.dp),
+//                horizontalAlignment = Alignment.CenterHorizontally,
+//                verticalArrangement =  Arrangement.spacedBy(24.dp))
+//            {
+//                Text(text = stringResource(id = R.string.are_you_sure ))
+//                Text(text = stringResource(id = R.string.delete_account_confirmation_message))
+//                Row(
+//                    modifier= Modifier.fillMaxWidth(),
+//                    verticalAlignment = Alignment.CenterVertically
+//                ){
+//                    TextButton(
+//                        onClick = {
+//                            showDeleteConfirmationDialog = false
+//                            onDeleteAccountConfirmed()
+//                            toolbarViewModel.logOut()
+//                        }, modifier = Modifier.fillMaxWidth().weight(1f)
+//                    ) {
+//                        Text(text = stringResource(id = R.string.delete_account))
+//                    }
+//                    TextButton(
+//                        onClick = { showDeleteConfirmationDialog = false },
+//                        modifier = Modifier.fillMaxWidth().weight(1f)
+//                    ) {
+//                        Text(text = stringResource(id = R.string.cancel))
+//                    }
+//                }
+//            }
+//
+//            }
+//        }
+//    }
+
+
 }
 
-@Preview(showBackground = true)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserProfileEditButtonsPreview(){
-    MyApplicationTheme {
-        UserProfileEditButtons(
-            isEditingUserProfile = true,
-            onEditButtonClick = {},
-            onDiscardEditButtonClick = {}
-        )
+fun DeleteConfirmationDialog(
+    showDeleteConfirmationDialog: Boolean,
+    onDeleteAccountConfirmed: () -> Unit,
+    onDismissRequest: () -> Unit,
+    toolbarViewModel: ToolbarViewModel
+) {
+    if (showDeleteConfirmationDialog) {
+        AlertDialog(onDismissRequest = onDismissRequest) {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = Color.White,
+                tonalElevation = AlertDialogDefaults.TonalElevation,
+                shadowElevation = 20.dp,
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    Text(text = stringResource(id = R.string.are_you_sure))
+                    Text(text = stringResource(id = R.string.delete_account_confirmation_message))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        TextButton(
+                            onClick = onDismissRequest,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                        ) {
+                            Text(text = stringResource(id = R.string.cancel))
+                        }
+                        TextButton(
+                            onClick = {
+                                onDismissRequest()
+                                onDeleteAccountConfirmed()
+                                toolbarViewModel.logOut()
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                        ) {
+                            Text(text = stringResource(id = R.string.confirm))
+                        }
+
+                    }
+                }
+            }
+        }
     }
 }
+
+
+
+
+
+
+//@Preview(showBackground = true)
+//@Composable
+//fun UserProfileEditButtonsPreview(){
+//    MyApplicationTheme {
+//        UserProfileEditButtons(
+//            isEditingUserProfile = true,
+//            onEditButtonClick = {},
+//            onDiscardEditButtonClick = {},
+//            onDeleteAccountConfirmed = {},
+//            toolbarViewModel =
+//        )
+//    }
+//}
