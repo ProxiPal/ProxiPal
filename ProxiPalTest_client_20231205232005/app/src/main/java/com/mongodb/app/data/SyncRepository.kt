@@ -614,7 +614,6 @@ class RealmSyncRepository(
         // Messages sent is a list of strings, but actual message ID is a ObjectId
         // Convert list of strings to list of ObjectIds first before doing the query
         return getQuerySpecificMessages(realm, friendConversation)
-            .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
     }
 
