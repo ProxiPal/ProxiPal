@@ -1,7 +1,6 @@
 package com.mongodb.app.presentation.userprofiles
 
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
@@ -12,7 +11,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
-import com.mongodb.app.TAG
+import com.mongodb.app.app
 import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT
 import com.mongodb.app.data.USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT
@@ -25,6 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 
@@ -590,6 +590,12 @@ class UserProfileViewModel constructor(
         }
     }
 
+    fun deleteAccount() {
+        runBlocking {
+            app.currentUser?.delete()
+        }
+        }
+    }
 
 
-}
+

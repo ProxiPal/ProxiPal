@@ -40,7 +40,8 @@ fun ProfileSetupScaffold(
         Column {
             UserProfileBody(
                 contentPadding = innerPadding,
-                userProfileViewModel = userProfileViewModel
+                userProfileViewModel = userProfileViewModel,
+                toolbarViewModel = toolbarViewModel
             )
         }
     }

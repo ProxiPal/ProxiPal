@@ -22,21 +22,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
@@ -63,7 +63,6 @@ import com.mongodb.app.presentation.tasks.ToolbarEvent
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.presentation.userprofiles.AddUserProfileEvent
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
-import com.mongodb.app.tutorial.OnboardingScreen
 import com.mongodb.app.ui.components.MultiLineText
 import com.mongodb.app.ui.components.ProxiPalBottomAppBar
 import com.mongodb.app.ui.components.SingleLineText
@@ -228,7 +227,8 @@ fun UserProfileLayout(
         Column {
             UserProfileBody(
                 contentPadding = innerPadding,
-                userProfileViewModel = userProfileViewModel
+                userProfileViewModel = userProfileViewModel,
+                toolbarViewModel = toolbarViewModel
             )
             HomeScreen(navController = navController, viewModel = homeViewModel, userProfileViewModel = userProfileViewModel)
         }
@@ -261,6 +261,7 @@ fun UserProfileLayoutPreview() {
 @Composable
 fun UserProfileBody(
     userProfileViewModel: UserProfileViewModel,
+    toolbarViewModel: ToolbarViewModel,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues? = null
 ) {
@@ -331,7 +332,11 @@ fun UserProfileBody(
             onDiscardEditButtonClick = {
                 userProfileViewModel.discardUserProfileChanges()
                 isCardExpanded = false
-            }
+            },
+            onDeleteAccountConfirmed = {
+                userProfileViewModel.deleteAccount()
+            },
+            toolbarViewModel = toolbarViewModel
         )
     }
 }
@@ -344,11 +349,13 @@ fun UserProfileBodyPreview() {
         val userProfiles = (1..30).map { index ->
             MockRepository.getMockUserProfile(index)
         }.toMutableStateList()
+
         UserProfileBody(
             userProfileViewModel = UserProfileViewModel(
                 repository = repository,
-                userProfileListState = userProfiles
-            )
+                userProfileListState = userProfiles,
+            ),
+            toolbarViewModel = ToolbarViewModel(repository=repository)
         )
     }
 }
@@ -462,9 +469,12 @@ fun UserProfileLayoutRowPreview() {
 fun UserProfileEditButtons(
     isEditingUserProfile: Boolean,
     onEditButtonClick: (() -> Unit),
-    onDiscardEditButtonClick: (() -> Unit),
+    onDiscardEditButtonClick: () -> Unit,
+    onDeleteAccountConfirmed: () -> Unit,
+    toolbarViewModel: ToolbarViewModel,
     modifier: Modifier = Modifier
 ) {
+    var showDeleteConfirmationDialog by remember { mutableStateOf(false) }
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         modifier = modifier
@@ -495,18 +505,53 @@ fun UserProfileEditButtons(
             }
         }
     }
+    if (isEditingUserProfile){
+        Button(onClick = {showDeleteConfirmationDialog = true}){
+            Text(
+                text = stringResource(id = R.string.delete_account)
+            )
+        }
+    }
+
+    if (showDeleteConfirmationDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmationDialog = false },
+            title = { Text(text = stringResource(id = R.string.delete_account)) },
+            text = { Text(text = stringResource(id = R.string.delete_account_confirmation_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteConfirmationDialog = false
+                        onDeleteAccountConfirmed()
+                        toolbarViewModel.logOut()
+                    }
+                ) {
+                    Text(text = stringResource(id = R.string.delete_account))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteConfirmationDialog = false }
+                ) {
+                    Text(text = stringResource(id = R.string.cancel))
+                }
+            }
+        )
+    }
 }
 
 
 
 //@Preview(showBackground = true)
-@Composable
-fun UserProfileEditButtonsPreview(){
-    MyApplicationTheme {
-        UserProfileEditButtons(
-            isEditingUserProfile = true,
-            onEditButtonClick = {},
-            onDiscardEditButtonClick = {}
-        )
-    }
-}
+//@Composable
+//fun UserProfileEditButtonsPreview(){
+//    MyApplicationTheme {
+//        UserProfileEditButtons(
+//            isEditingUserProfile = true,
+//            onEditButtonClick = {},
+//            onDiscardEditButtonClick = {},
+//            onDeleteAccountConfirmed = {},
+//            toolbarViewModel =
+//        )
+//    }
+//}
