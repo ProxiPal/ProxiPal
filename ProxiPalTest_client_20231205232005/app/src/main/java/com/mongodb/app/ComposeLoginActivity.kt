@@ -29,6 +29,7 @@ import com.mongodb.app.presentation.login.EventSeverity
 import com.mongodb.app.presentation.login.LoginEvent
 import com.mongodb.app.presentation.login.LoginViewModel
 import com.mongodb.app.ui.login.AccountScaffold
+import com.mongodb.app.ui.messages.MessagesScreen
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.userprofiles.UserProfileScreen
 import io.realm.kotlin.Realm

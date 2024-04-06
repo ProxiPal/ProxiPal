@@ -3,6 +3,7 @@ package com.mongodb.app.presentation.userprofiles
 import android.os.Bundle
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -13,8 +14,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.mongodb.app.app
 import com.mongodb.app.data.SyncRepository
-import com.mongodb.app.data.USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT
-import com.mongodb.app.data.USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT
+import com.mongodb.app.data.userprofiles.USER_PROFILE_BIOGRAPHY_MAXIMUM_CHARACTER_AMOUNT
+import com.mongodb.app.data.userprofiles.USER_PROFILE_NAME_MAXIMUM_CHARACTER_AMOUNT
 import com.mongodb.app.domain.UserProfile
 import io.realm.kotlin.notifications.InitialResults
 import io.realm.kotlin.notifications.ResultsChange
@@ -23,6 +24,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -43,7 +48,7 @@ sealed class AddUserProfileEvent {
     class Error(val message: String, val throwable: Throwable) : AddUserProfileEvent()
 }
 
-class UserProfileViewModel constructor(
+class UserProfileViewModel(
     private var repository: SyncRepository,
     val userProfileListState: SnapshotStateList<UserProfile> = mutableStateListOf()
 ) : ViewModel() {
@@ -61,12 +66,12 @@ class UserProfileViewModel constructor(
     private val _isEditingUserProfile: MutableState<Boolean> = mutableStateOf(false)
 
     // for current user's location, added by Marco Pacini
-    private val _userProfileLatitude: MutableState<Double> = mutableStateOf(0.0)
-    private val _userProfileLongitude: MutableState<Double> = mutableStateOf(0.0)
+    private val _userProfileLatitude: MutableState<Double> = mutableDoubleStateOf(0.0)
+    private val _userProfileLongitude: MutableState<Double> = mutableDoubleStateOf(0.0)
 
     private val _nearbyUserProfiles: MutableList<UserProfile> = mutableListOf()
 
-    private val _proximityRadius: MutableState<Double> = mutableStateOf(0.1)
+    private val _proximityRadius: MutableState<Double> = mutableDoubleStateOf(0.1)
 
 
     //added by George Fu for Social media handling
@@ -189,6 +194,21 @@ class UserProfileViewModel constructor(
      */
     private fun getUserProfile(){
         viewModelScope.launch {
+          /*
+            repository.readUserProfile(repository.getCurrentUserId())
+                .first{
+                    userProfileListState.clear()
+                    userProfileListState.addAll(it.list)
+                    // When trying to update a user profile that is not saved in the database
+                    // ... the SyncRepository will handle creating a new user profile before
+                    // ... making the updated changes
+                    if (it.list.size > 0){
+                        Log.i(
+                            TAG(),
+                            "UserProfileViewModel: Current user's profile = \"${it.list[0]._id}\""
+                        )
+                        setUserProfileVariables(it.list[0])
+                        */
             repository.getCurrentUserProfileList()
                 .collect { event: ResultsChange<UserProfile> ->
                     when (event) {
@@ -259,8 +279,19 @@ class UserProfileViewModel constructor(
                         }
                         else -> Unit // No-op
                     }
+                    true
                 }
         }
+      /*
+    }
+
+    private fun setUserProfileVariables(userProfile: UserProfile){
+        _userProfileFirstName.value = userProfile.firstName
+        _userProfileLastName.value = userProfile.lastName
+        _userProfileBiography.value = userProfile.biography
+        _userProfileLatitude.value = userProfile.location?.latitude!!
+        _userProfileLongitude.value = userProfile.location?.longitude!!
+        */
     }
 
 

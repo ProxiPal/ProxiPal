@@ -95,6 +95,7 @@ dependencies {
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
     debugImplementation ("androidx.compose.ui:ui-tooling:1.6.1")
     implementation ("com.google.accompanist:accompanist-pager:0.19.0")
+    implementation("androidx.compose.material:material-icons-extended")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     implementation ("androidx.compose.material:material-icons-extended:1.6.3")
 
@@ -115,8 +116,4 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.2.2"))
     // When using the BoM, don't specify versions in Firebase dependencies
     implementation("com.google.firebase:firebase-messaging")
-
-
-
-
 }

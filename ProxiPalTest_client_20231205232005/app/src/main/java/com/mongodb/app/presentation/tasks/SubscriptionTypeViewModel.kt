@@ -9,7 +9,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
-import com.mongodb.app.data.SHOULD_USE_TASKS_ITEMS
+import com.mongodb.app.data.userprofiles.SHOULD_USE_TASKS_ITEMS
 import com.mongodb.app.data.SubscriptionType
 import com.mongodb.app.data.SyncRepository
 import kotlinx.coroutines.CoroutineScope

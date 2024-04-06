@@ -61,8 +61,8 @@ import com.mongodb.app.R
 import com.mongodb.app.TAG
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
-import com.mongodb.app.data.USER_PROFILE_EDIT_MODE_MAXIMUM_LINE_AMOUNT
-import com.mongodb.app.data.USER_PROFILE_ROW_HEADER_WEIGHT
+import com.mongodb.app.data.userprofiles.USER_PROFILE_EDIT_MODE_MAXIMUM_LINE_AMOUNT
+import com.mongodb.app.data.userprofiles.USER_PROFILE_ROW_HEADER_WEIGHT
 import com.mongodb.app.home.HomeScreen
 import com.mongodb.app.home.HomeViewModel
 import com.mongodb.app.navigation.NavigationGraph
@@ -122,27 +122,8 @@ class UserProfileScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
-        Log.i(
-            TAG(),
-            "UPScreen: Start of OnCreate()"
-        )
-
-
         // region ViewModel events
         lifecycleScope.launch {
-            userProfileViewModel.event
-                .collect {
-                    Log.i(
-                        TAG(),
-                        "UPScreen: Tried to modify or remove a user profile that doesn't belong to the current user."
-                    )
-                    Toast.makeText(
-                        this@UserProfileScreen,
-                        getString(R.string.user_profile_permissions_warning),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
         }
 
         lifecycleScope.launch {

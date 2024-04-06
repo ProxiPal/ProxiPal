@@ -1,4 +1,4 @@
-package com.mongodb.app.data
+package com.mongodb.app.data.userprofiles
 
 
 /*

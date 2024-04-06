@@ -2,10 +2,19 @@ package com.mongodb.app.data
 
 import android.util.Log
 import com.mongodb.app.TAG
-import com.mongodb.app.domain.Item
 import com.mongodb.app.app
+import com.mongodb.app.data.messages.IConversationsRealm
+import com.mongodb.app.data.messages.IMessagesRealm
+import com.mongodb.app.data.messages.SHOULD_PRINT_REALM_CONFIG_INFO
+import com.mongodb.app.data.messages.SubscriptionNameAllMessages
+import com.mongodb.app.data.messages.SubscriptionNameMyFriendConversations
+import com.mongodb.app.data.userprofiles.SHOULD_USE_TASKS_ITEMS
+import com.mongodb.app.domain.FriendConversation
+import com.mongodb.app.domain.FriendMessage
+import com.mongodb.app.domain.Item
 import com.mongodb.app.domain.UserProfile
 import com.mongodb.app.location.CustomGeoPoint
+import com.mongodb.app.ui.messages.empty
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.annotations.ExperimentalGeoSpatialApi
@@ -30,14 +39,59 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import org.mongodb.kbson.ObjectId
+import java.util.SortedSet
 import kotlin.time.Duration.Companion.seconds
 
 
 /*
 Contributions:
-- Kevin Kubota (added functions relating to user profiles, see below)
+- Kevin Kubota (Review #1: added functions relating to user profiles, see below)
+- Kevin Kubota (Review #3: Implemented functions for friend conversations and messages;
+... This mainly includes everything in the regions named "Messages" and "Conversations")
 - Marco Pacini (location related tasks only)
  */
+
+
+// region Extensions
+fun String.toObjectId(): ObjectId {
+    return ObjectId(this)
+}
+
+fun SortedSet<String>.toRealmList(): RealmList<String>{
+    val elementAmount = this.size
+    // Converts the original set to a list
+    val setToList = this.toList()
+    // Creates an empty realm list
+    val setToRealmList: RealmList<String> = realmListOf()
+    // Iterate through the list and set each element to the realm list
+    // Sets don't use indexes but list and realm list must
+    for (index in 0..<elementAmount){
+        setToRealmList.add(setToList[index])
+    }
+    return setToRealmList
+}
+
+fun RealmList<String>.toObjectIdList(): RealmList<ObjectId>{
+    val realmList: RealmList<ObjectId> = realmListOf()
+    for (string in this){
+        try{
+            realmList.add(string.toObjectId())
+        }
+        catch (e: Exception){
+            Log.e(
+                TAG(),
+                "!!!: Caught exception \"${e}\" while converting a list of strings to ObjectIds; " +
+                        "Skipping converting string = \"$string\" to an ObjectId"
+            )
+        }
+    }
+    return realmList
+}
+// endregion Extensions
+
+
+private const val SubscriptionNameAllUserProfiles = "AllUserProfiles"
 
 
 /**
@@ -45,9 +99,10 @@ Contributions:
  * Working functions and code for Item classes has been copied for UserProfile classes
  */
 interface SyncRepository {
-    /*
-    ===== Functions =====
-     */
+    // region Functions
+
+
+    // region RealmFunctions
     /**
      * Returns the active [SubscriptionType].
      */
@@ -64,9 +119,15 @@ interface SyncRepository {
     fun resumeSync()
 
     /**
+     * Gets the current user's ID
+     */
+    fun getCurrentUserId(): String
+
+    /**
      * Closes the realm instance held by this repository.
      */
     fun close()
+    // endregion RealmFunctions
 
     /*
     These functions are from an existing template
@@ -109,6 +170,25 @@ interface SyncRepository {
      */
     // region User profiles
     /**
+     * Returns a query to get a specific [UserProfile]
+     */
+    fun getQuerySpecificUserProfile(realm: Realm, ownerId: String): RealmQuery<UserProfile>
+
+    /**
+     * Returns a query to get all [UserProfile]s
+     */
+    fun getQueryAllUserProfiles(realm: Realm): RealmQuery<UserProfile>
+
+    /**
+     * Returns the specified [UserProfile]
+     */
+    fun readUserProfile(ownerId: String): Flow<ResultsChange<UserProfile>>
+
+    /**
+     * Returns all [UserProfile] objects
+     */
+    fun readUserProfiles(): Flow<ResultsChange<UserProfile>>
+  /*
      * Returns a flow with the current user's profile.
      * Modified by Marco Pacini to fix issues
      */
@@ -156,6 +236,10 @@ interface SyncRepository {
     fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double, selectedInterests: List<String> = emptyList(), selectedIndustries: List<String> = emptyList(), otherFilters: List<String> = emptyList()): Flow<ResultsChange<UserProfile>>
     // endregion location
 
+
+    // endregion Functions
+  
+  
     suspend fun updateUserProfileInterests(interest:String)
 
     suspend fun updateUserProfileIndustries(industry:String)
@@ -175,13 +259,13 @@ interface SyncRepository {
  */
 class RealmSyncRepository(
     onSyncError: (session: SyncSession, error: SyncException) -> Unit
-) : SyncRepository {
+) : SyncRepository, IMessagesRealm, IConversationsRealm {
 
-    // Unsure if there can be more than 1 instance of a Realm
     private val realm: Realm
     private val config: SyncConfiguration
     private val currentUser: User
         get() = app.currentUser!!
+
 
     init {
         // Contributed by Kevin Kubota
@@ -189,9 +273,13 @@ class RealmSyncRepository(
         // If trying to query A when the sync configuration is set for B,
         // ... the app will crash if querying anything other than B.
         // If errors still persist, try deleting and re-running the app.
-        val set = if (SHOULD_USE_TASKS_ITEMS) setOf(Item::class)
-        else setOf(UserProfile::class, CustomGeoPoint::class)
-        config = SyncConfiguration.Builder(currentUser, set)
+        val schemaSet = if (SHOULD_USE_TASKS_ITEMS) setOf(Item::class)
+        else setOf(
+            UserProfile::class,
+            CustomGeoPoint::class,
+            FriendMessage::class,
+            FriendConversation::class)
+        config = SyncConfiguration.Builder(currentUser, schemaSet)
             .initialSubscriptions { realm ->
                 // Subscribe to the active subscriptionType - first time defaults to MINE
                 val activeSubscriptionType = SubscriptionType.ALL
@@ -202,8 +290,19 @@ class RealmSyncRepository(
                     )
                 } else {
                     add(
-                        getQueryUserProfiles(realm, activeSubscriptionType),
-                        activeSubscriptionType.name
+                        getQueryAllUserProfiles(realm),
+                        SubscriptionNameAllUserProfiles
+                    )
+                    // Subscribe to receive any updates on all messages
+                    // Then can possibly query to get only specific messages
+                    add(
+                        getQueryAllMessages(realm),
+                        SubscriptionNameAllMessages
+                    )
+                    // Subscribe to receive any updates on only my conversations
+                    add(
+                        getQueryMyConversations(realm),
+                        SubscriptionNameMyFriendConversations
                     )
                 }
             }
@@ -215,27 +314,52 @@ class RealmSyncRepository(
 
         realm = Realm.open(config)
 
-//        // After configuration changes, realm stays the same but config changes every time
-//        // This leads to the app crashing when trying to interact with Realm after a configuration change
-//        Log.i(
-//            TAG(),
-//            "RealmSyncRepository: Realm = \"${realm}\""
-//        )
-//        Log.i(
-//            TAG(),
-//            "RealmSyncRepository: Config = \"${config}\""
-//        )
-
         // Mutable states must be updated on the UI thread
         CoroutineScope(Dispatchers.Main).launch {
+            // Manually adding subscriptions
+            if (realm.subscriptions.size == 0){
+                realm.subscriptions.update {
+                    add(
+                        getQueryAllUserProfiles(realm),
+                        SubscriptionNameAllUserProfiles
+                    )
+                    // Subscribe to receive any updates on all messages
+                    // Then can possibly query to get only specific messages
+                    add(
+                        getQueryAllMessages(realm),
+                        SubscriptionNameAllMessages
+                    )
+                    // Subscribe to receive any updates on only my conversations
+                    add(
+                        getQueryMyConversations(realm),
+                        SubscriptionNameMyFriendConversations
+                    )
+                }
+            }
             realm.subscriptions.waitForSynchronization()
         }
+
+        if (SHOULD_PRINT_REALM_CONFIG_INFO) {
+            // After configuration changes, realm stays the same but config changes every time
+            // This leads to the app crashing when trying to interact with Realm after a configuration change
+            for (subscription in realm.subscriptions){
+                Log.i(
+                    TAG(),
+                    "RealmSyncRepository: Subscription = \"${subscription}\" ;; " +
+                            "Subscription name = \"${subscription.name}\" ;; " +
+                            "Subscription description = \"${subscription.queryDescription}\""
+                )
+            }
+        }
+
+        Log.i(
+            TAG(),
+            "RealmSyncRepository: Realm is now set up"
+        )
     }
 
 
-    /*
-    ===== Functions =====
-     */
+    // region RealmFunctions
     override fun getActiveSubscriptionType(realm: Realm?): SubscriptionType {
         val realmInstance = realm ?: this.realm
         val subscriptions = realmInstance.subscriptions
@@ -258,6 +382,11 @@ class RealmSyncRepository(
     }
 
     override fun close() = realm.close()
+
+    override fun getCurrentUserId(): String{
+        return currentUser.id
+    }
+    // endregion RealmFunctions
 
     /*
     These functions are from an existing template
@@ -320,6 +449,28 @@ class RealmSyncRepository(
     Deleting has not been testing for functionality and may not be necessary, for now
      */
     // region User profiles
+    override fun getQuerySpecificUserProfile(
+        realm: Realm,
+        ownerId: String
+    ): RealmQuery<UserProfile> {
+        return realm.query<UserProfile>("ownerId == $0", ownerId)
+    }
+
+    override fun getQueryAllUserProfiles(realm: Realm): RealmQuery<UserProfile> {
+        // Should return all user profiles as "0" should be an invalid ID
+        return realm.query<UserProfile>("ownerId != $0", "0")
+    }
+
+    override fun readUserProfile(ownerId: String): Flow<ResultsChange<UserProfile>> {
+        return getQuerySpecificUserProfile(realm, ownerId)
+            .sort(Pair("_id", Sort.ASCENDING))
+            .asFlow()
+    }
+
+    override fun readUserProfiles(): Flow<ResultsChange<UserProfile>> {
+        return getQueryAllUserProfiles(realm)
+            .sort(Pair("_id", Sort.ASCENDING))
+            
     override fun getCurrentUserProfileList(): Flow<ResultsChange<UserProfile>> {
         return realm.query<UserProfile>("ownerId == $0", currentUser.id)
             .asFlow()
@@ -356,6 +507,7 @@ class RealmSyncRepository(
     }
 
     override suspend fun updateUserProfile(firstName: String, lastName: String, biography: String, instagramHandle: String, twitterHandle: String, linktreeHandle: String, linkedinHandle: String) {
+
         // Queries inside write transaction are live objects
         // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
         val frozenUserProfile = getCurrentUserProfile(realm = realm).find()
@@ -420,8 +572,8 @@ class RealmSyncRepository(
     ): RealmQuery<UserProfile> =
         when (subscriptionType) {
             // Make sure the fields referenced in the query exactly match their name in the database
-            SubscriptionType.MINE -> realm.query("ownerId == $0", currentUser.id)
-            SubscriptionType.ALL -> realm.query()
+            SubscriptionType.MINE -> getQuerySpecificUserProfile(realm, currentUser.id)
+            SubscriptionType.ALL -> getQueryAllUserProfiles(realm)
         }
 
     private fun getCurrentUserProfile(realm: Realm) : RealmQuery<UserProfile>{
@@ -446,12 +598,6 @@ class RealmSyncRepository(
             null
         }
         if (frozenFirstUserProfile == null) {
-            Log.i(
-                TAG(),
-                "RealmSyncRepository: Creating a new user profile with the given parameters for " +
-                        "current user ID = \"${currentUser.id}\"...; " +
-                        "Skipping rest of user profile update function..."
-            )
             // Create a new user profile before applying the updated changes
             addUserProfile(
                 firstName = "empty",
@@ -465,28 +611,6 @@ class RealmSyncRepository(
 
             )
             return
-        }
-        when (getCurrentUserProfile(realm = realm).find().size) {
-            // Create a new profile for the user if they do not have one already in the database
-            // This may not be necessary as users will get their initial profiles added to the database
-            // ... once they register an account and deleting their profile will only occur when
-            // ... deleting their account (unsure if account deletion will be implemented)
-            0 -> {
-                Log.i(
-                    TAG(),
-                    "RealmSyncRepository: No user profiles found with owner ID \"${currentUser.id}\""
-                )
-            }
-
-            1 -> Log.i(
-                TAG(),
-                "RealmSyncRepository: Exactly 1 user profile found with owner ID \"${currentUser.id}\""
-            )
-
-            else -> Log.i(
-                TAG(),
-                "RealmSyncRepository: Multiple user profiles found with owner ID \"${currentUser.id}\""
-            )
         }
         realm.write {
             findLatest(frozenFirstUserProfile)?.let { liveUserProfile ->
@@ -537,6 +661,191 @@ class RealmSyncRepository(
     //endregion location
 
 
+    // region Messages
+    override fun getQueryAllMessages(realm: Realm): RealmQuery<FriendMessage> {
+        // Should return all messages since owner ID "0" should not be a valid ID
+        return realm.query("ownerId != $0", "0")
+    }
+
+    override fun getQuerySpecificMessage(realm: Realm, messageId: ObjectId): RealmQuery<FriendMessage> {
+        return realm.query("_id == $0", messageId)
+    }
+
+    override fun getQuerySpecificMessages(realm: Realm, friendConversation: FriendConversation): RealmQuery<FriendMessage> {
+        return realm.query("_id IN $0", friendConversation.messagesSent.toObjectIdList())
+    }
+
+    override suspend fun createMessage(newMessage: FriendMessage){
+        realm.write {
+            copyToRealm(newMessage, updatePolicy = UpdatePolicy.ALL)
+        }
+    }
+
+    override fun readMessage(messageId: ObjectId): Flow<ResultsChange<FriendMessage>> {
+        return realm.query<FriendMessage>("_id == $0", messageId)
+            .sort(Pair("_id", Sort.ASCENDING))
+            .asFlow()
+    }
+
+    override fun readConversationMessages(friendConversation: FriendConversation): Flow<ResultsChange<FriendMessage>> {
+        // Messages sent is a list of strings, but actual message ID is a ObjectId
+        // Convert list of strings to list of ObjectIds first before doing the query
+        return getQuerySpecificMessages(realm, friendConversation)
+            .asFlow()
+    }
+
+    override suspend fun updateMessage(messageId: ObjectId, newMessage: String) {
+        // Queries inside write transaction are live objects
+        // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
+        val frozenObjects = getQuerySpecificMessage(
+            realm = realm,
+            messageId = messageId
+        )
+            .find()
+        // In case the query result list is empty, check first before calling ".first()"
+        val frozenObject = (if (frozenObjects.size > 0) frozenObjects.first() else null) ?: return
+        realm.write {
+            findLatest(frozenObject)?.let{
+                liveObject ->
+                liveObject.message = newMessage
+                liveObject.hasBeenUpdated = true
+            }
+        }
+    }
+
+    override suspend fun deleteMessage(messageId: ObjectId) {
+        // Similar process to updating a Realm object
+        // Involves frozen and live objects but deletion can only occur on live objects
+
+        // Queries inside write transaction are live objects
+        // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
+        // Only get the specific message being deleted
+        val frozenObjects = realm.query<FriendMessage>("_id == $0", messageId)
+            .find()
+
+        // In case the query result list is empty, check first before calling ".first()"
+        val frozenObject = (if (frozenObjects.size > 0) frozenObjects.first() else null) ?: return
+
+        // Delete the object
+        realm.write {
+            findLatest(frozenObject)?.let {
+                delete(it)
+            }
+        }
+    }
+    // endregion Messages
+
+
+    // region Conversations
+    override fun getQueryMyConversations(realm: Realm): RealmQuery<FriendConversation> {
+        return realm.query("$0 IN usersInvolved", currentUser.id)
+    }
+
+    override fun getQuerySpecificConversation(
+        realm: Realm,
+        usersInvolved: SortedSet<String>
+    ): RealmQuery<FriendConversation> {
+        return realm.query<FriendConversation>("usersInvolved == $0", usersInvolved)
+    }
+
+    override fun getQuerySpecificConversation(
+        realm: Realm,
+        conversationId: ObjectId
+    ): RealmQuery<FriendConversation> {
+        return realm.query<FriendConversation>("_id == $0", conversationId)
+    }
+
+    override suspend fun createConversation(usersInvolved: SortedSet<String>) {
+        val usersInvolvedRealmList: RealmList<String> = usersInvolved.toRealmList()
+        Log.i(
+            TAG(),
+            "RealmSyncRepository: Creating a conversation for users = \"" +
+                    "${usersInvolvedRealmList}\""
+        )
+        // Initial list with an initial empty message (which will count as "invalid" and not be shown in the UI)
+        // This is just so the variable gets initialized in the database (since it does not show on realm object creation)
+        val messagesSentRealmList: RealmList<String> = realmListOf("")
+
+        val friendConversation = FriendConversation().apply{
+            this.usersInvolved = usersInvolvedRealmList
+            // Start with an empty list, then message references are added after
+            this.messagesSent = messagesSentRealmList
+        }
+        realm.write{
+            copyToRealm(friendConversation, updatePolicy = UpdatePolicy.ALL)
+        }
+    }
+
+    override fun readConversation(usersInvolved: SortedSet<String>): Flow<ResultsChange<FriendConversation>> {
+        return getQuerySpecificConversation(realm, usersInvolved)
+            .sort(Pair("_id", Sort.ASCENDING))
+            .asFlow()
+    }
+
+    override suspend fun updateConversationAdd(
+        friendConversation: FriendConversation,
+        messageId: ObjectId
+    ) {
+        updateConversation(
+            friendConversation = friendConversation,
+            messageId = messageId,
+            shouldAddMessage = true
+        )
+    }
+
+    override suspend fun updateConversationRemove(
+        friendConversation: FriendConversation,
+        messageId: ObjectId
+    ) {
+        updateConversation(
+            friendConversation = friendConversation,
+            messageId = messageId,
+            shouldAddMessage = false
+        )
+    }
+
+    /**
+     * To simplify common code for updating a conversation by either adding or removing a message
+     */
+    private suspend fun updateConversation(
+        friendConversation: FriendConversation,
+        messageId: ObjectId,
+        shouldAddMessage: Boolean
+    ) {
+        // Queries inside write transaction are live objects
+        // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
+        val frozenObjects = getQuerySpecificConversation(
+            realm,
+            friendConversation.usersInvolved.toSortedSet()
+        )
+            .find()
+        // In case the query result list is empty, check first before calling ".first()"
+        val frozenObject = if (frozenObjects.size > 0) frozenObjects.first() else null
+        if (frozenObject == null) {
+            Log.i(
+                TAG(),
+                "RealmSyncRepository: Could not update conversation with ID = \"${friendConversation._id}\"; " +
+                        "Creating a new conversation object instead"
+            )
+            // This is more of a safety check
+            // Create a new conversation object if it was somehow deleted before or during the updating process
+            createConversation(
+                usersInvolved = friendConversation.usersInvolved.toSortedSet()
+            )
+            return
+        }
+        realm.write {
+            if (shouldAddMessage){
+                findLatest(frozenObject)?.addMessage(messageId)
+            }
+            else{
+                findLatest(frozenObject)?.removeMessage(messageId)
+            }
+        }
+    }
+    // endregion Conversations
+    
+    
     override suspend fun updateUserProfileInterests(interest:String) {
         // Queries inside write transaction are live objects
         // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
@@ -704,18 +1013,20 @@ class RealmSyncRepository(
             }
         }
     }
-
-
-
 }
 
 /**
  * Mock repo for generating the Compose layout preview.
  */
 class MockRepository : SyncRepository {
+    // region Functions
     override fun getActiveSubscriptionType(realm: Realm?): SubscriptionType = SubscriptionType.ALL
     override fun pauseSync() = Unit
     override fun resumeSync() = Unit
+    override fun getCurrentUserId(): String {
+        return String.empty
+    }
+
     override fun close() = Unit
 
     override fun getTaskList(): Flow<ResultsChange<Item>> = flowOf()
@@ -727,8 +1038,24 @@ class MockRepository : SyncRepository {
 
 
     // Contributed by Kevin Kubota
+    override fun getQuerySpecificUserProfile(
+        realm: Realm,
+        ownerId: String
+    ): RealmQuery<UserProfile> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getQueryAllUserProfiles(realm: Realm): RealmQuery<UserProfile> {
+        TODO("Not yet implemented")
+    }
+
+    override fun readUserProfile(ownerId: String): Flow<ResultsChange<UserProfile>> {
+        TODO("Not yet implemented")
+    }
+    override fun readUserProfiles(): Flow<ResultsChange<UserProfile>> = flowOf()
     override fun getCurrentUserProfileList(): Flow<ResultsChange<UserProfile>> = flowOf() // modified by Marco
     override suspend fun addUserProfile(firstName: String, lastName: String, biography: String, instagramHandle: String, twitterHandle: String, linktreeHandle: String, linkedinHandle: String) =
+
         Unit
     override suspend fun updateUserProfile(firstName: String, lastName: String, biography: String, instagramHandle: String, twitterHandle: String, linktreeHandle: String, linkedinHandle: String) =
         Unit
@@ -739,6 +1066,7 @@ class MockRepository : SyncRepository {
 
     override suspend fun updateUserProfileLocation(latitude: Double, longitude: Double) =
         Unit
+    // endregion Functions
 
     override fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double, selectedInterests: List<String>, selectedIndustries: List<String>, otherFilters: List<String>): Flow<ResultsChange<UserProfile>> = flowOf()
 

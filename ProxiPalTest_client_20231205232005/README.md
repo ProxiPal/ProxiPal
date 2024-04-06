@@ -72,6 +72,8 @@ On a related note, this link:
     https://www.mongodb.com/docs/realm/sdk/kotlin/sync/subscribe/ 
 may be helpful since it revolves around properly setting up Sync subscriptions.
 
+Need to update read and write rules in "Rules" under "Data Access" under "App Services" tab on Mongo Atlas website.
+
 ## Log message shows successful adding {className} to database but the object is not actually added
 
 A new database collection was first created with a dummy object for user profiles. (Unsure if this was needed but the collection was manually created anyway.) Logged into the Atlas website and went to the "Rules" sub-section of the database's "Data Access" section (on the far left). Then, a rule was added to the collection that holds objects of type {className} in the database. The rule was (1) applicable always, (2) had insert, delete, and search document permissions, and (3) had read all, write all field permissions.
@@ -94,6 +96,47 @@ Example:
 
 Deleting the app did not work first try. What did work was restarting Android Studio and wiping
 emulator device data on restart.
+
+### Issues encountered when working on messages screen
+
+## "RLM_ERR_NO_SUBSCRIPTION_FOR_WRITE"; no flexible subscription error
+
+Needed to manually update the realm instance's subscriptions with 
+"realm.subscriptions.update { add(\\subscriptionHere\\) }"
+
+## App crashing when running regularly, then runs without working when debugging
+
+This was mainly caused whenever the realm.subscriptions.update() was called.
+What steps I took to fix it was:
+(1) Uninstall app
+(2) Re-run app and sign in
+(3) Revert realm subscriptions to only use user profile and geopoint subscriptions
+(4) Run app to check user profile functionality to see if it saves to database
+(5) Run app to check if messages screen can show without crashing
+(6) Re-instate messages subscriptions
+(7) Run app to check if messages can be sent and saved to database
+
+EDIT: It might be better to just have 1 class have a realm instance open, as multiple
+classes opening multiple realms causes the subscription-related error in the header
+
+## Realm subscriptions don't update automatically when changing in code
+
+Need to uninstall and re-install app, then realm subscriptions will update
+
+## "[RLM_ERR_INVALID_SCHEMA_CHANGE]: The following changes cannot be made in additive-only schema mode:"
+## (App crashes immediately) Cannot change schema from {x} to {y}
+
+Uninstall and re-install app
+
+## To update Realm subscriptions without having to delete and re-install app
+
+Call "realm.subscriptions.update { remove(subscriptionName) }" before "realm.subscriptions.waitForSynchronization()"
+Basically, subscriptions tell what kind of data can be returned from the database. Any data that doesn't satisfy a subscription's query will not be returned and thus can never be recognized in the app, no matter how many times data is retrieved.
+As a side note, when updating subscriptions, sometimes messages would not be saved to the database yet conversations would have their ID references saved. Creating a new emulated device and running the app there for some reason fixes that.
+
+## Message history on multiple devices are not the same and the database is not synced correctly with one of the devices
+
+Uninstall the app on both devices, then re-run the app on them. Message history should now be synced up to the database and regular create, update, and delete operations should work again.
 
 ## Discovery and advertising functions from Nearby API show as aborted in logcat
 

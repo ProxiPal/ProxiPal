@@ -64,6 +64,9 @@
             android:name=".ui.compassscreen.CompassPermissions"
             android:screenOrientation="fullSensor" />
         <activity
+            android:name=".ui.messages.MessagesScreen"
+            android:screenOrientation="fullSensor" />
+        <activity
             android:name=".ComposeLoginActivity"
             android:exported="true"
             android:screenOrientation="nosensor">
