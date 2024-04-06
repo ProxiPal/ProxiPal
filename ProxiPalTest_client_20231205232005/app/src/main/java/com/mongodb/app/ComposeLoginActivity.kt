@@ -24,7 +24,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
-import com.mongodb.app.data.SHOULD_USE_TASKS_ITEMS
+import com.mongodb.app.data.userprofiles.SHOULD_USE_TASKS_ITEMS
 import com.mongodb.app.presentation.login.EventSeverity
 import com.mongodb.app.presentation.login.LoginEvent
 import com.mongodb.app.presentation.login.LoginViewModel

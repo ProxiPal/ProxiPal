@@ -470,6 +470,8 @@ class RealmSyncRepository(
     override fun readUserProfiles(): Flow<ResultsChange<UserProfile>> {
         return getQueryAllUserProfiles(realm)
             .sort(Pair("_id", Sort.ASCENDING))
+            .asFlow()
+    }
             
     override fun getCurrentUserProfileList(): Flow<ResultsChange<UserProfile>> {
         return realm.query<UserProfile>("ownerId == $0", currentUser.id)
@@ -497,13 +499,6 @@ class RealmSyncRepository(
         realm.write {
             copyToRealm(userProfile, updatePolicy = UpdatePolicy.ALL)
         }
-    }
-
-    /**
-     * Returns the current user's ID
-     */
-    fun getCurrentUserId(): String{
-        return currentUser.id
     }
 
     override suspend fun updateUserProfile(firstName: String, lastName: String, biography: String, instagramHandle: String, twitterHandle: String, linktreeHandle: String, linkedinHandle: String) {
