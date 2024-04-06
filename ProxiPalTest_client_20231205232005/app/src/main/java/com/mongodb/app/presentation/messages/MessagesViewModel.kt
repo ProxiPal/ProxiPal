@@ -33,7 +33,7 @@ import java.util.SortedSet
 
 class MessagesViewModel(
     private var repository: SyncRepository,
-    var messagesRepository: IMessagesRealm,
+    private var messagesRepository: IMessagesRealm,
     private var conversationsRepository: IConversationsRealm
 ) : ViewModel(){
     // region Variables
@@ -458,7 +458,7 @@ class MessagesViewModel(
                     i ->
                     Log.i(
                         TAG(),
-                        "\"MessagesViewModel: Single conversation object = \"${i}\""
+                        "MessagesViewModel: Single conversation object = \"${i}\""
                     )
                 }
                 conversationsListState.addAll(it.list)

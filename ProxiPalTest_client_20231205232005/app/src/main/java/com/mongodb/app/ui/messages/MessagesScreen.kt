@@ -248,18 +248,22 @@ fun MessagesBodyContent(
             // Start with showing the most recent messages first
             val friendMessages = messagesViewModel.messagesListState.toList().reversed()
             items(friendMessages) { friendMessage ->
-                SingleMessageContainer(
-                    friendMessage = friendMessage,
-                    isSenderMe = messagesViewModel.isMessageMine(friendMessage),
-                    messagesViewModel = messagesViewModel
-                )
-                // If the sent message is the last in the list
-                // ... or in other words the first ever message sent
-                // Because the messages are shown starting from the bottom of the screen
-                // ... to make this appear at the very top, this should go after
-                // ... message composable
-                if (friendMessages.indexOf(friendMessage) == friendMessages.size - 1) {
-                    MessagesEndOfHistory()
+                // Exclude empty messages from being shown in the message history
+                // Namely, the initial message when creating a conversation object will not be shown
+                if (friendMessage.message.isNotBlank() && friendMessage.message.isNotEmpty()){
+                    SingleMessageContainer(
+                        friendMessage = friendMessage,
+                        isSenderMe = messagesViewModel.isMessageMine(friendMessage),
+                        messagesViewModel = messagesViewModel
+                    )
+                    // If the sent message is the last in the list
+                    // ... or in other words the first ever message sent
+                    // Because the messages are shown starting from the bottom of the screen
+                    // ... to make this appear at the very top, this should go after
+                    // ... message composable
+                    if (friendMessages.indexOf(friendMessage) == friendMessages.size - 1) {
+                        MessagesEndOfHistory()
+                    }
                 }
             }
         }

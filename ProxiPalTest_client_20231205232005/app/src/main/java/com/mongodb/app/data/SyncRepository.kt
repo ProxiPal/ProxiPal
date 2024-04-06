@@ -78,10 +78,9 @@ fun RealmList<String>.toObjectIdList(): RealmList<ObjectId>{
         catch (e: Exception){
             Log.e(
                 TAG(),
-                "Caught exception \"${e}\" while converting a list of strings to ObjectIds; " +
-                        "Returning an empty list instead"
+                "!!!: Caught exception \"${e}\" while converting a list of strings to ObjectIds; " +
+                        "Skipping converting string = \"$string\" to an ObjectId"
             )
-            return realmListOf()
         }
     }
     return realmList
@@ -299,7 +298,6 @@ class RealmSyncRepository(
         CoroutineScope(Dispatchers.Main).launch {
             // Manually adding subscriptions
             if (realm.subscriptions.size == 0){
-                val activeSubscriptionType = getActiveSubscriptionType(realm)
                 realm.subscriptions.update {
                     add(
                         getQueryAllUserProfiles(realm),
@@ -688,8 +686,9 @@ class RealmSyncRepository(
             "RealmSyncRepository: Creating a conversation for users = \"" +
                     "${usersInvolvedRealmList}\""
         )
-        // Empty list of messages
-        val messagesSentRealmList: RealmList<String> = realmListOf()
+        // Initial list with an initial empty message (which will count as "invalid" and not be shown in the UI)
+        // This is just so the variable gets initialized in the database (since it does not show on realm object creation)
+        val messagesSentRealmList: RealmList<String> = realmListOf("")
 
         val friendConversation = FriendConversation().apply{
             this.usersInvolved = usersInvolvedRealmList
