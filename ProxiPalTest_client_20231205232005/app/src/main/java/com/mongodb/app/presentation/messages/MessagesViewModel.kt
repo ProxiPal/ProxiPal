@@ -46,7 +46,7 @@ class MessagesViewModel(
     private val _conversationsListState: SnapshotStateList<FriendConversation> = mutableStateListOf()
     private var _friendMessageUnderActionFocus: FriendMessage? = null
     private val _currentAction = mutableStateOf(MessagesUserAction.IDLE)
-    private var _otherUserProfile: UserProfile? = null
+    private val _otherUserProfileName = mutableStateOf("")
 
     /**
      * Maps the [ObjectId] of a [FriendMessage] reply to the message of the [FriendMessage] replying to
@@ -73,8 +73,8 @@ class MessagesViewModel(
         get() = _currentAction
     val messageIdRepliesToOriginalMessages
         get() = _messageIdRepliesToOriginalMessages
-    val otherUserProfile
-        get() = _otherUserProfile
+    val otherUserProfileName
+        get() = _otherUserProfileName
     // endregion Properties
 
 
@@ -142,6 +142,10 @@ class MessagesViewModel(
      */
     private fun readOtherUserProfile(){
         val otherUserId = getOtherUserInvolvedId()
+        Log.i(
+            TAG(),
+            "MessagesViewModel: Other user ID = \"$otherUserId\""
+        )
         viewModelScope.launch {
             if (otherUserId.isEmpty()){
                 return@launch
@@ -149,14 +153,11 @@ class MessagesViewModel(
             else {
                 repository.readUserProfile(otherUserId)
                     .first{
-                        _otherUserProfile = if (it.list.size > 0){
-                            it.list[0]
-                        } else{
-                            null
+                        if (it.list.size > 0){
+                            _otherUserProfileName.value = it.list[0].firstName
                         }
                         true
                     }
-                otherUserProfile
             }
         }
     }

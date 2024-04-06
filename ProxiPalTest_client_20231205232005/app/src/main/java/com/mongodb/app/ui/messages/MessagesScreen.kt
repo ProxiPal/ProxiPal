@@ -193,12 +193,7 @@ fun MessagesTopBar(
                             .size(dimensionResource(id = R.dimen.messages_screen_profile_picture_size))
                     )
                     Text(
-                        text = if (messagesViewModel.otherUserProfile != null){
-                            messagesViewModel.otherUserProfile!!.firstName
-                                                                              }
-                        else{
-                            String.empty
-                            },
+                        text = messagesViewModel.otherUserProfileName.value,
                         color = Color.Black,
                         style = MaterialTheme.typography.labelLarge
                     )
