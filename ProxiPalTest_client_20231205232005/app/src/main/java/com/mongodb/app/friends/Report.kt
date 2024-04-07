@@ -38,7 +38,9 @@ import com.mongodb.app.R
 import com.mongodb.app.domain.Report
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.theme.MyApplicationTheme
+//Vichet Chim
 
+//report dropdown menu
 @Composable
 fun ReportDropDownMenu(reportedUser : String,reportViewModel: ReportViewModel){
     val context = LocalContext.current
@@ -68,6 +70,7 @@ fun ReportDropDownMenu(reportedUser : String,reportViewModel: ReportViewModel){
 }
 
 
+//report options alertdialog
 @Composable
 fun ReportOptionsDialog(
     onDismiss: () -> Unit, reportViewModel: ReportViewModel, reportedUser: String
@@ -128,21 +131,14 @@ fun ReportOptionsDialog(
     )
 }
 
+//gets the checked reasons as a list
 private fun getCheckedReasons(checkboxStates: Map<String, Boolean>): List<String> {
     return checkboxStates.filterValues { it }.keys.toList()
 }
 
-
+//checkbox reusable
 @Composable
 fun ReportCheckBox(reasons: List<String>, checkboxStates:MutableMap<String, Boolean>){
-//    val context = LocalContext.current
-//    val reasons = listOf(
-//        context.getString(R.string.inappropriate),
-//        context.getString(R.string.harassment),
-//        context.getString(R.string.spam),
-//        context.getString(R.string.others)
-//    )
-//    val checkboxStates = remember {mutableStateMapOf<String, Boolean>().withDefault{false}}
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Center){
         reasons.forEach{ reason ->
             Row(
