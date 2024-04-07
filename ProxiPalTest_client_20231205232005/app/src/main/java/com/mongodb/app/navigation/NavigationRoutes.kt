@@ -14,4 +14,7 @@ sealed class Routes(val route: String) {
     object UserIndustriesScreen : Routes("userindustriescreen")
     object OnboardingScreen : Routes("onboardingscreen")
     object AdvancedScreenSettings : Routes("advancedscreensettings")
+
+    object EventDetails : Routes("event_details/{event_id}")
+    object EventScreen:Routes("eventscreen")
 }

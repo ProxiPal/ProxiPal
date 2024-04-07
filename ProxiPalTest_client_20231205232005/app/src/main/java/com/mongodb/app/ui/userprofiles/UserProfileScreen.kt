@@ -481,6 +481,7 @@ fun UserProfileEditButtons(
     toolbarViewModel: ToolbarViewModel,
     modifier: Modifier = Modifier
 ) {
+
     var showDeleteConfirmationDialog by remember { mutableStateOf(false) }
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -519,6 +520,7 @@ fun UserProfileEditButtons(
             )
         }
     }
+    //Vichet Chim, confirmation for deleting account
     DeleteConfirmationDialog(
         showDeleteConfirmationDialog = showDeleteConfirmationDialog,
         onDeleteAccountConfirmed =  onDeleteAccountConfirmed,
@@ -526,49 +528,10 @@ fun UserProfileEditButtons(
         toolbarViewModel = toolbarViewModel
     )
 
-//    if (showDeleteConfirmationDialog) {
-//        AlertDialog(onDismissRequest = { showDeleteConfirmationDialog = false}) {
-//            Surface(
-//                modifier=Modifier.fillMaxWidth(),
-////                tonalElevation = AlertDialogDefaults.TonalElevation,
-//                color = Color.White,
-//                shape = RoundedCornerShape(12.dp)
-//            ) {
-//            Column(modifier=Modifier.padding(16.dp),
-//                horizontalAlignment = Alignment.CenterHorizontally,
-//                verticalArrangement =  Arrangement.spacedBy(24.dp))
-//            {
-//                Text(text = stringResource(id = R.string.are_you_sure ))
-//                Text(text = stringResource(id = R.string.delete_account_confirmation_message))
-//                Row(
-//                    modifier= Modifier.fillMaxWidth(),
-//                    verticalAlignment = Alignment.CenterVertically
-//                ){
-//                    TextButton(
-//                        onClick = {
-//                            showDeleteConfirmationDialog = false
-//                            onDeleteAccountConfirmed()
-//                            toolbarViewModel.logOut()
-//                        }, modifier = Modifier.fillMaxWidth().weight(1f)
-//                    ) {
-//                        Text(text = stringResource(id = R.string.delete_account))
-//                    }
-//                    TextButton(
-//                        onClick = { showDeleteConfirmationDialog = false },
-//                        modifier = Modifier.fillMaxWidth().weight(1f)
-//                    ) {
-//                        Text(text = stringResource(id = R.string.cancel))
-//                    }
-//                }
-//            }
-//
-//            }
-//        }
-//    }
-
 
 }
 
+//Vichet Chim - confirmation box for deleting account
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeleteConfirmationDialog(

@@ -6,9 +6,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.mongodb.app.home.AdvancedScreenSettings
 import com.mongodb.app.home.FilterScreen
 import com.mongodb.app.home.HomeScreen
@@ -19,6 +22,9 @@ import com.mongodb.app.ui.tasks.ConnectWithOthersScreen
 import com.mongodb.app.location.LocationPermissionScreen
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.tutorial.OnboardingScreen
+import com.mongodb.app.ui.events.EventDetailsScreen
+import com.mongodb.app.ui.events.EventScreen
+import com.mongodb.app.ui.events.SharedViewModel
 import com.mongodb.app.ui.userprofiles.IndustryScreen
 import com.mongodb.app.ui.userprofiles.InterestScreen
 
@@ -36,6 +42,7 @@ import com.mongodb.app.ui.userprofiles.UserProfileLayout
 fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: UserProfileViewModel, homeViewModel: HomeViewModel) {
     var state by remember{ mutableStateOf(false)}
     val navController = rememberNavController()
+    val sharedViewModel:SharedViewModel = viewModel()
     var startDest = Routes.UserProfileScreen.route
     if (userProfileViewModel.userProfileListState.isEmpty()){
         startDest = Routes.OnboardingScreen.route
@@ -104,6 +111,15 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
         composable(Routes.AdvancedScreenSettings.route){
             AdvancedScreenSettings(navController)
         }
+
+        composable(route = Routes.EventScreen.route){
+            EventScreen(sharedViewModel) { navController.navigate(Routes.EventDetails.route) }
+        }
+        composable(route = Routes.EventDetails.route){
+            EventDetailsScreen(sharedViewModel =sharedViewModel) {navController.popBackStack()}
+        }
+
+
 
     }
 }
