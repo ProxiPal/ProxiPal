@@ -35,8 +35,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.mongodb.app.R
-import com.mongodb.app.domain.Report
-import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.theme.MyApplicationTheme
 //Vichet Chim
 

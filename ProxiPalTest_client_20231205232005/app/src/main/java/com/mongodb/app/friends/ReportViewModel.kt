@@ -17,21 +17,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
-
+//Vichet Chim
 class ReportViewModel(
     private val repository: SyncRepository
 ) : ViewModel() {
 
-//    fun addReport(userReported: String, reasons: List<String>, comment: String) {
-//        CoroutineScope(Dispatchers.IO).launch {
-//            runCatching {
-//                repository.addReport(reportedUser = userReported, reasonsList = reasons, comment = comment)
-//                repository.updateSubscriptionsReports(SubscriptionType.MINE)
-//            }.onSuccess { Log.d("test", "working") }
-//                .onFailure { Log.d("test", "not working") }
-//        }
-//    }
-
+    // function to add a report to database
     fun addReport(userReported: String, reasons: List<String>, comment: String) {
         viewModelScope.launch(){
             runCatching {
