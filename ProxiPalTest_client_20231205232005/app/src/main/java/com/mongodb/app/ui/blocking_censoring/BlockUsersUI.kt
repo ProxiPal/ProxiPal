@@ -17,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.mongodb.app.R
 import com.mongodb.app.TAG
+import com.mongodb.app.presentation.blocking_censoring.FetchCensoredTextThread
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -36,53 +37,11 @@ class BlockUsersUI : ComponentActivity(){
         super.onCreate(savedInstanceState)
 
         // Set this call in a button UI or something similar eventually
-        FetchDataThread().start()
+        FetchCensoredTextThread().start()
         setContent {
             BlockUsersLayout(
-                data = FetchDataThread().data.value
+                data = FetchCensoredTextThread().data.value
             )
-        }
-    }
-
-
-    class FetchDataThread : Thread(){
-        val data = mutableStateOf("")
-
-        override fun run() {
-            try{
-                val url: URL = URL("https://raw.githubusercontent.com/dsojevic/profanity-list/main/en.txt")
-                val httpURLConnection: HttpURLConnection = url.openConnection() as HttpURLConnection
-                val inputStream: InputStream = httpURLConnection.inputStream
-                val inputStreamReader: InputStreamReader = InputStreamReader(inputStream)
-                val bufferedReader: BufferedReader = BufferedReader(inputStreamReader)
-                var line: String? = bufferedReader.readLine()
-
-                while (line != null){
-                    data.value += line
-                    data.value += "\n"
-                    // .readLine() automatically moves to the next line after calling
-                    // Do not call this method more than once per loop iteration
-                    line = bufferedReader.readLine()
-                }
-
-//            if (!data.value.isEmpty()){
-//                val jsonObject: JSONObject = JSONObject(data)
-//            }
-                Log.i(
-                    "TAG()",
-                    "BlockUsersUI: Read data = \"$data\""
-                )
-            }
-            catch (e: Exception){
-                Log.e(
-                    "TAG()",
-                    "BlockUsersUI: Caught exception \"$e\" while trying to load URL"
-                )
-                Log.i(
-                    "TAG()",
-                    "BlockUsersUI: Data is currently = \"${data.value}\""
-                )
-            }
         }
     }
 }
@@ -106,11 +65,11 @@ fun BlockUsersLayout(
 @Composable
 @Preview(showBackground = true)
 fun BlockUsersUIPreview(){
-    BlockUsersUI.FetchDataThread().start()
+    FetchCensoredTextThread().start()
     MyApplicationTheme {
         BlockUsersLayout(
 //            data = stringResource(id = R.string.user_profile_test_string)
-            data = BlockUsersUI.FetchDataThread().data.value
+            data = FetchCensoredTextThread().data.value
         )
     }
 }
