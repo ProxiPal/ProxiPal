@@ -10,10 +10,13 @@ import java.net.URL
 
 
 class FetchCensoredTextThread : Thread(){
-    val data = mutableStateOf("")
+    val isDoneFetchingData = mutableStateOf(true)
+    val data: MutableList<String> = mutableListOf("")
 
 
     override fun run() {
+        isDoneFetchingData.value = false
+        data.clear()
         try{
             val url: URL = URL("https://raw.githubusercontent.com/dsojevic/profanity-list/main/en.txt")
             val httpURLConnection: HttpURLConnection = url.openConnection() as HttpURLConnection
@@ -23,8 +26,7 @@ class FetchCensoredTextThread : Thread(){
             var line: String? = bufferedReader.readLine()
 
             while (line != null){
-                data.value += line
-                data.value += "\n"
+                data.add(line)
                 // .readLine() automatically moves to the next line after calling
                 // Do not call this method more than once per loop iteration
                 line = bufferedReader.readLine()
@@ -45,8 +47,9 @@ class FetchCensoredTextThread : Thread(){
             )
             Log.i(
                 "TAG()",
-                "BlockUsersUI: Data is currently = \"${data.value}\""
+                "BlockUsersUI: Data is currently = \"${data}\""
             )
         }
+        isDoneFetchingData.value = true
     }
 }

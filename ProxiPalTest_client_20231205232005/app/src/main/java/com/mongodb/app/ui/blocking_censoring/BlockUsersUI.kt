@@ -4,8 +4,10 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -15,10 +17,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.lifecycleScope
 import com.mongodb.app.R
 import com.mongodb.app.TAG
+import com.mongodb.app.data.MockRepository
+import com.mongodb.app.data.RealmSyncRepository
+import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
 import com.mongodb.app.presentation.blocking_censoring.FetchCensoredTextThread
 import com.mongodb.app.ui.theme.MyApplicationTheme
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStream
@@ -29,7 +36,17 @@ import java.net.URL
 
 class BlockUsersUI : ComponentActivity(){
     // region Variables
-    private val data = mutableStateOf("")
+    private val repository = RealmSyncRepository { _, _ ->
+        lifecycleScope.launch {
+        }
+    }
+
+    private val censoringViewModel: CensoringViewModel by viewModels{
+        CensoringViewModel.factory(
+            repository = repository,
+            this
+        )
+    }
     // endregion Variables
 
 
@@ -40,7 +57,7 @@ class BlockUsersUI : ComponentActivity(){
         FetchCensoredTextThread().start()
         setContent {
             BlockUsersLayout(
-                data = FetchCensoredTextThread().data.value
+                censoringViewModel = censoringViewModel
             )
         }
     }
@@ -49,14 +66,17 @@ class BlockUsersUI : ComponentActivity(){
 
 @Composable
 fun BlockUsersLayout(
-    data: String,
+    censoringViewModel: CensoringViewModel,
     modifier: Modifier = Modifier
 ){
     Column(
         modifier = modifier
             .fillMaxSize()
     ) {
-        Text(text = data)
+        Button(
+            onClick = { censoringViewModel.readCensoredTextList() }
+        ) {
+        }
     }
 }
 
@@ -65,11 +85,11 @@ fun BlockUsersLayout(
 @Composable
 @Preview(showBackground = true)
 fun BlockUsersUIPreview(){
-    FetchCensoredTextThread().start()
+    val mockRepository = MockRepository()
+    val mockCensoringViewModel = CensoringViewModel(mockRepository)
     MyApplicationTheme {
         BlockUsersLayout(
-//            data = stringResource(id = R.string.user_profile_test_string)
-            data = FetchCensoredTextThread().data.value
+            censoringViewModel = mockCensoringViewModel
         )
     }
 }
