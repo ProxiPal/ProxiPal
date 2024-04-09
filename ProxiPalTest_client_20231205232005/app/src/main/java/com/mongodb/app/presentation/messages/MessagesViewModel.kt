@@ -86,6 +86,16 @@ class MessagesViewModel(
 
     // region Functions
     /**
+     * When a configuration change occurs, this allows updating the current SyncRepository instance
+     * and prevents the app from crashing when trying to communicate with Realm after it has closed.
+     */
+    fun updateRepository(
+        newRepository: SyncRepository
+    ){
+        repository = newRepository
+    }
+
+    /**
      * Retrieves the latest [FriendConversation] object from the database and its referenced [FriendMessage]s
      */
     fun refreshMessages(){

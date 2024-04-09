@@ -114,6 +114,10 @@ class MessagesScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        messagesViewModel.updateRepository(
+            newRepository = repository
+        )
+
         // TODO These values are hardcoded for now
         val usersInvolved = sortedSetOf(
             // Gmail account
