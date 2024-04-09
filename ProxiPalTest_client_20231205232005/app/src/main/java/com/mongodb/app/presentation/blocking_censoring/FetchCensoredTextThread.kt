@@ -12,7 +12,7 @@ import java.net.URL
 class FetchCensoredTextThread : Thread(){
     // region Variables
     val isDoneFetchingData = mutableStateOf(true)
-    val data: MutableList<String> = mutableListOf("")
+    val data: MutableList<String> = mutableListOf()
     // endregion Variables
 
 

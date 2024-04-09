@@ -36,13 +36,19 @@ class CensoringViewModel (
                     TAG(),
                     "CensoringViewModel: Waiting for fetched data"
                 )
-                delay(2000)
+                delay(1000)
             }
-            _censoredTextList.addAll(fetchCensoredTextThread.data)
+            for (datum in fetchCensoredTextThread.data){
+                _censoredTextList.add(datum)
+            }
+            // Do not use .addAll(), it adds all elements as a single element to the end
+//            _censoredTextList.addAll(fetchCensoredTextThread.data)
             Log.i(
                 TAG(),
                 "CensoringViewModel: Done waiting for fetched data; " +
-                        "It's now = \"${_censoredTextList}\""
+                        "It's now = \"${_censoredTextList[0]} ... " +
+                        "${_censoredTextList[_censoredTextList.size - 1]}\" with size = " +
+                        "${_censoredTextList.size}"
             )
         }
     }
