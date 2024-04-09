@@ -67,6 +67,9 @@
             android:name=".ui.messages.MessagesScreen"
             android:screenOrientation="fullSensor" />
         <activity
+            android:name=".ui.blocking_censoring.BlockUsersUI"
+            android:screenOrientation="fullSensor" />
+        <activity
             android:name=".ComposeLoginActivity"
             android:exported="true"
             android:screenOrientation="nosensor">

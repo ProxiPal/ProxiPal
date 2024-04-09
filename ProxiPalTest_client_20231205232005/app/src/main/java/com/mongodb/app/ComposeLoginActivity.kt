@@ -28,6 +28,7 @@ import com.mongodb.app.data.userprofiles.SHOULD_USE_TASKS_ITEMS
 import com.mongodb.app.presentation.login.EventSeverity
 import com.mongodb.app.presentation.login.LoginEvent
 import com.mongodb.app.presentation.login.LoginViewModel
+import com.mongodb.app.ui.blocking_censoring.BlockUsersUI
 import com.mongodb.app.ui.login.AccountScaffold
 import com.mongodb.app.ui.messages.MessagesScreen
 import com.mongodb.app.ui.theme.MyApplicationTheme
@@ -67,8 +68,9 @@ class ComposeLoginActivity : ComponentActivity() {
             else
                 startActivity(Intent(
                     this,
+                    BlockUsersUI::class.java
 //                    CompassScreen::class.java
-                    UserProfileScreen::class.java
+//                    UserProfileScreen::class.java
                 ))
             finish()
             return
@@ -89,8 +91,9 @@ class ComposeLoginActivity : ComponentActivity() {
                             )
                             else Intent(
                                 this@ComposeLoginActivity,
+                                BlockUsersUI::class.java
 //                                CompassScreen::class.java
-                                UserProfileScreen::class.java
+//                                UserProfileScreen::class.java
                             )
                             startActivity(intent)
                             finish()
