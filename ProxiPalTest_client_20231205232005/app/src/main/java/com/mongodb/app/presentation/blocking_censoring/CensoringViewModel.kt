@@ -32,16 +32,17 @@ class CensoringViewModel (
         fetchCensoredTextThread.start()
         viewModelScope.launch {
             while (!fetchCensoredTextThread.isDoneFetchingData.value){
-                delay(2000)
                 Log.i(
                     TAG(),
                     "CensoringViewModel: Waiting for fetched data"
                 )
+                delay(2000)
             }
             _censoredTextList.addAll(fetchCensoredTextThread.data)
             Log.i(
                 TAG(),
-                "CensoringViewModel: Done waiting for fetched data"
+                "CensoringViewModel: Done waiting for fetched data; " +
+                        "It's now = \"${_censoredTextList}\""
             )
         }
     }

@@ -10,10 +10,13 @@ import java.net.URL
 
 
 class FetchCensoredTextThread : Thread(){
+    // region Variables
     val isDoneFetchingData = mutableStateOf(true)
     val data: MutableList<String> = mutableListOf("")
+    // endregion Variables
 
 
+    // region Functions
     override fun run() {
         isDoneFetchingData.value = false
         data.clear()
@@ -31,25 +34,14 @@ class FetchCensoredTextThread : Thread(){
                 // Do not call this method more than once per loop iteration
                 line = bufferedReader.readLine()
             }
-
-//            if (!data.value.isEmpty()){
-//                val jsonObject: JSONObject = JSONObject(data)
-//            }
-            Log.i(
-                "TAG()",
-                "BlockUsersUI: Read data = \"$data\""
-            )
         }
         catch (e: Exception){
             Log.e(
                 "TAG()",
                 "BlockUsersUI: Caught exception \"$e\" while trying to load URL"
             )
-            Log.i(
-                "TAG()",
-                "BlockUsersUI: Data is currently = \"${data}\""
-            )
         }
         isDoneFetchingData.value = true
     }
+    // endregion Functions
 }
