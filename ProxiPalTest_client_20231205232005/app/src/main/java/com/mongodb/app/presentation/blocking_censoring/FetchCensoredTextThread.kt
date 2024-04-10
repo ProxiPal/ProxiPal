@@ -7,6 +7,7 @@ import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import javax.net.ssl.HttpsURLConnection
 
 
 class FetchCensoredTextThread : Thread(){
@@ -23,6 +24,7 @@ class FetchCensoredTextThread : Thread(){
         try{
             val url: URL = URL("https://raw.githubusercontent.com/dsojevic/profanity-list/main/en.txt")
             val httpURLConnection: HttpURLConnection = url.openConnection() as HttpURLConnection
+//            val httpsURLConnection: HttpsURLConnection = url.openConnection() as HttpsURLConnection
             val inputStream: InputStream = httpURLConnection.inputStream
             val inputStreamReader: InputStreamReader = InputStreamReader(inputStream)
             val bufferedReader: BufferedReader = BufferedReader(inputStreamReader)
@@ -38,7 +40,7 @@ class FetchCensoredTextThread : Thread(){
         catch (e: Exception){
             Log.e(
                 "TAG()",
-                "BlockUsersUI: Caught exception \"$e\" while trying to load URL"
+                "FetchCensoredTextThread: Caught exception \"$e\" while trying to load URL"
             )
         }
         isDoneFetchingData.value = true

@@ -15,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
+import com.mongodb.app.presentation.blocking_censoring.censor
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import kotlinx.coroutines.launch
 
@@ -61,6 +62,13 @@ fun BlockUsersLayout(
         ) {
             Text(
                 text = "Load censored text list"
+            )
+        }
+        Button(
+            onClick = { censoringViewModel.testTextCensoring() }
+        ){
+            Text(
+                text = "Test string censoring"
             )
         }
     }
