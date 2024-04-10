@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
+import com.mongodb.app.presentation.blocking_censoring.CSVFileReader
 import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
 import com.mongodb.app.presentation.blocking_censoring.censor
 import com.mongodb.app.ui.theme.MyApplicationTheme
@@ -69,6 +70,13 @@ fun BlockUsersLayout(
         ){
             Text(
                 text = "Test string censoring"
+            )
+        }
+        Button(
+            onClick = { CSVFileReader().readCsvFile() }
+        ){
+            Text(
+                text = "Test .csv reading"
             )
         }
     }
