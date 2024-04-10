@@ -25,12 +25,22 @@ fun String.censor(censoredTextList: MutableList<String>): String{
     }
 
     for (keyText in censoredTextList){
-        // While the string still contains the text to censor
+        // While the current string still contains the text to censor
         while (stringBuilder.indexOf(keyText) != -1){
-            val startIndex = stringBuilder.indexOf(keyText)
-            val endIndex = startIndex + keyText.length - 1
-            for (i in startIndex..endIndex){
-                stringBuilder.setCharAt(i, censoredChar)
+            // Only censor if the message is exactly the text to censor
+            // ... or if the message contains the text surrounded by spaces
+            // Ex: "p ass word" should be censored but not "pass" or "assassin"
+            // While the string still contains the text to censor
+            val isExactText = stringBuilder.equals(keyText)
+            val doesHaveExactTextSurrounded = stringBuilder.contains(" $keyText ")
+            val shouldCensor = isExactText || doesHaveExactTextSurrounded
+
+            if (shouldCensor){
+                val startIndex = stringBuilder.indexOf(keyText)
+                val endIndex = startIndex + keyText.length - 1
+                for (i in startIndex..endIndex){
+                    stringBuilder.setCharAt(i, censoredChar)
+                }
             }
         }
     }
