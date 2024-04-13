@@ -21,23 +21,18 @@ import java.util.regex.Pattern
 fun String.censor(censoredTextList: MutableList<String>): String{
     val censoredChar = '*'
     val stringBuilder = StringBuilder()
+    val lowercaseBuilder = StringBuilder()
     for (index in indices){
-        stringBuilder.append(this[index].lowercaseChar())
+        stringBuilder.append(this[index])
+        lowercaseBuilder.append(this[index].lowercaseChar())
     }
 
     for (keyText in censoredTextList){
         var shouldCensor = true
         // While the current string still contains the text to censor
-        while (stringBuilder.indexOf(keyText) != -1 && shouldCensor){
-            // Only censor if the message is exactly the text to censor
-            // ... or if the message contains the text surrounded by spaces
-            // Ex: "p ass word" should be censored but not "pass" or "assassin"
-            // While the string still contains the text to censor
-            val isExactText = stringBuilder.toString() == keyText
-            // This would censor both "What is an *ss?" and "What is an assassin?"
-            val doesHaveExactTextFront = stringBuilder.contains(" $keyText")
-            val doesHaveExactTextSurrounded = stringBuilder.contains(" $keyText ")
-            // Should match the censored text with any amount of spaces in front and behind it
+        while (lowercaseBuilder.indexOf(keyText) != -1 && shouldCensor){
+            // If the current string matches the censored text with any amount of spaces
+            // ... in front and behind it, censor it
             val zeroOrMoreWhitespacesPattern = "\\s*"
             val exactTextSurroundedPattern = Pattern.compile(
                 zeroOrMoreWhitespacesPattern +
@@ -45,24 +40,24 @@ fun String.censor(censoredTextList: MutableList<String>): String{
                 zeroOrMoreWhitespacesPattern
             )
             // Check if the string matches the pattern (whiteSpace)* + keyText + (whiteSpace)*
-            val exactTextSurroundedMatcher = exactTextSurroundedPattern.matcher(stringBuilder)
+            val exactTextSurroundedMatcher = exactTextSurroundedPattern.matcher(lowercaseBuilder)
             val doesMatchExactTextSurroundedPattern = exactTextSurroundedMatcher.matches()
-            shouldCensor = isExactText || doesHaveExactTextFront || doesHaveExactTextSurrounded ||
-                    doesMatchExactTextSurroundedPattern
+            shouldCensor = doesMatchExactTextSurroundedPattern
 
             // Replace the offending text with censored characters
             if (shouldCensor){
-                val startIndex = stringBuilder.indexOf(keyText)
+                val startIndex = lowercaseBuilder.indexOf(keyText)
                 val endIndex = startIndex + keyText.length - 1
                 for (i in startIndex..endIndex){
                     stringBuilder.setCharAt(i, censoredChar)
+                    lowercaseBuilder.setCharAt(i, censoredChar)
                 }
             }
         }
     }
     Log.i(
         TAG(),
-        "Censored \"${this}\" to \"${stringBuilder.toString()}\""
+        "Censored \"${this}\" to \"${stringBuilder}\""
     )
     return stringBuilder.toString()
 }
