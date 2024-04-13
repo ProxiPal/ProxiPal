@@ -86,6 +86,13 @@
     <string name="messages_screen_message_reference_short">\"%s\"</string>
     <string name="messages_screen_message_reference_long">\"%s…\"</string>
 <!--    End messages screen strings-->
+<!--    Start of blocking/censoring strings -->
+    <string name="blocking_contextual_menu_block_user">Block</string>
+    <string name="blocking_alert_title">Block \"%s\"?</string>
+    <string name="blocking_alert_text">Are you sure you want to block this user?</string>
+    <string name="blocking_alert_cancel">Cancel</string>
+    <string name="blocking_alert_confirm">Confirm</string>
+<!--    End of blocking/censoring strings -->
 
     <!-- NewFriendRequestNotificationService strings
          Programmer:Brian Poon 2/21/24   -->
