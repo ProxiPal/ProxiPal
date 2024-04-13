@@ -10,6 +10,8 @@ import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 
 
+// If this ends up not working, try shutting down the emulator and restarting it
+// If still not working, try restarting Android Studio
 class FetchCensoredTextThread : Thread(){
     // region Variables
     val isDoneFetchingData = mutableStateOf(true)
@@ -25,6 +27,8 @@ class FetchCensoredTextThread : Thread(){
             val url: URL = URL("https://raw.githubusercontent.com/dsojevic/profanity-list/main/en.txt")
             val httpURLConnection: HttpURLConnection = url.openConnection() as HttpURLConnection
 //            val httpsURLConnection: HttpsURLConnection = url.openConnection() as HttpsURLConnection
+            // Set the timeout to 1 minute
+            httpURLConnection.connectTimeout = 60000
             val inputStream: InputStream = httpURLConnection.inputStream
             val inputStreamReader: InputStreamReader = InputStreamReader(inputStream)
             val bufferedReader: BufferedReader = BufferedReader(inputStreamReader)
