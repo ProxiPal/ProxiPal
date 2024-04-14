@@ -69,7 +69,6 @@ class ComposeLoginActivity : ComponentActivity() {
                 startActivity(Intent(
                     this,
                     BlockUsersUI::class.java
-//                    CompassScreen::class.java
 //                    UserProfileScreen::class.java
                 ))
             finish()
@@ -92,7 +91,6 @@ class ComposeLoginActivity : ComponentActivity() {
                             else Intent(
                                 this@ComposeLoginActivity,
                                 BlockUsersUI::class.java
-//                                CompassScreen::class.java
 //                                UserProfileScreen::class.java
                             )
                             startActivity(intent)
