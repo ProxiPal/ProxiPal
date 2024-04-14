@@ -44,9 +44,7 @@ fun String.censor(censoredTextList: MutableList<String>): String{
 private fun StringBuilder.censorShort(textToCensor: String){
     val zeroOrMoreWhitespaces = "\\s*"
     val zeroOrMoreWhitespacesPattern = Pattern.compile(
-        zeroOrMoreWhitespaces +
-                textToCensor +
-                zeroOrMoreWhitespaces
+        zeroOrMoreWhitespaces + textToCensor + zeroOrMoreWhitespaces
     )
     // Ignore casing when doing the pattern matching
     val lowercase = this.toString().lowercase()
@@ -70,9 +68,13 @@ private fun StringBuilder.censorLong(textToCensor: String){
 
     val nonAlphabetChar = "[^a-z]"
     val nonAlphabetCharPattern = Pattern.compile(
-        nonAlphabetChar +
-                textToCensor +
-                nonAlphabetChar
+        nonAlphabetChar + textToCensor + nonAlphabetChar
+    )
+    val nonAlphabetCharFirstPattern = Pattern.compile(
+        textToCensor + nonAlphabetChar
+    )
+    val nonAlphabetCharLastPattern = Pattern.compile(
+        nonAlphabetChar + textToCensor
     )
 
     // Ignore casing when doing the pattern matching
@@ -89,12 +91,32 @@ private fun StringBuilder.censorLong(textToCensor: String){
         val nonAlphabetCharMatcher = nonAlphabetCharPattern.matcher(substring)
         val doesMatchNonAlphabetCharPattern = nonAlphabetCharMatcher.matches()
 
-        Log.i(
-            TAG(),
-            "\"$substring\" =?= \"${nonAlphabetCharPattern.pattern()}\""
-        )
+//        Log.i(
+//            TAG(),
+//            "\"$substring\" =?= \"${nonAlphabetCharPattern.pattern()}\""
+//        )
         if (doesMatchNonAlphabetCharPattern){
             this.replace(startIndex, endIndex, CENSORED_CHAR)
+        }
+
+
+        val substringFirst = lowercase.substring(startIndex, endIndex)
+        val substringLast = lowercase.substring(startIndex + 1, endIndex + 1)
+//        Log.i(
+//            TAG(),
+//            "\"$substringFirst\" ?= \"${nonAlphabetCharFirstPattern.pattern()}\""
+//        )
+//        Log.i(
+//            TAG(),
+//            "\"$substringLast\" =? \"${nonAlphabetCharLastPattern.pattern()}\""
+//        )
+        // For 1st iteration, instead check (keyText) + (nonAlphabetChar)
+        if (i == 0 && nonAlphabetCharFirstPattern.matcher(substringFirst).matches()){
+            this.replace(startIndex, endIndex - 1, CENSORED_CHAR)
+        }
+        // For last iteration, instead check (nonAlphabetChar) + (keyText)
+        if (i == loopAmount - 1 && nonAlphabetCharLastPattern.matcher(substringLast).matches()){
+            this.replace(startIndex + 1, endIndex, CENSORED_CHAR)
         }
 
         startIndex += 1
