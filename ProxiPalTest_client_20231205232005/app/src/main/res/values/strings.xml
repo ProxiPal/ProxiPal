@@ -88,8 +88,11 @@
 <!--    End messages screen strings-->
 <!--    Start of blocking/censoring strings -->
     <string name="blocking_contextual_menu_block_user">Block</string>
-    <string name="blocking_alert_title">Block \"%s\"?</string>
-    <string name="blocking_alert_text">Are you sure you want to block this user?</string>
+    <string name="blocking_contextual_menu_unblock_user">Unblock</string>
+    <string name="blocking_alert_block_title">Block \"%s\"?</string>
+    <string name="blocking_alert_unblock_title">Unblock \"%s\"?</string>
+    <string name="blocking_alert_block_text">Are you sure you want to block this user? You will no longer see your message history with this user.</string>
+    <string name="blocking_alert_unblock_text">Are you sure you want to unblock this user?</string>
     <string name="blocking_alert_cancel">Cancel</string>
     <string name="blocking_alert_confirm">Confirm</string>
 <!--    End of blocking/censoring strings -->

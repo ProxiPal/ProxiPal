@@ -147,7 +147,8 @@ fun BlockingContextualMenu(
             userNameToBlock = "placeholder",
             onDismissRequest = { blockingViewModel.blockUserEnd() },
             onDismissButtonClick = { blockingViewModel.blockUserEnd() },
-            onConfirmButtonClick = { blockingViewModel.blockUser() }
+            onConfirmButtonClick = { blockingViewModel.blockUser() },
+            blockingViewModel = blockingViewModel
         )
     }
 }
@@ -160,6 +161,7 @@ fun BlockingAlert(
     onDismissRequest: (() -> Unit),
     onDismissButtonClick: (() -> Unit),
     onConfirmButtonClick: (() -> Unit),
+    blockingViewModel: BlockingViewModel,
     modifier: Modifier = Modifier
 ) {
     AlertDialog(
@@ -184,12 +186,20 @@ fun BlockingAlert(
         },
         title = {
             Text(
-                text = stringResource(id = R.string.blocking_alert_title, userNameToBlock)
+                text =
+                if (blockingViewModel.isUserBlocked(userIdToBlock))
+                    stringResource(id = R.string.blocking_alert_unblock_title, userNameToBlock)
+                else
+                    stringResource(id = R.string.blocking_alert_block_title, userNameToBlock)
             )
         },
         text = {
             Text(
-                text = stringResource(id = R.string.blocking_alert_text)
+                text =
+                if (blockingViewModel.isUserBlocked(userIdToBlock))
+                    stringResource(id = R.string.blocking_alert_unblock_text)
+                else
+                    stringResource(id = R.string.blocking_alert_block_text)
             )
         },
         modifier = modifier
@@ -253,13 +263,16 @@ fun BlockingContextualMenuPreview() {
 @Composable
 @Preview(showBackground = true)
 fun BlockingAlertPreview() {
+    val mockRepository = MockRepository()
+    val mockBlockingViewModel = BlockingViewModel(mockRepository)
     MyApplicationTheme {
         BlockingAlert(
             userIdToBlock = stringResource(id = R.string.user_profile_test_string),
             userNameToBlock = stringResource(id = R.string.user_profile_test_string),
             onDismissRequest = {},
             onDismissButtonClick = {},
-            onConfirmButtonClick = {}
+            onConfirmButtonClick = {},
+            blockingViewModel = mockBlockingViewModel
         )
     }
 }
