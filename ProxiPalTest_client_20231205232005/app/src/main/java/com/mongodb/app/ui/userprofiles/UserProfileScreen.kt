@@ -63,6 +63,7 @@ import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.userprofiles.USER_PROFILE_EDIT_MODE_MAXIMUM_LINE_AMOUNT
 import com.mongodb.app.data.userprofiles.USER_PROFILE_ROW_HEADER_WEIGHT
+import com.mongodb.app.friends.FriendRequestViewModel
 import com.mongodb.app.home.HomeScreen
 import com.mongodb.app.home.HomeViewModel
 import com.mongodb.app.navigation.NavigationGraph
@@ -112,6 +113,11 @@ class UserProfileScreen : ComponentActivity() {
 
     private val toolbarViewModel: ToolbarViewModel by viewModels {
         ToolbarViewModel.factory(repository, this)
+    }
+
+    //april2
+    private val friendRequestViewModel: FriendRequestViewModel by viewModels {
+        FriendRequestViewModel.factory(repository)
     }
 
 
@@ -174,7 +180,7 @@ class UserProfileScreen : ComponentActivity() {
 
         setContent {
             MyApplicationTheme {
-                NavigationGraph(toolbarViewModel, userProfileViewModel, homeViewModel = HomeViewModel(repository = repository))
+                NavigationGraph(toolbarViewModel, userProfileViewModel, homeViewModel = HomeViewModel(repository = repository), friendRequestViewModel = friendRequestViewModel)
             }
         }
     }

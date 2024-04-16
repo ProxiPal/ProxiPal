@@ -7,7 +7,7 @@ import io.realm.kotlin.types.RealmList
 import org.mongodb.kbson.ObjectId
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
-
+import kotlin.random.Random
 
 
 /*
@@ -46,6 +46,14 @@ class UserProfile : RealmObject {
     var selectedIndustries : RealmList<String> = realmListOf()
     var otherFilters : RealmList<String> = realmListOf()
 
+    //april
+    var friendsId: String = generateFriendsId()
+    companion object {
+        fun generateFriendsId(): String = Random.nextInt(10000000, 99999999).toString()
+    }
+    //april2
+    var friends: RealmList<String> = realmListOf()
+
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
         if (other !is UserProfile) return false
@@ -64,5 +72,6 @@ class UserProfile : RealmObject {
         result = 31 * result + biography.hashCode()
         result = 31 * result + ownerId.hashCode()
         return result
+
     }
 }

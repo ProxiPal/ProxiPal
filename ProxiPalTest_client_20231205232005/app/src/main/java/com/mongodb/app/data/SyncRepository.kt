@@ -13,6 +13,8 @@ import com.mongodb.app.domain.FriendConversation
 import com.mongodb.app.domain.FriendMessage
 import com.mongodb.app.domain.Item
 import com.mongodb.app.domain.UserProfile
+import com.mongodb.app.domain.UserProfile.Companion.generateFriendsId
+import com.mongodb.app.friends.FriendshipRequest
 import com.mongodb.app.location.CustomGeoPoint
 import com.mongodb.app.ui.messages.empty
 import io.realm.kotlin.Realm
@@ -39,9 +41,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.mongodb.kbson.ObjectId
 import java.util.SortedSet
 import kotlin.time.Duration.Companion.seconds
+import java.util.UUID
+
+
 
 
 /*
@@ -251,6 +257,24 @@ interface SyncRepository {
     //march17 George Fu
     suspend fun updateUserSelectedFilters(selectedInterests: List<String>, selectedIndustries: List<String>, otherFilters: List<String>)
     suspend fun clearUserSelectedFilters()
+
+    //april2
+    suspend fun sendFriendRequest(senderId: String, receiverFriendId: String)
+
+    suspend fun respondToFriendRequest(requestId: String, accepted: Boolean)
+
+    fun getFriendRequests(receiverFriendId: String): Flow<ResultsChange<FriendshipRequest>>
+
+
+    //april2
+    suspend fun validateFriendId(friendId: String): Boolean
+
+    //april2
+    suspend fun getCurrentUserFriendsId(): String?
+
+    //APRIL12
+    fun getAllUserProfiles(): Flow<List<UserProfile>>
+
 }
 
 
@@ -278,8 +302,11 @@ class RealmSyncRepository(
             UserProfile::class,
             CustomGeoPoint::class,
             FriendMessage::class,
-            FriendConversation::class)
+            FriendConversation::class,
+            FriendshipRequest::class) //april
+
         config = SyncConfiguration.Builder(currentUser, schemaSet)
+            .schemaVersion(1)
             .initialSubscriptions { realm ->
                 // Subscribe to the active subscriptionType - first time defaults to MINE
                 val activeSubscriptionType = SubscriptionType.ALL
@@ -304,8 +331,18 @@ class RealmSyncRepository(
                         getQueryMyConversations(realm),
                         SubscriptionNameMyFriendConversations
                     )
+                    //april
+                    if (realm.subscriptions.find { it.name == "FriendshipRequests" } == null) {
+                        add(
+                            realm.query(FriendshipRequest::class),
+                            "FriendshipRequests"
+                        )
+                    }
+
                 }
+
             }
+
             .errorHandler { session: SyncSession, error: SyncException ->
                 onSyncError.invoke(session, error)
             }
@@ -383,7 +420,7 @@ class RealmSyncRepository(
 
     override fun close() = realm.close()
 
-    override fun getCurrentUserId(): String{
+    override fun getCurrentUserId(): String {
         return currentUser.id
     }
     // endregion RealmFunctions
@@ -495,6 +532,8 @@ class RealmSyncRepository(
             // it will be updated by the connect screen
             this.location = CustomGeoPoint(0.0,0.0)
             //this.interests.add("")
+            //april
+            generateFriendsId()
         }
         realm.write {
             copyToRealm(userProfile, updatePolicy = UpdatePolicy.ALL)
@@ -1008,6 +1047,71 @@ class RealmSyncRepository(
             }
         }
     }
+
+    //april2
+    override suspend fun sendFriendRequest(senderId: String, receiverFriendId: String) {
+        try {
+            // Ensure the subscriptions are ready and check specifically for the required subscription
+            realm.subscriptions.waitForSynchronization()
+            if (!realm.subscriptions.any { it.name == "FriendshipRequests" }) {
+                throw IllegalStateException("Subscription for FriendshipRequests not found")
+            }
+
+            realm.write {
+                // Create and add the FriendshipRequest
+                val newRequest = FriendshipRequest().apply {
+                    this._id = UUID.randomUUID().toString()
+                    this.senderId = senderId
+                    this.receiverFriendId = receiverFriendId
+                    this.status = "pending"
+                }
+                copyToRealm(newRequest)
+                Log.d("idk", "Friend request sent: ${newRequest._id}")
+            }
+        } catch (e: Exception) {
+            Log.e("idk", "Error sending friend request", e)
+        }
+    }
+
+
+
+    //april2
+    override suspend fun respondToFriendRequest(requestId: String, accepted: Boolean) {
+        realm.write {
+            val request = query<FriendshipRequest>("_id == $0", requestId).first().find()
+            request?.status = if (accepted) "accepted" else "declined"
+        }
+    }
+    //april2
+    override fun getFriendRequests(receiverFriendId: String): Flow<ResultsChange<FriendshipRequest>> {
+        // This should correctly query friend requests where the current user is the receiver
+        return realm.query<FriendshipRequest>("receiverFriendId == $0", receiverFriendId)
+            .asFlow()
+    }
+
+    //april2
+    override suspend fun validateFriendId(friendId: String): Boolean = withContext(Dispatchers.IO) {
+        // Directly query for the existence of the friendId without comparing it to the currentUserFriendId
+        val currentUserFriendId = getCurrentUserFriendsId()
+        if (friendId == currentUserFriendId) {
+            return@withContext false // If the user tries to add themselves, return false
+        }
+        val result = realm.query<UserProfile>("friendsId == $0", friendId).find()
+
+        result.firstOrNull() != null // true if any user (except the current user, already checked) has this friendsId
+    }
+
+
+    //april2
+    override suspend fun getCurrentUserFriendsId(): String? = withContext(Dispatchers.IO) {
+        val userProfile = realm.query<UserProfile>("ownerId == $0", getCurrentUserId()).first().find()
+        userProfile?.friendsId
+    }
+    //APRIL12
+    override fun getAllUserProfiles(): Flow<List<UserProfile>> = flow {
+        val userProfiles = realm.query<UserProfile>().find().toList()
+        emit(userProfiles)
+    }
 }
 
 /**
@@ -1076,6 +1180,22 @@ class MockRepository : SyncRepository {
     //march17 George Fu
     override suspend fun updateUserSelectedFilters(selectedInterests: List<String>, selectedIndustries: List<String>, otherFilters: List<String>) = Unit
     override suspend fun clearUserSelectedFilters() = Unit
+
+    //april
+    override suspend fun sendFriendRequest(senderId: String, receiverFriendId: String) = Unit
+    override suspend fun respondToFriendRequest(requestId: String, accepted: Boolean) = Unit
+    override fun getFriendRequests(receiverFriendId: String): Flow<ResultsChange<FriendshipRequest>> = flowOf()
+
+
+    //april2
+    override suspend fun validateFriendId(friendId: String): Boolean {
+        return true
+    }
+    //april2
+    override suspend fun getCurrentUserFriendsId(): String? = null
+
+    //APRIL12
+    override fun getAllUserProfiles(): Flow<List<UserProfile>> = flowOf()
 
     companion object {
         const val MOCK_OWNER_ID_MINE = "A"
