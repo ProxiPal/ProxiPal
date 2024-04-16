@@ -31,6 +31,7 @@ import androidx.lifecycle.lifecycleScope
 import com.mongodb.app.R
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
+import com.mongodb.app.presentation.blocking_censoring.BlockingAction
 import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
 import com.mongodb.app.presentation.blocking_censoring.CSVFileReader
 import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
@@ -140,14 +141,25 @@ fun BlockingContextualMenu(
         }
     }
 
-    if (blockingViewModel.isBlockingUser.value) {
+    if (blockingViewModel.blockingAction.value == BlockingAction.BLOCKING) {
         BlockingAlert(
             // TODO
             userIdToBlock = userId,
             userNameToBlock = "placeholder",
-            onDismissRequest = { blockingViewModel.blockUserEnd() },
-            onDismissButtonClick = { blockingViewModel.blockUserEnd() },
+            onDismissRequest = { blockingViewModel.blockUnblockUserEnd() },
+            onDismissButtonClick = { blockingViewModel.blockUnblockUserEnd() },
             onConfirmButtonClick = { blockingViewModel.blockUser() },
+            blockingViewModel = blockingViewModel
+        )
+    }
+    else if (blockingViewModel.blockingAction.value == BlockingAction.UNBLOCKING){
+        BlockingAlert(
+            // TODO
+            userIdToBlock = userId,
+            userNameToBlock = "placeholder",
+            onDismissRequest = { blockingViewModel.blockUnblockUserEnd() },
+            onDismissButtonClick = { blockingViewModel.blockUnblockUserEnd() },
+            onConfirmButtonClick = { blockingViewModel.unblockUser() },
             blockingViewModel = blockingViewModel
         )
     }

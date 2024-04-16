@@ -17,14 +17,21 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 
+enum class BlockingAction{
+    IDLE, /* Not blocking or unblocking a user */
+    BLOCKING,
+    UNBLOCKING
+}
+
+
 class BlockingViewModel (
     private var repository: SyncRepository
 ) : ViewModel(){
     // region Variables
     private var _currentUserId = mutableStateOf("")
     private var _currentUserProfile: UserProfile? = null
-    private val _isBlockingUser = mutableStateOf(false)
-    private val _userIdBeingBlocked = mutableStateOf("")
+    private val _blockingAction = mutableStateOf(BlockingAction.IDLE)
+    private val _userIdInFocus = mutableStateOf("")
     // endregion Variables
 
 
@@ -33,17 +40,17 @@ class BlockingViewModel (
         get() = _currentUserId
     val currentUserProfile
         get() = _currentUserProfile
-    val isBlockingUser
-        get() = _isBlockingUser
-    val userIdBeingBlocked
-        get() = _userIdBeingBlocked
+    val blockingAction
+        get() = _blockingAction
+    val userIdInFocus
+        get() = _userIdInFocus
     // endregion Properties
 
 
     // region Functions
     fun updateRepositories(newRepository: SyncRepository){
         repository = newRepository
-        _currentUserId.value = repository.getCurrentUserId()
+        currentUserId.value = repository.getCurrentUserId()
         viewModelScope.launch {
             resetCurrentUserProfileReference()
         }
@@ -52,15 +59,22 @@ class BlockingViewModel (
     fun blockUserStart(
         userIdToBlock: String
     ){
-        _isBlockingUser.value = true
-        _userIdBeingBlocked.value = userIdToBlock
+        blockingAction.value = BlockingAction.BLOCKING
+        userIdInFocus.value = userIdToBlock
+    }
+
+    fun unblockUserStart(
+        userIdToUnblock: String
+    ){
+        blockingAction.value = BlockingAction.UNBLOCKING
+        userIdInFocus.value = userIdToUnblock
     }
 
     fun blockUser(){
         viewModelScope.launch {
             tryBlockUnblockUser(true)
             resetCurrentUserProfileReference()
-            blockUserEnd()
+            blockUnblockUserEnd()
         }
     }
 
@@ -68,7 +82,7 @@ class BlockingViewModel (
         viewModelScope.launch {
             tryBlockUnblockUser(false)
             resetCurrentUserProfileReference()
-            blockUserEnd()
+            blockUnblockUserEnd()
         }
     }
 
@@ -78,7 +92,7 @@ class BlockingViewModel (
     private suspend fun tryBlockUnblockUser(shouldBlock: Boolean){
         // This is inside a try-catch block in case the user ID being (un)blocked is not a valid ID
         try{
-            val objectId = userIdBeingBlocked.value.toObjectId()
+            val objectId = userIdInFocus.value.toObjectId()
             repository.updateUsersBlocked(objectId, shouldBlock)
             if (shouldBlock){
                 Log.i(
@@ -98,21 +112,21 @@ class BlockingViewModel (
                 Log.e(
                     TAG(),
                     "BlockingViewModel: Caught exception \"$e\" while trying to block user " +
-                            "with ID \"${userIdBeingBlocked.value}\""
+                            "with ID \"${userIdInFocus.value}\""
                 )
             }
             else{
                 Log.e(
                     TAG(),
                     "BlockingViewModel: Caught exception \"$e\" while trying to unblock user " +
-                            "with ID \"${userIdBeingBlocked.value}\""
+                            "with ID \"${userIdInFocus.value}\""
                 )
             }
         }
     }
 
     private suspend fun resetCurrentUserProfileReference(){
-        repository.readUserProfile(_currentUserId.value)
+        repository.readUserProfile(currentUserId.value)
             .first{
                 if (it.list.size > 0){
                     _currentUserProfile = it.list[0]
@@ -121,9 +135,9 @@ class BlockingViewModel (
             }
     }
 
-    fun blockUserEnd(){
-        _isBlockingUser.value = false
-        _userIdBeingBlocked.value = String.empty
+    fun blockUnblockUserEnd(){
+        blockingAction.value = BlockingAction.IDLE
+        userIdInFocus.value = String.empty
     }
 
     fun isUserBlocked(userId: String): Boolean {
