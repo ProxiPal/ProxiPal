@@ -236,10 +236,6 @@ interface SyncRepository {
     fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double, selectedInterests: List<String> = emptyList(), selectedIndustries: List<String> = emptyList(), otherFilters: List<String> = emptyList()): Flow<ResultsChange<UserProfile>>
     // endregion location
 
-
-    // endregion Functions
-  
-  
     suspend fun updateUserProfileInterests(interest:String)
 
     suspend fun updateUserProfileIndustries(industry:String)
@@ -251,6 +247,10 @@ interface SyncRepository {
     //march17 George Fu
     suspend fun updateUserSelectedFilters(selectedInterests: List<String>, selectedIndustries: List<String>, otherFilters: List<String>)
     suspend fun clearUserSelectedFilters()
+
+    //region User Rating System
+
+    // endregion Functions
 }
 
 

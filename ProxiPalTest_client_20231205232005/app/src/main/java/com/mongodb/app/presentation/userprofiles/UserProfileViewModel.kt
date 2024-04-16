@@ -88,6 +88,9 @@ class UserProfileViewModel(
     private val _selectedIndustries = mutableStateOf<List<String>>(emptyList())
     private val _otherFilters = mutableStateOf<List<String>>(emptyList())
 
+    // user rating will be a list of size 2; first element is likes and second is dislikes
+    private val _userRatings = mutableStateOf<List<Int>>(emptyList())
+
 
 
     /*
@@ -147,6 +150,9 @@ class UserProfileViewModel(
     val selectedInterests: State<List<String>> = _selectedInterests
     val selectedIndustries: State<List<String>> = _selectedIndustries
     val otherFilters: State<List<String>> = _otherFilters
+
+    val userRatings: State<List<Int>>
+        get() = _userRatings
 
 
 
@@ -316,9 +322,6 @@ class UserProfileViewModel(
     /**
      * Updates the user profile's location
      */
-
-
-
     fun setUserProfileLocation(latitude: Double, longitude: Double){
         _userProfileLatitude.value = latitude
         _userProfileLongitude.value = longitude
