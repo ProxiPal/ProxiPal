@@ -89,7 +89,7 @@ class UserProfileViewModel(
     private val _otherFilters = mutableStateOf<List<String>>(emptyList())
 
     // user rating will be a list of size 2; first element is likes and second is dislikes
-    private val _userRatings = mutableStateOf<List<Int>>(emptyList())
+    private val _userRatings: MutableState<List<Int>> = mutableStateOf(listOf(0,0))
 
 
 
@@ -245,6 +245,8 @@ class UserProfileViewModel(
                                     _userProfileInterests = event.list[0].interests.toList().toMutableList()
                                     _userProfileIndustries = event.list[0].industries.toList().toMutableList()
 
+                                    _userRatings.value = event.list[0].ratings
+
                                 }
                                 else -> {
                                     // Load the saved profile details
@@ -261,6 +263,8 @@ class UserProfileViewModel(
 
                                     _userProfileInterests = event.list[0].interests.toList().toMutableList()
                                     _userProfileIndustries = event.list[0].industries.toList().toMutableList()
+
+                                    _userRatings.value = event.list[0].ratings
 
                                 }
                             }
