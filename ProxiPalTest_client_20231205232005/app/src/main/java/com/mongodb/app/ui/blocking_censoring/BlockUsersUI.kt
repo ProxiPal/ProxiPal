@@ -7,9 +7,9 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
@@ -21,6 +21,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -33,7 +35,6 @@ import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.presentation.blocking_censoring.BlockingAction
 import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
-import com.mongodb.app.presentation.blocking_censoring.CSVFileReader
 import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import kotlinx.coroutines.launch
@@ -146,6 +147,7 @@ fun BlockingContextualMenu(
             // TODO
             userIdToBlock = userId,
             userNameToBlock = "placeholder",
+            isBlocking = true,
             onDismissRequest = { blockingViewModel.blockUnblockUserEnd() },
             onDismissButtonClick = { blockingViewModel.blockUnblockUserEnd() },
             onConfirmButtonClick = { blockingViewModel.blockUser() },
@@ -157,6 +159,7 @@ fun BlockingContextualMenu(
             // TODO
             userIdToBlock = userId,
             userNameToBlock = "placeholder",
+            isBlocking = false,
             onDismissRequest = { blockingViewModel.blockUnblockUserEnd() },
             onDismissButtonClick = { blockingViewModel.blockUnblockUserEnd() },
             onConfirmButtonClick = { blockingViewModel.unblockUser() },
@@ -170,12 +173,18 @@ fun BlockingContextualMenu(
 fun BlockingAlert(
     userIdToBlock: String,
     userNameToBlock: String,
+    isBlocking: Boolean,
     onDismissRequest: (() -> Unit),
     onDismissButtonClick: (() -> Unit),
     onConfirmButtonClick: (() -> Unit),
     blockingViewModel: BlockingViewModel,
     modifier: Modifier = Modifier
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val snackbarText = if (isBlocking) stringResource(id = R.string.blocking_snackbar_block_text)
+    else stringResource(id = R.string.blocking_snackbar_unblock_text)
+
     AlertDialog(
         onDismissRequest = { onDismissRequest() },
         dismissButton = {
@@ -189,7 +198,14 @@ fun BlockingAlert(
         },
         confirmButton = {
             TextButton(
-                onClick = { onConfirmButtonClick() }
+                onClick = {
+                    onConfirmButtonClick()
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            snackbarText
+                        )
+                    }
+                }
             ) {
                 Text(
                     text = stringResource(id = R.string.blocking_alert_confirm)
@@ -281,6 +297,7 @@ fun BlockingAlertPreview() {
         BlockingAlert(
             userIdToBlock = stringResource(id = R.string.user_profile_test_string),
             userNameToBlock = stringResource(id = R.string.user_profile_test_string),
+            isBlocking = true,
             onDismissRequest = {},
             onDismissButtonClick = {},
             onConfirmButtonClick = {},

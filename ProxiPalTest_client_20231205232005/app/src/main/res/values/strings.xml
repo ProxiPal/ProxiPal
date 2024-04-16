@@ -95,6 +95,8 @@
     <string name="blocking_alert_unblock_text">Are you sure you want to unblock this user?</string>
     <string name="blocking_alert_cancel">Cancel</string>
     <string name="blocking_alert_confirm">Confirm</string>
+    <string name="blocking_snackbar_block_text">User has been blocked</string>
+    <string name="blocking_snackbar_unblock_text">User has been unblocked</string>
 <!--    End of blocking/censoring strings -->
 
     <!-- NewFriendRequestNotificationService strings
