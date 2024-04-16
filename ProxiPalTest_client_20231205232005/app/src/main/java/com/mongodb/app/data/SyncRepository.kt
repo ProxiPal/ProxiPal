@@ -371,6 +371,10 @@ class RealmSyncRepository(
                         getQueryMyConversations(realm),
                         SubscriptionNameMyFriendConversations
                     )
+                    add(
+                        realm.query(FriendshipRequest::class),
+                        "FriendshipRequests"
+                    )
                 }
             }
             realm.subscriptions.waitForSynchronization()
