@@ -88,7 +88,7 @@ fun BlockUsersLayout(
     ){
         BlockingContextualMenu(
             // TODO
-            userId = "placeholder",
+            userId = "6570119696faac878ad696a5",
             blockingViewModel = blockingViewModel
         )
         CensoringTestButtons(
@@ -143,7 +143,7 @@ fun BlockingContextualMenu(
     if (blockingViewModel.isBlockingUser.value) {
         BlockingAlert(
             // TODO
-            userIdToBlock = "placeholder",
+            userIdToBlock = userId,
             userNameToBlock = "placeholder",
             onDismissRequest = { blockingViewModel.blockUserEnd() },
             onDismissButtonClick = { blockingViewModel.blockUserEnd() },

@@ -237,6 +237,11 @@ interface SyncRepository {
     // endregion location
 
 
+    // region Blocking
+    suspend fun updateUsersBlocked(userId: ObjectId, shouldBlock: Boolean)
+    // endregion Blocking
+
+
     // endregion Functions
   
   
@@ -495,6 +500,9 @@ class RealmSyncRepository(
             // it will be updated by the connect screen
             this.location = CustomGeoPoint(0.0,0.0)
             //this.interests.add("")
+
+            // Initialize a newly created account with no users yet blocked
+            this.usersBlocked = realmListOf(String.empty)
         }
         realm.write {
             copyToRealm(userProfile, updatePolicy = UpdatePolicy.ALL)
@@ -839,6 +847,32 @@ class RealmSyncRepository(
         }
     }
     // endregion Conversations
+
+
+    // region Blocking
+    override suspend fun updateUsersBlocked(userId: ObjectId, shouldBlock: Boolean) {
+        // Queries inside write transaction are live objects
+        // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
+        val frozenObject = getCurrentUserProfile(realm).find()
+        val frozenFirst = (if (frozenObject.size > 0) frozenObject.first() else null) ?: return
+        realm.write{
+            val liveObject = findLatest(frozenFirst)
+            // Use .toHexString() over .toString()
+            val userIdString = userId.toHexString()
+
+            if (liveObject != null){
+                // Block the user
+                if (shouldBlock && !liveObject.usersBlocked.contains(userIdString)){
+                    liveObject.usersBlocked.add(userIdString)
+                }
+                // Unblock the user
+                else if (!shouldBlock && liveObject.usersBlocked.contains(userIdString)){
+                    liveObject.usersBlocked.remove(userIdString)
+                }
+            }
+        }
+    }
+    // endregion Blocking
     
     
     override suspend fun updateUserProfileInterests(interest:String) {
@@ -1061,6 +1095,8 @@ class MockRepository : SyncRepository {
 
     override suspend fun updateUserProfileLocation(latitude: Double, longitude: Double) =
         Unit
+
+    override suspend fun updateUsersBlocked(userId: ObjectId, shouldBlock: Boolean) = Unit
     // endregion Functions
 
     override fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double, selectedInterests: List<String>, selectedIndustries: List<String>, otherFilters: List<String>): Flow<ResultsChange<UserProfile>> = flowOf()

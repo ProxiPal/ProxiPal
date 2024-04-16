@@ -6,10 +6,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.mongodb.app.TAG
 import com.mongodb.app.data.SyncRepository
+import com.mongodb.app.data.toObjectId
 import com.mongodb.app.ui.messages.empty
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 
 class BlockingViewModel (
@@ -42,16 +46,66 @@ class BlockingViewModel (
     }
 
     fun blockUser(){
-        Log.i(
-            TAG(),
-            "BlockingViewModel: Blocked user = \"\""
-        )
-        blockUserEnd()
+        viewModelScope.launch {
+            tryBlockUnblockUser(true)
+            blockUserEnd()
+        }
+    }
+
+    fun unblockUser(){
+        viewModelScope.launch {
+            tryBlockUnblockUser(false)
+            blockUserEnd()
+        }
+    }
+
+    /**
+     * Attempts to block or unblock the current user in focus
+     */
+    private suspend fun tryBlockUnblockUser(shouldBlock: Boolean){
+        // This is inside a try-catch block in case the user ID being (un)blocked is not a valid ID
+        try{
+            val objectId = userIdBeingBlocked.value.toObjectId()
+            repository.updateUsersBlocked(objectId, shouldBlock)
+            if (shouldBlock){
+                Log.i(
+                    TAG(),
+                    "BlockingViewModel: Blocked user = \"$objectId\""
+                )
+            }
+            else{
+                Log.i(
+                    TAG(),
+                    "BlockingViewModel: Unblocked user = \"$objectId\""
+                )
+            }
+        }
+        catch (e: Exception){
+            if (shouldBlock){
+                Log.e(
+                    TAG(),
+                    "BlockingViewModel: Caught exception \"$e\" while trying to block user " +
+                            "with ID \"${userIdBeingBlocked.value}\""
+                )
+            }
+            else{
+                Log.e(
+                    TAG(),
+                    "BlockingViewModel: Caught exception \"$e\" while trying to unblock user " +
+                            "with ID \"${userIdBeingBlocked.value}\""
+                )
+            }
+        }
     }
 
     fun blockUserEnd(){
         _isBlockingUser.value = false
         _userIdBeingBlocked.value = String.empty
+    }
+
+    // TODO
+    fun isUserBlocked(): Boolean{
+        return true
     }
     // endregion Functions
 

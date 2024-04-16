@@ -28,6 +28,11 @@ class UserProfile : RealmObject {
     var biography: String = ""
     var ownerId: String = ""
 
+    /**
+     * List of user IDs which are blocked by the current user
+     */
+    var usersBlocked: RealmList<String> = realmListOf()
+
     // Added by Marco Pacini, stores latitude and longitude
     var location: CustomGeoPoint? = null
     var instagramHandle: String = ""
