@@ -11,6 +11,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import com.mongodb.app.TAG
 import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.toObjectId
+import com.mongodb.app.domain.UserProfile
 import com.mongodb.app.ui.messages.empty
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -20,12 +21,18 @@ class BlockingViewModel (
     private var repository: SyncRepository
 ) : ViewModel(){
     // region Variables
+    private var _currentUserId = mutableStateOf("")
+    private var _currentUserProfile: UserProfile? = null
     private val _isBlockingUser = mutableStateOf(false)
     private val _userIdBeingBlocked = mutableStateOf("")
     // endregion Variables
 
 
     // region Properties
+    val currentUserId
+        get() = _currentUserId
+    val currentUserProfile
+        get() = _currentUserProfile
     val isBlockingUser
         get() = _isBlockingUser
     val userIdBeingBlocked
@@ -36,6 +43,10 @@ class BlockingViewModel (
     // region Functions
     fun updateRepositories(newRepository: SyncRepository){
         repository = newRepository
+        _currentUserId.value = repository.getCurrentUserId()
+        viewModelScope.launch {
+            resetCurrentUserProfileReference()
+        }
     }
 
     fun blockUserStart(
@@ -48,6 +59,7 @@ class BlockingViewModel (
     fun blockUser(){
         viewModelScope.launch {
             tryBlockUnblockUser(true)
+            resetCurrentUserProfileReference()
             blockUserEnd()
         }
     }
@@ -55,6 +67,7 @@ class BlockingViewModel (
     fun unblockUser(){
         viewModelScope.launch {
             tryBlockUnblockUser(false)
+            resetCurrentUserProfileReference()
             blockUserEnd()
         }
     }
@@ -98,14 +111,26 @@ class BlockingViewModel (
         }
     }
 
+    private suspend fun resetCurrentUserProfileReference(){
+        repository.readUserProfile(_currentUserId.value)
+            .first{
+                if (it.list.size > 0){
+                    _currentUserProfile = it.list[0]
+                }
+                true
+            }
+    }
+
     fun blockUserEnd(){
         _isBlockingUser.value = false
         _userIdBeingBlocked.value = String.empty
     }
 
-    // TODO
-    fun isUserBlocked(): Boolean{
-        return true
+    fun isUserBlocked(userId: String): Boolean {
+        if (currentUserProfile == null){
+            return false
+        }
+        return currentUserProfile!!.usersBlocked.contains(userId)
     }
     // endregion Functions
 
