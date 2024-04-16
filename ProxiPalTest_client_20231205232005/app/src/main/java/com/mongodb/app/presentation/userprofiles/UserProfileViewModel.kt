@@ -223,39 +223,9 @@ class UserProfileViewModel(
                                     // ... the SyncRepository will handle creating a new user profile before
                                     // ... making the updated changes
                                 }
-                                1 -> {
-                                    // Load the saved profile details
-                                    _userProfileFirstName.value = event.list[0].firstName
-                                    _userProfileLastName.value = event.list[0].lastName
-                                    _userProfileBiography.value = event.list[0].biography
-                                    _userProfileLatitude.value = event.list[0].location?.latitude!!
-                                    _userProfileLongitude.value = event.list[0].location?.longitude!!
-
-                                    _userProfileInstagramHandle.value = event.list[0].instagramHandle
-                                    _userProfileTwitterHandle.value = event.list[0].twitterHandle
-                                    _userProfileLinktreeHandle.value = event.list[0].linktreeHandle
-                                    _userProfilelinkedinHandle.value = event.list[0].linkedinHandle
-
-                                    _userProfileInterests = event.list[0].interests.toList().toMutableList()
-                                    _userProfileIndustries = event.list[0].industries.toList().toMutableList()
-
-                                }
                                 else -> {
                                     // Load the saved profile details
-                                    _userProfileFirstName.value = event.list[0].firstName
-                                    _userProfileLastName.value = event.list[0].lastName
-                                    _userProfileBiography.value = event.list[0].biography
-                                    _userProfileLatitude.value = event.list[0].location?.latitude!!
-                                    _userProfileLongitude.value = event.list[0].location?.longitude!!
-
-                                    _userProfileInstagramHandle.value = event.list[0].instagramHandle
-                                    _userProfileTwitterHandle.value = event.list[0].twitterHandle
-                                    _userProfileLinktreeHandle.value = event.list[0].linktreeHandle
-                                    _userProfilelinkedinHandle.value = event.list[0].linkedinHandle
-
-                                    _userProfileInterests = event.list[0].interests.toList().toMutableList()
-                                    _userProfileIndustries = event.list[0].industries.toList().toMutableList()
-
+                                    setUserProfileVariables(event.list[0])
                                 }
                             }
                         }
@@ -282,18 +252,26 @@ class UserProfileViewModel(
                     true
                 }
         }
-      /*
     }
 
+    /**
+     * Loads the specified user profile parameter
+     */
     private fun setUserProfileVariables(userProfile: UserProfile){
         _userProfileFirstName.value = userProfile.firstName
         _userProfileLastName.value = userProfile.lastName
         _userProfileBiography.value = userProfile.biography
         _userProfileLatitude.value = userProfile.location?.latitude!!
         _userProfileLongitude.value = userProfile.location?.longitude!!
-        */
-    }
 
+        _userProfileInstagramHandle.value = userProfile.instagramHandle
+        _userProfileTwitterHandle.value = userProfile.twitterHandle
+        _userProfileLinktreeHandle.value = userProfile.linktreeHandle
+        _userProfilelinkedinHandle.value = userProfile.linkedinHandle
+
+        _userProfileInterests = userProfile.interests.toList().toMutableList()
+        _userProfileIndustries = userProfile.industries.toList().toMutableList()
+    }
 
     /**
      * Updates the current user's user profile, if it exists
