@@ -10,8 +10,9 @@ import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 
 
-// If this ends up not working, try shutting down the emulator and restarting it
-// If still not working, try restarting Android Studio
+// If this ends up not working, try restarting the app and re-running
+// If this still does not work, try shutting down the emulator and restarting it
+// ... or try restarting Android Studio
 class FetchCensoredTextThread : Thread(){
     // region Variables
     val isDoneFetchingData = mutableStateOf(true)

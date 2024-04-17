@@ -106,6 +106,7 @@ fun BlockingContextualMenu(
     modifier: Modifier = Modifier
 ) {
     var isContextualMenuOpen by rememberSaveable { mutableStateOf(false) }
+    val isUserBlocked = blockingViewModel.isUserBlocked(userId)
 
     Box(
         contentAlignment = Alignment.Center,
@@ -129,32 +130,30 @@ fun BlockingContextualMenu(
             DropdownMenuItem(
                 text = {
                     Text(
-                        text = stringResource(id = R.string.blocking_contextual_menu_block_user)
+                        text =
+                        if (isUserBlocked) stringResource(id = R.string.blocking_contextual_menu_unblock_user)
+                        else stringResource(id = R.string.blocking_contextual_menu_block_user)
                     )
                 },
                 onClick = {
                     isContextualMenuOpen = false
-                    blockingViewModel.blockUserStart(
-                        userIdToBlock = userId
-                    )
+                    if (isUserBlocked){
+                        blockingViewModel.unblockUserStart(
+                            userIdToUnblock = userId
+                        )
+                    }
+                    else{
+                        blockingViewModel.blockUserStart(
+                            userIdToBlock = userId
+                        )
+                    }
                 }
             )
         }
     }
 
-    if (blockingViewModel.blockingAction.value == BlockingAction.BLOCKING) {
-        BlockingAlert(
-            // TODO
-            userIdToBlock = userId,
-            userNameToBlock = "placeholder",
-            isBlocking = true,
-            onDismissRequest = { blockingViewModel.blockUnblockUserEnd() },
-            onDismissButtonClick = { blockingViewModel.blockUnblockUserEnd() },
-            onConfirmButtonClick = { blockingViewModel.blockUser() },
-            blockingViewModel = blockingViewModel
-        )
-    }
-    else if (blockingViewModel.blockingAction.value == BlockingAction.UNBLOCKING){
+    // Start unblocking the user
+    if (blockingViewModel.blockingAction.value == BlockingAction.UNBLOCKING) {
         BlockingAlert(
             // TODO
             userIdToBlock = userId,
@@ -163,6 +162,19 @@ fun BlockingContextualMenu(
             onDismissRequest = { blockingViewModel.blockUnblockUserEnd() },
             onDismissButtonClick = { blockingViewModel.blockUnblockUserEnd() },
             onConfirmButtonClick = { blockingViewModel.unblockUser() },
+            blockingViewModel = blockingViewModel
+        )
+    }
+    // Start blocking the user
+    else if (blockingViewModel.blockingAction.value == BlockingAction.BLOCKING){
+        BlockingAlert(
+            // TODO
+            userIdToBlock = userId,
+            userNameToBlock = "placeholder",
+            isBlocking = true,
+            onDismissRequest = { blockingViewModel.blockUnblockUserEnd() },
+            onDismissButtonClick = { blockingViewModel.blockUnblockUserEnd() },
+            onConfirmButtonClick = { blockingViewModel.blockUser() },
             blockingViewModel = blockingViewModel
         )
     }
@@ -184,6 +196,7 @@ fun BlockingAlert(
     val scope = rememberCoroutineScope()
     val snackbarText = if (isBlocking) stringResource(id = R.string.blocking_snackbar_block_text)
     else stringResource(id = R.string.blocking_snackbar_unblock_text)
+    val isUserBlocked = blockingViewModel.isUserBlocked(userIdToBlock)
 
     AlertDialog(
         onDismissRequest = { onDismissRequest() },
@@ -215,7 +228,7 @@ fun BlockingAlert(
         title = {
             Text(
                 text =
-                if (blockingViewModel.isUserBlocked(userIdToBlock))
+                if (isUserBlocked)
                     stringResource(id = R.string.blocking_alert_unblock_title, userNameToBlock)
                 else
                     stringResource(id = R.string.blocking_alert_block_title, userNameToBlock)
@@ -224,7 +237,7 @@ fun BlockingAlert(
         text = {
             Text(
                 text =
-                if (blockingViewModel.isUserBlocked(userIdToBlock))
+                if (isUserBlocked)
                     stringResource(id = R.string.blocking_alert_unblock_text)
                 else
                     stringResource(id = R.string.blocking_alert_block_text)
