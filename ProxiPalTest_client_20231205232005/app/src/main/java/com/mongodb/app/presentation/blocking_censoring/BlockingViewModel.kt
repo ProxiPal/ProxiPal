@@ -28,10 +28,11 @@ class BlockingViewModel (
     private var repository: SyncRepository
 ) : ViewModel(){
     // region Variables
-    private var _currentUserId = mutableStateOf("")
+    private val _currentUserId = mutableStateOf("")
     private var _currentUserProfile: UserProfile? = null
-    private val _blockingAction = mutableStateOf(BlockingAction.IDLE)
     private val _userIdInFocus = mutableStateOf("")
+    private val _focusedUserName = mutableStateOf("")
+    private val _blockingAction = mutableStateOf(BlockingAction.IDLE)
     // endregion Variables
 
 
@@ -40,10 +41,12 @@ class BlockingViewModel (
         get() = _currentUserId
     val currentUserProfile
         get() = _currentUserProfile
-    val blockingAction
-        get() = _blockingAction
     val userIdInFocus
         get() = _userIdInFocus
+    val focusedUserName
+        get() = _focusedUserName
+    val blockingAction
+        get() = _blockingAction
     // endregion Properties
 
 
@@ -61,6 +64,9 @@ class BlockingViewModel (
     ){
         blockingAction.value = BlockingAction.BLOCKING
         userIdInFocus.value = userIdToBlock
+        viewModelScope.launch {
+            resetFocusedUserProfileReference()
+        }
     }
 
     fun unblockUserStart(
@@ -68,6 +74,9 @@ class BlockingViewModel (
     ){
         blockingAction.value = BlockingAction.UNBLOCKING
         userIdInFocus.value = userIdToUnblock
+        viewModelScope.launch {
+            resetFocusedUserProfileReference()
+        }
     }
 
     fun blockUser(){
@@ -135,9 +144,20 @@ class BlockingViewModel (
             }
     }
 
+    private suspend fun resetFocusedUserProfileReference(){
+        repository.readUserProfile(userIdInFocus.value)
+            .first{
+                if (it.list.size > 0){
+                    focusedUserName.value = it.list[0].firstName
+                }
+                true
+            }
+    }
+
     fun blockUnblockUserEnd(){
         blockingAction.value = BlockingAction.IDLE
         userIdInFocus.value = String.empty
+        focusedUserName.value = String.empty
     }
 
     fun isUserBlocked(userId: String): Boolean {

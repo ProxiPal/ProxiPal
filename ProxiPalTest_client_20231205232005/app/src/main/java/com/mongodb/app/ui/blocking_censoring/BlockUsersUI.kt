@@ -36,6 +36,7 @@ import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.presentation.blocking_censoring.BlockingAction
 import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
 import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
+import com.mongodb.app.ui.messages.empty
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import kotlinx.coroutines.launch
 
@@ -85,12 +86,15 @@ fun BlockUsersLayout(
     censoringViewModel: CensoringViewModel,
     modifier: Modifier = Modifier
 ) {
+    // TODO
+//    val tempId = "6570119696faac878ad696a5"
+    val tempId = "65e96193c6e205c32b0915cc"
+
     Column(
         modifier = modifier
     ){
         BlockingContextualMenu(
-            // TODO
-            userId = "6570119696faac878ad696a5",
+            userId = tempId,
             blockingViewModel = blockingViewModel
         )
         CensoringTestButtons(
@@ -155,9 +159,7 @@ fun BlockingContextualMenu(
     // Start unblocking the user
     if (blockingViewModel.blockingAction.value == BlockingAction.UNBLOCKING) {
         BlockingAlert(
-            // TODO
             userIdToBlock = userId,
-            userNameToBlock = "placeholder",
             isBlocking = false,
             onDismissRequest = { blockingViewModel.blockUnblockUserEnd() },
             onDismissButtonClick = { blockingViewModel.blockUnblockUserEnd() },
@@ -168,9 +170,7 @@ fun BlockingContextualMenu(
     // Start blocking the user
     else if (blockingViewModel.blockingAction.value == BlockingAction.BLOCKING){
         BlockingAlert(
-            // TODO
             userIdToBlock = userId,
-            userNameToBlock = "placeholder",
             isBlocking = true,
             onDismissRequest = { blockingViewModel.blockUnblockUserEnd() },
             onDismissButtonClick = { blockingViewModel.blockUnblockUserEnd() },
@@ -184,7 +184,6 @@ fun BlockingContextualMenu(
 @Composable
 fun BlockingAlert(
     userIdToBlock: String,
-    userNameToBlock: String,
     isBlocking: Boolean,
     onDismissRequest: (() -> Unit),
     onDismissButtonClick: (() -> Unit),
@@ -197,6 +196,7 @@ fun BlockingAlert(
     val snackbarText = if (isBlocking) stringResource(id = R.string.blocking_snackbar_block_text)
     else stringResource(id = R.string.blocking_snackbar_unblock_text)
     val isUserBlocked = blockingViewModel.isUserBlocked(userIdToBlock)
+    val userNameToBlock = blockingViewModel.focusedUserName.value
 
     AlertDialog(
         onDismissRequest = { onDismissRequest() },
@@ -309,7 +309,6 @@ fun BlockingAlertPreview() {
     MyApplicationTheme {
         BlockingAlert(
             userIdToBlock = stringResource(id = R.string.user_profile_test_string),
-            userNameToBlock = stringResource(id = R.string.user_profile_test_string),
             isBlocking = true,
             onDismissRequest = {},
             onDismissButtonClick = {},
