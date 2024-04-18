@@ -331,13 +331,9 @@ class RealmSyncRepository(
                         getQueryMyConversations(realm),
                         SubscriptionNameMyFriendConversations
                     )
-                    //april
-                    if (realm.subscriptions.find { it.name == "FriendshipRequests" } == null) {
-                        add(
-                            realm.query(FriendshipRequest::class),
-                            "FriendshipRequests"
-                        )
-                    }
+                    add(
+                        getQueryFriendshipRequests(realm),
+                        "FriendshipRequests")
 
                 }
 
@@ -372,9 +368,8 @@ class RealmSyncRepository(
                         SubscriptionNameMyFriendConversations
                     )
                     add(
-                        realm.query(FriendshipRequest::class),
-                        "FriendshipRequests"
-                    )
+                        getQueryFriendshipRequests(realm),
+                        "FriendshipRequests")
                 }
             }
             realm.subscriptions.waitForSynchronization()
@@ -517,6 +512,10 @@ class RealmSyncRepository(
     override fun getCurrentUserProfileList(): Flow<ResultsChange<UserProfile>> {
         return realm.query<UserProfile>("ownerId == $0", currentUser.id)
             .asFlow()
+    }
+
+    private fun getQueryFriendshipRequests(realm: Realm): RealmQuery<FriendshipRequest> {
+        return realm.query(FriendshipRequest::class, "status == $0", "pending")
     }
 
     //added the social media handling
