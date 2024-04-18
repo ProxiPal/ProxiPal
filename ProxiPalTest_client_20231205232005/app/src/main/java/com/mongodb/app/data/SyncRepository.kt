@@ -1102,6 +1102,8 @@ class MockRepository : SyncRepository {
     override suspend fun updateUserSelectedFilters(selectedInterests: List<String>, selectedIndustries: List<String>, otherFilters: List<String>) = Unit
     override suspend fun clearUserSelectedFilters() = Unit
 
+    override suspend fun rateOtherUser(otherUserOwnerId: String, ratingGiven: Boolean) = Unit
+
     companion object {
         const val MOCK_OWNER_ID_MINE = "A"
         const val MOCK_OWNER_ID_OTHER = "B"
