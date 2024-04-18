@@ -46,7 +46,7 @@ class UserProfile : RealmObject {
     var selectedIndustries : RealmList<String> = realmListOf()
     var otherFilters : RealmList<String> = realmListOf()
 
-    // Added by Marco Pacini for user ratings (likes and dislikes)
+    // Added by Marco Pacini for user ratings (first element is likes and second element is dislikes)
     var ratings: RealmList<Int> = realmListOf()
 
     override fun equals(other: Any?): Boolean {

@@ -250,6 +250,16 @@ interface SyncRepository {
 
     //region User Rating System
 
+    /**
+     * Updates another user's rating score when the current user rates them.
+     *
+     * Takes in the other user's ownerId as input and adds the current user's ownerId
+     * to the list of users that have rated them already (so they cannot rate them more than once).
+     *
+     * ratingGiven is true for like and false for dislike.
+     */
+    suspend fun rateOtherUser(otherUserOwnerId: String, ratingGiven: Boolean)
+
     // endregion Functions
 }
 
@@ -602,8 +612,6 @@ class RealmSyncRepository(
                 twitterHandle = "empty",
                 linktreeHandle = "empty",
                 linkedinHandle = "empty"
-
-
             )
             return
         }
@@ -648,7 +656,7 @@ class RealmSyncRepository(
 
         //return realm.query<UserProfile>(query, currentUser.id).find().asFlow()
 
-        // TODO: TESTING THE NEARBY USER LIST DISPLAY WITH BELOW STATEMENT SHOULD SHOW ALL USERS IN DATABASE
+        // TODO: The below statement just displays all users in the database for testing purposes
         return realm.query<UserProfile>("ownerId != $0", currentUser.id).find().asFlow()
     }
 
@@ -1005,6 +1013,23 @@ class RealmSyncRepository(
                 profile.selectedIndustries.clear()
                 profile.otherFilters.clear()
 
+            }
+        }
+    }
+
+    // region rating system
+    override suspend fun rateOtherUser(otherUserOwnerId: String, ratingGiven: Boolean){
+        val otherUserProfile = getQuerySpecificUserProfile(realm = realm, ownerId = otherUserOwnerId).find().first()
+        realm.write {
+            findLatest(otherUserProfile)?.let { liveUserProfile ->
+                // increment likes if the current user liked the other user
+                if (ratingGiven){
+                    liveUserProfile.ratings[0] = liveUserProfile.ratings[0]+1
+                }
+                // increment dislikes if the current user disliked the other user
+                else{
+                    liveUserProfile.ratings[1] = liveUserProfile.ratings[1]+1
+                }
             }
         }
     }

@@ -151,6 +151,7 @@ class UserProfileViewModel(
     val selectedIndustries: State<List<String>> = _selectedIndustries
     val otherFilters: State<List<String>> = _otherFilters
 
+    // for rating system, added by Marco
     val userRatings: State<List<Int>>
         get() = _userRatings
 
