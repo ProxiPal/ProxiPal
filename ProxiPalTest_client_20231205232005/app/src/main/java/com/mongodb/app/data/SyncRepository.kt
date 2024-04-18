@@ -515,7 +515,7 @@ class RealmSyncRepository(
     }
 
     private fun getQueryFriendshipRequests(realm: Realm): RealmQuery<FriendshipRequest> {
-        return realm.query(FriendshipRequest::class, "status == $0", "pending")
+        return realm.query<FriendshipRequest> ("status == $0", "pending")
     }
 
     //added the social media handling
