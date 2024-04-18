@@ -70,4 +70,8 @@ class UserProfile : RealmObject {
         result = 31 * result + ownerId.hashCode()
         return result
     }
+
+    fun isUserBlocked(userIdToCheck: String): Boolean{
+        return usersBlocked.contains(userIdToCheck)
+    }
 }

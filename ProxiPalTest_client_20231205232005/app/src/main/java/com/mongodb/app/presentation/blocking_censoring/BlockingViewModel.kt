@@ -160,11 +160,11 @@ class BlockingViewModel (
         focusedUserName.value = String.empty
     }
 
-    fun isUserBlocked(userId: String): Boolean {
+    fun isUserBlocked(userIdToCheck: String): Boolean {
         if (currentUserProfile == null){
             return false
         }
-        return currentUserProfile!!.usersBlocked.contains(userId)
+        return currentUserProfile!!.isUserBlocked(userIdToCheck)
     }
     // endregion Functions
 
