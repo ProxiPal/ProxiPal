@@ -2,6 +2,7 @@ package com.mongodb.app.presentation.messages
 
 import android.os.Bundle
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -52,8 +53,9 @@ class MessagesViewModel(
     private val _conversationsListState: SnapshotStateList<FriendConversation> = mutableStateListOf()
     private var _friendMessageUnderActionFocus: FriendMessage? = null
     private val _currentAction = mutableStateOf(MessagesUserAction.IDLE)
+    private val _otherUserProfileId = mutableStateOf("")
     private val _otherUserProfileName = mutableStateOf("")
-    private var _currentUserProfile: UserProfile? = null
+    private var _currentUserProfile: MutableState<UserProfile> = mutableStateOf(UserProfile())
 
     /**
      * Maps the [ObjectId] of a [FriendMessage] reply to the message of the [FriendMessage] replying to
@@ -80,6 +82,8 @@ class MessagesViewModel(
         get() = _currentAction
     val messageIdRepliesToOriginalMessages
         get() = _messageIdRepliesToOriginalMessages
+    val otherUserProfileId
+        get() = _otherUserProfileId
     val otherUserProfileName
         get() = _otherUserProfileName
     val currentUserProfile
@@ -157,7 +161,7 @@ class MessagesViewModel(
             repository.readUserProfile(repository.getCurrentUserId())
                 .first{
                     if (it.list.size > 0){
-                        _currentUserProfile = it.list[0]
+                        currentUserProfile.value = it.list[0]
                     }
                     true
                 }
@@ -177,6 +181,7 @@ class MessagesViewModel(
                 repository.readUserProfile(otherUserId)
                     .first{
                         if (it.list.size > 0){
+                            otherUserProfileId.value = it.list[0].ownerId
                             otherUserProfileName.value = it.list[0].firstName
                             Log.i(
                                 TAG(),
@@ -527,6 +532,7 @@ class MessagesViewModel(
         }
 
         _usersInvolved = usersInvolved
+        readMyUserProfile()
         readOtherUserProfile()
         refreshMessages()
     }

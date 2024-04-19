@@ -1,5 +1,7 @@
 package com.mongodb.app.domain
 
+import android.util.Log
+import com.mongodb.app.TAG
 import com.mongodb.app.location.CustomGeoPoint
 
 import io.realm.kotlin.ext.realmListOf
@@ -72,6 +74,13 @@ class UserProfile : RealmObject {
     }
 
     fun isUserBlocked(userIdToCheck: String): Boolean{
+        Log.i(
+            TAG(),
+            "UserProfile: Does ID = \"$ownerId\"'s \"$usersBlocked\" contain \"$userIdToCheck\"?"
+        )
+        if (userIdToCheck.isBlank() || userIdToCheck.isEmpty()){
+            return false
+        }
         return usersBlocked.contains(userIdToCheck)
     }
 }

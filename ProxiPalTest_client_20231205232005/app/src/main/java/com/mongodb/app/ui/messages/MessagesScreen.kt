@@ -164,11 +164,13 @@ fun MessagesScreenLayout(
         // If the current user has the other user blocked, show a different UI
         // However, do not show this for the blocked user for privacy reasons
         // ... (Do not want users to know someone has blocked them)
-        if (messagesViewModel.currentUserProfile != null
-            && messagesViewModel.otherUserProfileName.value.isNotBlank()
-            && messagesViewModel.otherUserProfileName.value.isNotEmpty()
-            && messagesViewModel.currentUserProfile!!.isUserBlocked(messagesViewModel.otherUserProfileName.value)){
-            MessagesBlockedNotifier()
+        if (messagesViewModel.currentUserProfile.value.isUserBlocked(
+                messagesViewModel.otherUserProfileId.value)
+            ){
+            MessagesBlockedNotifier(
+                modifier = Modifier
+                    .padding(innerPadding)
+            )
         }
         else{
             MessagesBodyContent(
@@ -184,17 +186,24 @@ fun MessagesScreenLayout(
 fun MessagesBlockedNotifier(
     modifier: Modifier = Modifier
 ){
-    Row(
+    Column(
         modifier = modifier
-            .fillMaxWidth()
-            .padding(
-                top = dimensionResource(id = R.dimen.messages_screen_message_history_message_vertical_padding),
-                bottom = dimensionResource(id = R.dimen.messages_screen_message_history_message_vertical_padding)
-            )
+            .fillMaxSize()
     ){
-        Text(
-            text = stringResource(id = R.string.messages_screen_user_blocked_notifier)
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    top = dimensionResource(id = R.dimen.messages_screen_message_history_message_vertical_padding),
+                    bottom = dimensionResource(id = R.dimen.messages_screen_message_history_message_vertical_padding),
+                    start = 8.dp,
+                    end = 8.dp
+                )
+        ){
+            Text(
+                text = stringResource(id = R.string.messages_screen_user_blocked_notifier)
+            )
+        }
     }
 }
 
