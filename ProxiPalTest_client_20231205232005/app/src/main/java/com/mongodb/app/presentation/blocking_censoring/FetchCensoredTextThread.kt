@@ -41,6 +41,8 @@ class FetchCensoredTextThread : Thread(){
                 // Do not call this method more than once per loop iteration
                 line = bufferedReader.readLine()
             }
+
+            bufferedReader.close()
         }
         catch (e: Exception){
             Log.e(
