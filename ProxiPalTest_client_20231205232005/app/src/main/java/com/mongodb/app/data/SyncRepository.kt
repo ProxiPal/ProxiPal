@@ -76,7 +76,9 @@ fun RealmList<String>.toObjectIdList(): RealmList<ObjectId>{
     val realmList: RealmList<ObjectId> = realmListOf()
     for (string in this){
         try{
-            realmList.add(string.toObjectId())
+            if (string.isNotBlank() && string.isNotEmpty()){
+                realmList.add(string.toObjectId())
+            }
         }
         catch (e: Exception){
             Log.e(
