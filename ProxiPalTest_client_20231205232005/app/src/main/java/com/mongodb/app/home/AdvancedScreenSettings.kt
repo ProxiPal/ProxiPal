@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavHostController
+import com.mongodb.app.AccessibilityActivity
 import com.mongodb.app.R
 import com.mongodb.app.AllowNotificationsActivity
 import com.mongodb.app.LanguageActivity
@@ -88,6 +89,10 @@ fun AdvancedScreenSettings(navController: NavHostController) {
                     }
                     SettingsItem("Language Translation") {
                         val intent = Intent(context, LanguageTranslationActivity::class.java)
+                        context.startActivity(intent)
+                    }
+                    SettingsItem("Accessibility") {
+                        val intent = Intent(context, AccessibilityActivity::class.java)
                         context.startActivity(intent)
                     }
                 }

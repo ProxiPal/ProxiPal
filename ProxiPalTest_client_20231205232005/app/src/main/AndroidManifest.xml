@@ -40,6 +40,9 @@
             android:name=".LanguageTranslationActivity"
             android:exported="false" />
         <activity
+            android:name=".AccessibilityActivity"
+            android:exported="false" />
+        <activity
             android:name=".ComposeItemActivity"
             android:screenOrientation="nosensor" />
         <activity
