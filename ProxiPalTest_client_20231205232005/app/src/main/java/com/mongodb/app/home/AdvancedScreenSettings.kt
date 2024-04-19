@@ -1,17 +1,13 @@
 package com.mongodb.app.home
 import android.annotation.SuppressLint
+import android.app.ActivityOptions
 import android.content.Intent
-import android.service.autofill.OnClickAction
-import android.view.LayoutInflater
-import android.widget.TextView
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,16 +25,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavHostController
 import com.mongodb.app.AccessibilityActivity
-import com.mongodb.app.R
-import com.mongodb.app.AllowNotificationsActivity
-import com.mongodb.app.LanguageActivity
 import com.mongodb.app.LanguageIdentificationActivity
 import com.mongodb.app.LanguageTranslationActivity
-import com.mongodb.app.PrivacyPolicyActivity
-import com.mongodb.app.navigation.Routes
+import com.mongodb.app.DarkModeActivity
 
 //This is the code to edit the settings screen.
 @Composable
@@ -91,9 +82,14 @@ fun AdvancedScreenSettings(navController: NavHostController) {
                         val intent = Intent(context, LanguageTranslationActivity::class.java)
                         context.startActivity(intent)
                     }
-                    SettingsItem("Accessibility") {
+                    SettingsItem("Text To Speech") {
                         val intent = Intent(context, AccessibilityActivity::class.java)
                         context.startActivity(intent)
+                    }
+                    SettingsItem("Dark Mode") {
+                        val intent = Intent(context, DarkModeActivity::class.java)
+                        context.startActivity(intent)
+
                     }
                 }
             }

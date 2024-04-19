@@ -43,6 +43,9 @@
             android:name=".AccessibilityActivity"
             android:exported="false" />
         <activity
+            android:name=".DarkModeActivity"
+            android:exported="false" />
+        <activity
             android:name=".ComposeItemActivity"
             android:screenOrientation="nosensor" />
         <activity
