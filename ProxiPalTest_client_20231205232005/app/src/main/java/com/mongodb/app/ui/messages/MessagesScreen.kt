@@ -161,10 +161,39 @@ fun MessagesScreenLayout(
         modifier = modifier
         // Pad the body of content so it does not get cut off by the scaffold top bar
     ) { innerPadding ->
-        MessagesBodyContent(
-            messagesViewModel = messagesViewModel,
-            modifier = Modifier
-                .padding(innerPadding)
+        // If the current user has the other user blocked, show a different UI
+        // However, do not show this for the blocked user for privacy reasons
+        // ... (Do not want users to know someone has blocked them)
+        if (messagesViewModel.currentUserProfile != null
+            && messagesViewModel.otherUserProfileName.value.isNotBlank()
+            && messagesViewModel.otherUserProfileName.value.isNotEmpty()
+            && messagesViewModel.currentUserProfile!!.isUserBlocked(messagesViewModel.otherUserProfileName.value)){
+            MessagesBlockedNotifier()
+        }
+        else{
+            MessagesBodyContent(
+                messagesViewModel = messagesViewModel,
+                modifier = Modifier
+                    .padding(innerPadding)
+            )
+        }
+    }
+}
+
+@Composable
+fun MessagesBlockedNotifier(
+    modifier: Modifier = Modifier
+){
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(
+                top = dimensionResource(id = R.dimen.messages_screen_message_history_message_vertical_padding),
+                bottom = dimensionResource(id = R.dimen.messages_screen_message_history_message_vertical_padding)
+            )
+    ){
+        Text(
+            text = stringResource(id = R.string.messages_screen_user_blocked_notifier)
         )
     }
 }
@@ -882,6 +911,14 @@ fun SingleMessageContainerPreview() {
                 messagesViewModel = messagesViewModel
             )
         }
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
+fun MessagesBlockedNotifierPreview(){
+    MyApplicationTheme {
+        MessagesBlockedNotifier()
     }
 }
 // endregion PreviewFunctions

@@ -53,6 +53,7 @@ class MessagesViewModel(
     private var _friendMessageUnderActionFocus: FriendMessage? = null
     private val _currentAction = mutableStateOf(MessagesUserAction.IDLE)
     private val _otherUserProfileName = mutableStateOf("")
+    private var _currentUserProfile: UserProfile? = null
 
     /**
      * Maps the [ObjectId] of a [FriendMessage] reply to the message of the [FriendMessage] replying to
@@ -81,6 +82,8 @@ class MessagesViewModel(
         get() = _messageIdRepliesToOriginalMessages
     val otherUserProfileName
         get() = _otherUserProfileName
+    val currentUserProfile
+        get() = _currentUserProfile
     // endregion Properties
 
 
@@ -149,6 +152,18 @@ class MessagesViewModel(
 
 
     // region OtherUser
+    private fun readMyUserProfile(){
+        viewModelScope.launch {
+            repository.readUserProfile(repository.getCurrentUserId())
+                .first{
+                    if (it.list.size > 0){
+                        _currentUserProfile = it.list[0]
+                    }
+                    true
+                }
+        }
+    }
+
     /**
      * Gets the [UserProfile] of the other user involved in a [FriendConversation]
      */
@@ -162,7 +177,19 @@ class MessagesViewModel(
                 repository.readUserProfile(otherUserId)
                     .first{
                         if (it.list.size > 0){
-                            _otherUserProfileName.value = it.list[0].firstName
+                            otherUserProfileName.value = it.list[0].firstName
+                            Log.i(
+                                TAG(),
+                                "MessagesViewModel: Other Id = \"$otherUserId\"; " +
+                                        "Other name = \"${otherUserProfileName.value}\""
+                            )
+                        }
+                        else{
+                            Log.i(
+                                TAG(),
+                                "MessagesViewModel: Could not find other Id = \"$otherUserId\"; " +
+                                        "Other name = \"${otherUserProfileName.value}\""
+                            )
                         }
                         true
                     }
