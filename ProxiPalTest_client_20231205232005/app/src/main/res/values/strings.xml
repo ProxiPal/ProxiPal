@@ -85,7 +85,7 @@
     <string name="messages_screen_message_reference_invalid">\{null\}</string>
     <string name="messages_screen_message_reference_short">\"%s\"</string>
     <string name="messages_screen_message_reference_long">\"%s…\"</string>
-    <string name="messages_screen_user_blocked_notifier">You cannot view your message history with this user. Unblock them first.</string>
+    <string name="messages_screen_user_blocked_notifier">You cannot view your message history with this user. Unblock them first to continue messaging.</string>
 <!--    End messages screen strings-->
 <!--    Start of blocking/censoring strings -->
     <string name="blocking_contextual_menu_block_user">Block</string>

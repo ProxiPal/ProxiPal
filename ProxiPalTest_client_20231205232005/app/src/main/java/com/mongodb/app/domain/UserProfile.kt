@@ -74,10 +74,6 @@ class UserProfile : RealmObject {
     }
 
     fun isUserBlocked(userIdToCheck: String): Boolean{
-        Log.i(
-            TAG(),
-            "UserProfile: Does ID = \"$ownerId\"'s \"$usersBlocked\" contain \"$userIdToCheck\"?"
-        )
         if (userIdToCheck.isBlank() || userIdToCheck.isEmpty()){
             return false
         }

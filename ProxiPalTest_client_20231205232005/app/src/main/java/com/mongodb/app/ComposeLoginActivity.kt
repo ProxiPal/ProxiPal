@@ -60,6 +60,9 @@ class ComposeLoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+//        val componentActivity = UserProfileScreen::class.java
+        val componentActivity = MessagesScreen::class.java
+
         // Fast-track task list screen if we are logged in
         if (app.currentUser != null) {
             // Contributed by Kevin Kubota
@@ -68,8 +71,7 @@ class ComposeLoginActivity : ComponentActivity() {
             else
                 startActivity(Intent(
                     this,
-                    BlockUsersUI::class.java
-//                    UserProfileScreen::class.java
+                    componentActivity
                 ))
             finish()
             return
@@ -90,8 +92,7 @@ class ComposeLoginActivity : ComponentActivity() {
                             )
                             else Intent(
                                 this@ComposeLoginActivity,
-                                BlockUsersUI::class.java
-//                                UserProfileScreen::class.java
+                                componentActivity
                             )
                             startActivity(intent)
                             finish()

@@ -183,18 +183,6 @@ class MessagesViewModel(
                         if (it.list.size > 0){
                             otherUserProfileId.value = it.list[0].ownerId
                             otherUserProfileName.value = it.list[0].firstName
-                            Log.i(
-                                TAG(),
-                                "MessagesViewModel: Other Id = \"$otherUserId\"; " +
-                                        "Other name = \"${otherUserProfileName.value}\""
-                            )
-                        }
-                        else{
-                            Log.i(
-                                TAG(),
-                                "MessagesViewModel: Could not find other Id = \"$otherUserId\"; " +
-                                        "Other name = \"${otherUserProfileName.value}\""
-                            )
                         }
                         true
                     }
