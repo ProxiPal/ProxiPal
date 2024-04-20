@@ -38,7 +38,9 @@ fun CreateEventBody() {
     val context = LocalContext.current
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(25.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -56,11 +58,10 @@ fun CreateEventBody() {
             modifier=Modifier.fillMaxWidth()
         )
         Text(text = "Location")
-        Text(text = "Date & Time")
         Row(verticalAlignment = Alignment.CenterVertically) {
             showDatePicker(context)
+            showTimePicker(context)
         }
-        showTimePicker(context = context)
         TextButton(onClick = { /*TODO*/ }) {
             Text(text = "Cancel")
         }
@@ -94,8 +95,8 @@ fun showDatePicker(context: Context) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "Date",
-            fontSize = 24.sp,
+            text = "Date:",
+            fontSize = 18.sp,
         )
         TextButton(
             onClick = {
@@ -104,7 +105,7 @@ fun showDatePicker(context: Context) {
         ) {
             Text(
                 text = date,
-                fontSize = 24.sp
+                fontSize = 18.sp
             )
         }
     }
@@ -116,15 +117,26 @@ fun showTimePicker(context: Context) {
     val hour = calendar[Calendar.HOUR_OF_DAY]
     val minute = calendar[Calendar.MINUTE]
     var time by remember { mutableStateOf("") }
+    var amPm by remember { mutableStateOf("") }
 
+//    if (time.isEmpty()) {
+//        time = "%02d:%02d".format(hour, minute)
+//    }
     if (time.isEmpty()) {
-        time = "%02d:%02d".format(hour, minute)
+        val hr = if (hour > 12) hour - 12 else hour
+        val min = if (minute < 10) "0$minute" else minute.toString()
+        amPm = if (hour >= 12) "PM" else "AM"
+        time = "$hr:$min $amPm"
     }
 
     val timePickerDialog = TimePickerDialog(
         context,
         { _, selectedHour: Int, selectedMinute: Int ->
-            time = "%02d:%02d".format(selectedHour, selectedMinute)
+            //time = "%02d:%02d".format(selectedHour, selectedMinute)
+            val hr = if (selectedHour > 12) selectedHour - 12 else selectedHour
+            val min = if (selectedMinute < 10) "0$selectedMinute" else selectedMinute.toString()
+            amPm = if (selectedHour >= 12) "PM" else "AM"
+            time = "$hr:$min $amPm"
         },
         hour,
         minute,
@@ -136,7 +148,7 @@ fun showTimePicker(context: Context) {
     ) {
 
         Text(
-            text = "Time",
+            text = "Time:",
             fontSize = 18.sp,
         )
         TextButton(
