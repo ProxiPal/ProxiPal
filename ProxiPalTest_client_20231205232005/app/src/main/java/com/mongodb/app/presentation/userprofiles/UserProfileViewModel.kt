@@ -88,8 +88,12 @@ class UserProfileViewModel(
     private val _selectedIndustries = mutableStateOf<List<String>>(emptyList())
     private val _otherFilters = mutableStateOf<List<String>>(emptyList())
 
-    // user rating will be a list of size 2; first element is likes and second is dislikes
-    private val _userRatings: MutableState<List<Int>> = mutableStateOf(listOf(0,0))
+    // Stores the ratings that other users have given this user. Added by Marco.
+    // List of size 2; first element is likes and second element is dislikes.
+    private var _userRatings: MutableList<Int> = mutableListOf(0,0)
+
+    // Contains a list of userId's that have rated the current user. Added by Marco.
+    private var _usersThatRatedMe: MutableList<String> = mutableListOf()
 
 
 
@@ -152,8 +156,11 @@ class UserProfileViewModel(
     val otherFilters: State<List<String>> = _otherFilters
 
     // for rating system, added by Marco
-    val userRatings: State<List<Int>>
+    val userRatings: List<Int>
         get() = _userRatings
+
+    val usersThatRatedMe: List<String>
+        get() = _usersThatRatedMe
 
 
 
@@ -246,7 +253,8 @@ class UserProfileViewModel(
                                     _userProfileInterests = event.list[0].interests.toList().toMutableList()
                                     _userProfileIndustries = event.list[0].industries.toList().toMutableList()
 
-                                    _userRatings.value = event.list[0].ratings
+                                    _userRatings = event.list[0].ratings
+                                    _usersThatRatedMe = event.list[0].usersThatRatedMe
 
                                 }
                                 else -> {
@@ -265,7 +273,8 @@ class UserProfileViewModel(
                                     _userProfileInterests = event.list[0].interests.toList().toMutableList()
                                     _userProfileIndustries = event.list[0].industries.toList().toMutableList()
 
-                                    _userRatings.value = event.list[0].ratings
+                                    _userRatings = event.list[0].ratings
+                                    _usersThatRatedMe = event.list[0].usersThatRatedMe
 
                                 }
                             }

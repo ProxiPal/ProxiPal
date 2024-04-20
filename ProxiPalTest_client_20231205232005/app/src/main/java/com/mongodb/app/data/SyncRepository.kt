@@ -1018,21 +1018,30 @@ class RealmSyncRepository(
     }
 
     // region rating system
+
+    // takes the other user's ID and the current user's rating (true for like, false for dislike)
+    // and rates the other user
     override suspend fun rateOtherUser(otherUserOwnerId: String, ratingGiven: Boolean){
         val otherUserProfile = getQuerySpecificUserProfile(realm = realm, ownerId = otherUserOwnerId).find().first()
         realm.write {
             findLatest(otherUserProfile)?.let { liveUserProfile ->
-                // increment likes if the current user liked the other user
-                if (ratingGiven){
-                    liveUserProfile.ratings[0] = liveUserProfile.ratings[0]+1
-                }
-                // increment dislikes if the current user disliked the other user
-                else{
-                    liveUserProfile.ratings[1] = liveUserProfile.ratings[1]+1
+                // first, make sure the current user has not already rated the other user
+                if (!liveUserProfile.usersThatRatedMe.contains(currentUser.id)){
+                    // increment likes if the current user liked the other user
+                    if (ratingGiven){
+                        liveUserProfile.ratings[0] = liveUserProfile.ratings[0]+1
+                    }
+                    // increment dislikes if the current user disliked the other user
+                    else{
+                        liveUserProfile.ratings[1] = liveUserProfile.ratings[1]+1
+                    }
+                    // add the current user to the list of users that have rated the other user
+                    liveUserProfile.usersThatRatedMe.add(currentUser.id)
                 }
             }
         }
     }
+
 }
 
 /**
