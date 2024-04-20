@@ -87,6 +87,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.0.0")
     implementation(platform("androidx.compose:compose-bom:2023.08.00"))
     implementation("androidx.compose.ui:ui-graphics")
+    implementation("com.google.android.libraries.places:places:3.4.0")
 
     testImplementation ("junit:junit:4.13.2")
     androidTestImplementation ("androidx.test.ext:junit:1.1.5")

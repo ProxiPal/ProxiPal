@@ -22,6 +22,7 @@ import com.mongodb.app.ui.tasks.ConnectWithOthersScreen
 import com.mongodb.app.location.LocationPermissionScreen
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.tutorial.OnboardingScreen
+import com.mongodb.app.ui.events.CreateEventBody
 import com.mongodb.app.ui.events.EventDetailsScreen
 import com.mongodb.app.ui.events.EventScreen
 import com.mongodb.app.ui.events.SharedViewModel
@@ -113,7 +114,14 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
         }
 
         composable(route = Routes.EventScreen.route){
-            EventScreen(sharedViewModel) { navController.navigate(Routes.EventDetails.route) }
+            EventScreen(sharedViewModel = sharedViewModel,
+                navigateToEvent = { navController.navigate(Routes.EventDetails.route)})
+            {
+                navController.navigate(Routes.CreateEvent.route)
+            }
+        }
+        composable(route = Routes.CreateEvent.route){
+            CreateEventBody(navigateBack = {navController.popBackStack()})
         }
         composable(route = Routes.EventDetails.route){
             EventDetailsScreen(sharedViewModel =sharedViewModel) {navController.popBackStack()}

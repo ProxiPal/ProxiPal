@@ -17,4 +17,6 @@ sealed class Routes(val route: String) {
 
     object EventDetails : Routes("event_details/{event_id}")
     object EventScreen:Routes("eventscreen")
+
+    object CreateEvent:Routes("createevent")
 }

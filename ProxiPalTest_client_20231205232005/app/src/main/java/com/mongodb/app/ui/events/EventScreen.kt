@@ -8,7 +8,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -70,10 +74,22 @@ val otherEvents = listOf(
 )
 
 @Composable
-fun EventScreen(sharedViewModel: SharedViewModel, navigateToEvent:()-> Unit) {
+fun EventScreen(sharedViewModel: SharedViewModel, navigateToEvent:()-> Unit, navigateToCreateEvent:()-> Unit) {
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text(text = "Events") })
+            TopAppBar(
+                title = { Text(text = "Events") },
+                actions = {
+                    IconButton(
+                        onClick = navigateToCreateEvent
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Create Event"
+                        )
+                    }
+                }
+            )
         }
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
@@ -147,6 +163,6 @@ fun EventCard(event: Event, onClick:()->Unit) {
 @Preview
 fun EventScreenPreview(){
     MyApplicationTheme {
-        EventScreen( sharedViewModel =  SharedViewModel(), navigateToEvent = {})
+        EventScreen( sharedViewModel =  SharedViewModel(), navigateToEvent = {}, navigateToCreateEvent={})
     }
 }
