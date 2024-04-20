@@ -1091,9 +1091,7 @@ class RealmSyncRepository(
     }
     //april2
     override fun getFriendRequests(receiverFriendId: String): Flow<ResultsChange<FriendshipRequest>> {
-        // This should correctly query friend requests where the current user is the receiver
-        return realm.query<FriendshipRequest>("receiverFriendId == $0", receiverFriendId)
-            .asFlow()
+        return realm.query<FriendshipRequest>("receiverFriendId == $0", receiverFriendId).asFlow()
     }
 
     //april2

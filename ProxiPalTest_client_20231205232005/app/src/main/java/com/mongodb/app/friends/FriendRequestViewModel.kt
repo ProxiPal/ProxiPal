@@ -24,17 +24,14 @@ data class FriendRequestUiState(
 
 //ADDED BY GEORGE FU
 class FriendRequestViewModel(private val repository: SyncRepository) : ViewModel() {
-    private val _friendRequests = MutableStateFlow<List<FriendshipRequest>>(emptyList())
-    val friendRequests: StateFlow<List<FriendshipRequest>> = _friendRequests.asStateFlow()
+    private val _uiState = MutableStateFlow(FriendRequestUiState())
+    val uiState: StateFlow<FriendRequestUiState> = _uiState.asStateFlow()
 
     private val _users = MutableStateFlow<List<UserProfile>>(emptyList())
     val users: StateFlow<List<UserProfile>> = _users.asStateFlow()
 
     private val _feedback = MutableSharedFlow<String>()
     val feedback: SharedFlow<String> = _feedback.asSharedFlow()
-
-    private val _uiState = MutableStateFlow(FriendRequestUiState())
-    val uiState: StateFlow<FriendRequestUiState> = _uiState.asStateFlow()
 
     init {
         fetchFriendRequests()
@@ -60,8 +57,6 @@ class FriendRequestViewModel(private val repository: SyncRepository) : ViewModel
             }
         }
     }
-
-
 
     private fun fetchUsers() {
         viewModelScope.launch {
@@ -99,6 +94,8 @@ class FriendRequestViewModel(private val repository: SyncRepository) : ViewModel
             fetchFriendRequests() // Refresh friend requests list
         }
     }
+
+
 
     companion object {
         fun factory(repository: SyncRepository) = object : ViewModelProvider.Factory {
