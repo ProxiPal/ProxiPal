@@ -1,5 +1,6 @@
 package com.mongodb.app.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -7,53 +8,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mongodb.app.friends.FriendRequestViewModel
 import com.mongodb.app.friends.FriendshipRequest
-import com.mongodb.app.data.SyncRepository
-import kotlinx.coroutines.flow.map
-
-
-//ALL ADDED BY GEORGE FU
-@Composable
-fun FriendRequestItem(request: FriendshipRequest, friendRequestViewModel: FriendRequestViewModel, repository: SyncRepository) {
-    val senderProfile by repository.readUserProfile(request.senderId).map { it.list.firstOrNull() }.collectAsState(initial = null)
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        senderProfile?.let {
-            Text("From: ${it.firstName} ${it.lastName}", modifier = Modifier.weight(1f))
-        } ?: Text("Loading...", modifier = Modifier.weight(1f))
-
-        Button(onClick = {
-            friendRequestViewModel.respondToFriendRequest(request._id, true) // directly use request._id
-        }) {
-            Text("Accept")
-        }
-        Spacer(modifier = Modifier.width(8.dp))
-        Button(onClick = {
-            friendRequestViewModel.respondToFriendRequest(request._id, false) // directly use request._id
-        }) {
-            Text("Decline")
-        }
-    }
-}
+import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FriendRequestScreen(friendRequestViewModel: FriendRequestViewModel, repository: SyncRepository) {
+fun FriendRequestScreen(friendRequestViewModel: FriendRequestViewModel, userProfileViewModel: UserProfileViewModel) {
     val uiState by friendRequestViewModel.uiState.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
             SmallTopAppBar(
-                title = { Text(text = "Friend Requests") },
-                colors = TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                title = { Text(text = "Friend Requests") }
             )
         }
     ) { padding ->
@@ -64,10 +31,50 @@ fun FriendRequestScreen(friendRequestViewModel: FriendRequestViewModel, reposito
                 Text("Error: ${uiState.error}")
             } else {
                 uiState.friendRequests.forEach { request ->
-                    FriendRequestItem(request, friendRequestViewModel, repository)
+                    FriendRequestItem(
+                        request = request,
+                        friendRequestViewModel = friendRequestViewModel,
+                        userProfileViewModel = userProfileViewModel
+                    )
                 }
             }
         }
     }
 }
 
+@SuppressLint("CoroutineCreationDuringComposition")
+@Composable
+fun FriendRequestItem(
+    request: FriendshipRequest,
+    friendRequestViewModel: FriendRequestViewModel,
+    userProfileViewModel: UserProfileViewModel
+) {
+    var senderName by remember { mutableStateOf("Loading...") }
+
+    // Collecting from the readUserProfile flow to get the sender's name
+    LaunchedEffect(request.senderId) {
+        userProfileViewModel.readUserProfile(request.senderId).collect { userProfile ->
+            senderName = "${userProfile?.firstName} ${userProfile?.lastName}"
+        }
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(senderName, modifier = Modifier.weight(1f))
+        Button(onClick = {
+            friendRequestViewModel.respondToFriendRequest(request._id, true)
+        }) {
+            Text("Accept")
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        Button(onClick = {
+            friendRequestViewModel.respondToFriendRequest(request._id, false)
+        }) {
+            Text("Decline")
+        }
+    }
+}

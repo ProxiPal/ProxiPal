@@ -275,6 +275,8 @@ interface SyncRepository {
     //APRIL12
     fun getAllUserProfiles(): Flow<List<UserProfile>>
 
+    fun getRealmInstance(): Realm?
+
 }
 
 
@@ -289,7 +291,9 @@ class RealmSyncRepository(
     private val config: SyncConfiguration
     private val currentUser: User
         get() = app.currentUser!!
-
+    override fun getRealmInstance(): Realm {
+        return realm
+    }
 
     init {
         // Contributed by Kevin Kubota
@@ -1199,6 +1203,9 @@ class MockRepository : SyncRepository {
 
     //APRIL12
     override fun getAllUserProfiles(): Flow<List<UserProfile>> = flowOf()
+
+    override fun getRealmInstance(): Realm? = null
+
 
     companion object {
         const val MOCK_OWNER_ID_MINE = "A"

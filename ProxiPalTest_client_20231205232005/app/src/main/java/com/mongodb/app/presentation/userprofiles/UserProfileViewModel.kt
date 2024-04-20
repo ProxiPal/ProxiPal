@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.flow
 
 
 /*
@@ -635,7 +636,13 @@ class UserProfileViewModel(
             app.currentUser?.delete()
         }
         }
+    fun readUserProfile(userId: String): Flow<UserProfile?> = flow {
+        val realm = repository.getRealmInstance() ?: throw IllegalStateException("Realm instance is null")
+        val query = repository.getQuerySpecificUserProfile(realm, userId)
+        emit(query.find().firstOrNull())
     }
+
+}
 
 
 

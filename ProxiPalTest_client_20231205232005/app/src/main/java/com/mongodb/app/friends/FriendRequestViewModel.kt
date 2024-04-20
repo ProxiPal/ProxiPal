@@ -46,17 +46,22 @@ class FriendRequestViewModel(private val repository: SyncRepository) : ViewModel
             _uiState.value = _uiState.value.copy(isLoading = true)
             try {
                 val currentUserId = repository.getCurrentUserId()
+                Log.d("FriendRequestViewModel", "Current User ID: $currentUserId")
                 repository.getFriendRequests(currentUserId).collect { resultsChange ->
+                    Log.d("FriendRequestViewModel", "Fetched requests: ${resultsChange.list}")
                     _uiState.value = _uiState.value.copy(
                         friendRequests = resultsChange.list.filter { it.status == "pending" && it.receiverFriendId == currentUserId },
                         isLoading = false
                     )
                 }
             } catch (e: Exception) {
+                Log.e("FriendRequestViewModel", "Error fetching friend requests", e)
                 _uiState.value = _uiState.value.copy(error = e.localizedMessage, isLoading = false)
             }
         }
     }
+
+
 
     private fun fetchUsers() {
         viewModelScope.launch {

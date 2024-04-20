@@ -126,7 +126,7 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
             )
         }
         composable(Routes.FriendRequestScreen.route) {
-            FriendRequestScreen(friendRequestViewModel = friendRequestViewModel, repository = repository)
+            FriendRequestScreen(friendRequestViewModel = friendRequestViewModel,userProfileViewModel = userProfileViewModel)
         }
 
     }
