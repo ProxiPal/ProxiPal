@@ -107,6 +107,9 @@ fun MessagesScreenLayout(
     messagesViewModel.updateUsersInvolved(
         usersInvolved = conversationUsersInvolved
     )
+    blockingViewModel.updateUserInFocus(
+        messagesViewModel.otherUserProfileId.value
+    )
 
     Scaffold(
         topBar = {
@@ -123,9 +126,7 @@ fun MessagesScreenLayout(
         // If the current user has the other user blocked, show a different UI
         // However, do not show this for the blocked user for privacy reasons
         // ... (Do not want users to know someone has blocked them)
-        if (messagesViewModel.currentUserProfile.value.isUserBlocked(
-                messagesViewModel.otherUserProfileId.value)
-            ){
+        if (blockingViewModel.isUserInFocusBlocked){
             MessagesBlockedNotifier(
                 modifier = Modifier
                     .padding(innerPadding)

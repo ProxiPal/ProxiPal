@@ -48,6 +48,8 @@ class BlockingViewModel (
         get() = _focusedUserName
     val blockingAction
         get() = _blockingAction
+    val isUserInFocusBlocked
+        get() = currentUserProfile.value.isUserBlocked(userIdInFocus.value)
     // endregion Properties
 
 
@@ -58,6 +60,10 @@ class BlockingViewModel (
         viewModelScope.launch {
             resetCurrentUserProfileReference()
         }
+    }
+
+    fun updateUserInFocus(userIdInFocus: String){
+        this.userIdInFocus.value = userIdInFocus
     }
 
     fun blockUserStart(
@@ -166,9 +172,9 @@ class BlockingViewModel (
     fun blockUnblockUserEnd(){
         blockingAction.value = BlockingAction.IDLE
         currentUserProfile.value = UserProfile()
-        // Reset the variables denoting which other user is currently being blocked/unblocked
-        userIdInFocus.value = String.empty
-        focusedUserName.value = String.empty
+//        // Reset the variables denoting which other user is currently being blocked/unblocked
+//        userIdInFocus.value = String.empty
+//        focusedUserName.value = String.empty
     }
 
     fun isUserBlocked(userIdToCheck: String): Boolean {
