@@ -30,7 +30,6 @@ import com.mongodb.app.presentation.login.LoginEvent
 import com.mongodb.app.presentation.login.LoginViewModel
 import com.mongodb.app.ui.blocking_censoring.BlockUsersUI
 import com.mongodb.app.ui.login.AccountScaffold
-import com.mongodb.app.ui.messages.MessagesScreen
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.userprofiles.UserProfileScreen
 import io.realm.kotlin.Realm
@@ -60,8 +59,8 @@ class ComposeLoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        val componentActivity = UserProfileScreen::class.java
-        val componentActivity = MessagesScreen::class.java
+        val componentActivity = UserProfileScreen::class.java
+//        val componentActivity = MessagesScreen::class.java
 
         // Fast-track task list screen if we are logged in
         if (app.currentUser != null) {

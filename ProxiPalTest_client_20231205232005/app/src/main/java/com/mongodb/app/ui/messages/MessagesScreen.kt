@@ -22,7 +22,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
@@ -58,6 +60,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.mongodb.app.R
 import com.mongodb.app.TAG
 import com.mongodb.app.data.MockRepository
@@ -68,6 +72,7 @@ import com.mongodb.app.data.messages.MessagesUserAction
 import com.mongodb.app.data.messages.MockConversationRepository
 import com.mongodb.app.data.messages.MockMessagesRepository
 import com.mongodb.app.domain.FriendMessage
+import com.mongodb.app.navigation.Routes
 import com.mongodb.app.presentation.messages.MessagesViewModel
 import com.mongodb.app.ui.theme.MessageColorMine
 import com.mongodb.app.ui.theme.MessageColorOther
@@ -92,51 +97,6 @@ val String.Companion.empty: String
 // endregion Extensions
 
 
-class MessagesScreen : ComponentActivity() {
-    // region Variables
-    private val repository = RealmSyncRepository { _, _ ->
-        lifecycleScope.launch {
-        }
-    }
-
-    private val messagesViewModel: MessagesViewModel by viewModels {
-        MessagesViewModel.factory(
-            repository = repository,
-            messagesRealm = repository,
-            conversationsRealm = repository,
-            this
-        )
-    }
-    // endregion Variables
-
-
-    // region Functions
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        messagesViewModel.updateRepository(
-            newRepository = repository
-        )
-
-        // TODO These values are hardcoded for now
-        val usersInvolved = sortedSetOf(
-            // Gmail account
-            "65e96193c6e205c32b0915cc",
-            // Student account
-            "6570119696faac878ad696a5"
-        )
-
-        setContent {
-            MessagesScreenLayout(
-                messagesViewModel = messagesViewModel,
-                conversationUsersInvolved = usersInvolved
-            )
-        }
-    }
-    // endregion Functions
-}
-
-
 // region Functions
 /**
  * Displays the entire messages screen
@@ -144,6 +104,7 @@ class MessagesScreen : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessagesScreenLayout(
+    navController: NavHostController,
     messagesViewModel: MessagesViewModel,
     conversationUsersInvolved: SortedSet<String>,
     modifier: Modifier = Modifier
@@ -155,6 +116,7 @@ fun MessagesScreenLayout(
     Scaffold(
         topBar = {
             MessagesTopBar(
+                navController = navController,
                 messagesViewModel = messagesViewModel
             )
         },
@@ -213,6 +175,7 @@ fun MessagesBlockedNotifier(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessagesTopBar(
+    navController: NavHostController,
     messagesViewModel: MessagesViewModel,
     modifier: Modifier = Modifier
 ) {
@@ -223,6 +186,14 @@ fun MessagesTopBar(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .clickable {
+                            navController.navigate(Routes.UserProfileScreen.route)
+                        }
+                )
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -869,6 +840,7 @@ fun MessagesScreenLayoutPreview() {
         val mockMessagesRepository = MockMessagesRepository()
         val mockConversationRepository = MockConversationRepository()
         MessagesScreenLayout(
+            navController = rememberNavController(),
             messagesViewModel = MessagesViewModel(
                 repository = mockSyncRepository,
                 messagesRepository = mockMessagesRepository,
