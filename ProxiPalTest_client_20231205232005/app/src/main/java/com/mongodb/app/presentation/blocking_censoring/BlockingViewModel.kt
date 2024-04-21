@@ -2,6 +2,7 @@ package com.mongodb.app.presentation.blocking_censoring
 
 import android.os.Bundle
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
@@ -29,7 +30,7 @@ class BlockingViewModel (
 ) : ViewModel(){
     // region Variables
     private val _currentUserId = mutableStateOf("")
-    private var _currentUserProfile: UserProfile? = null
+    private var _currentUserProfile: MutableState<UserProfile> = mutableStateOf(UserProfile())
     private val _userIdInFocus = mutableStateOf("")
     private val _focusedUserName = mutableStateOf("")
     private val _blockingAction = mutableStateOf(BlockingAction.IDLE)
@@ -138,7 +139,7 @@ class BlockingViewModel (
         repository.readUserProfile(currentUserId.value)
             .first{
                 if (it.list.size > 0){
-                    _currentUserProfile = it.list[0]
+                    currentUserProfile.value = it.list[0]
                 }
                 true
             }
@@ -161,10 +162,7 @@ class BlockingViewModel (
     }
 
     fun isUserBlocked(userIdToCheck: String): Boolean {
-        if (currentUserProfile == null){
-            return false
-        }
-        return currentUserProfile!!.isUserBlocked(userIdToCheck)
+        return currentUserProfile.value.isUserBlocked(userIdToCheck)
     }
     // endregion Functions
 

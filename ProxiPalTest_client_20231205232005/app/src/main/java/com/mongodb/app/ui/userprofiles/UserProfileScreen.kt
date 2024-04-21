@@ -196,6 +196,15 @@ class UserProfileScreen : ComponentActivity() {
         userProfileViewModel.updateRepository(
             newRepository = repository
         )
+        messagesViewModel.updateRepository(
+            newRepository = repository
+        )
+        blockingViewModel.updateRepositories(
+            newRepository = repository
+        )
+        censoringViewModel.updateRepositories(
+            newRepository = repository
+        )
 
         setContent {
             MyApplicationTheme {
