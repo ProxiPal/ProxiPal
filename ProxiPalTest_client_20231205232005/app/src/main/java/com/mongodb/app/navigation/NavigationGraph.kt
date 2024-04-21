@@ -17,6 +17,7 @@ import com.mongodb.app.home.ScreenSettings
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.ui.tasks.ConnectWithOthersScreen
 import com.mongodb.app.location.LocationPermissionScreen
+import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
 import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
 import com.mongodb.app.presentation.blocking_censoring.FetchCensoredTextThread
 import com.mongodb.app.presentation.messages.MessagesViewModel
@@ -42,6 +43,7 @@ fun NavigationGraph(
     userProfileViewModel: UserProfileViewModel,
     homeViewModel: HomeViewModel,
     messagesViewModel: MessagesViewModel,
+    blockingViewModel: BlockingViewModel,
     censoringViewModel: CensoringViewModel
 ) {
 
@@ -128,7 +130,8 @@ fun NavigationGraph(
             MessagesScreenLayout(
                 navController = navController,
                 messagesViewModel = messagesViewModel,
-                conversationUsersInvolved = usersInvolved
+                conversationUsersInvolved = usersInvolved,
+                blockingViewModel = blockingViewModel
             )
         }
     }

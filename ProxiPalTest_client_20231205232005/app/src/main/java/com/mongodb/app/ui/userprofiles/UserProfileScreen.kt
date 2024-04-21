@@ -66,6 +66,7 @@ import com.mongodb.app.data.userprofiles.USER_PROFILE_ROW_HEADER_WEIGHT
 import com.mongodb.app.home.HomeScreen
 import com.mongodb.app.home.HomeViewModel
 import com.mongodb.app.navigation.NavigationGraph
+import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
 import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
 import com.mongodb.app.presentation.blocking_censoring.FetchCensoredTextThread
 import com.mongodb.app.presentation.messages.MessagesViewModel
@@ -122,6 +123,13 @@ class UserProfileScreen : ComponentActivity() {
             repository = repository,
             messagesRealm = repository,
             conversationsRealm = repository,
+            this
+        )
+    }
+
+    private val blockingViewModel: BlockingViewModel by viewModels {
+        BlockingViewModel.factory(
+            repository = repository,
             this
         )
     }
@@ -196,6 +204,7 @@ class UserProfileScreen : ComponentActivity() {
                     userProfileViewModel,
                     homeViewModel = HomeViewModel(repository = repository),
                     messagesViewModel = messagesViewModel,
+                    blockingViewModel = blockingViewModel,
                     censoringViewModel = censoringViewModel
                 )
             }

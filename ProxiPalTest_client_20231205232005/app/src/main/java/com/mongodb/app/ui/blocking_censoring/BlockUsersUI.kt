@@ -41,60 +41,22 @@ import com.mongodb.app.ui.theme.MyApplicationTheme
 import kotlinx.coroutines.launch
 
 
-class BlockUsersUI : ComponentActivity() {
-    // region Variables
-    private val repository = RealmSyncRepository { _, _ ->
-        lifecycleScope.launch {
-        }
-    }
-
-    private val blockingViewModel: BlockingViewModel by viewModels {
-        BlockingViewModel.factory(
-            repository = repository,
-            this
-        )
-    }
-
-    private val censoringViewModel: CensoringViewModel by viewModels {
-        CensoringViewModel.factory(
-            repository = repository,
-            this
-        )
-    }
-    // endregion Variables
-
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        blockingViewModel.updateRepositories(repository)
-        censoringViewModel.updateRepositories(repository)
-
-        setContent {
-            BlockUsersLayout(
-                blockingViewModel = blockingViewModel,
-                censoringViewModel = censoringViewModel
-            )
-        }
-    }
-}
-
-
+@Deprecated(
+    message = "Not currently in use; Use BlockingContextualMenu function instead"
+)
 @Composable
 fun BlockUsersLayout(
     blockingViewModel: BlockingViewModel,
     censoringViewModel: CensoringViewModel,
+    /* The other user's ID involved in the current conversation */
+    userIdInFocus: String,
     modifier: Modifier = Modifier
 ) {
-    // TODO
-    val tempId = "6570119696faac878ad696a5"
-//    val tempId = "65e96193c6e205c32b0915cc"
-
     Column(
         modifier = modifier
     ){
         BlockingContextualMenu(
-            userId = tempId,
+            userId = userIdInFocus,
             blockingViewModel = blockingViewModel
         )
         CensoringTestButtons(
@@ -103,6 +65,9 @@ fun BlockUsersLayout(
     }
 }
 
+/**
+ * The main [Composable] function for setting up the block/unblock user contextual menu
+ */
 @Composable
 fun BlockingContextualMenu(
     userId: String,
@@ -283,7 +248,8 @@ fun BlockUsersLayoutPreview() {
     MyApplicationTheme {
         BlockUsersLayout(
             blockingViewModel = mockBlockingViewModel,
-            censoringViewModel = mockCensoringViewModel
+            censoringViewModel = mockCensoringViewModel,
+            userIdInFocus = "placeholder"
         )
     }
 }

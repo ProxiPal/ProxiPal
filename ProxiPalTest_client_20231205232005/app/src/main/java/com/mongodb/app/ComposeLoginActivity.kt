@@ -28,7 +28,6 @@ import com.mongodb.app.data.userprofiles.SHOULD_USE_TASKS_ITEMS
 import com.mongodb.app.presentation.login.EventSeverity
 import com.mongodb.app.presentation.login.LoginEvent
 import com.mongodb.app.presentation.login.LoginViewModel
-import com.mongodb.app.ui.blocking_censoring.BlockUsersUI
 import com.mongodb.app.ui.login.AccountScaffold
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.userprofiles.UserProfileScreen

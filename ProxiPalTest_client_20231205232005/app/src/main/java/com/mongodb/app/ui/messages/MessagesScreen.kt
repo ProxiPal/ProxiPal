@@ -66,7 +66,9 @@ import com.mongodb.app.data.messages.MockConversationRepository
 import com.mongodb.app.data.messages.MockMessagesRepository
 import com.mongodb.app.domain.FriendMessage
 import com.mongodb.app.navigation.Routes
+import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
 import com.mongodb.app.presentation.messages.MessagesViewModel
+import com.mongodb.app.ui.blocking_censoring.BlockingContextualMenu
 import com.mongodb.app.ui.theme.MessageColorMine
 import com.mongodb.app.ui.theme.MessageColorOther
 import com.mongodb.app.ui.theme.MessageInputBackgroundColor
@@ -99,6 +101,7 @@ fun MessagesScreenLayout(
     navController: NavHostController,
     messagesViewModel: MessagesViewModel,
     conversationUsersInvolved: SortedSet<String>,
+    blockingViewModel: BlockingViewModel,
     modifier: Modifier = Modifier
 ) {
     messagesViewModel.updateUsersInvolved(
@@ -109,7 +112,9 @@ fun MessagesScreenLayout(
         topBar = {
             MessagesTopBar(
                 navController = navController,
-                messagesViewModel = messagesViewModel
+                messagesViewModel = messagesViewModel,
+                blockingViewModel = blockingViewModel,
+                userIdInFocus = messagesViewModel.otherUserProfileId.value
             )
         },
         modifier = modifier
@@ -169,6 +174,9 @@ fun MessagesBlockedNotifier(
 fun MessagesTopBar(
     navController: NavHostController,
     messagesViewModel: MessagesViewModel,
+    blockingViewModel: BlockingViewModel,
+    /* The other user's ID involved in the current conversation */
+    userIdInFocus: String,
     modifier: Modifier = Modifier
 ) {
     // Back button is automatically handled by the navigation code (?)
@@ -207,12 +215,9 @@ fun MessagesTopBar(
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = "Open Contextual Menu",
-                    modifier = Modifier
-                        .clickable {
-                        }
+                BlockingContextualMenu(
+                    userId = userIdInFocus,
+                    blockingViewModel = blockingViewModel
                 )
             }
         },
@@ -841,6 +846,9 @@ fun MessagesScreenLayoutPreview() {
         val mockSyncRepository = MockRepository()
         val mockMessagesRepository = MockMessagesRepository()
         val mockConversationRepository = MockConversationRepository()
+        val mockBlockingViewModel = BlockingViewModel(
+            repository = mockSyncRepository
+        )
         MessagesScreenLayout(
             navController = rememberNavController(),
             messagesViewModel = MessagesViewModel(
@@ -848,7 +856,8 @@ fun MessagesScreenLayoutPreview() {
                 messagesRepository = mockMessagesRepository,
                 conversationsRepository = mockConversationRepository
             ),
-            conversationUsersInvolved = sortedSetOf(String.empty)
+            conversationUsersInvolved = sortedSetOf(String.empty),
+            blockingViewModel = mockBlockingViewModel
         )
     }
 }
