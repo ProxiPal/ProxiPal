@@ -131,7 +131,8 @@ fun NavigationGraph(
                 navController = navController,
                 messagesViewModel = messagesViewModel,
                 conversationUsersInvolved = usersInvolved,
-                blockingViewModel = blockingViewModel
+                blockingViewModel = blockingViewModel,
+                censoringViewModel = censoringViewModel
             )
         }
     }

@@ -67,6 +67,8 @@ import com.mongodb.app.data.messages.MockMessagesRepository
 import com.mongodb.app.domain.FriendMessage
 import com.mongodb.app.navigation.Routes
 import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
+import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
+import com.mongodb.app.presentation.blocking_censoring.censor
 import com.mongodb.app.presentation.messages.MessagesViewModel
 import com.mongodb.app.ui.blocking_censoring.BlockingContextualMenu
 import com.mongodb.app.ui.theme.MessageColorMine
@@ -102,13 +104,14 @@ fun MessagesScreenLayout(
     messagesViewModel: MessagesViewModel,
     conversationUsersInvolved: SortedSet<String>,
     blockingViewModel: BlockingViewModel,
+    censoringViewModel: CensoringViewModel,
     modifier: Modifier = Modifier
 ) {
     messagesViewModel.updateUsersInvolved(
         usersInvolved = conversationUsersInvolved
     )
     blockingViewModel.updateUserInFocus(
-        messagesViewModel.otherUserProfileId.value
+        userIdInFocus = messagesViewModel.otherUserProfileId.value
     )
 
     Scaffold(
@@ -135,6 +138,7 @@ fun MessagesScreenLayout(
         else{
             MessagesBodyContent(
                 messagesViewModel = messagesViewModel,
+                censoringViewModel = censoringViewModel,
                 modifier = Modifier
                     .padding(innerPadding)
             )
@@ -235,6 +239,7 @@ fun MessagesTopBar(
 @Composable
 fun MessagesBodyContent(
     messagesViewModel: MessagesViewModel,
+    censoringViewModel: CensoringViewModel,
     modifier: Modifier = Modifier
 ) {
     if (messagesViewModel.isDeletingMessage()) {
@@ -281,7 +286,8 @@ fun MessagesBodyContent(
                     SingleMessageContainer(
                         friendMessage = friendMessage,
                         isSenderMe = messagesViewModel.isMessageMine(friendMessage),
-                        messagesViewModel = messagesViewModel
+                        messagesViewModel = messagesViewModel,
+                        censoringViewModel = censoringViewModel
                     )
                     // If the sent message is the last in the list
                     // ... or in other words the first ever message sent
@@ -342,6 +348,7 @@ fun SingleMessageContainer(
     friendMessage: FriendMessage,
     isSenderMe: Boolean,
     messagesViewModel: MessagesViewModel,
+    censoringViewModel: CensoringViewModel,
     modifier: Modifier = Modifier
 ) {
     val rowArrangement =
@@ -381,6 +388,7 @@ fun SingleMessageContainer(
                 SingleMessage(
                     message = friendMessage.message,
                     isSenderMe = isSenderMe,
+                    censoringViewModel = censoringViewModel,
                     modifier = Modifier
                 )
                 Row(
@@ -427,6 +435,7 @@ fun SingleMessageContainer(
 fun SingleMessage(
     message: String,
     isSenderMe: Boolean,
+    censoringViewModel: CensoringViewModel,
     modifier: Modifier = Modifier
 ) {
     val messageShape =
@@ -459,7 +468,7 @@ fun SingleMessage(
         modifier = modifier
     ) {
         Text(
-            text = message,
+            text = message.censor(censoringViewModel.censoredTextList),
             style = MaterialTheme.typography.bodyLarge,
             softWrap = true,
             overflow = TextOverflow.Clip,
@@ -850,6 +859,9 @@ fun MessagesScreenLayoutPreview() {
         val mockBlockingViewModel = BlockingViewModel(
             repository = mockSyncRepository
         )
+        val mockCensoringViewModel = CensoringViewModel(
+            repository = mockSyncRepository
+        )
         MessagesScreenLayout(
             navController = rememberNavController(),
             messagesViewModel = MessagesViewModel(
@@ -858,7 +870,8 @@ fun MessagesScreenLayoutPreview() {
                 conversationsRepository = mockConversationRepository
             ),
             conversationUsersInvolved = sortedSetOf(String.empty),
-            blockingViewModel = mockBlockingViewModel
+            blockingViewModel = mockBlockingViewModel,
+            censoringViewModel = mockCensoringViewModel
         )
     }
 }
@@ -871,13 +884,17 @@ fun SingleMessageContainerPreview() {
             val messagesViewModel = MessagesViewModel(
                 MockRepository(), MockMessagesRepository(), MockConversationRepository()
             )
+            val mockCensoringViewModel = CensoringViewModel(
+                MockRepository()
+            )
             SingleMessageContainer(
                 friendMessage = FriendMessage().apply {
                     message =
                         stringResource(id = R.string.user_profile_test_string)
                 },
                 isSenderMe = false,
-                messagesViewModel = messagesViewModel
+                messagesViewModel = messagesViewModel,
+                censoringViewModel = mockCensoringViewModel
             )
             SingleMessageContainer(
                 friendMessage = FriendMessage().apply {
@@ -885,7 +902,8 @@ fun SingleMessageContainerPreview() {
                         stringResource(id = R.string.user_profile_test_string)
                 },
                 isSenderMe = true,
-                messagesViewModel = messagesViewModel
+                messagesViewModel = messagesViewModel,
+                censoringViewModel = mockCensoringViewModel
             )
             SingleMessageContainer(
                 friendMessage = FriendMessage().apply {
@@ -893,7 +911,8 @@ fun SingleMessageContainerPreview() {
                         "a"
                 },
                 isSenderMe = false,
-                messagesViewModel = messagesViewModel
+                messagesViewModel = messagesViewModel,
+                censoringViewModel = mockCensoringViewModel
             )
             SingleMessageContainer(
                 friendMessage = FriendMessage().apply {
@@ -901,7 +920,8 @@ fun SingleMessageContainerPreview() {
                         "z"
                 },
                 isSenderMe = true,
-                messagesViewModel = messagesViewModel
+                messagesViewModel = messagesViewModel,
+                censoringViewModel = mockCensoringViewModel
             )
         }
     }

@@ -157,6 +157,11 @@ class CensoringViewModel (
     // endregion Properties
 
 
+    init{
+        readCensoredTextList()
+    }
+
+
     // region Functions
     fun updateRepositories(newRepository: SyncRepository){
         repository = newRepository
