@@ -34,6 +34,8 @@ class BlockingViewModel (
     private val _userIdInFocus = mutableStateOf("")
     private val _focusedUserName = mutableStateOf("")
     private val _blockingAction = mutableStateOf(BlockingAction.IDLE)
+    // TODO Need to store this variable in UserProfile database class
+    private val _shouldCensorText = mutableStateOf(false)
     // endregion Variables
 
 
@@ -50,10 +52,16 @@ class BlockingViewModel (
         get() = _blockingAction
     val isUserInFocusBlocked
         get() = currentUserProfile.value.isUserBlocked(userIdInFocus.value)
+    val shouldCensorText
+        get() = _shouldCensorText
     // endregion Properties
 
 
     // region Functions
+    fun toggleShouldCensorText(){
+        shouldCensorText.value = !shouldCensorText.value
+    }
+
     fun updateRepositories(newRepository: SyncRepository){
         repository = newRepository
         currentUserId.value = repository.getCurrentUserId()

@@ -3,6 +3,7 @@ package com.mongodb.app.ui.blocking_censoring
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.SnackbarHostState
@@ -13,6 +14,8 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,6 +34,7 @@ import com.mongodb.app.presentation.blocking_censoring.BlockingAction
 import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
 import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
 import com.mongodb.app.ui.theme.MyApplicationTheme
+import com.mongodb.app.ui.theme.Purple200
 import kotlinx.coroutines.launch
 
 
@@ -205,6 +209,30 @@ fun BlockingAlert(
     )
 }
 
+/**
+ * Shows a temporary switch to toggle between censoring and showing all texts
+ */
+@Composable
+fun SwitchToggleTextCensoring(
+    switchToggleState: Boolean,
+    onSwitchToggle: (() -> Unit),
+    modifier: Modifier = Modifier
+){
+    Row(
+        modifier = modifier
+    ){
+        Switch(
+            checked = switchToggleState,
+            onCheckedChange = {
+                onSwitchToggle()
+            },
+            colors = SwitchDefaults.colors(
+                checkedTrackColor = Purple200
+            )
+        )
+    }
+}
+
 @Composable
 fun CensoringTestButtons(
     censoringViewModel: CensoringViewModel,
@@ -276,6 +304,17 @@ fun BlockingAlertPreview() {
             onDismissButtonClick = {},
             onConfirmButtonClick = {},
             blockingViewModel = mockBlockingViewModel
+        )
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
+fun SwitchToggleTextCensoringPreview(){
+    MyApplicationTheme {
+        SwitchToggleTextCensoring(
+            switchToggleState = false,
+            onSwitchToggle = { /*TODO*/ }
         )
     }
 }
