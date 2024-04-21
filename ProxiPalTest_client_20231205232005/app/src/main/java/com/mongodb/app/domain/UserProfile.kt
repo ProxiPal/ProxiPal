@@ -1,5 +1,7 @@
 package com.mongodb.app.domain
 
+import android.util.Log
+import com.mongodb.app.TAG
 import com.mongodb.app.location.CustomGeoPoint
 
 import io.realm.kotlin.ext.realmListOf
@@ -27,6 +29,11 @@ class UserProfile : RealmObject {
     var lastName: String = ""
     var biography: String = ""
     var ownerId: String = ""
+
+    /**
+     * List of user IDs which are blocked by the current user
+     */
+    var usersBlocked: RealmList<String> = realmListOf()
 
     // Added by Marco Pacini, stores latitude and longitude
     var location: CustomGeoPoint? = null
@@ -64,5 +71,12 @@ class UserProfile : RealmObject {
         result = 31 * result + biography.hashCode()
         result = 31 * result + ownerId.hashCode()
         return result
+    }
+
+    fun isUserBlocked(userIdToCheck: String): Boolean{
+        if (userIdToCheck.isBlank() || userIdToCheck.isEmpty()){
+            return false
+        }
+        return usersBlocked.contains(userIdToCheck)
     }
 }

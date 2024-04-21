@@ -66,6 +66,10 @@ import com.mongodb.app.data.userprofiles.USER_PROFILE_ROW_HEADER_WEIGHT
 import com.mongodb.app.home.HomeScreen
 import com.mongodb.app.home.HomeViewModel
 import com.mongodb.app.navigation.NavigationGraph
+import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
+import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
+import com.mongodb.app.presentation.blocking_censoring.FetchCensoredTextThread
+import com.mongodb.app.presentation.messages.MessagesViewModel
 import com.mongodb.app.presentation.tasks.ToolbarEvent
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.presentation.userprofiles.AddUserProfileEvent
@@ -114,7 +118,28 @@ class UserProfileScreen : ComponentActivity() {
         ToolbarViewModel.factory(repository, this)
     }
 
+    private val messagesViewModel: MessagesViewModel by viewModels {
+        MessagesViewModel.factory(
+            repository = repository,
+            messagesRealm = repository,
+            conversationsRealm = repository,
+            this
+        )
+    }
 
+    private val blockingViewModel: BlockingViewModel by viewModels {
+        BlockingViewModel.factory(
+            repository = repository,
+            this
+        )
+    }
+
+    private val censoringViewModel: CensoringViewModel by viewModels {
+        CensoringViewModel.factory(
+            repository = repository,
+            this
+        )
+    }
 
     /*
     ===== Functions =====
@@ -171,10 +196,26 @@ class UserProfileScreen : ComponentActivity() {
         userProfileViewModel.updateRepository(
             newRepository = repository
         )
+        messagesViewModel.updateRepository(
+            newRepository = repository
+        )
+        blockingViewModel.updateRepositories(
+            newRepository = repository
+        )
+        censoringViewModel.updateRepositories(
+            newRepository = repository
+        )
 
         setContent {
             MyApplicationTheme {
-                NavigationGraph(toolbarViewModel, userProfileViewModel, homeViewModel = HomeViewModel(repository = repository))
+                NavigationGraph(
+                    toolbarViewModel,
+                    userProfileViewModel,
+                    homeViewModel = HomeViewModel(repository = repository),
+                    messagesViewModel = messagesViewModel,
+                    blockingViewModel = blockingViewModel,
+                    censoringViewModel = censoringViewModel
+                )
             }
         }
     }
@@ -605,22 +646,3 @@ fun DeleteConfirmationDialog(
         }
     }
 }
-
-
-
-
-
-
-//@Preview(showBackground = true)
-//@Composable
-//fun UserProfileEditButtonsPreview(){
-//    MyApplicationTheme {
-//        UserProfileEditButtons(
-//            isEditingUserProfile = true,
-//            onEditButtonClick = {},
-//            onDiscardEditButtonClick = {},
-//            onDeleteAccountConfirmed = {},
-//            toolbarViewModel =
-//        )
-//    }
-//}
