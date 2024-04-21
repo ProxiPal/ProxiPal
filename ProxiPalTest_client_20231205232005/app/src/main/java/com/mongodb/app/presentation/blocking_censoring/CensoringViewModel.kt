@@ -144,7 +144,8 @@ private fun StringBuilder.replace(startIndex: Int, endIndex: Int, replacement: C
 
 
 class CensoringViewModel (
-    private var repository: SyncRepository
+    private var repository: SyncRepository,
+    private val shouldReadCensoredTextOnInit: Boolean
 ) : ViewModel(){
     // region Variables
     private val _censoredTextList: MutableList<String> = mutableListOf()
@@ -158,7 +159,11 @@ class CensoringViewModel (
 
 
     init{
-        readCensoredTextList()
+        // This boolean condition is only to allow previews to work
+        // ... (Error is due to an illegal thread state)
+        if (shouldReadCensoredTextOnInit){
+            readCensoredTextList()
+        }
     }
 
 
@@ -227,6 +232,7 @@ class CensoringViewModel (
     companion object {
         fun factory(
             repository: SyncRepository,
+            shouldReadCensoredTextOnInit: Boolean,
             owner: SavedStateRegistryOwner,
             defaultArgs: Bundle? = null
         ): AbstractSavedStateViewModelFactory {
@@ -237,7 +243,7 @@ class CensoringViewModel (
                     handle: SavedStateHandle
                 ): T {
                     // Remember to change the cast to the class name this code is in
-                    return CensoringViewModel (repository) as T
+                    return CensoringViewModel (repository, shouldReadCensoredTextOnInit) as T
                 }
             }
         }

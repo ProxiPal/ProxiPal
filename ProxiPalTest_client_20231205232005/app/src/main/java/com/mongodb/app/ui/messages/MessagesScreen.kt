@@ -184,8 +184,6 @@ fun MessagesTopBar(
     userIdInFocus: String,
     modifier: Modifier = Modifier
 ) {
-    // Back button is automatically handled by the navigation code (?)
-    // ... so it's not programmed here
     CenterAlignedTopAppBar(
         title = {
             Row(
@@ -194,11 +192,13 @@ fun MessagesTopBar(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
+                // Back button
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = null,
                     modifier = Modifier
                         .clickable {
+                            // TODO Need to change this to navigate to friends screen instead
                             navController.navigate(Routes.UserProfileScreen.route)
                         }
                 )
@@ -860,7 +860,8 @@ fun MessagesScreenLayoutPreview() {
             repository = mockSyncRepository
         )
         val mockCensoringViewModel = CensoringViewModel(
-            repository = mockSyncRepository
+            repository = mockSyncRepository,
+            shouldReadCensoredTextOnInit = false
         )
         MessagesScreenLayout(
             navController = rememberNavController(),
@@ -885,7 +886,8 @@ fun SingleMessageContainerPreview() {
                 MockRepository(), MockMessagesRepository(), MockConversationRepository()
             )
             val mockCensoringViewModel = CensoringViewModel(
-                MockRepository()
+                repository = MockRepository(),
+                shouldReadCensoredTextOnInit = false
             )
             SingleMessageContainer(
                 friendMessage = FriendMessage().apply {

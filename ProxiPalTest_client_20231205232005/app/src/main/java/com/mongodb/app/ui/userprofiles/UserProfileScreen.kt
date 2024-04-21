@@ -137,6 +137,7 @@ class UserProfileScreen : ComponentActivity() {
     private val censoringViewModel: CensoringViewModel by viewModels {
         CensoringViewModel.factory(
             repository = repository,
+            shouldReadCensoredTextOnInit = true,
             this
         )
     }

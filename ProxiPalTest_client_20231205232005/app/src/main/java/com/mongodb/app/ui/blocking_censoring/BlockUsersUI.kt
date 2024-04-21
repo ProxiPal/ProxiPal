@@ -1,9 +1,5 @@
 package com.mongodb.app.ui.blocking_censoring
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,14 +25,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.lifecycleScope
 import com.mongodb.app.R
 import com.mongodb.app.data.MockRepository
-import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.presentation.blocking_censoring.BlockingAction
 import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
 import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
-import com.mongodb.app.ui.messages.empty
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import kotlinx.coroutines.launch
 
@@ -244,7 +237,10 @@ fun CensoringTestButtons(
 fun BlockUsersLayoutPreview() {
     val mockRepository = MockRepository()
     val mockBlockingViewModel = BlockingViewModel(mockRepository)
-    val mockCensoringViewModel = CensoringViewModel(mockRepository)
+    val mockCensoringViewModel = CensoringViewModel(
+        repository = mockRepository,
+        shouldReadCensoredTextOnInit = false
+    )
     MyApplicationTheme {
         BlockUsersLayout(
             blockingViewModel = mockBlockingViewModel,
