@@ -83,16 +83,16 @@ class BlockingViewModel (
     fun blockUser(){
         viewModelScope.launch {
             tryBlockUnblockUser(true)
-            resetCurrentUserProfileReference()
             blockUnblockUserEnd()
+            resetCurrentUserProfileReference()
         }
     }
 
     fun unblockUser(){
         viewModelScope.launch {
             tryBlockUnblockUser(false)
-            resetCurrentUserProfileReference()
             blockUnblockUserEnd()
+            resetCurrentUserProfileReference()
         }
     }
 
@@ -138,9 +138,17 @@ class BlockingViewModel (
     private suspend fun resetCurrentUserProfileReference(){
         repository.readUserProfile(currentUserId.value)
             .first{
+//                Log.i(
+//                    TAG(),
+//                    "BlockingViewModel: Current blocked = \"${currentUserProfile.value.usersBlocked}\""
+//                )
                 if (it.list.size > 0){
                     currentUserProfile.value = it.list[0]
                 }
+//                Log.i(
+//                    TAG(),
+//                    "BlockingViewModel: Now Current blocked = \"${currentUserProfile.value.usersBlocked}\""
+//                )
                 true
             }
     }
@@ -157,6 +165,8 @@ class BlockingViewModel (
 
     fun blockUnblockUserEnd(){
         blockingAction.value = BlockingAction.IDLE
+        currentUserProfile.value = UserProfile()
+        // Reset the variables denoting which other user is currently being blocked/unblocked
         userIdInFocus.value = String.empty
         focusedUserName.value = String.empty
     }
