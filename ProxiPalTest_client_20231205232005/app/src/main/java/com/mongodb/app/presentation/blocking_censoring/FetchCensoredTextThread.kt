@@ -20,6 +20,24 @@ class FetchCensoredTextThread : Thread(){
     // endregion Variables
 
 
+    companion object{
+        private var _instance: FetchCensoredTextThread? = null
+
+        fun getInstance(): FetchCensoredTextThread{
+            if (_instance == null){
+                _instance = FetchCensoredTextThread()
+            }
+            return _instance!!
+        }
+    }
+
+    init{
+        if (_instance == null){
+            _instance = this
+        }
+    }
+
+
     // region Functions
     override fun run() {
         isDoneFetchingData.value = false

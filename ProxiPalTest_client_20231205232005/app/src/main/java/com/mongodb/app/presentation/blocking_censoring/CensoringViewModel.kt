@@ -164,17 +164,16 @@ class CensoringViewModel (
 
     fun readCensoredTextList(){
         _censoredTextList.clear()
-        val fetchCensoredTextThread = FetchCensoredTextThread()
-        fetchCensoredTextThread.start()
+        FetchCensoredTextThread.getInstance().start()
         viewModelScope.launch {
-            while (!fetchCensoredTextThread.isDoneFetchingData.value){
+            while (!FetchCensoredTextThread.getInstance().isDoneFetchingData.value){
                 Log.i(
                     TAG(),
                     "CensoringViewModel: Waiting for fetched data"
                 )
                 delay(1000)
             }
-            for (datum in fetchCensoredTextThread.data){
+            for (datum in FetchCensoredTextThread.getInstance().data){
                 _censoredTextList.add(datum)
             }
             // Do not use .addAll(), it adds all elements as a single element to the end
