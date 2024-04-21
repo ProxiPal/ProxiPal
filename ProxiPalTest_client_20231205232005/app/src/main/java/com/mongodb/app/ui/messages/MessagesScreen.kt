@@ -158,10 +158,7 @@ fun MessagesBlockedNotifier(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    top = dimensionResource(id = R.dimen.messages_screen_message_history_message_vertical_padding),
-                    bottom = dimensionResource(id = R.dimen.messages_screen_message_history_message_vertical_padding),
-                    start = 8.dp,
-                    end = 8.dp
+                    all = dimensionResource(id = R.dimen.messages_screen_user_blocked_notifier_all_padding)
                 )
         ){
             Text(
