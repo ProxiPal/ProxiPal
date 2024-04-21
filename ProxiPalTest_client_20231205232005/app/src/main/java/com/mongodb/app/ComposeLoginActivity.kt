@@ -60,7 +60,6 @@ class ComposeLoginActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val componentActivity = UserProfileScreen::class.java
-//        val componentActivity = MessagesScreen::class.java
 
         // Fast-track task list screen if we are logged in
         if (app.currentUser != null) {

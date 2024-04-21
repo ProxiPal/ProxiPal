@@ -1,10 +1,6 @@
 package com.mongodb.app.ui.messages
 
-import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
@@ -59,13 +54,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.mongodb.app.R
 import com.mongodb.app.TAG
 import com.mongodb.app.data.MockRepository
-import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.messages.LONG_MESSAGE_CHARACTER_THRESHOLD
 import com.mongodb.app.data.messages.MESSAGE_WIDTH_WEIGHT
 import com.mongodb.app.data.messages.MessagesUserAction
@@ -79,7 +72,6 @@ import com.mongodb.app.ui.theme.MessageColorOther
 import com.mongodb.app.ui.theme.MessageInputBackgroundColor
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
-import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Date
 import java.util.SortedSet
@@ -184,7 +176,10 @@ fun MessagesTopBar(
     CenterAlignedTopAppBar(
         title = {
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -212,6 +207,13 @@ fun MessagesTopBar(
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = "Open Contextual Menu",
+                    modifier = Modifier
+                        .clickable {
+                        }
+                )
             }
         },
         colors = TopAppBarDefaults.smallTopAppBarColors(
