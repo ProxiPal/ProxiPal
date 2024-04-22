@@ -178,21 +178,36 @@ class CensoringViewModel (
     }
 
     fun readCensoredTextList(){
-        _censoredTextList.clear()
+        censoredTextList.clear()
         FetchCensoredTextThread.getInstance().start()
         viewModelScope.launch {
-            while (!FetchCensoredTextThread.getInstance().isDoneFetchingData.value){
-                Log.i(
-                    TAG(),
-                    "CensoringViewModel: Waiting for fetched data"
-                )
-                delay(1000)
-            }
-            for (datum in FetchCensoredTextThread.getInstance().data){
-                _censoredTextList.add(datum)
+            var shouldKeepReReading = true
+            val loopLimit = 10
+            var loopIter = 0
+            while (shouldKeepReReading && loopIter < loopLimit){
+                while (!FetchCensoredTextThread.getInstance().isDoneFetchingData.value){
+                    Log.i(
+                        TAG(),
+                        "CensoringViewModel: Waiting for fetched data"
+                    )
+                    delay(1000)
+                }
+                // List of censored words has been read successfully
+                if (FetchCensoredTextThread.getInstance().data.size > 0){
+                    shouldKeepReReading = false
+                }
+                else{
+                    Log.i(
+                        TAG(),
+                        "CensoringViewModel: Unsuccessful, trying again"
+                    )
+                }
+                loopIter++
             }
             // Do not use .addAll(), it adds all elements as a single element to the end
-//            _censoredTextList.addAll(fetchCensoredTextThread.data)
+            for (datum in FetchCensoredTextThread.getInstance().data){
+                censoredTextList.add(datum)
+            }
             Log.i(
                 TAG(),
                 "CensoringViewModel: Done waiting for fetched data; Size = " +
