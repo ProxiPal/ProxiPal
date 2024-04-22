@@ -266,7 +266,7 @@ interface SyncRepository {
 
 
     //april2
-    suspend fun validateFriendId(friendId: String): Boolean
+    suspend fun isUserIdValid(userId: String): Boolean
 
     //april2
     suspend fun getCurrentUserFriendsId(): String?
@@ -1092,13 +1092,10 @@ class RealmSyncRepository(
     }
 
     //april2
-    override suspend fun validateFriendId(friendId: String): Boolean = withContext(Dispatchers.IO) {
-        if (friendId == getCurrentUserId()) {
-            return@withContext false // Cannot befriend oneself
-        }
-        // Check if the user ID exists in the system
-        val exists = realm.query<UserProfile>("_id == $0", friendId).find().firstOrNull() != null
-        return@withContext exists
+    override suspend fun isUserIdValid(userId: String): Boolean {
+        val realm = getRealmInstance() ?: return false
+        val user = realm.query<UserProfile>("ownerId == $0", userId).find().firstOrNull()
+        return user != null
     }
 
 
@@ -1188,7 +1185,7 @@ class MockRepository : SyncRepository {
 
 
     //april2
-    override suspend fun validateFriendId(friendId: String): Boolean {
+    override suspend fun isUserIdValid(userId: String): Boolean {
         return true
     }
     //april2

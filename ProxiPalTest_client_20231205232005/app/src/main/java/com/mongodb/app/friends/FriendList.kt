@@ -14,11 +14,7 @@ import com.mongodb.app.navigation.Routes
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.filled.Mail
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.platform.LocalContext
+
 
 
 //ALL ADDED BY GEORGE FU
@@ -38,6 +34,7 @@ fun Friendslist(
     LaunchedEffect(feedback) {
         if (feedback.isNotEmpty()) {
             Toast.makeText(context, feedback, Toast.LENGTH_SHORT).show()
+            friendRequestViewModel.clearFeedback()  // Reset the feedback after showing toast
         }
     }
 
@@ -69,7 +66,9 @@ fun Friendslist(
         Row {
             Button(onClick = {
                 if (searchText.value.text.isNotEmpty()) {
+                    // Call the updated function with validation checks
                     friendRequestViewModel.onSendFriendRequestButtonClicked(searchText.value.text)
+                } else {
                 }
             }) {
                 Text("Send Friend Request")

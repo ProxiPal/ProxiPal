@@ -76,23 +76,39 @@ class FriendRequestViewModel(private val repository: SyncRepository) : ViewModel
     }
 
 
-    fun onSendFriendRequestButtonClicked(receiverFriendId: String) {
+    fun onSendFriendRequestButtonClicked(receiverUserId: String) {
         viewModelScope.launch {
-            val currentUserId = repository.getCurrentUserId()
-            if (currentUserId != receiverFriendId) {
-                repository.sendFriendRequest(currentUserId, receiverFriendId)
-                _feedback.emit("Friend request successfully sent.")
+            if (receiverUserId.isEmpty()) {
+                _feedback.emit("Please enter a valid User ID.")
             } else {
-                _feedback.emit("Cannot send friend request to yourself")
+                val userExists = repository.isUserIdValid(receiverUserId) // This should be an existing method in your repository
+                if (!userExists) {
+                    _feedback.emit("No user found with this ID.")
+                } else {
+                    // Proceed with sending the friend request because the ID is valid
+                    val currentUserId = repository.getCurrentUserId()
+                    if (currentUserId != receiverUserId) {
+                        repository.sendFriendRequest(currentUserId, receiverUserId)
+                        _feedback.emit("Friend request successfully sent.")
+                    } else {
+                        _feedback.emit("Cannot send a friend request to yourself.")
+                    }
+                }
             }
         }
     }
+
 
 
     fun respondToFriendRequest(requestId: String, accepted: Boolean) {
         viewModelScope.launch {
             repository.respondToFriendRequest(requestId, accepted)
             fetchFriendRequests() // Refresh friend requests list
+        }
+    }
+    fun clearFeedback() {
+        viewModelScope.launch {
+            _feedback.emit("")
         }
     }
 
