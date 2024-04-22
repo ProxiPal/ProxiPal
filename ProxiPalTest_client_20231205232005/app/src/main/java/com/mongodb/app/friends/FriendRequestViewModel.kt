@@ -65,7 +65,7 @@ class FriendRequestViewModel(private val repository: SyncRepository) : ViewModel
                 val currentUserId = repository.getCurrentUserId()
                 repository.getAllUserProfiles().collect { userProfiles ->
                     _uiState.value = _uiState.value.copy(
-                        users = userProfiles.filter { it.ownerId != currentUserId && !it.friends.contains(currentUserId) },
+                        users = userProfiles.filter { it.ownerId != currentUserId }, // Filter out the current user
                         isLoading = false
                     )
                 }
@@ -75,18 +75,19 @@ class FriendRequestViewModel(private val repository: SyncRepository) : ViewModel
         }
     }
 
-    fun onSendFriendRequestButtonClicked(friendId: String) {
+
+    fun onSendFriendRequestButtonClicked(receiverFriendId: String) {
         viewModelScope.launch {
-            val isValidFriendId = repository.validateFriendId(friendId)
-            if (isValidFriendId) {
-                val currentUserID = repository.getCurrentUserId()
-                repository.sendFriendRequest(currentUserID, friendId)
+            val currentUserId = repository.getCurrentUserId()
+            if (currentUserId != receiverFriendId) {
+                repository.sendFriendRequest(currentUserId, receiverFriendId)
                 _feedback.emit("Friend request successfully sent.")
             } else {
-                _feedback.emit("Invalid Friend ID")
+                _feedback.emit("Cannot send friend request to yourself")
             }
         }
     }
+
 
     fun respondToFriendRequest(requestId: String, accepted: Boolean) {
         viewModelScope.launch {

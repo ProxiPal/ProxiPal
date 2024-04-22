@@ -90,7 +90,7 @@ class UserProfileViewModel(
     private val _otherFilters = mutableStateOf<List<String>>(emptyList())
 
     //april
-    private val _currentUserFriendsId = MutableStateFlow<String?>(null)
+    private val _currentUserId = mutableStateOf("")
 
     /*
     ===== Properties =====
@@ -150,15 +150,12 @@ class UserProfileViewModel(
     val selectedIndustries: State<List<String>> = _selectedIndustries
     val otherFilters: State<List<String>> = _otherFilters
 
-    //april
-    val currentUserFriendsId: StateFlow<String?> = _currentUserFriendsId.asStateFlow()
-
-    //APRIL2
-    fun getCurrentUserId(): String = repository.getCurrentUserId()
+    val currentUserId: State<String> = _currentUserId
 
 
 
     init {
+        getCurrentUserId()
         getUserProfile()
         loadUserFilterSelections()
     }
@@ -223,8 +220,6 @@ class UserProfileViewModel(
                             userProfileListState.addAll(event.list)
                             // The user should not have more than 1 user profile,
                             // ... but will allow the app to run and not throw an exception for now
-                            //april
-                            _currentUserFriendsId.value = userProfileListState.firstOrNull()?.friendsId
                             when (event.list.size){
                                 0 -> {
                                     // When trying to update a user profile that is not saved in the database
@@ -269,7 +264,6 @@ class UserProfileViewModel(
                         }
                         is UpdatedResults -> {
                             //april
-                            _currentUserFriendsId.value = userProfileListState.firstOrNull()?.friendsId
                             if (event.deletions.isNotEmpty() && userProfileListState.isNotEmpty()) {
                                 event.deletions.reversed().forEach {
                                     userProfileListState.removeAt(it)
@@ -640,6 +634,11 @@ class UserProfileViewModel(
         val realm = repository.getRealmInstance() ?: throw IllegalStateException("Realm instance is null")
         val query = repository.getQuerySpecificUserProfile(realm, userId)
         emit(query.find().firstOrNull())
+    }
+    private fun getCurrentUserId() {
+        viewModelScope.launch {
+            _currentUserId.value = repository.getCurrentUserId()
+        }
     }
 
 }

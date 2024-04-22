@@ -13,7 +13,6 @@ import com.mongodb.app.domain.FriendConversation
 import com.mongodb.app.domain.FriendMessage
 import com.mongodb.app.domain.Item
 import com.mongodb.app.domain.UserProfile
-import com.mongodb.app.domain.UserProfile.Companion.generateFriendsId
 import com.mongodb.app.friends.FriendshipRequest
 import com.mongodb.app.location.CustomGeoPoint
 import com.mongodb.app.ui.messages.empty
@@ -539,8 +538,6 @@ class RealmSyncRepository(
             // it will be updated by the connect screen
             this.location = CustomGeoPoint(0.0,0.0)
             //this.interests.add("")
-            //april
-            generateFriendsId()
         }
         realm.write {
             copyToRealm(userProfile, updatePolicy = UpdatePolicy.ALL)
@@ -1056,7 +1053,7 @@ class RealmSyncRepository(
     }
 
     //april2
-    override suspend fun sendFriendRequest(senderId: String, receiverFriendId: String) {
+    override suspend fun sendFriendRequest(senderId: String,receiverFriendId: String) {
         try {
             // Ensure the subscriptions are ready and check specifically for the required subscription
             realm.subscriptions.waitForSynchronization()
@@ -1096,22 +1093,20 @@ class RealmSyncRepository(
 
     //april2
     override suspend fun validateFriendId(friendId: String): Boolean = withContext(Dispatchers.IO) {
-        // Directly query for the existence of the friendId without comparing it to the currentUserFriendId
-        val currentUserFriendId = getCurrentUserFriendsId()
-        if (friendId == currentUserFriendId) {
-            return@withContext false // If the user tries to add themselves, return false
+        if (friendId == getCurrentUserId()) {
+            return@withContext false // Cannot befriend oneself
         }
-        val result = realm.query<UserProfile>("friendsId == $0", friendId).find()
-
-        result.firstOrNull() != null // true if any user (except the current user, already checked) has this friendsId
+        // Check if the user ID exists in the system
+        val exists = realm.query<UserProfile>("_id == $0", friendId).find().firstOrNull() != null
+        return@withContext exists
     }
 
 
     //april2
     override suspend fun getCurrentUserFriendsId(): String? = withContext(Dispatchers.IO) {
-        val userProfile = realm.query<UserProfile>("ownerId == $0", getCurrentUserId()).first().find()
-        userProfile?.friendsId
+        getCurrentUserId()
     }
+
     //APRIL12
     override fun getAllUserProfiles(): Flow<List<UserProfile>> = flow {
         val userProfiles = realm.query<UserProfile>().find().toList()

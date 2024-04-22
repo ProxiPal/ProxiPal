@@ -14,6 +14,11 @@ import com.mongodb.app.navigation.Routes
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.filled.Mail
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 
 
 //ALL ADDED BY GEORGE FU
@@ -26,8 +31,9 @@ fun Friendslist(
 ) {
     val context = LocalContext.current
     val searchText = remember { mutableStateOf(TextFieldValue()) }
-    val friendsId by viewModel.currentUserFriendsId.collectAsState()
     val feedback by friendRequestViewModel.feedback.collectAsState(initial = "")
+    val currentUserId by viewModel.currentUserId
+
 
     LaunchedEffect(feedback) {
         if (feedback.isNotEmpty()) {
@@ -48,7 +54,7 @@ fun Friendslist(
                     value = searchText.value,
                     onValueChange = { newText -> if (newText.text.length <= 30) searchText.value = newText },
                     singleLine = true,
-                    placeholder = { Text("Search For Friend ID") },
+                    placeholder = { Text("Enter User ID to add") },
                     colors = TextFieldDefaults.textFieldColors(
                         containerColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
@@ -76,7 +82,7 @@ fun Friendslist(
             }
         }
 
-        Text("Your Friends ID: $friendsId", modifier = Modifier.padding(16.dp))
+        Text("Your User ID: $currentUserId", modifier = Modifier.padding(16.dp))
     }
 }
 
