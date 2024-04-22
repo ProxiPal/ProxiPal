@@ -154,7 +154,6 @@ class CensoringViewModel (
 ) : ViewModel(){
     // region Variables
     private val _censoredTextList: MutableList<String> = mutableListOf()
-    // TODO Need to store this variable in UserProfile database class
     private val _isCensoringText = mutableStateOf(false)
     // endregion Variables
 

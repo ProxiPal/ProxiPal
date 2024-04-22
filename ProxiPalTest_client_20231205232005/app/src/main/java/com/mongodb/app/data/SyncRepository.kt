@@ -501,6 +501,7 @@ class RealmSyncRepository(
 
             // Initialize a newly created account with no users yet blocked
             this.usersBlocked = realmListOf(String.empty)
+            this.hasTextCensoringEnabled = false
         }
         realm.write {
             copyToRealm(userProfile, updatePolicy = UpdatePolicy.ALL)
