@@ -59,6 +59,7 @@ import androidx.navigation.compose.rememberNavController
 import com.mongodb.app.R
 import com.mongodb.app.TAG
 import com.mongodb.app.data.MockRepository
+import com.mongodb.app.data.blocking_censoring.MockBlockingCensoringRealm
 import com.mongodb.app.data.messages.LONG_MESSAGE_CHARACTER_THRESHOLD
 import com.mongodb.app.data.messages.MESSAGE_WIDTH_WEIGHT
 import com.mongodb.app.data.messages.MessagesUserAction
@@ -113,6 +114,7 @@ fun MessagesScreenLayout(
     blockingViewModel.updateUserInFocus(
         userIdInFocus = messagesViewModel.otherUserProfileId.value
     )
+    censoringViewModel.updateShouldCensorTextState()
 
     Scaffold(
         topBar = {
@@ -890,11 +892,14 @@ fun MessagesScreenLayoutPreview() {
         val mockSyncRepository = MockRepository()
         val mockMessagesRepository = MockMessagesRepository()
         val mockConversationRepository = MockConversationRepository()
+        val mockBlockingCensoringRealm = MockBlockingCensoringRealm()
         val mockBlockingViewModel = BlockingViewModel(
-            repository = mockSyncRepository
+            repository = mockSyncRepository,
+            blockingCensoringRealm = mockBlockingCensoringRealm
         )
         val mockCensoringViewModel = CensoringViewModel(
             repository = mockSyncRepository,
+            blockingCensoringRealm = mockBlockingCensoringRealm,
             shouldReadCensoredTextOnInit = false
         )
         MessagesScreenLayout(
@@ -922,11 +927,14 @@ fun SingleMessageContainerPreview() {
                 messagesRepository = MockMessagesRepository(),
                 conversationsRepository = MockConversationRepository()
             )
+            val mockBlockingCensoringRealm = MockBlockingCensoringRealm()
             val mockBlockingViewModel = BlockingViewModel(
-                repository = mockRepository
+                repository = mockRepository,
+                blockingCensoringRealm = mockBlockingCensoringRealm
             )
             val mockCensoringViewModel = CensoringViewModel(
                 repository = MockRepository(),
+                blockingCensoringRealm = mockBlockingCensoringRealm,
                 shouldReadCensoredTextOnInit = false
             )
             SingleMessageContainer(

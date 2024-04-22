@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.mongodb.app.R
 import com.mongodb.app.data.MockRepository
+import com.mongodb.app.data.blocking_censoring.MockBlockingCensoringRealm
 import com.mongodb.app.presentation.blocking_censoring.BlockingAction
 import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
 import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
@@ -264,9 +265,14 @@ fun CensoringTestButtons(
 @Preview(showBackground = true)
 fun BlockUsersLayoutPreview() {
     val mockRepository = MockRepository()
-    val mockBlockingViewModel = BlockingViewModel(mockRepository)
+    val mockBlockingCensoringRealm = MockBlockingCensoringRealm()
+    val mockBlockingViewModel = BlockingViewModel(
+        repository = mockRepository,
+        blockingCensoringRealm = mockBlockingCensoringRealm
+    )
     val mockCensoringViewModel = CensoringViewModel(
         repository = mockRepository,
+        blockingCensoringRealm = mockBlockingCensoringRealm,
         shouldReadCensoredTextOnInit = false
     )
     MyApplicationTheme {
@@ -282,7 +288,10 @@ fun BlockUsersLayoutPreview() {
 @Preview(showBackground = true)
 fun BlockingContextualMenuPreview() {
     val mockRepository = MockRepository()
-    val mockBlockingViewModel = BlockingViewModel(mockRepository)
+    val mockBlockingCensoringRealm = MockBlockingCensoringRealm()
+    val mockBlockingViewModel = BlockingViewModel(
+        repository = mockRepository,
+        blockingCensoringRealm = mockBlockingCensoringRealm)
     MyApplicationTheme {
         BlockingContextualMenu(
             userId = stringResource(id = R.string.user_profile_test_string),
@@ -295,7 +304,11 @@ fun BlockingContextualMenuPreview() {
 @Preview(showBackground = true)
 fun BlockingAlertPreview() {
     val mockRepository = MockRepository()
-    val mockBlockingViewModel = BlockingViewModel(mockRepository)
+    val mockBlockingCensoringRealm = MockBlockingCensoringRealm()
+    val mockBlockingViewModel = BlockingViewModel(
+        repository = mockRepository,
+        blockingCensoringRealm = mockBlockingCensoringRealm
+    )
     MyApplicationTheme {
         BlockingAlert(
             userIdToBlock = stringResource(id = R.string.user_profile_test_string),

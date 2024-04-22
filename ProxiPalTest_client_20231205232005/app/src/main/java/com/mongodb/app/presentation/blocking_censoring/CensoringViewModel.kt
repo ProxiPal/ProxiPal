@@ -10,7 +10,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.mongodb.app.TAG
 import com.mongodb.app.data.SyncRepository
+import com.mongodb.app.data.blocking_censoring.IBlockingCensoringRealm
+import com.mongodb.app.data.toObjectId
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.regex.Pattern
 
@@ -146,6 +149,7 @@ private fun StringBuilder.replace(startIndex: Int, endIndex: Int, replacement: C
 
 class CensoringViewModel (
     private var repository: SyncRepository,
+    private var blockingCensoringRealm: IBlockingCensoringRealm,
     private val shouldReadCensoredTextOnInit: Boolean
 ) : ViewModel(){
     // region Variables
@@ -173,8 +177,12 @@ class CensoringViewModel (
 
 
     // region Functions
-    fun updateRepositories(newRepository: SyncRepository){
+    fun updateRepositories(
+        newRepository: SyncRepository,
+        newBlockingCensoringRealm: IBlockingCensoringRealm
+    ){
         repository = newRepository
+        blockingCensoringRealm = newBlockingCensoringRealm
     }
 
     fun readCensoredTextList(){
@@ -246,12 +254,29 @@ class CensoringViewModel (
         )
     }
 
+    fun updateShouldCensorTextState(){
+        viewModelScope.launch {
+            readShouldCensorTextState()
+        }
+    }
+
+    private suspend fun readShouldCensorTextState(){
+        repository.readUserProfile(repository.getCurrentUserId())
+            .first{
+                if (it.list.size > 0){
+                    isCensoringText.value = it.list[0].hasTextCensoringEnabled
+                }
+                true
+            }
+    }
+
     fun toggleShouldCensorText(){
-        isCensoringText.value = !isCensoringText.value
-        Log.i(
-            TAG(),
-            "CensoringViewModel: IsCensoring? = \"${isCensoringText.value}\""
-        )
+        viewModelScope.launch {
+            blockingCensoringRealm.updateTextCensoringState(
+                repository.getCurrentUserId().toObjectId()
+            )
+            readShouldCensorTextState()
+        }
     }
     // endregion Functions
 
@@ -260,6 +285,7 @@ class CensoringViewModel (
     companion object {
         fun factory(
             repository: SyncRepository,
+            blockingCensoringRealm: IBlockingCensoringRealm,
             shouldReadCensoredTextOnInit: Boolean,
             owner: SavedStateRegistryOwner,
             defaultArgs: Bundle? = null
@@ -271,7 +297,7 @@ class CensoringViewModel (
                     handle: SavedStateHandle
                 ): T {
                     // Remember to change the cast to the class name this code is in
-                    return CensoringViewModel (repository, shouldReadCensoredTextOnInit) as T
+                    return CensoringViewModel (repository, blockingCensoringRealm, shouldReadCensoredTextOnInit) as T
                 }
             }
         }

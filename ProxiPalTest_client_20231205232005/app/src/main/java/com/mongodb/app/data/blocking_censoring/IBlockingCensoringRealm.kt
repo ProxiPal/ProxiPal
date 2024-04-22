@@ -7,7 +7,7 @@ import org.mongodb.kbson.ObjectId
 /**
  * Contains necessary functions for blocking and text censoring with [UserProfile] objects
  */
-interface IBlockingCensoring {
+interface IBlockingCensoringRealm {
     // region Blocking
     suspend fun updateUsersBlocked(userId: ObjectId, shouldBlock: Boolean)
     // endregion Blocking

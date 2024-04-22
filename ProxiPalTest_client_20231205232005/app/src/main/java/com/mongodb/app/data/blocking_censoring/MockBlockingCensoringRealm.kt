@@ -6,7 +6,7 @@ import org.mongodb.kbson.ObjectId
 /**
  * A mock class to be used in preview Composable functions
  */
-class MockBlockingCensoring: IBlockingCensoring {
+class MockBlockingCensoringRealm: IBlockingCensoringRealm {
     override suspend fun updateUsersBlocked(
         userId: ObjectId,
         shouldBlock: Boolean

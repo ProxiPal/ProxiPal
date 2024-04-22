@@ -3,7 +3,7 @@ package com.mongodb.app.data
 import android.util.Log
 import com.mongodb.app.TAG
 import com.mongodb.app.app
-import com.mongodb.app.data.blocking_censoring.IBlockingCensoring
+import com.mongodb.app.data.blocking_censoring.IBlockingCensoringRealm
 import com.mongodb.app.data.messages.IConversationsRealm
 import com.mongodb.app.data.messages.IMessagesRealm
 import com.mongodb.app.data.messages.SHOULD_PRINT_REALM_CONFIG_INFO
@@ -262,7 +262,7 @@ interface SyncRepository {
  */
 class RealmSyncRepository(
     onSyncError: (session: SyncSession, error: SyncException) -> Unit
-) : SyncRepository, IMessagesRealm, IConversationsRealm, IBlockingCensoring {
+) : SyncRepository, IMessagesRealm, IConversationsRealm, IBlockingCensoringRealm {
 
     private val realm: Realm
     private val config: SyncConfiguration

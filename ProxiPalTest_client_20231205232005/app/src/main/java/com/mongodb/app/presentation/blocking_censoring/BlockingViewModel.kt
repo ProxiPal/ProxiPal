@@ -11,6 +11,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.mongodb.app.TAG
 import com.mongodb.app.data.SyncRepository
+import com.mongodb.app.data.blocking_censoring.IBlockingCensoringRealm
+import com.mongodb.app.data.blocking_censoring.MockBlockingCensoringRealm
 import com.mongodb.app.data.toObjectId
 import com.mongodb.app.domain.UserProfile
 import com.mongodb.app.ui.messages.empty
@@ -26,7 +28,8 @@ enum class BlockingAction{
 
 
 class BlockingViewModel (
-    private var repository: SyncRepository
+    private var repository: SyncRepository,
+    private var blockingCensoringRealm: IBlockingCensoringRealm
 ) : ViewModel(){
     // region Variables
     private val _currentUserId = mutableStateOf("")
@@ -109,7 +112,7 @@ class BlockingViewModel (
         // This is inside a try-catch block in case the user ID being (un)blocked is not a valid ID
         try{
             val objectId = userIdInFocus.value.toObjectId()
-            repository.updateUsersBlocked(objectId, shouldBlock)
+            blockingCensoringRealm.updateUsersBlocked(objectId, shouldBlock)
             if (shouldBlock){
                 Log.i(
                     TAG(),
@@ -187,6 +190,7 @@ class BlockingViewModel (
     companion object {
         fun factory(
             repository: SyncRepository,
+            blockingCensoringRealm: IBlockingCensoringRealm,
             owner: SavedStateRegistryOwner,
             defaultArgs: Bundle? = null
         ): AbstractSavedStateViewModelFactory {
@@ -197,7 +201,7 @@ class BlockingViewModel (
                     handle: SavedStateHandle
                 ): T {
                     // Remember to change the cast to the class name this code is in
-                    return BlockingViewModel (repository) as T
+                    return BlockingViewModel (repository, blockingCensoringRealm) as T
                 }
             }
         }
