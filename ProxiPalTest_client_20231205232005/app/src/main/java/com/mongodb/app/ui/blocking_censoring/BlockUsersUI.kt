@@ -12,7 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -29,8 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.mongodb.app.R
-import com.mongodb.app.data.MockRepository
-import com.mongodb.app.data.blocking_censoring.MockBlockingCensoringRealm
+import com.mongodb.app.data.blocking_censoring.MockBlockingCensoringData
 import com.mongodb.app.presentation.blocking_censoring.BlockingAction
 import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
 import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
@@ -159,7 +157,6 @@ fun BlockingContextualMenu(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BlockingAlert(
     userIdToBlock: String,
@@ -229,6 +226,10 @@ fun BlockingAlert(
 /**
  * Shows a temporary switch to toggle between censoring and showing all texts
  */
+@Deprecated(
+    message = "May use eventually, but for now the action to censor text is in a contextual menu in " +
+            "the top app bar of the messages screen"
+)
 @Composable
 fun SwitchToggleTextCensoring(
     switchToggleState: Boolean,
@@ -280,21 +281,10 @@ fun CensoringTestButtons(
 @Composable
 @Preview(showBackground = true)
 fun BlockUsersLayoutPreview() {
-    val mockRepository = MockRepository()
-    val mockBlockingCensoringRealm = MockBlockingCensoringRealm()
-    val mockBlockingViewModel = BlockingViewModel(
-        repository = mockRepository,
-        blockingCensoringRealm = mockBlockingCensoringRealm
-    )
-    val mockCensoringViewModel = CensoringViewModel(
-        repository = mockRepository,
-        blockingCensoringRealm = mockBlockingCensoringRealm,
-        shouldReadCensoredTextOnInit = false
-    )
     MyApplicationTheme {
         BlockUsersLayout(
-            blockingViewModel = mockBlockingViewModel,
-            censoringViewModel = mockCensoringViewModel,
+            blockingViewModel = MockBlockingCensoringData.mockBlockingViewModel,
+            censoringViewModel = MockBlockingCensoringData.mockCensoringViewModel,
             userIdInFocus = "placeholder"
         )
     }
@@ -303,22 +293,11 @@ fun BlockUsersLayoutPreview() {
 @Composable
 @Preview(showBackground = true)
 fun BlockingContextualMenuPreview() {
-    val mockRepository = MockRepository()
-    val mockBlockingCensoringRealm = MockBlockingCensoringRealm()
-    val mockBlockingViewModel = BlockingViewModel(
-        repository = mockRepository,
-        blockingCensoringRealm = mockBlockingCensoringRealm
-    )
-    val mockCensoringViewModel = CensoringViewModel(
-        repository = mockRepository,
-        blockingCensoringRealm = mockBlockingCensoringRealm,
-        shouldReadCensoredTextOnInit = false
-    )
     MyApplicationTheme {
         BlockingContextualMenu(
             userId = stringResource(id = R.string.user_profile_test_string),
-            blockingViewModel = mockBlockingViewModel,
-            censoringViewModel = mockCensoringViewModel
+            blockingViewModel = MockBlockingCensoringData.mockBlockingViewModel,
+            censoringViewModel = MockBlockingCensoringData.mockCensoringViewModel
         )
     }
 }
@@ -326,12 +305,6 @@ fun BlockingContextualMenuPreview() {
 @Composable
 @Preview(showBackground = true)
 fun BlockingAlertPreview() {
-    val mockRepository = MockRepository()
-    val mockBlockingCensoringRealm = MockBlockingCensoringRealm()
-    val mockBlockingViewModel = BlockingViewModel(
-        repository = mockRepository,
-        blockingCensoringRealm = mockBlockingCensoringRealm
-    )
     MyApplicationTheme {
         BlockingAlert(
             userIdToBlock = stringResource(id = R.string.user_profile_test_string),
@@ -339,7 +312,7 @@ fun BlockingAlertPreview() {
             onDismissRequest = {},
             onDismissButtonClick = {},
             onConfirmButtonClick = {},
-            blockingViewModel = mockBlockingViewModel
+            blockingViewModel = MockBlockingCensoringData.mockBlockingViewModel
         )
     }
 }

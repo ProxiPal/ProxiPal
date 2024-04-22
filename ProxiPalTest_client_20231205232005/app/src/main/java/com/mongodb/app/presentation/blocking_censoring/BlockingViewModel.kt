@@ -12,10 +12,8 @@ import androidx.savedstate.SavedStateRegistryOwner
 import com.mongodb.app.TAG
 import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.blocking_censoring.IBlockingCensoringRealm
-import com.mongodb.app.data.blocking_censoring.MockBlockingCensoringRealm
 import com.mongodb.app.data.toObjectId
 import com.mongodb.app.domain.UserProfile
-import com.mongodb.app.ui.messages.empty
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 

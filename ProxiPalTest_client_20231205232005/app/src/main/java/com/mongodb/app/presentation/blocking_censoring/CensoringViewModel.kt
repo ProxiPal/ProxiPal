@@ -82,7 +82,7 @@ private fun StringBuilder.censorLong(textToCensor: String){
     )
 
     // Ignore casing when doing the pattern matching
-    var lowercase = this.toString().lowercase()
+    val lowercase = this.toString().lowercase()
 
     // Check every substring for the offending text
     var startIndex = 0
@@ -150,7 +150,7 @@ private fun StringBuilder.replace(startIndex: Int, endIndex: Int, replacement: C
 class CensoringViewModel (
     private var repository: SyncRepository,
     private var blockingCensoringRealm: IBlockingCensoringRealm,
-    private val shouldReadCensoredTextOnInit: Boolean
+    shouldReadCensoredTextOnInit: Boolean
 ) : ViewModel(){
     // region Variables
     private val _censoredTextList: MutableList<String> = mutableListOf()
