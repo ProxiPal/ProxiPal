@@ -2,6 +2,7 @@ package com.mongodb.app.presentation.blocking_censoring
 
 import android.os.Bundle
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -149,12 +150,16 @@ class CensoringViewModel (
 ) : ViewModel(){
     // region Variables
     private val _censoredTextList: MutableList<String> = mutableListOf()
+    // TODO Need to store this variable in UserProfile database class
+    private val _isCensoringText = mutableStateOf(false)
     // endregion Variables
 
 
     // region Properties
     val censoredTextList
         get() = _censoredTextList
+    val isCensoringText
+        get() = _isCensoringText
     // endregion Properties
 
 
@@ -223,6 +228,14 @@ class CensoringViewModel (
         Log.i(
             TAG(),
             "CensoringViewModel: End of text censoring tests"
+        )
+    }
+
+    fun toggleShouldCensorText(){
+        isCensoringText.value = !isCensoringText.value
+        Log.i(
+            TAG(),
+            "CensoringViewModel: IsCensoring? = \"${isCensoringText.value}\""
         )
     }
     // endregion Functions

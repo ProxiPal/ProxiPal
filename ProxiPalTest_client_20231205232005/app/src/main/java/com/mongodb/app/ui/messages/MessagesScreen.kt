@@ -405,7 +405,8 @@ fun SingleMessageContainer(
                     MessagesContextualMenu(
                         friendMessage = friendMessage,
                         isSenderMe = isSenderMe,
-                        messagesViewModel = messagesViewModel
+                        messagesViewModel = messagesViewModel,
+                        censoringViewModel = censoringViewModel
                     )
                     if (!isSenderMe){
                         MessagesExtrasLabel(
@@ -465,7 +466,9 @@ fun SingleMessage(
         modifier = modifier
     ) {
         Text(
-            text = message.censor(censoringViewModel.censoredTextList),
+            text =
+            if (censoringViewModel.isCensoringText.value) message.censor(censoringViewModel.censoredTextList)
+            else message,
             style = MaterialTheme.typography.bodyLarge,
             softWrap = true,
             overflow = TextOverflow.Clip,
@@ -536,6 +539,25 @@ fun MessagesExtrasLabel(
     )
 }
 
+@Composable
+fun MessagesContextualMenuTextCensoring(
+    willCensorOnClick: Boolean,
+    onClick: (() -> Unit),
+    modifier: Modifier = Modifier
+){
+    DropdownMenuItem(
+        text = {
+            Text(
+                text =
+                    if (willCensorOnClick) stringResource(id = R.string.censoring_enable_text_censoring)
+                else stringResource(id = R.string.censoring_disable_text_censoring)
+            )
+        },
+        onClick = { onClick() },
+        modifier = modifier
+    )
+}
+
 /**
  * Provides an additional menu with extra actions the user can take
  */
@@ -544,6 +566,7 @@ fun MessagesContextualMenu(
     friendMessage: FriendMessage,
     isSenderMe: Boolean,
     messagesViewModel: MessagesViewModel,
+    censoringViewModel: CensoringViewModel,
     modifier: Modifier = Modifier
 ) {
     var isContextualMenuOpen by rememberSaveable { mutableStateOf(false) }
@@ -609,6 +632,13 @@ fun MessagesContextualMenu(
                         }
                     }
                 )
+                MessagesContextualMenuTextCensoring(
+                    willCensorOnClick = !censoringViewModel.isCensoringText.value,
+                    onClick = {
+                        isContextualMenuOpen = false
+                        censoringViewModel.toggleShouldCensorText()
+                    }
+                )
             }
             // Show only an option to reply to another user's messages
             else {
@@ -625,6 +655,13 @@ fun MessagesContextualMenu(
                                 friendMessageBeingRepliedTo = friendMessage
                             )
                         }
+                    }
+                )
+                MessagesContextualMenuTextCensoring(
+                    willCensorOnClick = !censoringViewModel.isCensoringText.value,
+                    onClick = {
+                        isContextualMenuOpen = false
+                        censoringViewModel.toggleShouldCensorText()
                     }
                 )
             }
@@ -879,8 +916,14 @@ fun MessagesScreenLayoutPreview() {
 fun SingleMessageContainerPreview() {
     MyApplicationTheme {
         Column {
+            val mockRepository = MockRepository()
             val messagesViewModel = MessagesViewModel(
-                MockRepository(), MockMessagesRepository(), MockConversationRepository()
+                repository = mockRepository,
+                messagesRepository = MockMessagesRepository(),
+                conversationsRepository = MockConversationRepository()
+            )
+            val mockBlockingViewModel = BlockingViewModel(
+                repository = mockRepository
             )
             val mockCensoringViewModel = CensoringViewModel(
                 repository = MockRepository(),

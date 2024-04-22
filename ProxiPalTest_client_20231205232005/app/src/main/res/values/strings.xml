@@ -98,6 +98,8 @@
     <string name="blocking_alert_confirm">Confirm</string>
     <string name="blocking_snackbar_block_text">User has been blocked</string>
     <string name="blocking_snackbar_unblock_text">User has been unblocked</string>
+    <string name="censoring_enable_text_censoring">Censor</string>
+    <string name="censoring_disable_text_censoring">Uncensor</string>
 <!--    End of blocking/censoring strings -->
 
     <!-- NewFriendRequestNotificationService strings
