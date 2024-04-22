@@ -55,7 +55,8 @@ fun BlockUsersLayout(
     ){
         BlockingContextualMenu(
             userId = userIdInFocus,
-            blockingViewModel = blockingViewModel
+            blockingViewModel = blockingViewModel,
+            censoringViewModel = censoringViewModel
         )
         CensoringTestButtons(
             censoringViewModel = censoringViewModel
@@ -70,6 +71,7 @@ fun BlockUsersLayout(
 fun BlockingContextualMenu(
     userId: String,
     blockingViewModel: BlockingViewModel,
+    censoringViewModel: CensoringViewModel,
     modifier: Modifier = Modifier
 ) {
     var isContextualMenuOpen by rememberSaveable { mutableStateOf(false) }
@@ -115,6 +117,20 @@ fun BlockingContextualMenu(
                         )
                     }
                 }
+            )
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text =
+                        if (!censoringViewModel.isCensoringText.value) stringResource(id = R.string.censoring_enable_text_censoring)
+                        else stringResource(id = R.string.censoring_disable_text_censoring)
+                    )
+                },
+                onClick = {
+                    isContextualMenuOpen = false
+                    censoringViewModel.toggleShouldCensorText()
+                },
+                modifier = modifier
             )
         }
     }
@@ -291,11 +307,18 @@ fun BlockingContextualMenuPreview() {
     val mockBlockingCensoringRealm = MockBlockingCensoringRealm()
     val mockBlockingViewModel = BlockingViewModel(
         repository = mockRepository,
-        blockingCensoringRealm = mockBlockingCensoringRealm)
+        blockingCensoringRealm = mockBlockingCensoringRealm
+    )
+    val mockCensoringViewModel = CensoringViewModel(
+        repository = mockRepository,
+        blockingCensoringRealm = mockBlockingCensoringRealm,
+        shouldReadCensoredTextOnInit = false
+    )
     MyApplicationTheme {
         BlockingContextualMenu(
             userId = stringResource(id = R.string.user_profile_test_string),
-            blockingViewModel = mockBlockingViewModel
+            blockingViewModel = mockBlockingViewModel,
+            censoringViewModel = mockCensoringViewModel
         )
     }
 }

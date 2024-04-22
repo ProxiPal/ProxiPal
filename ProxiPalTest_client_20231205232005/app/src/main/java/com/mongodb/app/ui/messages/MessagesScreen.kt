@@ -122,6 +122,7 @@ fun MessagesScreenLayout(
                 navController = navController,
                 messagesViewModel = messagesViewModel,
                 blockingViewModel = blockingViewModel,
+                censoringViewModel = censoringViewModel,
                 userIdInFocus = messagesViewModel.otherUserProfileId.value
             )
         },
@@ -179,6 +180,7 @@ fun MessagesTopBar(
     navController: NavHostController,
     messagesViewModel: MessagesViewModel,
     blockingViewModel: BlockingViewModel,
+    censoringViewModel: CensoringViewModel,
     /* The other user's ID involved in the current conversation */
     userIdInFocus: String,
     modifier: Modifier = Modifier
@@ -221,7 +223,8 @@ fun MessagesTopBar(
                 }
                 BlockingContextualMenu(
                     userId = userIdInFocus,
-                    blockingViewModel = blockingViewModel
+                    blockingViewModel = blockingViewModel,
+                    censoringViewModel = censoringViewModel
                 )
             }
         },
@@ -541,25 +544,6 @@ fun MessagesExtrasLabel(
     )
 }
 
-@Composable
-fun MessagesContextualMenuTextCensoring(
-    willCensorOnClick: Boolean,
-    onClick: (() -> Unit),
-    modifier: Modifier = Modifier
-){
-    DropdownMenuItem(
-        text = {
-            Text(
-                text =
-                    if (willCensorOnClick) stringResource(id = R.string.censoring_enable_text_censoring)
-                else stringResource(id = R.string.censoring_disable_text_censoring)
-            )
-        },
-        onClick = { onClick() },
-        modifier = modifier
-    )
-}
-
 /**
  * Provides an additional menu with extra actions the user can take
  */
@@ -634,13 +618,6 @@ fun MessagesContextualMenu(
                         }
                     }
                 )
-                MessagesContextualMenuTextCensoring(
-                    willCensorOnClick = !censoringViewModel.isCensoringText.value,
-                    onClick = {
-                        isContextualMenuOpen = false
-                        censoringViewModel.toggleShouldCensorText()
-                    }
-                )
             }
             // Show only an option to reply to another user's messages
             else {
@@ -657,13 +634,6 @@ fun MessagesContextualMenu(
                                 friendMessageBeingRepliedTo = friendMessage
                             )
                         }
-                    }
-                )
-                MessagesContextualMenuTextCensoring(
-                    willCensorOnClick = !censoringViewModel.isCensoringText.value,
-                    onClick = {
-                        isContextualMenuOpen = false
-                        censoringViewModel.toggleShouldCensorText()
                     }
                 )
             }
