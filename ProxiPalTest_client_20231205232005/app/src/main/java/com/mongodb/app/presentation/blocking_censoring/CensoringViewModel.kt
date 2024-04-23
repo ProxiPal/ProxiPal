@@ -154,6 +154,7 @@ class CensoringViewModel (
 ) : ViewModel(){
     // region Variables
     private val _profanityListTxt: MutableList<String> = mutableListOf()
+    private val _profanityListCsv: MutableList<String> = mutableListOf()
     private val _isCensoringText = mutableStateOf(false)
     // endregion Variables
 
@@ -161,6 +162,8 @@ class CensoringViewModel (
     // region Properties
     val profanityListTxt
         get() = _profanityListTxt
+    val profanityListCsv
+        get() = _profanityListCsv
     val isCensoringText
         get() = _isCensoringText
     // endregion Properties
@@ -187,10 +190,11 @@ class CensoringViewModel (
     }
 
     /**
-     * Attempts to read a list of "key words/phrases" to censor from messages in the messages screen
+     * Attempts to read a list of keyphrases to censor messages in the messages screen
      */
     fun readCensoredTextList(){
         profanityListTxt.clear()
+        profanityListCsv.clear()
         FetchCensoredTextThread.getInstance().start()
         viewModelScope.launch {
             var shouldKeepReReading = true
@@ -204,14 +208,15 @@ class CensoringViewModel (
                     )
                     delay(1000)
                 }
-                // List of censored words has been read successfully
-                if (FetchCensoredTextThread.getInstance().dataTxt.size > 0){
+                // Lists of profanity from .txt and .csv have been read successfully
+                if (FetchCensoredTextThread.getInstance().dataTxt.size > 0
+                    && FetchCensoredTextThread.getInstance().dataCsv.size > 0){
                     shouldKeepReReading = false
                 }
                 else{
                     Log.i(
                         TAG(),
-                        "CensoringViewModel: Unsuccessful, trying again"
+                        "CensoringViewModel: Unsuccessful reading, trying again"
                     )
                 }
                 loopIter++
@@ -220,16 +225,31 @@ class CensoringViewModel (
             for (datum in FetchCensoredTextThread.getInstance().dataTxt){
                 profanityListTxt.add(datum)
             }
+            for (datum in FetchCensoredTextThread.getInstance().dataCsv){
+                profanityListCsv.add(datum)
+            }
             Log.i(
                 TAG(),
-                "CensoringViewModel: Done waiting for fetched data; Size = " +
+                "CensoringViewModel: Done waiting for fetched .txt data; Size = " +
                         "${profanityListTxt.size}"
             )
             if (profanityListTxt.size > 0){
                 Log.i(
                     TAG(),
-                    "CensoringViewModel: 1st = \"${profanityListTxt[0]}\"; " +
+                    "CensoringViewModel: .txt 1st = \"${profanityListTxt[0]}\"; " +
                             "Last = \"${profanityListTxt[profanityListTxt.size - 1]}\""
+                )
+            }
+            Log.i(
+                TAG(),
+                "CensoringViewModel: Done waiting for fetched .csv data; Size = " +
+                        "${profanityListCsv.size}"
+            )
+            if (profanityListCsv.size > 0){
+                Log.i(
+                    TAG(),
+                    "CensoringViewModel: .csv 1st = \"${profanityListCsv[0]}\"; " +
+                            "Last = \"${profanityListCsv[profanityListCsv.size - 1]}\""
                 )
             }
         }
@@ -257,6 +277,7 @@ class CensoringViewModel (
         )
         for (test in testList) {
             test.censor(profanityListTxt)
+            test.censor(profanityListCsv)
         }
         Log.i(
             TAG(),

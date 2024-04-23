@@ -17,6 +17,7 @@ class FetchCensoredTextThread : Thread(){
     // region Variables
     val isDoneFetchingData = mutableStateOf(true)
     val dataTxt: MutableList<String> = mutableListOf()
+    val dataCsv: MutableList<String> = mutableListOf()
     private val _urlTxt = "https://raw.githubusercontent.com/dsojevic/profanity-list/main/en.txt"
     private val _urlCsv = "https://raw.githubusercontent.com/surge-ai/profanity/main/profanity_en.csv"
     private val _httpUrlConnectionTimeout = 60000
@@ -50,6 +51,7 @@ class FetchCensoredTextThread : Thread(){
     override fun run() {
         isDoneFetchingData.value = false
         dataTxt.clear()
+        dataCsv.clear()
 
         var url: URL
         var httpURLConnection: HttpURLConnection
@@ -59,6 +61,7 @@ class FetchCensoredTextThread : Thread(){
         var bufferedReader: BufferedReader
         var currentLine: String? = null
 
+        // Try reading .txt from a URL
         try{
             url = URL(_urlTxt)
             httpURLConnection = url.openConnection() as HttpURLConnection
@@ -82,11 +85,11 @@ class FetchCensoredTextThread : Thread(){
         catch (e: Exception){
             Log.e(
                 "TAG()",
-                "FetchCensoredTextThread: Caught exception \"$e\" while trying to load .txt from URL"
+                "FetchCensoredTextThread: Caught exception \"$e\" while reading .txt from URL"
             )
         }
 
-        val newData: MutableList<String> = mutableListOf()
+        // Try reading .csv from a URL
         try{
             url = URL(_urlCsv)
             httpURLConnection = url.openConnection() as HttpURLConnection
@@ -101,12 +104,7 @@ class FetchCensoredTextThread : Thread(){
 //                val (text, canForm1, canForm2, canForm3, cat1, cat2, cat3, sevRating, sevDesc) = currentLine.split(',', ignoreCase = false, limit = 9)
                 // Split the current line into the keyword/keyphrase to censor and the rest of that row's text
                 val (keyPhrase, otherCategories) = currentLine.split(',', ignoreCase = false, limit = 2)
-                Log.i(
-                    "TAG()",
-                    "FetchCensoredTextThread: .csv split = \"$keyPhrase\""
-                )
-
-                newData.add(currentLine)
+                dataCsv.add(keyPhrase)
                 currentLine = bufferedReader.readLine()
             }
 
@@ -115,10 +113,9 @@ class FetchCensoredTextThread : Thread(){
         catch (e: Exception){
             Log.e(
                 "TAG()",
-                "FetchCensoredTextThread: Caught exception \"$e\" while trying to load .csv from URL"
+                "FetchCensoredTextThread: Caught exception \"$e\" while reading .csv from URL"
             )
         }
-
 
         isDoneFetchingData.value = true
     }

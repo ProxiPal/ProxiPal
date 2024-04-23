@@ -465,9 +465,11 @@ fun SingleMessage(
         shape = messageShape,
         modifier = modifier
     ) {
+        var messageCensored = message.censor(censoringViewModel.profanityListTxt)
+        messageCensored = messageCensored.censor(censoringViewModel.profanityListCsv)
         Text(
             text = if (censoringViewModel.isCensoringText.value){
-                message.censor(censoringViewModel.profanityListTxt)
+                messageCensored
             } else{
                 message
                   },
