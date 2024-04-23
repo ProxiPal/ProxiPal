@@ -100,10 +100,18 @@ class FriendRequestViewModel(private val repository: SyncRepository) : ViewModel
 
 
 
+
+
     fun respondToFriendRequest(requestId: String, accepted: Boolean) {
         viewModelScope.launch {
-            repository.respondToFriendRequest(requestId, accepted)
-            fetchFriendRequests() // Refresh friend requests list
+            if (accepted) {
+                repository.respondToFriendRequest(requestId, true).also {
+                    // Add each user to the other's friend list upon acceptance
+                    repository.addUserToFriendList(requestId)
+                }
+            } else {
+                repository.respondToFriendRequest(requestId, false)
+            }
         }
     }
     fun clearFeedback() {

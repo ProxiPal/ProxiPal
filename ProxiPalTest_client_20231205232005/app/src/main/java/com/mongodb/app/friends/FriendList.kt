@@ -13,6 +13,7 @@ import androidx.navigation.NavController
 import com.mongodb.app.navigation.Routes
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import android.widget.Toast
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.ui.platform.LocalContext
 
 
@@ -29,6 +30,8 @@ fun Friendslist(
     val searchText = remember { mutableStateOf(TextFieldValue()) }
     val feedback by friendRequestViewModel.feedback.collectAsState(initial = "")
     val currentUserId by viewModel.currentUserId
+    val friends by viewModel.friendsList.collectAsState()
+
 
 
     LaunchedEffect(feedback) {
@@ -82,6 +85,11 @@ fun Friendslist(
         }
 
         Text("Your User ID: $currentUserId", modifier = Modifier.padding(16.dp))
+        LazyColumn {
+            items(friends.size) { index ->
+                Text(friends[index], modifier = Modifier.padding(8.dp))
+            }
+        }
     }
 }
 

@@ -276,6 +276,8 @@ interface SyncRepository {
 
     fun getRealmInstance(): Realm?
 
+    suspend fun addUserToFriendList(requestId: String)
+
 }
 
 
@@ -1109,6 +1111,27 @@ class RealmSyncRepository(
         val userProfiles = realm.query<UserProfile>().find().toList()
         emit(userProfiles)
     }
+
+    override suspend fun addUserToFriendList(requestId: String) {
+        realm.write {
+            val request = query<FriendshipRequest>("_id == $0", requestId).first().find()
+            if (request != null && request.status == "accepted") {
+                val senderProfile = query<UserProfile>("ownerId == $0", request.senderId).first().find()
+                val receiverProfile = query<UserProfile>("ownerId == $0", request.receiverFriendId).first().find()
+                if (senderProfile != null && receiverProfile != null) {
+                    senderProfile.friends.add(receiverProfile.firstName + " " + receiverProfile.lastName)
+                    receiverProfile.friends.add(senderProfile.firstName + " " + senderProfile.lastName)
+                } else {
+                    Log.e("FriendTest", "One of the user profiles is null: senderProfile=$senderProfile, receiverProfile=$receiverProfile")
+                }
+            } else {
+                Log.e("FriendTest", "FriendshipRequest not found or not accepted: request=$request")
+            }
+        }
+    }
+
+
+
 }
 
 /**
@@ -1195,6 +1218,8 @@ class MockRepository : SyncRepository {
     override fun getAllUserProfiles(): Flow<List<UserProfile>> = flowOf()
 
     override fun getRealmInstance(): Realm? = null
+
+    override suspend fun addUserToFriendList(requestId: String) = Unit
 
 
     companion object {

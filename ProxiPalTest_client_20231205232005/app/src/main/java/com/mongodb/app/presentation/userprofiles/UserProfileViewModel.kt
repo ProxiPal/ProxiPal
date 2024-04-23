@@ -92,6 +92,8 @@ class UserProfileViewModel(
     //april
     private val _currentUserId = mutableStateOf("")
 
+    private val _friendsList = MutableStateFlow<List<String>>(emptyList())
+
     /*
     ===== Properties =====
      */
@@ -151,6 +153,8 @@ class UserProfileViewModel(
     val otherFilters: State<List<String>> = _otherFilters
 
     val currentUserId: State<String> = _currentUserId
+
+    val friendsList: StateFlow<List<String>> = _friendsList.asStateFlow()
 
 
 
@@ -241,6 +245,7 @@ class UserProfileViewModel(
 
                                     _userProfileInterests = event.list[0].interests.toList().toMutableList()
                                     _userProfileIndustries = event.list[0].industries.toList().toMutableList()
+                                    _friendsList.value = event.list[0].friends.map { it.toString() }
 
                                 }
                                 else -> {
@@ -258,6 +263,7 @@ class UserProfileViewModel(
 
                                     _userProfileInterests = event.list[0].interests.toList().toMutableList()
                                     _userProfileIndustries = event.list[0].industries.toList().toMutableList()
+                                    _friendsList.value = event.list[0].friends.map { it.toString() }
 
                                 }
                             }

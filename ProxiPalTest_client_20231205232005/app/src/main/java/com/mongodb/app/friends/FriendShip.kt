@@ -12,6 +12,8 @@ class FriendshipRequest : RealmObject {
     var senderId: String = "" // ID of the user sending the request
     var receiverFriendId: String = "" // FriendID of the user receiving the request
     var status: String = "pending"
+    var senderName: String = ""
+    var receiverName: String = ""
 }
 
 

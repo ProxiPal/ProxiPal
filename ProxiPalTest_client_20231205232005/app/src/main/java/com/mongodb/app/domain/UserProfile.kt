@@ -46,6 +46,7 @@ class UserProfile : RealmObject {
     var selectedIndustries : RealmList<String> = realmListOf()
     var otherFilters : RealmList<String> = realmListOf()
 
+    var friends: RealmList<String> = realmListOf()
 
 
     override fun equals(other: Any?): Boolean {
