@@ -96,10 +96,15 @@ class FetchCensoredTextThread : Thread(){
             currentLine = bufferedReader.readLine()
 
             while (currentLine != null){
+                // This causes a compile error
+//                val (text, canForm1, canForm2, canForm3, cat1, cat2, cat3, sevRating, sevDesc) = currentLine.split(',', ignoreCase = false, limit = 9)
+                // Split the current line into the keyword/keyphrase to censor and the rest of that row's text
+                val (keyPhrase, otherCategories) = currentLine.split(',', ignoreCase = false, limit = 2)
                 Log.i(
                     "TAG()",
-                    "FetchCensoredTextThread: Read .csv line of data = \"$currentLine\""
+                    "FetchCensoredTextThread: .csv split = \"$keyPhrase\""
                 )
+
                 newData.add(currentLine)
                 currentLine = bufferedReader.readLine()
             }
