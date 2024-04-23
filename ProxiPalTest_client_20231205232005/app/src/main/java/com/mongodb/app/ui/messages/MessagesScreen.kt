@@ -466,9 +466,11 @@ fun SingleMessage(
         modifier = modifier
     ) {
         Text(
-            text =
-            if (censoringViewModel.isCensoringText.value) message.censor(censoringViewModel.censoredTextList)
-            else message,
+            text = if (censoringViewModel.isCensoringText.value){
+                message.censor(censoringViewModel.profanityListTxt)
+            } else{
+                message
+                  },
             style = MaterialTheme.typography.bodyLarge,
             softWrap = true,
             overflow = TextOverflow.Clip,

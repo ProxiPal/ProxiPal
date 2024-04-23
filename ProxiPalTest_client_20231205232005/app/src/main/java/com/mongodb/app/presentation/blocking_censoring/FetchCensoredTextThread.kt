@@ -16,13 +16,14 @@ import javax.net.ssl.HttpsURLConnection
 class FetchCensoredTextThread : Thread(){
     // region Variables
     val isDoneFetchingData = mutableStateOf(true)
-    val data: MutableList<String> = mutableListOf()
+    val dataTxt: MutableList<String> = mutableListOf()
     private val _urlTxt = "https://raw.githubusercontent.com/dsojevic/profanity-list/main/en.txt"
     private val _urlCsv = "https://raw.githubusercontent.com/surge-ai/profanity/main/profanity_en.csv"
     private val _httpUrlConnectionTimeout = 60000
     // endregion Variables
 
 
+    // Singleton instance
     companion object{
         private var _instance: FetchCensoredTextThread? = null
 
@@ -48,7 +49,7 @@ class FetchCensoredTextThread : Thread(){
      */
     override fun run() {
         isDoneFetchingData.value = false
-        data.clear()
+        dataTxt.clear()
 
         var url: URL
         var httpURLConnection: HttpURLConnection
@@ -70,7 +71,7 @@ class FetchCensoredTextThread : Thread(){
             currentLine = bufferedReader.readLine()
 
             while (currentLine != null){
-                data.add(currentLine)
+                dataTxt.add(currentLine)
                 // .readLine() automatically moves to the next line after calling
                 // Do not call this method more than once per loop iteration
                 currentLine = bufferedReader.readLine()

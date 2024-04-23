@@ -153,22 +153,21 @@ class CensoringViewModel (
     shouldReadCensoredTextOnInit: Boolean
 ) : ViewModel(){
     // region Variables
-    private val _censoredTextList: MutableList<String> = mutableListOf()
+    private val _profanityListTxt: MutableList<String> = mutableListOf()
     private val _isCensoringText = mutableStateOf(false)
     // endregion Variables
 
 
     // region Properties
-    val censoredTextList
-        get() = _censoredTextList
+    val profanityListTxt
+        get() = _profanityListTxt
     val isCensoringText
         get() = _isCensoringText
     // endregion Properties
 
 
     init{
-        // This boolean condition is only to allow previews to work
-        // ... (Error is due to an illegal thread state)
+        // This boolean condition is only to allow previews to work (error is an illegal thread state)
         if (shouldReadCensoredTextOnInit){
             readCensoredTextList()
         }
@@ -191,7 +190,7 @@ class CensoringViewModel (
      * Attempts to read a list of "key words/phrases" to censor from messages in the messages screen
      */
     fun readCensoredTextList(){
-        censoredTextList.clear()
+        profanityListTxt.clear()
         FetchCensoredTextThread.getInstance().start()
         viewModelScope.launch {
             var shouldKeepReReading = true
@@ -206,7 +205,7 @@ class CensoringViewModel (
                     delay(1000)
                 }
                 // List of censored words has been read successfully
-                if (FetchCensoredTextThread.getInstance().data.size > 0){
+                if (FetchCensoredTextThread.getInstance().dataTxt.size > 0){
                     shouldKeepReReading = false
                 }
                 else{
@@ -218,19 +217,19 @@ class CensoringViewModel (
                 loopIter++
             }
             // Do not use .addAll(), it adds all elements as a single element to the end
-            for (datum in FetchCensoredTextThread.getInstance().data){
-                censoredTextList.add(datum)
+            for (datum in FetchCensoredTextThread.getInstance().dataTxt){
+                profanityListTxt.add(datum)
             }
             Log.i(
                 TAG(),
                 "CensoringViewModel: Done waiting for fetched data; Size = " +
-                        "${censoredTextList.size}"
+                        "${profanityListTxt.size}"
             )
-            if (censoredTextList.size > 0){
+            if (profanityListTxt.size > 0){
                 Log.i(
                     TAG(),
-                    "CensoringViewModel: 1st = \"${censoredTextList[0]}\"; " +
-                            "Last = \"${censoredTextList[censoredTextList.size - 1]}\""
+                    "CensoringViewModel: 1st = \"${profanityListTxt[0]}\"; " +
+                            "Last = \"${profanityListTxt[profanityListTxt.size - 1]}\""
                 )
             }
         }
@@ -257,7 +256,7 @@ class CensoringViewModel (
             "ass. password assassin grass Ass"
         )
         for (test in testList) {
-            test.censor(censoredTextList)
+            test.censor(profanityListTxt)
         }
         Log.i(
             TAG(),
