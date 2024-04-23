@@ -99,11 +99,24 @@ class FetchCensoredTextThread : Thread(){
             bufferedReader = BufferedReader(inputStreamReader)
             currentLine = bufferedReader.readLine()
 
+            // Used to skip the 1st line when reading the .csv
+            // The 1st line denotes the headers for the .csv, the rest of the lines are the actual data
+            var shouldSkip = true
             while (currentLine != null){
+                // Skip reading and recording the 1st line of the .csv
+                if (shouldSkip){
+                    shouldSkip = false
+                    currentLine = bufferedReader.readLine()
+                    continue
+                }
                 // This causes a compile error
 //                val (text, canForm1, canForm2, canForm3, cat1, cat2, cat3, sevRating, sevDesc) = currentLine.split(',', ignoreCase = false, limit = 9)
                 // Split the current line into the keyword/keyphrase to censor and the rest of that row's text
-                val (keyPhrase, otherCategories) = currentLine.split(',', ignoreCase = false, limit = 2)
+                val (keyPhrase, otherCategories) = currentLine.split(
+                    ',',
+                    ignoreCase = false,
+                    limit = 2
+                )
                 dataCsv.add(keyPhrase)
                 currentLine = bufferedReader.readLine()
             }
