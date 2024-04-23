@@ -34,7 +34,7 @@ import com.mongodb.app.ui.theme.MyApplicationTheme
 
 val myEvents = listOf(
     Event().apply {
-        title = "Birthday Party"
+        name = "Birthday Party"
         description = "Join us for a fun-filled birthday celebration!"
         date = "05-06-2024"
     }
@@ -42,32 +42,32 @@ val myEvents = listOf(
 //sample other events
 val otherEvents = listOf(
     Event().apply {
-        title = "Conference"
+        name = "Conference"
         description = "Attend the annual technology conference."
         date = "07-12-2024"
     },
     Event().apply {
-        title = "Workshop"
+        name = "Workshop"
         description = "Learn new skills in our hands-on workshop."
         date = "08-30-2024"
     },
     Event().apply {
-        title = "Conference1"
+        name = "Conference1"
         description = "Attend the annual technology conference."
         date = "07-12-2024"
     },
     Event().apply {
-        title = "Workshop1"
+        name = "Workshop1"
         description = "Learn new skills in our hands-on workshop."
         date = "08-30-2024"
     },
     Event().apply {
-        title = "Conference2"
+        name = "Conference2"
         description = "Attend the annual technology conference."
         date = "07-12-2024"
     },
     Event().apply {
-        title = "Workshop2"
+        name = "Workshop2"
         description = "Learn new skills in our hands-on workshop."
         date = "08-30-2024"
     }
@@ -145,7 +145,7 @@ fun EventCard(event: Event, onClick:()->Unit) {
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                text = event.title,
+                text = event.name,
             )
             Text(
                 text = event.date,

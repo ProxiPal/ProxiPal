@@ -4,6 +4,7 @@ import android.util.Log
 import com.mongodb.app.TAG
 import com.mongodb.app.domain.Item
 import com.mongodb.app.app
+import com.mongodb.app.domain.Event
 import com.mongodb.app.domain.UserProfile
 import com.mongodb.app.location.CustomGeoPoint
 import io.realm.kotlin.Realm
@@ -86,6 +87,8 @@ interface SyncRepository {
      * Adds a task that belongs to the current user using the specified [taskSummary].
      */
     suspend fun addTask(taskSummary: String)
+
+    suspend fun addEvent(eventName: String, eventDescription: String, eventDate: String, eventTime: String, eventLocation: String)
 
     /**
      * Updates the Sync subscriptions based on the specified [SubscriptionType].
@@ -190,7 +193,7 @@ class RealmSyncRepository(
         // ... the app will crash if querying anything other than B.
         // If errors still persist, try deleting and re-running the app.
         val set = if (SHOULD_USE_TASKS_ITEMS) setOf(Item::class)
-        else setOf(UserProfile::class, CustomGeoPoint::class)
+        else setOf(UserProfile::class, CustomGeoPoint::class, Event::class)
         config = SyncConfiguration.Builder(currentUser, set)
             .initialSubscriptions { realm ->
                 // Subscribe to the active subscriptionType - first time defaults to MINE
@@ -283,6 +286,21 @@ class RealmSyncRepository(
         }
         realm.write {
             copyToRealm(task)
+        }
+    }
+
+    override suspend fun addEvent(eventName:String, eventDescription:String, eventTime:String, eventDate:String, eventLocation: String){
+        val event= Event().apply{
+            name = eventName
+            description = eventDescription
+            time = eventTime
+            date = eventDate
+            location = eventLocation
+            //attendees.add()
+            owner_id = currentUser.id
+        }
+        realm.write{
+            copyToRealm(event)
         }
     }
 
@@ -721,6 +739,8 @@ class MockRepository : SyncRepository {
     override fun getTaskList(): Flow<ResultsChange<Item>> = flowOf()
     override suspend fun toggleIsComplete(task: Item) = Unit
     override suspend fun addTask(taskSummary: String) = Unit
+
+    override suspend fun addEvent(eventName: String, eventDescription: String, eventDate: String, eventTime: String, eventLocation: String) = Unit
     override suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType) = Unit
     override suspend fun deleteTask(task: Item) = Unit
     override fun isTaskMine(task: Item): Boolean = task.owner_id == MOCK_OWNER_ID_MINE

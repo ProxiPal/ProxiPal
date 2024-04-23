@@ -10,9 +10,11 @@ import java.util.Date
 class Event(): RealmObject {
     @PrimaryKey
     var _id: ObjectId = ObjectId()
-    var title: String = ""
+    var name: String = ""
     var description: String = ""
     var date: String = ""
+    var time: String = ""
+    var location: String = ""
     var attendees: RealmList<UserProfile> = realmListOf()
 
     var owner_id: String = ""

@@ -87,12 +87,14 @@ import java.util.Locale
 //}
 
 @Composable
-fun CreateEventBody(navigateBack: () -> Unit) {
+fun CreateEventBody(navigateBack: () -> Unit, eventsViewModel: EventsViewModel) {
     var eventName by remember { mutableStateOf("") }
     var eventDescription by remember { mutableStateOf("") }
     val context = LocalContext.current
     var showLocationDialog by remember { mutableStateOf(false) }
     var location by remember { mutableStateOf("") }
+    var time by remember {mutableStateOf("")}
+    var date by remember { mutableStateOf("")}
 
     Box(
         modifier = Modifier
@@ -147,6 +149,9 @@ fun CreateEventBody(navigateBack: () -> Unit) {
             }
             TextButton(onClick = navigateBack) {
                 Text(text = "Cancel")
+            }
+            TextButton(onClick = { eventsViewModel.addEvent(eventName, eventDescription, "test", "test", location) }) {
+                Text(text = "Confirm")
             }
         }
     }
@@ -335,6 +340,6 @@ fun showTimePicker(context: Context) {
 @Preview
 fun CreateEventPreview() {
     MyApplicationTheme {
-        CreateEventBody(navigateBack = {})
+        //CreateEventBody(navigateBack = {}, eventsViewModel = EventsViewModel())
     }
 }

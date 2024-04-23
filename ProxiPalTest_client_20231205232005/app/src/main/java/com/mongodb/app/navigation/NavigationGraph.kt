@@ -25,6 +25,7 @@ import com.mongodb.app.tutorial.OnboardingScreen
 import com.mongodb.app.ui.events.CreateEventBody
 import com.mongodb.app.ui.events.EventDetailsScreen
 import com.mongodb.app.ui.events.EventScreen
+import com.mongodb.app.ui.events.EventsViewModel
 import com.mongodb.app.ui.events.SharedViewModel
 import com.mongodb.app.ui.userprofiles.IndustryScreen
 import com.mongodb.app.ui.userprofiles.InterestScreen
@@ -40,7 +41,7 @@ import com.mongodb.app.ui.userprofiles.UserProfileLayout
  * Navigation graph for the different screens in Proxipal
  */
 @Composable
-fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: UserProfileViewModel, homeViewModel: HomeViewModel) {
+fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: UserProfileViewModel, homeViewModel: HomeViewModel, eventsViewModel: EventsViewModel) {
     var state by remember{ mutableStateOf(false)}
     val navController = rememberNavController()
     val sharedViewModel:SharedViewModel = viewModel()
@@ -121,7 +122,7 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
             }
         }
         composable(route = Routes.CreateEvent.route){
-            CreateEventBody(navigateBack = {navController.popBackStack()})
+            CreateEventBody(navigateBack = {navController.popBackStack()}, eventsViewModel = eventsViewModel)
         }
         composable(route = Routes.EventDetails.route){
             EventDetailsScreen(sharedViewModel =sharedViewModel) {navController.popBackStack()}

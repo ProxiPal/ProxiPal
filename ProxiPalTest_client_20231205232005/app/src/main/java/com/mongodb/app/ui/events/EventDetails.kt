@@ -28,7 +28,7 @@ fun EventDetailsScreen(sharedViewModel: SharedViewModel, navigateBack:()-> Unit)
             TopAppBar(
                 title = {
                     if (event != null) {
-                        Text(text = event.title)
+                        Text(text = event.name)
                     }
                 },
                 navigationIcon = {
@@ -57,7 +57,7 @@ fun EventDetailsScreen(sharedViewModel: SharedViewModel, navigateBack:()-> Unit)
 }
 
 val test = Event().apply {
-    title = "Birthday Party"
+    name = "Birthday Party"
     description = "Join us for a fun-filled birthday celebration!"
     date = "05-06-2024"
 }
