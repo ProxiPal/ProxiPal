@@ -55,6 +55,9 @@ class BlockingViewModel (
 
 
     // region Functions
+    /**
+     * Updates the necessary variables during a recomposition (eg: screen orientation change)
+     */
     fun updateRepositories(newRepository: SyncRepository){
         repository = newRepository
         currentUserId.value = repository.getCurrentUserId()
@@ -63,10 +66,16 @@ class BlockingViewModel (
         }
     }
 
+    /**
+     * Updates a local variable with the user ID of another user in the process of being (un)blocked
+     */
     fun updateUserInFocus(userIdInFocus: String){
         this.userIdInFocus.value = userIdInFocus
     }
 
+    /**
+     * Starts the process for blocking another user
+     */
     fun blockUserStart(
         userIdToBlock: String
     ){
@@ -77,6 +86,9 @@ class BlockingViewModel (
         }
     }
 
+    /**
+     * Starts the process for unblocking another user
+     */
     fun unblockUserStart(
         userIdToUnblock: String
     ){
@@ -87,6 +99,9 @@ class BlockingViewModel (
         }
     }
 
+    /**
+     * Blocks a user
+     */
     fun blockUser(){
         viewModelScope.launch {
             tryBlockUnblockUser(true)
@@ -95,6 +110,9 @@ class BlockingViewModel (
         }
     }
 
+    /**
+     * Unblocks a user
+     */
     fun unblockUser(){
         viewModelScope.launch {
             tryBlockUnblockUser(false)
@@ -142,6 +160,9 @@ class BlockingViewModel (
         }
     }
 
+    /**
+     * Resets the reference to the current user's profile (to retrieve the latest list of blocked users)
+     */
     private suspend fun resetCurrentUserProfileReference(){
         repository.readUserProfile(currentUserId.value)
             .first{
@@ -160,6 +181,9 @@ class BlockingViewModel (
             }
     }
 
+    /**
+     * Resets the reference to the user-in-focus's profile
+     */
     private suspend fun resetFocusedUserProfileReference(){
         repository.readUserProfile(userIdInFocus.value)
             .first{
@@ -170,6 +194,9 @@ class BlockingViewModel (
             }
     }
 
+    /**
+     * Ends the process to (un)block another user
+     */
     fun blockUnblockUserEnd(){
         blockingAction.value = BlockingAction.IDLE
         currentUserProfile.value = UserProfile()
@@ -178,6 +205,9 @@ class BlockingViewModel (
 //        focusedUserName.value = String.empty
     }
 
+    /**
+     * Checks whether another user is blocked by the current user
+     */
     fun isUserBlocked(userIdToCheck: String): Boolean {
         return currentUserProfile.value.isUserBlocked(userIdToCheck)
     }

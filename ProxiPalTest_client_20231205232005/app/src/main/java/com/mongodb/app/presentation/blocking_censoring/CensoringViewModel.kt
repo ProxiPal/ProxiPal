@@ -176,6 +176,9 @@ class CensoringViewModel (
 
 
     // region Functions
+    /**
+     * Updates the necessary variables during a recomposition (eg: screen orientation change)
+     */
     fun updateRepositories(
         newRepository: SyncRepository,
         newBlockingCensoringRealm: IBlockingCensoringRealm
@@ -184,6 +187,9 @@ class CensoringViewModel (
         blockingCensoringRealm = newBlockingCensoringRealm
     }
 
+    /**
+     * Attempts to read a list of "key words/phrases" to censor from messages in the messages screen
+     */
     fun readCensoredTextList(){
         censoredTextList.clear()
         FetchCensoredTextThread.getInstance().start()
@@ -230,6 +236,12 @@ class CensoringViewModel (
         }
     }
 
+    /**
+     * Used for testing the string censoring algorithm on various test strings
+     */
+    @Deprecated(
+        message = "For testing purposes only; Do not use in the final product"
+    )
     fun testTextCensoring(){
         Log.i(
             TAG(),
@@ -253,12 +265,18 @@ class CensoringViewModel (
         )
     }
 
+    /**
+     * Updates a local variable to be the same as that in the database for whether a user wants messages censored
+     */
     fun updateShouldCensorTextState(){
         viewModelScope.launch {
             readShouldCensorTextState()
         }
     }
 
+    /**
+     * Reads the value for whether a user wants to have messages censored or not
+     */
     private suspend fun readShouldCensorTextState(){
         repository.readUserProfile(repository.getCurrentUserId())
             .first{
@@ -269,6 +287,9 @@ class CensoringViewModel (
             }
     }
 
+    /**
+     * Updates a user's preferences of if they want to censor messages
+     */
     fun toggleShouldCensorText(){
         viewModelScope.launch {
             blockingCensoringRealm.updateTextCensoringState(

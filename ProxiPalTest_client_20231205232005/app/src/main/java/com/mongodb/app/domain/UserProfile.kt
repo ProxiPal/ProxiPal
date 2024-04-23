@@ -73,6 +73,9 @@ class UserProfile : RealmObject {
         return result
     }
 
+    /**
+     * Checks whether another user is blocked by the current user
+     */
     fun isUserBlocked(userIdToCheck: String): Boolean{
         if (userIdToCheck.isBlank() || userIdToCheck.isEmpty()){
             return false

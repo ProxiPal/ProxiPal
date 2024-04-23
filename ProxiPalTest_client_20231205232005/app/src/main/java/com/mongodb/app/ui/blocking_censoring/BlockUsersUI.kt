@@ -157,6 +157,9 @@ fun BlockingContextualMenu(
     }
 }
 
+/**
+ * Shows an alert dialog when the user is about to (un)block another user
+ */
 @Composable
 fun BlockingAlert(
     userIdToBlock: String,
@@ -251,6 +254,12 @@ fun SwitchToggleTextCensoring(
     }
 }
 
+/**
+ * Shows buttons to quickly test loading list of text from a URL and censoring test strings
+ */
+@Deprecated(
+    message = "This is for testing purposes only; Do not use this in the final product"
+)
 @Composable
 fun CensoringTestButtons(
     censoringViewModel: CensoringViewModel,
@@ -263,14 +272,14 @@ fun CensoringTestButtons(
             onClick = { censoringViewModel.readCensoredTextList() }
         ) {
             Text(
-                text = "Load censored text list"
+                text = "Read censored text list"
             )
         }
         Button(
             onClick = { censoringViewModel.testTextCensoring() }
         ) {
             Text(
-                text = "Test string censoring"
+                text = "Test text censoring"
             )
         }
     }
