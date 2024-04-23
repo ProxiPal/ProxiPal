@@ -13,10 +13,14 @@ import androidx.navigation.NavController
 import com.mongodb.app.navigation.Routes
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.ui.platform.LocalContext
-
-
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 //ALL ADDED BY GEORGE FU
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,6 +35,7 @@ fun Friendslist(
     val feedback by friendRequestViewModel.feedback.collectAsState(initial = "")
     val currentUserId by viewModel.currentUserId
     val friends by viewModel.friendsList.collectAsState()
+
 
 
 
@@ -52,7 +57,9 @@ fun Friendslist(
             actions = {
                 TextField(
                     value = searchText.value,
-                    onValueChange = { newText -> if (newText.text.length <= 30) searchText.value = newText },
+                    onValueChange = { newText ->
+                        if (newText.text.length <= 30) searchText.value = newText
+                    },
                     singleLine = true,
                     placeholder = { Text("Enter User ID to add") },
                     colors = TextFieldDefaults.textFieldColors(
@@ -69,9 +76,7 @@ fun Friendslist(
         Row {
             Button(onClick = {
                 if (searchText.value.text.isNotEmpty()) {
-                    // Call the updated function with validation checks
                     friendRequestViewModel.onSendFriendRequestButtonClicked(searchText.value.text)
-                } else {
                 }
             }) {
                 Text("Send Friend Request")
@@ -85,11 +90,53 @@ fun Friendslist(
         }
 
         Text("Your User ID: $currentUserId", modifier = Modifier.padding(16.dp))
+
         LazyColumn {
-            items(friends.size) { index ->
-                Text(friends[index], modifier = Modifier.padding(8.dp))
+            items(friends) { friend ->
+                FriendItem(friend = friend, viewModel = viewModel)
             }
         }
     }
 }
 
+@Composable
+fun FriendItem(friend: String, viewModel: UserProfileViewModel) {
+    var showMenu by remember { mutableStateOf(false) }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp, horizontal = 16.dp)
+            .clickable { /* Navigate to friend detail or perform action */ },
+        shape = RoundedCornerShape(50.dp), // This creates the circular look
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = friend,
+                modifier = Modifier.weight(1f)
+            )
+            IconButton(onClick = { showMenu = !showMenu }) {
+                Icon(Icons.Filled.MoreVert, contentDescription = "More Options")
+            }
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text("Delete Friend") },
+                    onClick = {
+                        showMenu = false
+                        // Implement the delete functionality here when ready
+                    }
+                )
+            }
+        }
+    }
+}
