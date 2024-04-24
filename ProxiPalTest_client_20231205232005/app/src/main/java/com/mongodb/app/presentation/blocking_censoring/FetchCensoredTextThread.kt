@@ -21,6 +21,7 @@ class FetchCensoredTextThread : Thread(){
     private val _urlTxt = "https://raw.githubusercontent.com/dsojevic/profanity-list/main/en.txt"
     private val _urlCsv = "https://raw.githubusercontent.com/surge-ai/profanity/main/profanity_en.csv"
     private val _httpUrlConnectionTimeout = 60000
+    private val _delimitersCsv = ','
     // endregion Variables
 
 
@@ -122,7 +123,7 @@ class FetchCensoredTextThread : Thread(){
 //                val (text, canForm1, canForm2, canForm3, cat1, cat2, cat3, sevRating, sevDesc) = currentLine.split(',', ignoreCase = false, limit = 9)
                 // Split the current line into the keyword/keyphrase to censor and the rest of that row's text
                 val (profanityPhrase, otherCategories) = currentLine.split(
-                    ',',
+                    _delimitersCsv,
                     ignoreCase = false,
                     limit = 2
                 )

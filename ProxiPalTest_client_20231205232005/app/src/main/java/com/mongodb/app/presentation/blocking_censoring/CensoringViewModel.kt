@@ -157,6 +157,11 @@ class CensoringViewModel (
     private val _profanityListTxt: MutableList<String> = mutableListOf()
     private val _profanityListCsv: MutableList<String> = mutableListOf()
     private val _isCensoringText = mutableStateOf(false)
+
+    /**
+     * How many milliseconds to wait between attempts of reading files from URLs
+     */
+    private val _fileReadingDelayMs: Long = 1000
     // endregion Variables
 
 
@@ -202,12 +207,13 @@ class CensoringViewModel (
             val loopLimit = 10
             var loopIter = 0
             while (shouldKeepReReading && loopIter < loopLimit){
+                delay(_fileReadingDelayMs)
                 while (!FetchCensoredTextThread.getInstance().isDoneFetchingData.value){
                     Log.i(
                         TAG(),
                         "CensoringViewModel: Waiting for fetched data"
                     )
-                    delay(1000)
+                    delay(_fileReadingDelayMs)
                 }
                 // Lists of profanity from .txt and .csv have been read successfully
                 if (FetchCensoredTextThread.getInstance().dataTxt.size > 0
