@@ -74,6 +74,15 @@ class FetchCensoredTextThread : Thread(){
             currentLine = bufferedReader.readLine()
 
             while (currentLine != null){
+                // If the phrase is a number, don't censor (should only censor offensive words, not numbers)
+                if (currentLine.toDoubleOrNull() != null){
+                    Log.i(
+                        "TAG()",
+                        "FetchCensoredTextThread: Skipping number = \"$currentLine\""
+                    )
+                    currentLine = bufferedReader.readLine()
+                    continue
+                }
                 dataTxt.add(currentLine)
                 // .readLine() automatically moves to the next line after calling
                 // Do not call this method more than once per loop iteration
@@ -117,6 +126,15 @@ class FetchCensoredTextThread : Thread(){
                     ignoreCase = false,
                     limit = 2
                 )
+                // If the phrase is a number, don't censor (should only censor offensive words, not numbers)
+                if (keyPhrase.toDoubleOrNull() != null){
+                    Log.i(
+                        "TAG()",
+                        "FetchCensoredTextThread: Skipping number = \"$keyPhrase\""
+                    )
+                    currentLine = bufferedReader.readLine()
+                    continue
+                }
                 dataCsv.add(keyPhrase)
                 currentLine = bufferedReader.readLine()
             }
