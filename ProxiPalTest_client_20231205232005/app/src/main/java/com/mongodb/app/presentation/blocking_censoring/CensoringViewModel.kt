@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.mongodb.app.TAG
 import com.mongodb.app.data.SyncRepository
+import com.mongodb.app.data.blocking_censoring.CensoringData
 import com.mongodb.app.data.blocking_censoring.IBlockingCensoringRealm
 import com.mongodb.app.data.toObjectId
 import kotlinx.coroutines.delay
@@ -25,15 +26,15 @@ private const val CENSORED_CHAR = '*'
 /**
  * Censors a string using a list of text to hide from the original string
  */
-fun String.censor(censoredTextList: MutableList<String>): String{
+fun String.censor(profanityList: MutableList<String>): String{
     val stringBuilder = StringBuilder()
     for (index in indices){
         stringBuilder.append(this[index])
     }
 
-    for (keyText in censoredTextList){
-        stringBuilder.censorShort(keyText)
-        stringBuilder.censorLong(keyText)
+    for (profanityPhrase in profanityList){
+        stringBuilder.censorShort(profanityPhrase)
+        stringBuilder.censorLong(profanityPhrase)
     }
     Log.i(
         TAG(),
@@ -45,10 +46,10 @@ fun String.censor(censoredTextList: MutableList<String>): String{
 /**
  * Checks if a string is equal to some offending text followed by and following any amount of spaces
  */
-private fun StringBuilder.censorShort(textToCensor: String){
+private fun StringBuilder.censorShort(profanityPhrase: String){
     val zeroOrMoreWhitespaces = "\\s*"
     val zeroOrMoreWhitespacesPattern = Pattern.compile(
-        zeroOrMoreWhitespaces + textToCensor + zeroOrMoreWhitespaces
+        zeroOrMoreWhitespaces + profanityPhrase + zeroOrMoreWhitespaces
     )
     // Ignore casing when doing the pattern matching
     val lowercase = this.toString().lowercase()
@@ -56,8 +57,8 @@ private fun StringBuilder.censorShort(textToCensor: String){
     val doesMatchZeroOrMoreWhitespacesPattern = zeroOrMoreWhitespacesMatcher.matches()
 
     if (doesMatchZeroOrMoreWhitespacesPattern){
-        val startIndex = lowercase.indexOf(textToCensor)
-        val endIndex = startIndex + textToCensor.length - 1
+        val startIndex = lowercase.indexOf(profanityPhrase)
+        val endIndex = startIndex + profanityPhrase.length - 1
         this.replace(startIndex, endIndex, CENSORED_CHAR)
     }
 }
@@ -65,20 +66,20 @@ private fun StringBuilder.censorShort(textToCensor: String){
 /**
  * Checks if a string contains some offending text followed by and following a non-alphabet char
  */
-private fun StringBuilder.censorLong(textToCensor: String){
-    if (!this.contains(textToCensor)){
+private fun StringBuilder.censorLong(profanityPhrase: String){
+    if (!this.contains(profanityPhrase)){
         return
     }
 
     val nonAlphabetChar = "[^a-z]"
     val nonAlphabetCharPattern = Pattern.compile(
-        nonAlphabetChar + textToCensor + nonAlphabetChar
+        nonAlphabetChar + profanityPhrase + nonAlphabetChar
     )
     val nonAlphabetCharFirstPattern = Pattern.compile(
-        textToCensor + nonAlphabetChar
+        profanityPhrase + nonAlphabetChar
     )
     val nonAlphabetCharLastPattern = Pattern.compile(
-        nonAlphabetChar + textToCensor
+        nonAlphabetChar + profanityPhrase
     )
 
     // Ignore casing when doing the pattern matching
@@ -87,7 +88,7 @@ private fun StringBuilder.censorLong(textToCensor: String){
     // Check every substring for the offending text
     var startIndex = 0
     // Key text length + 2 surrounding characters - 1 for indexing
-    var endIndex = textToCensor.length + 1
+    var endIndex = profanityPhrase.length + 1
 
     val loopAmount = lowercase.length - endIndex
     for (i in 0..<loopAmount){
@@ -130,9 +131,9 @@ private fun StringBuilder.censorLong(textToCensor: String){
 
 /**
  * Replaces the characters at indexes [startIndex] inclusive to [endIndex] inclusive
- * with the specified characters
+ * with the specified character
  */
-private fun StringBuilder.replace(startIndex: Int, endIndex: Int, replacement: Char){
+private fun StringBuilder.replace(startIndex: Int, endIndex: Int, characterReplacement: Char){
     // The substring is not valid with the given indexes
     if (startIndex > endIndex){
         return
@@ -140,7 +141,7 @@ private fun StringBuilder.replace(startIndex: Int, endIndex: Int, replacement: C
     for (i in startIndex..endIndex){
         // Only replace/censor non-whitespace characters
         if (this[i] != ' '){
-            this.setCharAt(i, replacement)
+            this.setCharAt(i, characterReplacement)
         }
     }
 }
@@ -266,16 +267,7 @@ class CensoringViewModel (
             TAG(),
             "CensoringViewModel: Start of text censoring tests"
         )
-        val testList: List<String> = listOf(
-            "ass",
-            " password ",
-            " assassin ",
-            " grass ",
-            " Ass ",
-            "ass ass bass asss basss .ass ass. .ass. 0ass ass0 0ass0 assass aassss ass",
-            "ass. password assassin grass Ass"
-        )
-        for (test in testList) {
+        for (test in CensoringData.testListStringsToCensor) {
             test.censor(profanityListTxt)
             test.censor(profanityListCsv)
         }

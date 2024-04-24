@@ -121,21 +121,21 @@ class FetchCensoredTextThread : Thread(){
                 // This causes a compile error
 //                val (text, canForm1, canForm2, canForm3, cat1, cat2, cat3, sevRating, sevDesc) = currentLine.split(',', ignoreCase = false, limit = 9)
                 // Split the current line into the keyword/keyphrase to censor and the rest of that row's text
-                val (keyPhrase, otherCategories) = currentLine.split(
+                val (profanityPhrase, otherCategories) = currentLine.split(
                     ',',
                     ignoreCase = false,
                     limit = 2
                 )
                 // If the phrase is a number, don't censor (should only censor offensive words, not numbers)
-                if (keyPhrase.toDoubleOrNull() != null){
+                if (profanityPhrase.toDoubleOrNull() != null){
                     Log.i(
                         "TAG()",
-                        "FetchCensoredTextThread: Skipping number = \"$keyPhrase\""
+                        "FetchCensoredTextThread: Skipping number = \"$profanityPhrase\""
                     )
                     currentLine = bufferedReader.readLine()
                     continue
                 }
-                dataCsv.add(keyPhrase)
+                dataCsv.add(profanityPhrase)
                 currentLine = bufferedReader.readLine()
             }
 
