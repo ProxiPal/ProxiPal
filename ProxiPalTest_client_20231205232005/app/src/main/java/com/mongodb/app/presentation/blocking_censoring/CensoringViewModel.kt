@@ -154,6 +154,7 @@ class CensoringViewModel (
     shouldReadCensoredTextOnInit: Boolean
 ) : ViewModel(){
     // region Variables
+    private val _profanityListAll: MutableList<String> = mutableListOf()
     private val _profanityListTxt: MutableList<String> = mutableListOf()
     private val _profanityListCsv: MutableList<String> = mutableListOf()
     private val _isCensoringText = mutableStateOf(false)
@@ -166,9 +167,11 @@ class CensoringViewModel (
 
 
     // region Properties
-    val profanityListTxt
+    val profanityListAll
+        get() = _profanityListAll
+    private val profanityListTxt
         get() = _profanityListTxt
-    val profanityListCsv
+    private val profanityListCsv
         get() = _profanityListCsv
     val isCensoringText
         get() = _isCensoringText
@@ -201,6 +204,7 @@ class CensoringViewModel (
     fun readCensoredTextList(){
         profanityListTxt.clear()
         profanityListCsv.clear()
+        profanityListAll.clear()
         FetchCensoredTextThread.getInstance().start()
         viewModelScope.launch {
             var shouldKeepReReading = true
@@ -231,9 +235,11 @@ class CensoringViewModel (
             // Do not use .addAll(), it adds all elements as a single element to the end
             for (datum in FetchCensoredTextThread.getInstance().dataTxt){
                 profanityListTxt.add(datum)
+                profanityListAll.add(datum)
             }
             for (datum in FetchCensoredTextThread.getInstance().dataCsv){
                 profanityListCsv.add(datum)
+                profanityListAll.add(datum)
             }
             Log.i(
                 TAG(),
@@ -259,6 +265,18 @@ class CensoringViewModel (
                             "Last = \"${profanityListCsv[profanityListCsv.size - 1]}\""
                 )
             }
+            Log.i(
+                TAG(),
+                "CensoringViewModel: Done waiting for fetched all data; Size = " +
+                        "${profanityListAll.size}"
+            )
+            if (profanityListAll.size > 0){
+                Log.i(
+                    TAG(),
+                    "CensoringViewModel: All 1st = \"${profanityListAll[0]}\"; " +
+                            "Last = \"${profanityListAll[profanityListAll.size - 1]}\""
+                )
+            }
         }
     }
 
@@ -274,8 +292,7 @@ class CensoringViewModel (
             "CensoringViewModel: Start of text censoring tests"
         )
         for (test in CensoringData.testListStringsToCensor) {
-            test.censor(profanityListTxt)
-            test.censor(profanityListCsv)
+            test.censor(profanityListAll)
         }
         Log.i(
             TAG(),
