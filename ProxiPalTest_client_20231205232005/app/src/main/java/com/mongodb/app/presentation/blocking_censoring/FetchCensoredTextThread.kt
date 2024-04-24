@@ -16,10 +16,16 @@ import javax.net.ssl.HttpsURLConnection
 class FetchCensoredTextThread : Thread(){
     // region Variables
     val isDoneFetchingData = mutableStateOf(true)
-    val data: MutableList<String> = mutableListOf()
+    val dataTxt: MutableList<String> = mutableListOf()
+    val dataCsv: MutableList<String> = mutableListOf()
+    private val _urlTxt = "https://raw.githubusercontent.com/dsojevic/profanity-list/main/en.txt"
+    private val _urlCsv = "https://raw.githubusercontent.com/surge-ai/profanity/main/profanity_en.csv"
+    private val _httpUrlConnectionTimeout = 60000
+    private val _delimitersCsv = ','
     // endregion Variables
 
 
+    // Singleton instance
     companion object{
         private var _instance: FetchCensoredTextThread? = null
 
@@ -31,6 +37,7 @@ class FetchCensoredTextThread : Thread(){
         }
     }
 
+
     init{
         if (_instance == null){
             _instance = this
@@ -39,25 +46,48 @@ class FetchCensoredTextThread : Thread(){
 
 
     // region Functions
+    /**
+     * Attempts to read .txt and .csv files from GitHub repositories
+     */
     override fun run() {
         isDoneFetchingData.value = false
-        data.clear()
-        try{
-            val url: URL = URL("https://raw.githubusercontent.com/dsojevic/profanity-list/main/en.txt")
-            val httpURLConnection: HttpURLConnection = url.openConnection() as HttpURLConnection
-//            val httpsURLConnection: HttpsURLConnection = url.openConnection() as HttpsURLConnection
-            // Set the timeout to 1 minute
-            httpURLConnection.connectTimeout = 60000
-            val inputStream: InputStream = httpURLConnection.inputStream
-            val inputStreamReader: InputStreamReader = InputStreamReader(inputStream)
-            val bufferedReader: BufferedReader = BufferedReader(inputStreamReader)
-            var line: String? = bufferedReader.readLine()
+        dataTxt.clear()
+        dataCsv.clear()
 
-            while (line != null){
-                data.add(line)
+        var url: URL
+        var httpURLConnection: HttpURLConnection
+        var httpsURLConnection: HttpsURLConnection
+        var inputStream: InputStream
+        var inputStreamReader: InputStreamReader
+        var bufferedReader: BufferedReader
+        var currentLine: String? = null
+
+        // Try reading .txt from a URL
+        try{
+            url = URL(_urlTxt)
+            httpURLConnection = url.openConnection() as HttpURLConnection
+//            httpsURLConnection = url.openConnection() as HttpsURLConnection
+            // Set the timeout to 1 minute
+            httpURLConnection.connectTimeout = _httpUrlConnectionTimeout
+            inputStream = httpURLConnection.inputStream
+            inputStreamReader = InputStreamReader(inputStream)
+            bufferedReader = BufferedReader(inputStreamReader)
+            currentLine = bufferedReader.readLine()
+
+            while (currentLine != null){
+                // If the phrase is a number, don't censor (should only censor offensive words, not numbers)
+                if (currentLine.toDoubleOrNull() != null){
+                    Log.i(
+                        "TAG()",
+                        "FetchCensoredTextThread: Skipping number = \"$currentLine\""
+                    )
+                    currentLine = bufferedReader.readLine()
+                    continue
+                }
+                dataTxt.add(currentLine)
                 // .readLine() automatically moves to the next line after calling
                 // Do not call this method more than once per loop iteration
-                line = bufferedReader.readLine()
+                currentLine = bufferedReader.readLine()
             }
 
             bufferedReader.close()
@@ -65,9 +95,60 @@ class FetchCensoredTextThread : Thread(){
         catch (e: Exception){
             Log.e(
                 "TAG()",
-                "FetchCensoredTextThread: Caught exception \"$e\" while trying to load URL"
+                "FetchCensoredTextThread: Caught exception \"$e\" while reading .txt from URL"
             )
         }
+
+        // Try reading .csv from a URL
+        try{
+            url = URL(_urlCsv)
+            httpURLConnection = url.openConnection() as HttpURLConnection
+            httpURLConnection.connectTimeout = _httpUrlConnectionTimeout
+            inputStream = httpURLConnection.inputStream
+            inputStreamReader = InputStreamReader(inputStream)
+            bufferedReader = BufferedReader(inputStreamReader)
+            currentLine = bufferedReader.readLine()
+
+            // Used to skip the 1st line when reading the .csv
+            // The 1st line denotes the headers for the .csv, the rest of the lines are the actual data
+            var shouldSkip = true
+            while (currentLine != null){
+                // Skip reading and recording the 1st line of the .csv
+                if (shouldSkip){
+                    shouldSkip = false
+                    currentLine = bufferedReader.readLine()
+                    continue
+                }
+                // This causes a compile error
+//                val (text, canForm1, canForm2, canForm3, cat1, cat2, cat3, sevRating, sevDesc) = currentLine.split(',', ignoreCase = false, limit = 9)
+                // Split the current line into the keyword/keyphrase to censor and the rest of that row's text
+                val (profanityPhrase, otherCategories) = currentLine.split(
+                    _delimitersCsv,
+                    ignoreCase = false,
+                    limit = 2
+                )
+                // If the phrase is a number, don't censor (should only censor offensive words, not numbers)
+                if (profanityPhrase.toDoubleOrNull() != null){
+                    Log.i(
+                        "TAG()",
+                        "FetchCensoredTextThread: Skipping number = \"$profanityPhrase\""
+                    )
+                    currentLine = bufferedReader.readLine()
+                    continue
+                }
+                dataCsv.add(profanityPhrase)
+                currentLine = bufferedReader.readLine()
+            }
+
+            bufferedReader.close()
+        }
+        catch (e: Exception){
+            Log.e(
+                "TAG()",
+                "FetchCensoredTextThread: Caught exception \"$e\" while reading .csv from URL"
+            )
+        }
+
         isDoneFetchingData.value = true
     }
     // endregion Functions

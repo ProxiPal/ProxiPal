@@ -58,12 +58,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.mongodb.app.R
 import com.mongodb.app.TAG
-import com.mongodb.app.data.MockRepository
+import com.mongodb.app.data.blocking_censoring.MockBlockingCensoringData
 import com.mongodb.app.data.messages.LONG_MESSAGE_CHARACTER_THRESHOLD
 import com.mongodb.app.data.messages.MESSAGE_WIDTH_WEIGHT
 import com.mongodb.app.data.messages.MessagesUserAction
-import com.mongodb.app.data.messages.MockConversationRepository
-import com.mongodb.app.data.messages.MockMessagesRepository
 import com.mongodb.app.domain.FriendMessage
 import com.mongodb.app.navigation.Routes
 import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
@@ -97,7 +95,6 @@ val String.Companion.empty: String
 /**
  * Displays the entire messages screen
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessagesScreenLayout(
     navController: NavHostController,
@@ -113,6 +110,7 @@ fun MessagesScreenLayout(
     blockingViewModel.updateUserInFocus(
         userIdInFocus = messagesViewModel.otherUserProfileId.value
     )
+    censoringViewModel.updateShouldCensorTextState()
 
     Scaffold(
         topBar = {
@@ -120,6 +118,7 @@ fun MessagesScreenLayout(
                 navController = navController,
                 messagesViewModel = messagesViewModel,
                 blockingViewModel = blockingViewModel,
+                censoringViewModel = censoringViewModel,
                 userIdInFocus = messagesViewModel.otherUserProfileId.value
             )
         },
@@ -158,10 +157,7 @@ fun MessagesBlockedNotifier(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    top = dimensionResource(id = R.dimen.messages_screen_message_history_message_vertical_padding),
-                    bottom = dimensionResource(id = R.dimen.messages_screen_message_history_message_vertical_padding),
-                    start = 8.dp,
-                    end = 8.dp
+                    all = dimensionResource(id = R.dimen.messages_screen_user_blocked_notifier_all_padding)
                 )
         ){
             Text(
@@ -180,12 +176,11 @@ fun MessagesTopBar(
     navController: NavHostController,
     messagesViewModel: MessagesViewModel,
     blockingViewModel: BlockingViewModel,
+    censoringViewModel: CensoringViewModel,
     /* The other user's ID involved in the current conversation */
     userIdInFocus: String,
     modifier: Modifier = Modifier
 ) {
-    // Back button is automatically handled by the navigation code (?)
-    // ... so it's not programmed here
     CenterAlignedTopAppBar(
         title = {
             Row(
@@ -194,11 +189,13 @@ fun MessagesTopBar(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
+                // Back button
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = null,
                     modifier = Modifier
                         .clickable {
+                            // TODO Need to change this to navigate to friends screen instead
                             navController.navigate(Routes.UserProfileScreen.route)
                         }
                 )
@@ -222,7 +219,8 @@ fun MessagesTopBar(
                 }
                 BlockingContextualMenu(
                     userId = userIdInFocus,
-                    blockingViewModel = blockingViewModel
+                    blockingViewModel = blockingViewModel,
+                    censoringViewModel = censoringViewModel
                 )
             }
         },
@@ -468,7 +466,11 @@ fun SingleMessage(
         modifier = modifier
     ) {
         Text(
-            text = message.censor(censoringViewModel.censoredTextList),
+            text = if (censoringViewModel.isCensoringText.value){
+                message.censor(censoringViewModel.profanityListAll)
+            } else{
+                message
+                  },
             style = MaterialTheme.typography.bodyLarge,
             softWrap = true,
             overflow = TextOverflow.Clip,
@@ -715,7 +717,6 @@ fun MessagesDeleteAlert(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessagesInputRow(
     messagesViewModel: MessagesViewModel,
@@ -853,25 +854,16 @@ fun TimePreview() {
 @Composable
 fun MessagesScreenLayoutPreview() {
     MyApplicationTheme {
-        val mockSyncRepository = MockRepository()
-        val mockMessagesRepository = MockMessagesRepository()
-        val mockConversationRepository = MockConversationRepository()
-        val mockBlockingViewModel = BlockingViewModel(
-            repository = mockSyncRepository
-        )
-        val mockCensoringViewModel = CensoringViewModel(
-            repository = mockSyncRepository
-        )
         MessagesScreenLayout(
             navController = rememberNavController(),
             messagesViewModel = MessagesViewModel(
-                repository = mockSyncRepository,
-                messagesRepository = mockMessagesRepository,
-                conversationsRepository = mockConversationRepository
+                repository = MockBlockingCensoringData.mockRepository,
+                messagesRepository = MockBlockingCensoringData.mockMessagesRepository,
+                conversationsRepository = MockBlockingCensoringData.mockConversationRepository
             ),
             conversationUsersInvolved = sortedSetOf(String.empty),
-            blockingViewModel = mockBlockingViewModel,
-            censoringViewModel = mockCensoringViewModel
+            blockingViewModel = MockBlockingCensoringData.mockBlockingViewModel,
+            censoringViewModel = MockBlockingCensoringData.mockCensoringViewModel
         )
     }
 }
@@ -881,48 +873,24 @@ fun MessagesScreenLayoutPreview() {
 fun SingleMessageContainerPreview() {
     MyApplicationTheme {
         Column {
-            val messagesViewModel = MessagesViewModel(
-                MockRepository(), MockMessagesRepository(), MockConversationRepository()
+            val testMessages = listOf(
+                stringResource(id = R.string.user_profile_test_string),
+                stringResource(id = R.string.user_profile_test_string),
+                "a",
+                "z"
             )
-            val mockCensoringViewModel = CensoringViewModel(
-                MockRepository()
-            )
-            SingleMessageContainer(
-                friendMessage = FriendMessage().apply {
-                    message =
-                        stringResource(id = R.string.user_profile_test_string)
-                },
-                isSenderMe = false,
-                messagesViewModel = messagesViewModel,
-                censoringViewModel = mockCensoringViewModel
-            )
-            SingleMessageContainer(
-                friendMessage = FriendMessage().apply {
-                    message =
-                        stringResource(id = R.string.user_profile_test_string)
-                },
-                isSenderMe = true,
-                messagesViewModel = messagesViewModel,
-                censoringViewModel = mockCensoringViewModel
-            )
-            SingleMessageContainer(
-                friendMessage = FriendMessage().apply {
-                    message =
-                        "a"
-                },
-                isSenderMe = false,
-                messagesViewModel = messagesViewModel,
-                censoringViewModel = mockCensoringViewModel
-            )
-            SingleMessageContainer(
-                friendMessage = FriendMessage().apply {
-                    message =
-                        "z"
-                },
-                isSenderMe = true,
-                messagesViewModel = messagesViewModel,
-                censoringViewModel = mockCensoringViewModel
-            )
+
+            for (index in testMessages.indices){
+                SingleMessageContainer(
+                    friendMessage = FriendMessage().apply {
+                        message = testMessages[index]
+                    },
+                    // Make every 2nd message mine
+                    isSenderMe = index % 2 == 1,
+                    messagesViewModel = MockBlockingCensoringData.mockMessagesViewModel,
+                    censoringViewModel = MockBlockingCensoringData.mockCensoringViewModel
+                )
+            }
         }
     }
 }

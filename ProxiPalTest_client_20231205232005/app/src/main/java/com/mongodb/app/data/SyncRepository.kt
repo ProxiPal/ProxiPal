@@ -3,6 +3,7 @@ package com.mongodb.app.data
 import android.util.Log
 import com.mongodb.app.TAG
 import com.mongodb.app.app
+import com.mongodb.app.data.blocking_censoring.IBlockingCensoringRealm
 import com.mongodb.app.data.messages.IConversationsRealm
 import com.mongodb.app.data.messages.IMessagesRealm
 import com.mongodb.app.data.messages.SHOULD_PRINT_REALM_CONFIG_INFO
@@ -239,11 +240,6 @@ interface SyncRepository {
     // endregion location
 
 
-    // region Blocking
-    suspend fun updateUsersBlocked(userId: ObjectId, shouldBlock: Boolean)
-    // endregion Blocking
-
-
     // endregion Functions
   
   
@@ -266,7 +262,7 @@ interface SyncRepository {
  */
 class RealmSyncRepository(
     onSyncError: (session: SyncSession, error: SyncException) -> Unit
-) : SyncRepository, IMessagesRealm, IConversationsRealm {
+) : SyncRepository, IMessagesRealm, IConversationsRealm, IBlockingCensoringRealm {
 
     private val realm: Realm
     private val config: SyncConfiguration
@@ -505,6 +501,7 @@ class RealmSyncRepository(
 
             // Initialize a newly created account with no users yet blocked
             this.usersBlocked = realmListOf(String.empty)
+            this.hasTextCensoringEnabled = false
         }
         realm.write {
             copyToRealm(userProfile, updatePolicy = UpdatePolicy.ALL)
@@ -851,7 +848,7 @@ class RealmSyncRepository(
     // endregion Conversations
 
 
-    // region Blocking
+    // region BlockingCensoring
     override suspend fun updateUsersBlocked(userId: ObjectId, shouldBlock: Boolean) {
         // Queries inside write transaction are live objects
         // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
@@ -874,7 +871,20 @@ class RealmSyncRepository(
             }
         }
     }
-    // endregion Blocking
+
+    override suspend fun updateTextCensoringState(userId: ObjectId) {
+        // Queries inside write transaction are live objects
+        // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
+        val frozenObject = getCurrentUserProfile(realm).find()
+        val frozenFirst = (if (frozenObject.size > 0) frozenObject.first() else null) ?: return
+        realm.write{
+            val liveObject = findLatest(frozenFirst)
+            if (liveObject != null){
+                liveObject.hasTextCensoringEnabled = !liveObject.hasTextCensoringEnabled
+            }
+        }
+    }
+    // endregion BlockingCensoring
     
     
     override suspend fun updateUserProfileInterests(interest:String) {
@@ -1097,8 +1107,6 @@ class MockRepository : SyncRepository {
 
     override suspend fun updateUserProfileLocation(latitude: Double, longitude: Double) =
         Unit
-
-    override suspend fun updateUsersBlocked(userId: ObjectId, shouldBlock: Boolean) = Unit
     // endregion Functions
 
     override fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double, selectedInterests: List<String>, selectedIndustries: List<String>, otherFilters: List<String>): Flow<ResultsChange<UserProfile>> = flowOf()

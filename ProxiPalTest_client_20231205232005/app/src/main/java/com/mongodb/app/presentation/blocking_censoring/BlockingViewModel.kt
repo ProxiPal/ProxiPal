@@ -11,9 +11,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.mongodb.app.TAG
 import com.mongodb.app.data.SyncRepository
+import com.mongodb.app.data.blocking_censoring.IBlockingCensoringRealm
 import com.mongodb.app.data.toObjectId
 import com.mongodb.app.domain.UserProfile
-import com.mongodb.app.ui.messages.empty
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -26,7 +26,8 @@ enum class BlockingAction{
 
 
 class BlockingViewModel (
-    private var repository: SyncRepository
+    private var repository: SyncRepository,
+    private var blockingCensoringRealm: IBlockingCensoringRealm
 ) : ViewModel(){
     // region Variables
     private val _currentUserId = mutableStateOf("")
@@ -54,6 +55,9 @@ class BlockingViewModel (
 
 
     // region Functions
+    /**
+     * Updates the necessary variables during a recomposition (eg: screen orientation change)
+     */
     fun updateRepositories(newRepository: SyncRepository){
         repository = newRepository
         currentUserId.value = repository.getCurrentUserId()
@@ -62,10 +66,16 @@ class BlockingViewModel (
         }
     }
 
+    /**
+     * Updates a local variable with the user ID of another user in the process of being (un)blocked
+     */
     fun updateUserInFocus(userIdInFocus: String){
         this.userIdInFocus.value = userIdInFocus
     }
 
+    /**
+     * Starts the process for blocking another user
+     */
     fun blockUserStart(
         userIdToBlock: String
     ){
@@ -76,6 +86,9 @@ class BlockingViewModel (
         }
     }
 
+    /**
+     * Starts the process for unblocking another user
+     */
     fun unblockUserStart(
         userIdToUnblock: String
     ){
@@ -86,6 +99,9 @@ class BlockingViewModel (
         }
     }
 
+    /**
+     * Blocks a user
+     */
     fun blockUser(){
         viewModelScope.launch {
             tryBlockUnblockUser(true)
@@ -94,6 +110,9 @@ class BlockingViewModel (
         }
     }
 
+    /**
+     * Unblocks a user
+     */
     fun unblockUser(){
         viewModelScope.launch {
             tryBlockUnblockUser(false)
@@ -109,7 +128,7 @@ class BlockingViewModel (
         // This is inside a try-catch block in case the user ID being (un)blocked is not a valid ID
         try{
             val objectId = userIdInFocus.value.toObjectId()
-            repository.updateUsersBlocked(objectId, shouldBlock)
+            blockingCensoringRealm.updateUsersBlocked(objectId, shouldBlock)
             if (shouldBlock){
                 Log.i(
                     TAG(),
@@ -141,6 +160,9 @@ class BlockingViewModel (
         }
     }
 
+    /**
+     * Resets the reference to the current user's profile (to retrieve the latest list of blocked users)
+     */
     private suspend fun resetCurrentUserProfileReference(){
         repository.readUserProfile(currentUserId.value)
             .first{
@@ -159,6 +181,9 @@ class BlockingViewModel (
             }
     }
 
+    /**
+     * Resets the reference to the user-in-focus's profile
+     */
     private suspend fun resetFocusedUserProfileReference(){
         repository.readUserProfile(userIdInFocus.value)
             .first{
@@ -169,6 +194,9 @@ class BlockingViewModel (
             }
     }
 
+    /**
+     * Ends the process to (un)block another user
+     */
     fun blockUnblockUserEnd(){
         blockingAction.value = BlockingAction.IDLE
         currentUserProfile.value = UserProfile()
@@ -177,6 +205,9 @@ class BlockingViewModel (
 //        focusedUserName.value = String.empty
     }
 
+    /**
+     * Checks whether another user is blocked by the current user
+     */
     fun isUserBlocked(userIdToCheck: String): Boolean {
         return currentUserProfile.value.isUserBlocked(userIdToCheck)
     }
@@ -187,6 +218,7 @@ class BlockingViewModel (
     companion object {
         fun factory(
             repository: SyncRepository,
+            blockingCensoringRealm: IBlockingCensoringRealm,
             owner: SavedStateRegistryOwner,
             defaultArgs: Bundle? = null
         ): AbstractSavedStateViewModelFactory {
@@ -197,7 +229,7 @@ class BlockingViewModel (
                     handle: SavedStateHandle
                 ): T {
                     // Remember to change the cast to the class name this code is in
-                    return BlockingViewModel (repository) as T
+                    return BlockingViewModel (repository, blockingCensoringRealm) as T
                 }
             }
         }

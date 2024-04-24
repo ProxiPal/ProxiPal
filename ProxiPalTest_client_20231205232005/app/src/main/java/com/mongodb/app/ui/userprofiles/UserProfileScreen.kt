@@ -26,7 +26,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
@@ -50,7 +49,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
@@ -68,7 +66,6 @@ import com.mongodb.app.home.HomeViewModel
 import com.mongodb.app.navigation.NavigationGraph
 import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
 import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
-import com.mongodb.app.presentation.blocking_censoring.FetchCensoredTextThread
 import com.mongodb.app.presentation.messages.MessagesViewModel
 import com.mongodb.app.presentation.tasks.ToolbarEvent
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
@@ -130,6 +127,7 @@ class UserProfileScreen : ComponentActivity() {
     private val blockingViewModel: BlockingViewModel by viewModels {
         BlockingViewModel.factory(
             repository = repository,
+            blockingCensoringRealm = repository,
             this
         )
     }
@@ -137,6 +135,8 @@ class UserProfileScreen : ComponentActivity() {
     private val censoringViewModel: CensoringViewModel by viewModels {
         CensoringViewModel.factory(
             repository = repository,
+            blockingCensoringRealm = repository,
+            shouldReadCensoredTextOnInit = true,
             this
         )
     }
@@ -203,7 +203,8 @@ class UserProfileScreen : ComponentActivity() {
             newRepository = repository
         )
         censoringViewModel.updateRepositories(
-            newRepository = repository
+            newRepository = repository,
+            newBlockingCensoringRealm = repository
         )
 
         setContent {
@@ -231,6 +232,7 @@ class UserProfileScreen : ComponentActivity() {
 /*
 ===== Functions =====
  */
+
 
 /**
  * Displays the entire user profile screen
