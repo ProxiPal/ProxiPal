@@ -33,6 +33,10 @@ fun String.censor(profanityList: MutableList<String>): String{
     }
 
     for (profanityPhrase in profanityList){
+        // Profanity phrase does not fit in current string, so the string can never contain the phrase
+        if (profanityPhrase.length > stringBuilder.length){
+            continue
+        }
         stringBuilder.censorShort(profanityPhrase)
         stringBuilder.censorLong(profanityPhrase)
     }
@@ -277,6 +281,7 @@ class CensoringViewModel (
                             "Last = \"${profanityListAll[profanityListAll.size - 1]}\""
                 )
             }
+//            testTextCensoring()
         }
     }
 
