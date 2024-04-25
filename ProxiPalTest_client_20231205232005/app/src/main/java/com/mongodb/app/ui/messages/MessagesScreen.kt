@@ -81,7 +81,8 @@ import java.util.SortedSet
 
 /*
 Contributions:
-- Kevin Kubota (everything in this file, except for potential screen navigation logic)
+- Kevin Kubota (Review #3: everything in this file, except for potential screen navigation logic)
+- Kevin Kubota (Review #4: updated UI to allow user blocking and text censoring)
  */
 
 

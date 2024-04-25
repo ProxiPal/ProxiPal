@@ -34,6 +34,9 @@ import com.mongodb.app.ui.userprofiles.UserProfileLayout
 
 // Contribution: Marco Pacini
 // Vichet Chim - added first time login
+// - Kevin Kubota (updated navigation to user profile screen and set up navigation to messages screen)
+
+
 /**
  * Navigation graph for the different screens in Proxipal
  */

@@ -10,9 +10,17 @@ import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 
 
-// If this ends up not working, try restarting the app and re-running
-// If this still does not work, try shutting down the emulator and restarting it
-// ... or try restarting Android Studio
+/*
+Contributions:
+- Kevin Kubota (everything in this file)
+ */
+
+
+/**
+ * Attempts to fetch lists of profanity to censor from publicly accessible GitHub repositories.
+ * However, sometimes this does not successfully retrieve data from the supplied URLs. In this case,
+ * try either shutting down and restarting the emulator or restarting Android Studio
+ */
 class FetchCensoredTextThread : Thread(){
     // region Variables
     val isDoneFetchingData = mutableStateOf(true)

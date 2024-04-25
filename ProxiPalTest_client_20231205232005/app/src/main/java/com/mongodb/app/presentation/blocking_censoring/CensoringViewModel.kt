@@ -19,6 +19,12 @@ import kotlinx.coroutines.launch
 import java.util.regex.Pattern
 
 
+/*
+Contributions:
+- Kevin Kubota (everything in this file)
+ */
+
+
 private const val CENSORED_CHAR = '*'
 
 
