@@ -47,6 +47,9 @@ Contributions:
  */
 
 
+private const val ZONE_ID_UTC = "UTC"
+
+
 class MessagesViewModel(
     private var repository: SyncRepository,
     private var messagesRepository: IMessagesRealm,
@@ -236,53 +239,20 @@ class MessagesViewModel(
      * (Note, the same instance in time across different time zones return the same epoch time)
      */
     fun getEpochTime(): Long{
-        // There are many established ways online to get the system time as a number
-        // ... but using Calendar.getInstance() might be the most common answer
-//        Calendar.getInstance().time
-        return Calendar.getInstance().timeInMillis
+//        // There are many ways to get the epoch time, but this might be the most common
+//        return Calendar.getInstance().timeInMillis
+
+        val localDateTime = LocalDateTime.now()
+        val localZoned = localDateTime.atZone(ZoneId.systemDefault())
+        // This contains the UTC time
+        val utcZoned = localZoned.withZoneSameInstant(ZoneId.of(ZONE_ID_UTC))
+        return utcZoned.toInstant().toEpochMilli()
     }
 
-    private fun getTime(shouldUseUTC: Boolean): String{
-        val formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")
-        val universalTimeZone = if (shouldUseUTC){
-            ZoneId.of("UTC")
-        } else {
-            ZoneId.of(ZoneId.systemDefault().toString())
-        }
-        val now = ZonedDateTime.now(universalTimeZone)
-        // For returning a Long instead of a String
-//        return now.toInstant().toEpochMilli()
-        val text = now.format(formatter)
-        return text
-
-//        // Another approach
-//        val localDateTime = LocalDateTime.now()
-//        val localZoned = localDateTime.atZone(ZoneId.systemDefault())
-//        // Now `utcZoned` contains the UTC time
-//        val utcZoned = localZoned.withZoneSameInstant(ZoneId.of("UTC"))
-//        // For returning a Long instead of a String
-////        return utcZoned.toInstant().toEpochMilli()
-//        return utcZoned.toString()
-    }
-
-    /**
-     * Returns the current date and time in the user's local time
-     */
-    fun getLocalTime(): String{
-        return getTime(false)
-    }
-
-    /**
-     * Returns the current date and time in the universal time zone (UTC)
-     */
-    fun getUniversalTime(): String{
-        return getTime(true)
-    }
-
-    private fun getDateFromEpochTime(msSinceEpoch: Long, shouldUseUTC: Boolean): ZonedDateTime{
+    private fun getDate(msSinceEpoch: Long, shouldUseUTC: Boolean): ZonedDateTime{
         val instant = Instant.ofEpochMilli(msSinceEpoch)
         val zoneId = if (shouldUseUTC){
-            "UTC"
+            ZONE_ID_UTC
         } else {
             ZoneId.systemDefault().toString()
         }
@@ -291,17 +261,17 @@ class MessagesViewModel(
     }
 
     /**
-     * Returns a [Date] (in user's local time) given how many milliseconds since the epoch time
+     * Returns the current date and time in the user's local time
      */
-    fun getLocalDateFromEpochTime(msSinceEpoch: Long): ZonedDateTime{
-        return getDateFromEpochTime(msSinceEpoch, false)
+    fun getLocalDate(msSinceEpoch: Long = getEpochTime()): ZonedDateTime{
+        return getDate(msSinceEpoch, false)
     }
 
     /**
-     * Returns a date (always in universal time zone) given how many milliseconds since the epoch time
+     * Returns the current date and time in the universal time zone (UTC)
      */
-    fun getUniversalDateFromEpochTime(msSinceEpoch: Long): ZonedDateTime {
-        return getDateFromEpochTime(msSinceEpoch, true)
+    fun getUniversalDate(msSinceEpoch: Long = getEpochTime()): ZonedDateTime {
+        return getDate(msSinceEpoch, true)
     }
     // endregion DateTime
 

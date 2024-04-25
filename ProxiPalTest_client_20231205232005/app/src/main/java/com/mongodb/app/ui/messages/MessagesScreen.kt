@@ -802,24 +802,15 @@ fun MessagesInputRow(
 fun TimePreview() {
     MyApplicationTheme {
         Column {
+            val epochTime = MockBlockingCensoringData.mockMessagesViewModel.getEpochTime()
             Text(
-                text = "Epoch = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getEpochTime()}\""
+                text = "Epoch = \n\"${epochTime}\""
             )
             Text(
-                text = "Local time = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getLocalTime()}\""
+                text = "Local = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getLocalDate(epochTime)}\""
             )
             Text(
-                text = "Universal time = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getUniversalTime()}\""
-            )
-            Text(
-                text = "Local date = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getLocalDateFromEpochTime(
-                    MockBlockingCensoringData.mockMessagesViewModel.getEpochTime()
-                )}\""
-            )
-            Text(
-                text = "Universal date = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getUniversalDateFromEpochTime(
-                    MockBlockingCensoringData.mockMessagesViewModel.getEpochTime()
-                )}\""
+                text = "Universal = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getUniversalDate(epochTime)}\""
             )
         }
     }
