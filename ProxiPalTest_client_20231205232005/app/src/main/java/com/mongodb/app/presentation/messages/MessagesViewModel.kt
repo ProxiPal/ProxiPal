@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.mongodb.kbson.ObjectId
+import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDateTime
@@ -231,41 +232,74 @@ class MessagesViewModel(
 
     // region DateTime
     /**
-     * Returns the amount of ms since the epoch time
+     * Returns the amount of milliseconds since the epoch time
+     * (Note, the same instance in time across different time zones return the same epoch time)
      */
-    private fun getCurrentTime(): Long{
+    fun getCurrentTime(): Long{
+        // There are many established ways online to get the system time as a number
+        // ... but using Calendar.getInstance() might be the most common answer
+
+        // Note, numerical values are in milliseconds, not seconds
+        // Dates are in PDT, but millisecond times are in GMT (?)
+
+        // Timestamp
+        Timestamp(System.currentTimeMillis())
+        // System time
+        System.currentTimeMillis()
+
+        // Date
+        // Date time
+        Date()
+        Date().time
+        Date(Calendar.getInstance().timeInMillis)
+
+        // LocalDateTime
+        LocalDateTime.now()
+
+        // Instants
+        Instant.now().epochSecond
+        Instant.now().toEpochMilli()
+
+        // Calendars
+        Calendar.getInstance().time
         return Calendar.getInstance().timeInMillis
     }
 
     /**
-     * Returns a [Date] object given how many milliseconds since the epoch time
+     * Returns the current date and time in the universal time zone (UTC)
      */
-    private fun getDateFromTime(time: Long): Date{
-        return Date(time)
-    }
-
-    /**
-     * Returns the amount of s since the epoch time, in UTC (universal time zone)
-     */
-    fun getCurrentUniversalTime(): Long{
+    fun getUniversalTime(): String{
+        // Approach 1
         val formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")
         // "America/Los_Angeles" instead of "PST"
         val universalTimeZone = ZoneId.of("UTC")
         val now = ZonedDateTime.now(universalTimeZone)
-        return now.toInstant().toEpochMilli()
-//        val text = now.format(formatter)
-//        return text
-    }
+        // For returning a Long instead of a String
+//        return now.toInstant().toEpochMilli()
+        val text = now.format(formatter)
+        return text
 
-    fun getCurrentUniversalTimeReal(): Long{
+        // Approach 2
         val localDateTime = LocalDateTime.now()
         val localZoned = localDateTime.atZone(ZoneId.systemDefault())
-        val utcZoned = localZoned.withZoneSameInstant(ZoneId.of("UTC"))
         // Now `utcZoned` contains the UTC time
-        return utcZoned.toInstant().toEpochMilli()
+        val utcZoned = localZoned.withZoneSameInstant(ZoneId.of("UTC"))
+        // For returning a Long instead of a String
+//        return utcZoned.toInstant().toEpochMilli()
+        return utcZoned.toString()
     }
 
-    fun getDateTimeFromLong(msSinceEpoch: Long): ZonedDateTime {
+    /**
+     * Returns a [Date] (in user's local time) given how many milliseconds since the epoch time
+     */
+    fun getDateFromEpochTime(msSinceEpoch: Long): Date{
+        return Date(msSinceEpoch)
+    }
+
+    /**
+     * Returns a [ZonedDateTime] (always in universal time zone) given how many milliseconds since the epoch time
+     */
+    fun getZonedDateTimeFromEpochTime(msSinceEpoch: Long): ZonedDateTime {
         val instant = Instant.ofEpochMilli(msSinceEpoch)
         val zonedDateTime = instant.atZone(ZoneId.of("UTC"))
 //        println("ZonedDateTime in UTC: $zonedDateTime")

@@ -801,66 +801,17 @@ fun MessagesInputRow(
 @Composable
 fun TimePreview() {
     MyApplicationTheme {
-        // There are many established ways online to get the system time as a number
-        // ... but using Calendar.getInstance() might be the most common answer
         Column {
-            // Note, numerical values are in milliseconds, not seconds
-            // Dates are in PDT, but millisecond times are in GMT (?)
-
-//            // This works
-//            Text(
-//                text = "Timestamp = \n\"${Timestamp(System.currentTimeMillis())}\""
-//            )
-//            Text(
-//                text = "System time = \n\"${System.currentTimeMillis()}\""
-//            )
-
-//            // This works too
-//            Text(
-//                text = "Current date time = \n\"${java.util.Date()}\""
-//            )
-//            Text(
-//                text = "Current timestamp = \n\"${java.util.Date().time}\""
-//            )
-
-//            // This works too
-//            Text(
-//                text = "Local date time = \n\"${LocalDateTime.now()}\""
-//            )
-
-//            // This works too
-//            Text(
-//                text = "Instant time = \n\"${Instant.now().epochSecond}\""
-//            )
-//            Text(
-//                text = "Instant ms time = \n\"${Instant.now().toEpochMilli()}\""
-//            )
-
-            // This works too
             Text(
-                text = "Calendar date time = \n\"${Calendar.getInstance().time}\""
+                text = "Epoch = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getCurrentTime()}\""
             )
             Text(
-                text = "Calendar time = \n\"${Calendar.getInstance().timeInMillis}\""
-            )
-            Text(
-                text = "Calendar date from time = \n\"${Date(Calendar.getInstance().timeInMillis)}\""
-            )
-            Text(
-                text = "Epoch 1 = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getCurrentUniversalTime()}\""
-            )
-            Text(
-                text = "Epoch 2 = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getCurrentUniversalTimeReal()}\""
-            )
-            Text(
-                text = "Universal 1 = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getDateTimeFromLong(
-                    MockBlockingCensoringData.mockMessagesViewModel.getCurrentUniversalTime()
+                text = "Zoned = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getZonedDateTimeFromEpochTime(
+                    MockBlockingCensoringData.mockMessagesViewModel.getCurrentTime()
                 )}\""
             )
             Text(
-                text = "Universal 2 = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getDateTimeFromLong(
-                    MockBlockingCensoringData.mockMessagesViewModel.getCurrentUniversalTimeReal()
-                )}\""
+                text = "Universal = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getUniversalTime()}\""
             )
         }
     }
