@@ -27,9 +27,17 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.mongodb.kbson.ObjectId
+import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 import java.util.SortedSet
+import java.util.TimeZone
 
 
 /*
@@ -235,6 +243,34 @@ class MessagesViewModel(
     private fun getDateFromTime(time: Long): Date{
         return Date(time)
     }
+
+    /**
+     * Returns the amount of s since the epoch time, in UTC (universal time zone)
+     */
+    fun getCurrentUniversalTime(): Long{
+        val formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")
+        // "America/Los_Angeles" instead of "PST"
+        val universalTimeZone = ZoneId.of("UTC")
+        val now = ZonedDateTime.now(universalTimeZone)
+        return now.toInstant().toEpochMilli()
+//        val text = now.format(formatter)
+//        return text
+    }
+
+    fun getCurrentUniversalTimeReal(): Long{
+        val localDateTime = LocalDateTime.now()
+        val localZoned = localDateTime.atZone(ZoneId.systemDefault())
+        val utcZoned = localZoned.withZoneSameInstant(ZoneId.of("UTC"))
+        // Now `utcZoned` contains the UTC time
+        return utcZoned.toInstant().toEpochMilli()
+    }
+
+    fun getDateTimeFromLong(msSinceEpoch: Long): ZonedDateTime {
+        val instant = Instant.ofEpochMilli(msSinceEpoch)
+        val zonedDateTime = instant.atZone(ZoneId.of("UTC"))
+//        println("ZonedDateTime in UTC: $zonedDateTime")
+        return zonedDateTime
+    }
     // endregion DateTime
 
 
@@ -291,6 +327,10 @@ class MessagesViewModel(
                         messageIdRepliesToOriginalMessages[friendMessage._id] =
                             readMessageReply(friendMessage)
                     }
+                    Log.i(
+                        TAG(),
+                        "MsgVM: Id = \"${friendMessage._id}\"; msg = \"${friendMessage.message}\""
+                    )
                 }
 
                 messagesListState.clear()

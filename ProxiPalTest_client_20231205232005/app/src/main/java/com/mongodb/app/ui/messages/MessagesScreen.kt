@@ -846,6 +846,22 @@ fun TimePreview() {
             Text(
                 text = "Calendar date from time = \n\"${Date(Calendar.getInstance().timeInMillis)}\""
             )
+            Text(
+                text = "Epoch 1 = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getCurrentUniversalTime()}\""
+            )
+            Text(
+                text = "Epoch 2 = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getCurrentUniversalTimeReal()}\""
+            )
+            Text(
+                text = "Universal 1 = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getDateTimeFromLong(
+                    MockBlockingCensoringData.mockMessagesViewModel.getCurrentUniversalTime()
+                )}\""
+            )
+            Text(
+                text = "Universal 2 = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getDateTimeFromLong(
+                    MockBlockingCensoringData.mockMessagesViewModel.getCurrentUniversalTimeReal()
+                )}\""
+            )
         }
     }
 }
