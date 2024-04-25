@@ -95,6 +95,7 @@ interface SyncRepository {
      */
     suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType)
 
+    suspend fun updateSubscriptionsEvents(subscriptionType: SubscriptionType)
     /**
      * Deletes a given task.
      */
@@ -208,6 +209,10 @@ class RealmSyncRepository(
                         getQueryUserProfiles(realm, activeSubscriptionType),
                         activeSubscriptionType.name
                     )
+                    add(
+                        getQueryEvents(realm),
+                        "Event"
+                    )
                 }
             }
             .errorHandler { session: SyncSession, error: SyncException ->
@@ -316,6 +321,19 @@ class RealmSyncRepository(
         }
     }
 
+    override suspend fun updateSubscriptionsEvents(subscriptionType: SubscriptionType) {
+        realm.subscriptions.update {
+            removeAll()
+            val query = when (subscriptionType) {
+                SubscriptionType.MINE -> getQueryItems(realm, SubscriptionType.MINE)
+                SubscriptionType.ALL -> getQueryItems(realm, SubscriptionType.ALL)
+            }
+            add(query, subscriptionType.name)
+        }
+    }
+
+
+
     override suspend fun deleteTask(task: Item) {
         realm.write {
             delete(findLatest(task)!!)
@@ -330,6 +348,11 @@ class RealmSyncRepository(
             SubscriptionType.MINE -> realm.query("owner_id == $0", currentUser.id)
             SubscriptionType.ALL -> realm.query()
         }
+
+
+    private fun getQueryEvents(realm: Realm): RealmQuery<Event> {
+        return realm.query<Event> ("owner_id == $0", currentUser.id)
+    }
     // endregion Tasks/Items
 
     // Contributed by Kevin Kubota
@@ -742,6 +765,8 @@ class MockRepository : SyncRepository {
 
     override suspend fun addEvent(eventName: String, eventDescription: String, eventDate: String, eventTime: String, eventLocation: String) = Unit
     override suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType) = Unit
+
+    override suspend fun updateSubscriptionsEvents(subscriptionType: SubscriptionType) = Unit
     override suspend fun deleteTask(task: Item) = Unit
     override fun isTaskMine(task: Item): Boolean = task.owner_id == MOCK_OWNER_ID_MINE
 

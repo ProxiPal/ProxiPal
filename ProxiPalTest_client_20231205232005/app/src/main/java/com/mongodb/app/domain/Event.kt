@@ -15,7 +15,7 @@ class Event(): RealmObject {
     var date: String = ""
     var time: String = ""
     var location: String = ""
-    var attendees: RealmList<UserProfile> = realmListOf()
+//    var attendees: RealmList<UserProfile> = realmListOf()
 
     var owner_id: String = ""
 }
