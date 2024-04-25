@@ -27,18 +27,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.mongodb.kbson.ObjectId
-import java.sql.Timestamp
-import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
 import java.util.SortedSet
-import java.util.TimeZone
 
 
 /*
@@ -329,14 +322,16 @@ class MessagesViewModel(
                         messageIdRepliesToOriginalMessages[friendMessage._id] =
                             readMessageReply(friendMessage)
                     }
-                    Log.i(
-                        TAG(),
-                        "MsgVM: Id = \"${friendMessage._id}\"; msg = \"${friendMessage.message}\""
-                    )
                 }
 
                 messagesListState.clear()
                 messagesListState.addAll(it.list)
+                // Manually sort the messages by their time sent (time since epoch time)
+                // Without this, messages will sometimes show out of order
+                // (It appears it would have been sorted by who sent the message instead)
+                messagesListState.sortBy{
+                    toSort -> toSort.timeSent
+                }
                 return@collect
             }
         // Code beyond this point does not get called, regardless of return statements (?)
