@@ -803,15 +803,23 @@ fun TimePreview() {
     MyApplicationTheme {
         Column {
             Text(
-                text = "Epoch = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getCurrentTime()}\""
+                text = "Epoch = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getEpochTime()}\""
             )
             Text(
-                text = "Zoned = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getZonedDateTimeFromEpochTime(
-                    MockBlockingCensoringData.mockMessagesViewModel.getCurrentTime()
+                text = "Local time = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getLocalTime()}\""
+            )
+            Text(
+                text = "Universal time = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getUniversalTime()}\""
+            )
+            Text(
+                text = "Local date = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getLocalDateFromEpochTime(
+                    MockBlockingCensoringData.mockMessagesViewModel.getEpochTime()
                 )}\""
             )
             Text(
-                text = "Universal = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getUniversalTime()}\""
+                text = "Universal date = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getUniversalDateFromEpochTime(
+                    MockBlockingCensoringData.mockMessagesViewModel.getEpochTime()
+                )}\""
             )
         }
     }
