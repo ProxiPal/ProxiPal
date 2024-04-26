@@ -278,6 +278,8 @@ interface SyncRepository {
 
     suspend fun addUserToFriendList(requestId: String)
 
+    suspend fun removeFriendBidirectional(userId: String, friendId: String)
+
 }
 
 
@@ -1129,6 +1131,15 @@ class RealmSyncRepository(
             }
         }
     }
+    override suspend fun removeFriendBidirectional(userId: String, friendId: String) {
+        realm.write {
+            val user = query<UserProfile>("ownerId == $0", userId).first().find()
+            val friend = query<UserProfile>("ownerId == $0", friendId).first().find()
+
+            user?.friends?.remove(friendId)
+            friend?.friends?.remove(userId)
+        }
+    }
 
 
 
@@ -1220,6 +1231,8 @@ class MockRepository : SyncRepository {
     override fun getRealmInstance(): Realm? = null
 
     override suspend fun addUserToFriendList(requestId: String) = Unit
+
+    override suspend fun removeFriendBidirectional(userId: String, friendId: String) = Unit
 
 
     companion object {

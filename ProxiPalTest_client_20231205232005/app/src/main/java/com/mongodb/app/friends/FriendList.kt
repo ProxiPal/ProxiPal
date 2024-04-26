@@ -133,7 +133,7 @@ fun FriendItem(friend: String, viewModel: UserProfileViewModel) {
                     text = { Text("Delete Friend") },
                     onClick = {
                         showMenu = false
-                        // Implement the delete functionality here when ready
+                        viewModel.removeFriend(friend)
                     }
                 )
             }

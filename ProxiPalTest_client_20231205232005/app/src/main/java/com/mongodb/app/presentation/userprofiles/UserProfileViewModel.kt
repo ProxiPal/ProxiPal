@@ -647,6 +647,19 @@ class UserProfileViewModel(
         }
     }
 
+    fun removeFriend(friendUserId: String) {
+        viewModelScope.launch {
+            val currentUserId = repository.getCurrentUserId()
+
+            // Use the updated repository method
+            repository.removeFriendBidirectional(currentUserId, friendUserId)
+
+            // Update UI state if necessary
+            _friendsList.value = _friendsList.value.filterNot { it == friendUserId }
+        }
+    }
+
+
 }
 
 
