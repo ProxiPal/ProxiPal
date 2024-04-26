@@ -81,7 +81,8 @@ import java.util.SortedSet
 
 /*
 Contributions:
-- Kevin Kubota (everything in this file, except for potential screen navigation logic)
+- Kevin Kubota (Review #3: everything in this file, except for potential screen navigation logic)
+- Kevin Kubota (Review #4: updated UI to allow user blocking and text censoring)
  */
 
 
@@ -801,50 +802,16 @@ fun MessagesInputRow(
 @Composable
 fun TimePreview() {
     MyApplicationTheme {
-        // There are many established ways online to get the system time as a number
-        // ... but using Calendar.getInstance() might be the most common answer
         Column {
-            // Note, numerical values are in milliseconds, not seconds
-            // Dates are in PDT, but millisecond times are in GMT (?)
-
-//            // This works
-//            Text(
-//                text = "Timestamp = \n\"${Timestamp(System.currentTimeMillis())}\""
-//            )
-//            Text(
-//                text = "System time = \n\"${System.currentTimeMillis()}\""
-//            )
-
-//            // This works too
-//            Text(
-//                text = "Current date time = \n\"${java.util.Date()}\""
-//            )
-//            Text(
-//                text = "Current timestamp = \n\"${java.util.Date().time}\""
-//            )
-
-//            // This works too
-//            Text(
-//                text = "Local date time = \n\"${LocalDateTime.now()}\""
-//            )
-
-//            // This works too
-//            Text(
-//                text = "Instant time = \n\"${Instant.now().epochSecond}\""
-//            )
-//            Text(
-//                text = "Instant ms time = \n\"${Instant.now().toEpochMilli()}\""
-//            )
-
-            // This works too
+            val epochTime = MockBlockingCensoringData.mockMessagesViewModel.getEpochTime()
             Text(
-                text = "Calendar date time = \n\"${Calendar.getInstance().time}\""
+                text = "Epoch = \n\"${epochTime}\""
             )
             Text(
-                text = "Calendar time = \n\"${Calendar.getInstance().timeInMillis}\""
+                text = "Local = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getLocalDate(epochTime)}\""
             )
             Text(
-                text = "Calendar date from time = \n\"${Date(Calendar.getInstance().timeInMillis)}\""
+                text = "Universal = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getUniversalDate(epochTime)}\""
             )
         }
     }

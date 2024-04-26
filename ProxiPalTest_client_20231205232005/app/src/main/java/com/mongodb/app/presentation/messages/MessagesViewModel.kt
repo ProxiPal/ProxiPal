@@ -27,8 +27,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.mongodb.kbson.ObjectId
-import java.util.Calendar
-import java.util.Date
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.SortedSet
 
 
@@ -36,6 +38,9 @@ import java.util.SortedSet
 Contributions:
 - Kevin Kubota (everything in this file)
  */
+
+
+private const val ZONE_ID_UTC = "UTC"
 
 
 class MessagesViewModel(
@@ -223,17 +228,43 @@ class MessagesViewModel(
 
     // region DateTime
     /**
-     * Returns the amount of ms since the epoch time
+     * Returns the amount of milliseconds since the epoch time
+     * (Note, the same instance in time across different time zones return the same epoch time)
      */
-    private fun getCurrentTime(): Long{
-        return Calendar.getInstance().timeInMillis
+    fun getEpochTime(): Long{
+//        // There are many ways to get the epoch time, but this might be the most common
+//        return Calendar.getInstance().timeInMillis
+
+        val localDateTime = LocalDateTime.now()
+        val localZoned = localDateTime.atZone(ZoneId.systemDefault())
+        // This contains the UTC time
+        val utcZoned = localZoned.withZoneSameInstant(ZoneId.of(ZONE_ID_UTC))
+        return utcZoned.toInstant().toEpochMilli()
+    }
+
+    private fun getDate(msSinceEpoch: Long, shouldUseUTC: Boolean): ZonedDateTime{
+        val instant = Instant.ofEpochMilli(msSinceEpoch)
+        val zoneId = if (shouldUseUTC){
+            ZONE_ID_UTC
+        } else {
+            ZoneId.systemDefault().toString()
+        }
+        val zonedDateTime = instant.atZone(ZoneId.of(zoneId))
+        return zonedDateTime
     }
 
     /**
-     * Returns a [Date] object given how many milliseconds since the epoch time
+     * Returns the current date and time in the user's local time
      */
-    private fun getDateFromTime(time: Long): Date{
-        return Date(time)
+    fun getLocalDate(msSinceEpoch: Long = getEpochTime()): ZonedDateTime{
+        return getDate(msSinceEpoch, false)
+    }
+
+    /**
+     * Returns the current date and time in the universal time zone (UTC)
+     */
+    fun getUniversalDate(msSinceEpoch: Long = getEpochTime()): ZonedDateTime {
+        return getDate(msSinceEpoch, true)
     }
     // endregion DateTime
 
@@ -253,7 +284,7 @@ class MessagesViewModel(
         val newMessage = FriendMessage()
             .also {
                 it.message = message.value
-                it.timeSent = getCurrentTime()
+                it.timeSent = getEpochTime()
                 it.ownerId = repository.getCurrentUserId()
                 it.hasBeenUpdated = false
                 it.messageIdRepliedTo = messageIdRepliedTo
@@ -295,6 +326,12 @@ class MessagesViewModel(
 
                 messagesListState.clear()
                 messagesListState.addAll(it.list)
+                // Manually sort the messages by their time sent (time since epoch time)
+                // Without this, messages will sometimes show out of order
+                // (It appears it would have been sorted by who sent the message instead)
+                messagesListState.sortBy{
+                    toSort -> toSort.timeSent
+                }
                 return@collect
             }
         // Code beyond this point does not get called, regardless of return statements (?)

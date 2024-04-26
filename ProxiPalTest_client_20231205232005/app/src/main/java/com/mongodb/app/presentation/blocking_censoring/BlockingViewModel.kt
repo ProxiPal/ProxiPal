@@ -18,6 +18,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 
+/*
+Contributions:
+- Kevin Kubota (everything in this file)
+ */
+
+
 enum class BlockingAction{
     IDLE, /* Not blocking or unblocking a user */
     BLOCKING,

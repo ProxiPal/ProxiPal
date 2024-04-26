@@ -50,6 +50,7 @@ Contributions:
 - Kevin Kubota (Review #1: added functions relating to user profiles, see below)
 - Kevin Kubota (Review #3: Implemented functions for friend conversations and messages;
 ... This mainly includes everything in the regions named "Messages" and "Conversations")
+- Kevin Kubota (Review #4: Added database functions related to user blocking and text censoring)
 - Marco Pacini (location related tasks only)
  */
 
