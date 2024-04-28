@@ -114,18 +114,30 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
             AdvancedScreenSettings(navController)
         }
 
-        composable(route = Routes.EventScreen.route){
-            EventScreen(sharedViewModel = sharedViewModel,
-                navigateToEvent = { navController.navigate(Routes.EventDetails.route)})
-            {
+        composable(route = Routes.EventScreen.route) {
+            EventScreen(
+                eventsViewModel = eventsViewModel,
+                navigateToEvent = { eventId ->
+                    navController.navigate(Routes.EventDetails.createRoute(eventId))
+                }
+            ) {
                 navController.navigate(Routes.CreateEvent.route)
             }
         }
         composable(route = Routes.CreateEvent.route){
-            CreateEventBody(navigateBack = {navController.popBackStack()}, eventsViewModel = eventsViewModel)
+            CreateEventBody(
+                navigateBack = {navController.popBackStack()},
+                eventsViewModel = eventsViewModel)
         }
-        composable(route = Routes.EventDetails.route){
-            EventDetailsScreen(sharedViewModel =sharedViewModel) {navController.popBackStack()}
+        composable(
+            route = Routes.EventDetails.route,
+            arguments = listOf(navArgument(Routes.EventDetails.EVENT_ID_KEY) { type = NavType.StringType })
+        ) { backStackEntry ->
+            val eventId = backStackEntry.arguments?.getString(Routes.EventDetails.EVENT_ID_KEY)
+            EventDetailsScreen(
+                eventId = eventId,
+                eventsViewModel = eventsViewModel
+            ) { navController.popBackStack() }
         }
 
 

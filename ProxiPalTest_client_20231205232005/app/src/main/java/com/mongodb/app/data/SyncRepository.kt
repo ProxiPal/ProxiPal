@@ -11,7 +11,8 @@ import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.annotations.ExperimentalGeoSpatialApi
 import io.realm.kotlin.ext.query
-import io.realm.kotlin.ext.realmListOf
+import io.realm.kotlin.internal.objectIdToRealmObjectId
+
 import io.realm.kotlin.mongodb.User
 import io.realm.kotlin.mongodb.exceptions.SyncException
 import io.realm.kotlin.mongodb.subscriptions
@@ -21,7 +22,8 @@ import io.realm.kotlin.mongodb.syncSession
 import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.query.RealmQuery
 import io.realm.kotlin.query.Sort
-import io.realm.kotlin.types.RealmList
+import io.realm.kotlin.types.ObjectId.Companion.from
+
 import io.realm.kotlin.types.geo.Distance
 import io.realm.kotlin.types.geo.GeoCircle
 import io.realm.kotlin.types.geo.GeoPoint
@@ -31,6 +33,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import org.mongodb.kbson.ObjectId
 import kotlin.time.Duration.Companion.seconds
 
 
@@ -89,6 +92,11 @@ interface SyncRepository {
     suspend fun addTask(taskSummary: String)
 
     suspend fun addEvent(eventName: String, eventDescription: String, eventDate: String, eventTime: String, eventLocation: String)
+
+    suspend fun getEventById(eventId: String): Flow<ResultsChange<Event>>
+    suspend fun getMyEventList(): Flow<ResultsChange<Event>>
+
+    suspend fun getOtherEventList(): Flow<ResultsChange<Event>>
 
     /**
      * Updates the Sync subscriptions based on the specified [SubscriptionType].
@@ -294,19 +302,36 @@ class RealmSyncRepository(
         }
     }
 
-    override suspend fun addEvent(eventName:String, eventDescription:String, eventTime:String, eventDate:String, eventLocation: String){
+    override suspend fun addEvent(eventName:String, eventDescription:String, eventDate:String, eventTime:String, eventLocation: String){
         val event= Event().apply{
             name = eventName
             description = eventDescription
-            time = eventTime
             date = eventDate
+            time = eventTime
             location = eventLocation
-            //attendees.add()
+            attendeeIds.add(currentUser.id)
             owner_id = currentUser.id
         }
         realm.write{
             copyToRealm(event)
         }
+    }
+
+    override suspend fun getEventById(eventId: String): Flow<ResultsChange<Event>> {
+        val validIdString = eventId.removePrefix("BsonObjectId(").removeSuffix(")")
+        val objectId = ObjectId(validIdString)
+        return realm.query<Event>("_id == $0", objectId).asFlow()
+    }
+    override suspend fun getMyEventList(): Flow<ResultsChange<Event>> {
+        return realm.query<Event>("attendeeIds CONTAINS $0", currentUser.id)
+            .sort(Pair("date", Sort.ASCENDING))
+            .asFlow()
+    }
+
+    override suspend fun getOtherEventList(): Flow<ResultsChange<Event>> {
+        return realm.query<Event>("NOT attendeeIds CONTAINS $0", currentUser.id)
+            .sort(Pair("date", Sort.ASCENDING))
+            .asFlow()
     }
 
 
@@ -764,6 +789,14 @@ class MockRepository : SyncRepository {
     override suspend fun addTask(taskSummary: String) = Unit
 
     override suspend fun addEvent(eventName: String, eventDescription: String, eventDate: String, eventTime: String, eventLocation: String) = Unit
+//    override suspend fun getEventById(eventId: String): RealmQuery<Event> {
+//        TODO("Not yet implemented")
+//    }
+
+    override suspend fun getEventById(eventId: String): Flow<ResultsChange<Event>> = flowOf()
+    override suspend fun getMyEventList(): Flow<ResultsChange<Event>> = flowOf()
+
+    override suspend fun getOtherEventList(): Flow<ResultsChange<Event>> = flowOf()
     override suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType) = Unit
 
     override suspend fun updateSubscriptionsEvents(subscriptionType: SubscriptionType) = Unit

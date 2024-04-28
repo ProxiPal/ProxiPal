@@ -8,14 +8,13 @@ import org.mongodb.kbson.ObjectId
 import java.util.Date
 
 class Event(): RealmObject {
-    @PrimaryKey
-    var _id: ObjectId = ObjectId()
+    @PrimaryKey var _id: ObjectId = ObjectId()
     var name: String = ""
     var description: String = ""
     var date: String = ""
     var time: String = ""
     var location: String = ""
-//    var attendees: RealmList<UserProfile> = realmListOf()
+    var attendeeIds: RealmList<String> = realmListOf()
 
     var owner_id: String = ""
 }

@@ -15,8 +15,13 @@ sealed class Routes(val route: String) {
     object OnboardingScreen : Routes("onboardingscreen")
     object AdvancedScreenSettings : Routes("advancedscreensettings")
 
-    object EventDetails : Routes("event_details/{event_id}")
+    object EventDetails : Routes("event_details/{eventId}") {
+        const val EVENT_ID_KEY = "eventId"
+        fun createRoute(eventId: String) = "event_details/$eventId"
+    }
     object EventScreen:Routes("eventscreen")
 
     object CreateEvent:Routes("createevent")
+
+
 }

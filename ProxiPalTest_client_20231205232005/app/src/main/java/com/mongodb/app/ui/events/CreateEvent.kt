@@ -93,8 +93,8 @@ fun CreateEventBody(navigateBack: () -> Unit, eventsViewModel: EventsViewModel) 
     val context = LocalContext.current
     var showLocationDialog by remember { mutableStateOf(false) }
     var location by remember { mutableStateOf("") }
-    var time by remember {mutableStateOf("")}
-    var date by remember { mutableStateOf("")}
+    var time by remember { mutableStateOf("") }
+    var date by remember { mutableStateOf("") }
 
     Box(
         modifier = Modifier
@@ -144,13 +144,13 @@ fun CreateEventBody(navigateBack: () -> Unit, eventsViewModel: EventsViewModel) 
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                showDatePicker(context)
-                showTimePicker(context)
+                date = showDatePicker(context)
+                time = showTimePicker(context)
             }
             TextButton(onClick = navigateBack) {
                 Text(text = "Cancel")
             }
-            TextButton(onClick = { eventsViewModel.addEvent(eventName, eventDescription, "test", "test", location) }) {
+            TextButton(onClick = { eventsViewModel.addEvent(eventName, eventDescription, date, time, location) }) {
                 Text(text = "Confirm")
             }
         }
@@ -241,7 +241,7 @@ fun LocationInputDialog(
 
 
 @Composable
-fun showDatePicker(context: Context) {
+fun showDatePicker(context: Context): String {
     val calendar = Calendar.getInstance()
     val year = calendar.get(Calendar.YEAR)
     val month = calendar.get(Calendar.MONTH)
@@ -281,10 +281,11 @@ fun showDatePicker(context: Context) {
             )
         }
     }
+    return date
 }
 
 @Composable
-fun showTimePicker(context: Context) {
+fun showTimePicker(context: Context): String {
     val calendar = Calendar.getInstance()
     val hour = calendar[Calendar.HOUR_OF_DAY]
     val minute = calendar[Calendar.MINUTE]
@@ -334,6 +335,7 @@ fun showTimePicker(context: Context) {
             )
         }
     }
+    return time
 }
 
 @Composable
