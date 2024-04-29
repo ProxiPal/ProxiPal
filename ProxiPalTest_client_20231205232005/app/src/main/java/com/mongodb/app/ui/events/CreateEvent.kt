@@ -4,6 +4,7 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
 import android.location.Geocoder
+import android.util.Log
 import android.widget.DatePicker
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -147,8 +148,8 @@ fun CreateEventBody(navigateBack: () -> Unit, eventsViewModel: EventsViewModel) 
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                date = showDatePicker(context, "")
-                time = showTimePicker(context, "")
+                date = showDatePicker(context)
+                time = showTimePicker(context)
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -281,11 +282,15 @@ fun showDatePicker(context: Context, initialDate: String=""): String {
     val month = calendar.get(Calendar.MONTH)
     val day = calendar.get(Calendar.DAY_OF_MONTH)
     calendar.time = Date()
-    var date by remember { mutableStateOf(initialDate) }
+    var date by remember { mutableStateOf("") }
 
-    if (date.isEmpty()) {
-        date = "${month + 1}/$day/$year"
+    date = if (initialDate.isEmpty()) {
+        "${month + 1}/$day/$year"
+    } else{
+        initialDate
     }
+    Log.d("initialDate", initialDate)
+    Log.d("date", date)
 
 
     val datePickerDialog = DatePickerDialog(
@@ -336,6 +341,8 @@ fun showTimePicker(context: Context, initialTime:String = ""): String {
         amPm = if (hour >= 12) "PM" else "AM"
         time = "$hr:$min $amPm"
     }
+    Log.d("initialTime", initialTime)
+    Log.d("time", time)
 
     val timePickerDialog = TimePickerDialog(
         context,

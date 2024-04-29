@@ -1,5 +1,6 @@
 package com.mongodb.app.ui.events
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,6 +48,9 @@ fun EditEventBody(
     val context = LocalContext.current
     var showLocationDialog by remember { mutableStateOf(false) }
     var location by remember { mutableStateOf("") }
+    var initialTime by remember { mutableStateOf("") }
+    var initialDate by remember { mutableStateOf("") }
+
     var time by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
     var durationHours by remember { mutableStateOf("") }
@@ -57,14 +61,13 @@ fun EditEventBody(
             eventName = it.name
             eventDescription = it.description
             location = it.location
-            time = it.time
-            date = it.date
+            initialTime = it.time
+            initialDate = it.date
             val durationParts = it.duration.split(" ")
             durationHours = durationParts[0].replace("h", "")
             durationMinutes = durationParts[2].replace("m", "")
         }
     }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -113,8 +116,10 @@ fun EditEventBody(
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                date = showDatePicker(context, initialDate = date)
-                time = showTimePicker(context, initialTime = time)
+                date = showDatePicker(context, initialDate = initialDate)
+                time = showTimePicker(context, initialTime = initialTime)
+                Log.d("initialTime", initialTime)
+                Log.d("initialDate", initialDate)
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
