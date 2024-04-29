@@ -1,4 +1,4 @@
-package com.mongodb.app.userRatingSystem
+package com.mongodb.app.userratingsystem
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

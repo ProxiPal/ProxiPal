@@ -75,6 +75,7 @@ import com.mongodb.app.ui.components.ProxiPalBottomAppBar
 import com.mongodb.app.ui.components.SingleLineText
 import com.mongodb.app.ui.tasks.TaskAppToolbar
 import com.mongodb.app.ui.theme.MyApplicationTheme
+import com.mongodb.app.userratingsystem.UserRatingsDisplayScreen
 import kotlinx.coroutines.launch
 
 
@@ -218,6 +219,7 @@ fun UserProfileLayout(
                 userProfileViewModel = userProfileViewModel,
                 toolbarViewModel = toolbarViewModel
             )
+            UserRatingsDisplayScreen(userProfileViewModel = userProfileViewModel)
             HomeScreen(navController = navController, viewModel = homeViewModel, userProfileViewModel = userProfileViewModel)
         }
     }
