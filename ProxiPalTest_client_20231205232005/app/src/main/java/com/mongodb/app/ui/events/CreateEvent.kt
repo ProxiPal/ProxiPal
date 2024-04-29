@@ -160,7 +160,7 @@ fun CreateEventBody(navigateBack: () -> Unit, eventsViewModel: EventsViewModel) 
                     value = durationHours,
                     onValueChange = { durationHours = it },
 //                    label = { Text("Hours") },
-                    modifier = Modifier.width(60.dp).height(18.dp)
+                    modifier = Modifier.width(60.dp).height(50.dp)
                 )
                 Text(
                     text = "h",
@@ -171,7 +171,7 @@ fun CreateEventBody(navigateBack: () -> Unit, eventsViewModel: EventsViewModel) 
                     value = durationMinutes,
                     onValueChange = { durationMinutes = it },
 //                    label = { Text("Minutes") },
-                    modifier = Modifier.width(60.dp).height(18.dp)
+                    modifier = Modifier.width(60.dp).height(50.dp)
                 )
                 Text(
                     text = "m",

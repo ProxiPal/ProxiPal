@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -40,7 +41,7 @@ import org.mongodb.kbson.serialization.Bson
 
 
 @Composable
-fun EventScreen(eventsViewModel: EventsViewModel, navigateToEvent:(String)-> Unit, navigateToCreateEvent:()-> Unit) {
+fun EventScreen(eventsViewModel: EventsViewModel, navigateToEvent: (String) -> Unit, navigateToCreateEvent: () -> Unit) {
     val myEventList by eventsViewModel.myEventList.collectAsState()
     val otherEventList by eventsViewModel.otherEventList.collectAsState()
     Scaffold(
@@ -60,41 +61,32 @@ fun EventScreen(eventsViewModel: EventsViewModel, navigateToEvent:(String)-> Uni
             )
         }
     ) { paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues)) {
-            Text(
-                text = "My Events",
-                modifier = Modifier.padding(16.dp)
-            )
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                items(myEventList) { event ->
-                    EventCard(event) {
-                        Log.d("eventstring", event._id.toString())
-                        val validIdString = event._id.toString().removePrefix("BsonObjectId(").removeSuffix(")")
-                        Log.d("eventvalidString", validIdString)
-                        navigateToEvent(event._id.toString())
-                        // Handle click event for "My Events"
-                        // Example: Navigate to event details screen
-                        // navController.navigate("event_details/${event.id}")
-                    }
+        LazyColumn(
+            modifier = Modifier.padding(paddingValues)
+        ) {
+            item {
+                Text(
+                    text = "My Events",
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+            items(myEventList) { event ->
+                EventCard(event) {
+                    Log.d("eventstring", event._id.toString())
+                    val validIdString = event._id.toString().removePrefix("BsonObjectId(").removeSuffix(")")
+                    Log.d("eventvalidString", validIdString)
+                    navigateToEvent(event._id.toString())
                 }
             }
-
-            Text(
-                text = "Other Events",
-                modifier = Modifier.padding(16.dp)
-            )
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                items(otherEventList) { event ->
-                    EventCard(event) {
-                        navigateToEvent(event._id.toString())
-                        // Handle click event for "Other Events"
-                        // Example: Navigate to event details screen
-                        // navController.navigate("event_details/${event.id}")
-                    }
+            item {
+                Text(
+                    text = "Other Events",
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+            items(otherEventList) { event ->
+                EventCard(event) {
+                    navigateToEvent(event._id.toString())
                 }
             }
         }
@@ -133,7 +125,9 @@ fun EventCard(event: Event, onClick:()->Unit) {
             )
             Text(
                 text = event.description,
-                modifier = Modifier.padding(top = 8.dp)
+                modifier = Modifier.padding(top = 8.dp),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
