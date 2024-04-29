@@ -12,6 +12,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import com.mongodb.app.data.SubscriptionType
 import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.domain.Event
+import com.mongodb.app.domain.Item
 import com.mongodb.app.domain.UserProfile
 import com.mongodb.app.presentation.tasks.AddItemEvent
 import com.mongodb.app.presentation.tasks.AddItemViewModel
@@ -51,7 +52,7 @@ class EventsViewModel(
             }
         }
     }
-    fun addEvent(name: String, description: String, date: String, time: String, location: String) {
+    fun addEvent(name: String, description: String, date: String, time: String, duration:String, location: String) {
         CoroutineScope(Dispatchers.IO).launch {
             runCatching {
                 repository.addEvent(
@@ -59,6 +60,7 @@ class EventsViewModel(
                     eventDescription = description,
                     eventDate = date,
                     eventTime = time,
+                    eventDuration = duration,
                     eventLocation = location
                 )
             }.onSuccess { Log.d("events", "working") }
@@ -73,6 +75,11 @@ class EventsViewModel(
             flowOf(null)
         }
     }
+
+    fun isTaskMine(task: Item): Boolean = repository.isTaskMine(task)
+    fun isCurrentUserEventOwner(event: Event): Boolean  = repository.isEventOwner(event)
+
+
 
 
 

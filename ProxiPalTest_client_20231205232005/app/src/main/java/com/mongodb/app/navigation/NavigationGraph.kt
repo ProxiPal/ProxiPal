@@ -134,10 +134,9 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
             arguments = listOf(navArgument(Routes.EventDetails.EVENT_ID_KEY) { type = NavType.StringType })
         ) { backStackEntry ->
             val eventId = backStackEntry.arguments?.getString(Routes.EventDetails.EVENT_ID_KEY)
-            EventDetailsScreen(
-                eventId = eventId,
-                eventsViewModel = eventsViewModel
-            ) { navController.popBackStack() }
+            EventDetailsScreen(eventId = eventId, eventsViewModel = eventsViewModel, navigateBack = { navController.popBackStack() }) {
+
+            }
         }
 
 

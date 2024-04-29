@@ -13,6 +13,7 @@ class Event(): RealmObject {
     var description: String = ""
     var date: String = ""
     var time: String = ""
+    var duration: String = ""
     var location: String = ""
     var attendeeIds: RealmList<String> = realmListOf()
 

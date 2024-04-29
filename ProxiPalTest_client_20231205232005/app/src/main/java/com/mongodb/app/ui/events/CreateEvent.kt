@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material3.AlertDialog
@@ -95,6 +96,8 @@ fun CreateEventBody(navigateBack: () -> Unit, eventsViewModel: EventsViewModel) 
     var location by remember { mutableStateOf("") }
     var time by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
+    var durationHours by remember { mutableStateOf("") }
+    var durationMinutes by remember { mutableStateOf("") }
 
     Box(
         modifier = Modifier
@@ -147,10 +150,41 @@ fun CreateEventBody(navigateBack: () -> Unit, eventsViewModel: EventsViewModel) 
                 date = showDatePicker(context)
                 time = showTimePicker(context)
             }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "Duration:",
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                OutlinedTextField(
+                    value = durationHours,
+                    onValueChange = { durationHours = it },
+//                    label = { Text("Hours") },
+                    modifier = Modifier.width(60.dp).height(18.dp)
+                )
+                Text(
+                    text = "h",
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(start = 4.dp, end = 8.dp)
+                )
+                OutlinedTextField(
+                    value = durationMinutes,
+                    onValueChange = { durationMinutes = it },
+//                    label = { Text("Minutes") },
+                    modifier = Modifier.width(60.dp).height(18.dp)
+                )
+                Text(
+                    text = "m",
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            }
+            
             TextButton(onClick = navigateBack) {
                 Text(text = "Cancel")
             }
-            TextButton(onClick = { eventsViewModel.addEvent(eventName, eventDescription, date, time, location) }) {
+            val duration = "$durationHours h $durationMinutes m"
+            TextButton(onClick = { eventsViewModel.addEvent(eventName, eventDescription, date, time, duration , location) }) {
                 Text(text = "Confirm")
             }
         }

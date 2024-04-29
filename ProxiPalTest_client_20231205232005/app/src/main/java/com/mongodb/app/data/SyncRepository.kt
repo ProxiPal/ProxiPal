@@ -91,10 +91,12 @@ interface SyncRepository {
      */
     suspend fun addTask(taskSummary: String)
 
-    suspend fun addEvent(eventName: String, eventDescription: String, eventDate: String, eventTime: String, eventLocation: String)
+    suspend fun addEvent(eventName: String, eventDescription: String, eventDate: String, eventTime: String, eventDuration: String, eventLocation: String)
 
     suspend fun getEventById(eventId: String): Flow<ResultsChange<Event>>
     suspend fun getMyEventList(): Flow<ResultsChange<Event>>
+
+    fun isEventOwner(event: Event): Boolean
 
     suspend fun getOtherEventList(): Flow<ResultsChange<Event>>
 
@@ -302,12 +304,13 @@ class RealmSyncRepository(
         }
     }
 
-    override suspend fun addEvent(eventName:String, eventDescription:String, eventDate:String, eventTime:String, eventLocation: String){
+    override suspend fun addEvent(eventName:String, eventDescription:String, eventDate:String, eventTime:String, eventDuration:String, eventLocation: String){
         val event= Event().apply{
             name = eventName
             description = eventDescription
             date = eventDate
             time = eventTime
+            duration = eventDuration
             location = eventLocation
             attendeeIds.add(currentUser.id)
             owner_id = currentUser.id
@@ -327,6 +330,10 @@ class RealmSyncRepository(
             .sort(Pair("date", Sort.ASCENDING))
             .asFlow()
     }
+
+    override fun isEventOwner(event: Event): Boolean = event.owner_id == currentUser.id
+
+
 
     override suspend fun getOtherEventList(): Flow<ResultsChange<Event>> {
         return realm.query<Event>("NOT attendeeIds CONTAINS $0", currentUser.id)
@@ -788,7 +795,7 @@ class MockRepository : SyncRepository {
     override suspend fun toggleIsComplete(task: Item) = Unit
     override suspend fun addTask(taskSummary: String) = Unit
 
-    override suspend fun addEvent(eventName: String, eventDescription: String, eventDate: String, eventTime: String, eventLocation: String) = Unit
+    override suspend fun addEvent(eventName: String, eventDescription: String, eventDate: String, eventTime: String, eventDuration:String, eventLocation: String) = Unit
 //    override suspend fun getEventById(eventId: String): RealmQuery<Event> {
 //        TODO("Not yet implemented")
 //    }
@@ -797,6 +804,10 @@ class MockRepository : SyncRepository {
     override suspend fun getMyEventList(): Flow<ResultsChange<Event>> = flowOf()
 
     override suspend fun getOtherEventList(): Flow<ResultsChange<Event>> = flowOf()
+
+    override fun isEventOwner(event: Event): Boolean {
+        return event.owner_id == MOCK_OWNER_ID_MINE
+    }
     override suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType) = Unit
 
     override suspend fun updateSubscriptionsEvents(subscriptionType: SubscriptionType) = Unit
