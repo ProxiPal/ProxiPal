@@ -14,14 +14,21 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MediumTopAppBar
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -36,25 +43,32 @@ import androidx.navigation.navArgument
 import com.mongodb.app.domain.Event
 import com.mongodb.app.navigation.Routes
 import com.mongodb.app.ui.theme.MyApplicationTheme
+import com.mongodb.app.ui.theme.Purple200
 import org.mongodb.kbson.ObjectId
 import org.mongodb.kbson.serialization.Bson
 
 
+
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventScreen(eventsViewModel: EventsViewModel, navigateToEvent: (String) -> Unit, navigateToCreateEvent: () -> Unit) {
     val myEventList by eventsViewModel.myEventList.collectAsState()
     val otherEventList by eventsViewModel.otherEventList.collectAsState()
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(text = "Events") },
+            androidx.compose.material3.TopAppBar(
+                title = { Text(text = "Events", color =Color.White) },
+                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Purple200),
                 actions = {
                     IconButton(
                         onClick = navigateToCreateEvent
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Create Event"
+                            contentDescription = "Create Event",
+                            tint = Color.White
+                            
                         )
                     }
                 }
@@ -96,11 +110,13 @@ fun EventScreen(eventsViewModel: EventsViewModel, navigateToEvent: (String) -> U
 //event card for each event
 @Composable
 fun EventCard(event: Event, onClick:()->Unit) {
-    Card(
+    OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(6.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)

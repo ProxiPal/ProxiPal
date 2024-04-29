@@ -284,14 +284,9 @@ fun showDatePicker(context: Context, initialDate: String=""): String {
     calendar.time = Date()
     var date by remember { mutableStateOf("") }
 
-    date = if (initialDate.isEmpty()) {
-        "${month + 1}/$day/$year"
-    } else{
-        initialDate
+    if (initialDate.isEmpty()) {
+        date = "${month + 1}/$day/$year"
     }
-    Log.d("initialDate", initialDate)
-    Log.d("date", date)
-
 
     val datePickerDialog = DatePickerDialog(
         context,
@@ -323,14 +318,14 @@ fun showDatePicker(context: Context, initialDate: String=""): String {
     }
     return date
 }
-
 @Composable
 fun showTimePicker(context: Context, initialTime:String = ""): String {
     val calendar = Calendar.getInstance()
     val hour = calendar[Calendar.HOUR_OF_DAY]
     val minute = calendar[Calendar.MINUTE]
-    var time by remember { mutableStateOf(initialTime) }
+    var time by remember{ mutableStateOf(initialTime)}
     var amPm by remember { mutableStateOf("") }
+
 
 //    if (time.isEmpty()) {
 //        time = "%02d:%02d".format(hour, minute)
@@ -341,8 +336,6 @@ fun showTimePicker(context: Context, initialTime:String = ""): String {
         amPm = if (hour >= 12) "PM" else "AM"
         time = "$hr:$min $amPm"
     }
-    Log.d("initialTime", initialTime)
-    Log.d("time", time)
 
     val timePickerDialog = TimePickerDialog(
         context,
@@ -357,6 +350,8 @@ fun showTimePicker(context: Context, initialTime:String = ""): String {
         minute,
         false
     )
+
+
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -379,6 +374,8 @@ fun showTimePicker(context: Context, initialTime:String = ""): String {
     }
     return time
 }
+
+
 
 @Composable
 @Preview

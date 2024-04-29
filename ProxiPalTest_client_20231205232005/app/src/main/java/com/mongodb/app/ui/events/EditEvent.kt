@@ -155,15 +155,17 @@ fun EditEventBody(
             val duration = "$durationHours h $durationMinutes m"
             TextButton(
                 onClick = {
-//                    eventsViewModel.updateEvent(
-//                        eventToEdit.id,
-//                        eventName,
-//                        eventDescription,
-//                        date,
-//                        time,
-//                        duration,
-//                        location
-//                    )
+                    if (eventId != null) {
+                        eventsViewModel.updateEvent(
+                            eventId,
+                            eventName,
+                            eventDescription,
+                            date,
+                            time,
+                            duration,
+                            location
+                        )
+                    }
                 }
             ) {
                 Text(text = "Save")

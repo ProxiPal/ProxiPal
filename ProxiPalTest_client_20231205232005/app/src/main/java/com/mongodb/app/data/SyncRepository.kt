@@ -93,10 +93,19 @@ interface SyncRepository {
 
     suspend fun addEvent(eventName: String, eventDescription: String, eventDate: String, eventTime: String, eventDuration: String, eventLocation: String)
 
+    suspend fun updateEvent(eventId:String, eventName:String, eventDescription:String, eventDate:String, eventTime:String, eventDuration:String, eventLocation:String)
+
+    suspend fun joinEvent(eventId:String)
+    suspend fun leaveEvent(eventId:String)
+
+    suspend fun addAnnouncement(eventId:String, newAnnouncement:String)
+    suspend fun getEventAttendees(eventId: String) : List<UserProfile>
     suspend fun getEventById(eventId: String): Flow<ResultsChange<Event>>
     suspend fun getMyEventList(): Flow<ResultsChange<Event>>
 
     fun isEventOwner(event: Event): Boolean
+
+    fun isEventAttendee(event:Event): Boolean
 
     suspend fun getOtherEventList(): Flow<ResultsChange<Event>>
 
@@ -320,6 +329,67 @@ class RealmSyncRepository(
         }
     }
 
+    override suspend fun updateEvent(eventId:String, eventName:String, eventDescription:String, eventDate:String, eventTime:String, eventDuration:String, eventLocation:String) {
+        val validIdString = eventId.removePrefix("BsonObjectId(").removeSuffix(")")
+        val objectId = ObjectId(validIdString)
+        realm.write{
+            val liveEvent = query<Event>("_id == $0", objectId).find().first()
+            liveEvent.name = eventName
+            liveEvent.description = eventDescription
+            liveEvent.date = eventDate
+            liveEvent.time = eventTime
+            liveEvent.duration = eventDuration
+            liveEvent.location = eventLocation
+        }
+
+    }
+
+    override suspend fun joinEvent(eventId:String){
+        val validIdString = eventId.removePrefix("BsonObjectId(").removeSuffix(")")
+        val objectId = ObjectId(validIdString)
+        realm.write{
+            val liveEvent = query<Event>("_id == $0", objectId).find().first()
+            liveEvent.attendeeIds.add(currentUser.id)
+        }
+    }
+
+    override suspend fun leaveEvent(eventId:String){
+        val validIdString = eventId.removePrefix("BsonObjectId(").removeSuffix(")")
+        val objectId = ObjectId(validIdString)
+        realm.write{
+            val liveEvent = query<Event>("_id == $0", objectId).find().first()
+            liveEvent.attendeeIds.remove(currentUser.id)
+        }
+    }
+
+    override suspend fun addAnnouncement(eventId:String, newAnnouncement:String){
+        val validIdString = eventId.removePrefix("BsonObjectId(").removeSuffix(")")
+        val objectId = ObjectId(validIdString)
+        realm.write{
+            val liveEvent = query<Event>("_id == $0", objectId).find().first()
+            liveEvent.announcement.add(newAnnouncement)
+        }
+    }
+
+
+    override suspend fun getEventAttendees(eventId: String) : List<UserProfile> {
+        val validIdString = eventId.removePrefix("BsonObjectId(").removeSuffix(")")
+        val objectId = ObjectId(validIdString)
+        val event = realm.query<Event>("_id == $0", objectId).find().first()
+
+        val attendeeIds = event.attendeeIds
+        val attendees = mutableListOf<UserProfile>()
+        attendeeIds.forEach { attendeeId ->
+            val attendeeProfile = realm.query<UserProfile>("ownerId== $0", attendeeId).find().firstOrNull()
+            if (attendeeProfile != null){
+                attendees.add(attendeeProfile)
+            }
+        }
+        return attendees
+    }
+
+    override fun isEventAttendee(event:Event): Boolean = event.attendeeIds.contains(currentUser.id)
+
     override suspend fun getEventById(eventId: String): Flow<ResultsChange<Event>> {
         val validIdString = eventId.removePrefix("BsonObjectId(").removeSuffix(")")
         val objectId = ObjectId(validIdString)
@@ -337,7 +407,7 @@ class RealmSyncRepository(
 
     override suspend fun getOtherEventList(): Flow<ResultsChange<Event>> {
         return realm.query<Event>("NOT attendeeIds CONTAINS $0", currentUser.id)
-            .sort(Pair("date", Sort.ASCENDING))
+            //.sort(Pair("date", Sort.ASCENDING))
             .asFlow()
     }
 
@@ -383,7 +453,7 @@ class RealmSyncRepository(
 
 
     private fun getQueryEvents(realm: Realm): RealmQuery<Event> {
-        return realm.query<Event> ("owner_id == $0", currentUser.id)
+        return realm.query<Event>()
     }
     // endregion Tasks/Items
 
@@ -799,6 +869,15 @@ class MockRepository : SyncRepository {
 //    override suspend fun getEventById(eventId: String): RealmQuery<Event> {
 //        TODO("Not yet implemented")
 //    }
+    override suspend fun updateEvent(eventId:String, eventName:String, eventDescription:String, eventDate:String, eventTime:String, eventDuration:String, eventLocation:String) {    }
+
+    override suspend fun joinEvent(eventId:String) {}
+
+    override suspend fun leaveEvent(eventId:String) {}
+
+    override suspend fun addAnnouncement(eventId:String, newAnnouncement:String) {}
+
+    override suspend fun getEventAttendees(eventId: String) : List<UserProfile> {return listOf()}
 
     override suspend fun getEventById(eventId: String): Flow<ResultsChange<Event>> = flowOf()
     override suspend fun getMyEventList(): Flow<ResultsChange<Event>> = flowOf()
@@ -808,6 +887,9 @@ class MockRepository : SyncRepository {
     override fun isEventOwner(event: Event): Boolean {
         return event.owner_id == MOCK_OWNER_ID_MINE
     }
+
+    override fun isEventAttendee(event:Event): Boolean
+    { return event.attendeeIds.contains(MOCK_OWNER_ID_MINE) }
     override suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType) = Unit
 
     override suspend fun updateSubscriptionsEvents(subscriptionType: SubscriptionType) = Unit

@@ -80,6 +80,8 @@ class EventsViewModel(
                 _otherEventList.value = resultChange.list
             }
         }
+
+
     }
     fun addEvent(name: String, description: String, date: String, time: String, duration:String, location: String) {
         CoroutineScope(Dispatchers.IO).launch {
@@ -96,6 +98,47 @@ class EventsViewModel(
                 .onFailure { Log.d("events", "not working") }
         }
     }
+    fun updateEvent(eventId:String, name: String, description: String, date: String, time: String, duration:String, location: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            runCatching {
+                repository.updateEvent(
+                    eventId = eventId,
+                    eventName = name,
+                    eventDescription = description,
+                    eventDate = date,
+                    eventTime = time,
+                    eventDuration = duration,
+                    eventLocation = location
+                )
+            }.onSuccess { Log.d("events", "working") }
+                .onFailure { Log.d("events", "not working") }
+        }
+    }
+
+    fun joinEvent(eventId:String){
+        CoroutineScope(Dispatchers.IO).launch {
+            runCatching {
+                repository.joinEvent(
+                    eventId = eventId
+                )
+            }.onSuccess { Log.d("events", "working") }
+                .onFailure { Log.d("events", "not working") }
+        }
+    }
+
+    fun leaveEvent(eventId:String){
+        CoroutineScope(Dispatchers.IO).launch {
+            runCatching {
+                repository.leaveEvent(
+                    eventId = eventId
+                )
+            }.onSuccess { Log.d("events", "working") }
+                .onFailure { Log.d("events", "not working") }
+        }
+    }
+
+    fun isCurrentUserEventAttendee(event: Event) : Boolean = repository.isEventAttendee(event)
+
 
     suspend fun getEventById(eventId: String?): Flow<Event?> {
         return if (eventId != null) {
@@ -105,10 +148,33 @@ class EventsViewModel(
         }
     }
 
-    fun isTaskMine(task: Item): Boolean = repository.isTaskMine(task)
+    fun getEventAttendeesList(eventId: String?): List<UserProfile> {
+        var attendeesList = emptyList<UserProfile>()
+        viewModelScope.launch{
+            runCatching {
+                if (eventId != null) {
+                    attendeesList = repository.getEventAttendees(eventId)
+                }
+            }
+        }
+        return attendeesList
+    }
     fun isCurrentUserEventOwner(event: Event): Boolean  = repository.isEventOwner(event)
 
-
+    fun addAnnouncement
+                (eventId:String?, announcement:String) {
+        CoroutineScope(Dispatchers.IO).launch{
+            runCatching {
+                if (eventId != null) {
+                    repository.addAnnouncement(
+                        eventId=eventId,
+                        newAnnouncement = announcement
+                    )
+                }
+            }.onSuccess { Log.d("events", "working") }
+                .onFailure { Log.d("events", "not working") }
+        }
+    }
 
 
 
