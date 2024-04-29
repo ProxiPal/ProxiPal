@@ -147,8 +147,8 @@ fun CreateEventBody(navigateBack: () -> Unit, eventsViewModel: EventsViewModel) 
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                date = showDatePicker(context)
-                time = showTimePicker(context)
+                date = showDatePicker(context, "")
+                time = showTimePicker(context, "")
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -275,17 +275,18 @@ fun LocationInputDialog(
 
 
 @Composable
-fun showDatePicker(context: Context): String {
+fun showDatePicker(context: Context, initialDate: String=""): String {
     val calendar = Calendar.getInstance()
     val year = calendar.get(Calendar.YEAR)
     val month = calendar.get(Calendar.MONTH)
     val day = calendar.get(Calendar.DAY_OF_MONTH)
     calendar.time = Date()
-    var date by remember { mutableStateOf("") }
+    var date by remember { mutableStateOf(initialDate) }
 
     if (date.isEmpty()) {
         date = "${month + 1}/$day/$year"
     }
+
 
     val datePickerDialog = DatePickerDialog(
         context,
@@ -319,11 +320,11 @@ fun showDatePicker(context: Context): String {
 }
 
 @Composable
-fun showTimePicker(context: Context): String {
+fun showTimePicker(context: Context, initialTime:String = ""): String {
     val calendar = Calendar.getInstance()
     val hour = calendar[Calendar.HOUR_OF_DAY]
     val minute = calendar[Calendar.MINUTE]
-    var time by remember { mutableStateOf("") }
+    var time by remember { mutableStateOf(initialTime) }
     var amPm by remember { mutableStateOf("") }
 
 //    if (time.isEmpty()) {

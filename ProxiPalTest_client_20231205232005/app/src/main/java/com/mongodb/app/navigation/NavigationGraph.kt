@@ -23,6 +23,7 @@ import com.mongodb.app.location.LocationPermissionScreen
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.tutorial.OnboardingScreen
 import com.mongodb.app.ui.events.CreateEventBody
+import com.mongodb.app.ui.events.EditEventBody
 import com.mongodb.app.ui.events.EventDetailsScreen
 import com.mongodb.app.ui.events.EventScreen
 import com.mongodb.app.ui.events.EventsViewModel
@@ -135,8 +136,18 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
         ) { backStackEntry ->
             val eventId = backStackEntry.arguments?.getString(Routes.EventDetails.EVENT_ID_KEY)
             EventDetailsScreen(eventId = eventId, eventsViewModel = eventsViewModel, navigateBack = { navController.popBackStack() }) {
+                eventId1  -> navController.navigate(Routes.EditEvent.createRoute(eventId1))
 
             }
+        }
+
+        composable(
+            route = Routes.EditEvent.route,
+            arguments = listOf(navArgument(Routes.EventDetails.EVENT_ID_KEY) {type = NavType.StringType})
+        ) {
+            backStackEntry ->
+            val eventId = backStackEntry.arguments?.getString(Routes.EditEvent.EVENT_ID_KEY)
+            EditEventBody(navigateBack = { navController.popBackStack() }, eventsViewModel = eventsViewModel, eventId =eventId )
         }
 
 

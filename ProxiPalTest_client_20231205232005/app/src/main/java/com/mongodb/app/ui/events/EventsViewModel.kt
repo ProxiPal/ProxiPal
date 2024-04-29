@@ -2,6 +2,9 @@ package com.mongodb.app.ui.events
 
 import android.os.Bundle
 import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -39,6 +42,32 @@ class EventsViewModel(
 
     private val _otherEventList = MutableStateFlow<List<Event>>(emptyList())
     val otherEventList: StateFlow<List<Event>> = _otherEventList.asStateFlow()
+
+    private val _eventName: MutableState<String> = mutableStateOf("")
+    private val _eventDescription: MutableState<String> = mutableStateOf("")
+    private val _eventTime: MutableState<String> = mutableStateOf("")
+    private val _eventDate: MutableState<String> = mutableStateOf("")
+    private val _eventLocation: MutableState<String> = mutableStateOf("")
+    private val _eventDuration: MutableState<String> = mutableStateOf("")
+
+
+    val eventName: State<String>
+        get() = _eventName
+
+    val eventDescription: State<String>
+        get() = _eventDescription
+
+    val eventTime: State<String>
+        get() = _eventTime
+
+    val eventDate: State<String>
+        get() = _eventDate
+
+    val eventLocation: State<String>
+        get() = _eventLocation
+
+    val eventDuration: State<String>
+        get() = _eventDuration
 
     init {
         viewModelScope.launch {

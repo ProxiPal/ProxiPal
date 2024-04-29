@@ -56,7 +56,7 @@ fun EventDetailsScreen(
     eventId: String?,
     eventsViewModel: EventsViewModel,
     navigateBack: () -> Unit,
-    navigateToEdit: () -> Unit
+    navigateToEdit: (String) -> Unit
 ) {
     var event by remember { mutableStateOf<Event?>(null) }
     var selectedTab by remember { mutableStateOf(0) }
@@ -79,7 +79,7 @@ fun EventDetailsScreen(
                 actions = {
                     event?.let { eventData ->
                         if (eventsViewModel.isCurrentUserEventOwner(eventData)) {
-                            IconButton(onClick = navigateToEdit) {
+                            IconButton(onClick = { navigateToEdit(event!!._id.toString()) }) {
                                 Icon(Icons.Default.Edit, contentDescription = "Edit")
                             }
                         }

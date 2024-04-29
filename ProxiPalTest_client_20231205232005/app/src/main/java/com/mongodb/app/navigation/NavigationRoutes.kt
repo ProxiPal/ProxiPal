@@ -23,5 +23,9 @@ sealed class Routes(val route: String) {
 
     object CreateEvent:Routes("createevent")
 
+    object EditEvent : Routes("event_edit/{eventId}") {
+        const val EVENT_ID_KEY = "eventId"
+        fun createRoute(eventId: String) = "event_edit/$eventId"
+    }
 
 }
