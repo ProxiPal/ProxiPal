@@ -5,9 +5,7 @@ import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
-import kotlin.random.Random
 import org.mongodb.kbson.ObjectId
-
 
 
 /*
@@ -53,9 +51,6 @@ class UserProfile : RealmObject {
     var selectedIndustries : RealmList<String> = realmListOf()
     var otherFilters : RealmList<String> = realmListOf()
 
-    var friends: RealmList<String> = realmListOf()
-
-
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
         if (other !is UserProfile) return false
@@ -76,7 +71,6 @@ class UserProfile : RealmObject {
         result = 31 * result + ownerId.hashCode()
         result = 31 * result + hasTextCensoringEnabled.hashCode()
         return result
-
     }
 
     /**
