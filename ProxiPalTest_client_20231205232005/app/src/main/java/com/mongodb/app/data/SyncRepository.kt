@@ -193,10 +193,10 @@ interface SyncRepository {
      * Returns all [UserProfile] objects
      */
     fun readUserProfiles(): Flow<ResultsChange<UserProfile>>
-  /*
-     * Returns a flow with the current user's profile.
-     * Modified by Marco Pacini to fix issues
-     */
+    /*
+       * Returns a flow with the current user's profile.
+       * Modified by Marco Pacini to fix issues
+       */
     fun getCurrentUserProfileList(): Flow<ResultsChange<UserProfile>>
 
     /**
@@ -243,8 +243,8 @@ interface SyncRepository {
 
 
     // endregion Functions
-  
-  
+
+
     suspend fun updateUserProfileInterests(interest:String)
 
     suspend fun updateUserProfileIndustries(industry:String)
@@ -515,7 +515,7 @@ class RealmSyncRepository(
             .sort(Pair("_id", Sort.ASCENDING))
             .asFlow()
     }
-            
+
     override fun getCurrentUserProfileList(): Flow<ResultsChange<UserProfile>> {
         return realm.query<UserProfile>("ownerId == $0", currentUser.id)
             .asFlow()
@@ -748,7 +748,7 @@ class RealmSyncRepository(
         val frozenObject = (if (frozenObjects.size > 0) frozenObjects.first() else null) ?: return
         realm.write {
             findLatest(frozenObject)?.let{
-                liveObject ->
+                    liveObject ->
                 liveObject.message = newMessage
                 liveObject.hasBeenUpdated = true
             }
@@ -886,8 +886,8 @@ class RealmSyncRepository(
         }
     }
     // endregion Conversations
-    
-    
+
+
     override suspend fun updateUserProfileInterests(interest:String) {
         // Queries inside write transaction are live objects
         // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
@@ -1121,6 +1121,7 @@ class RealmSyncRepository(
                 val senderProfile = query<UserProfile>("ownerId == $0", request.senderId).first().find()
                 val receiverProfile = query<UserProfile>("ownerId == $0", request.receiverFriendId).first().find()
                 if (senderProfile != null && receiverProfile != null) {
+                    // Update both users' friend lists
                     senderProfile.friends.add(receiverProfile.firstName + " " + receiverProfile.lastName)
                     receiverProfile.friends.add(senderProfile.firstName + " " + senderProfile.lastName)
                 } else {

@@ -201,21 +201,21 @@ class UserProfileViewModel(
      */
     private fun getUserProfile(){
         viewModelScope.launch {
-          /*
-            repository.readUserProfile(repository.getCurrentUserId())
-                .first{
-                    userProfileListState.clear()
-                    userProfileListState.addAll(it.list)
-                    // When trying to update a user profile that is not saved in the database
-                    // ... the SyncRepository will handle creating a new user profile before
-                    // ... making the updated changes
-                    if (it.list.size > 0){
-                        Log.i(
-                            TAG(),
-                            "UserProfileViewModel: Current user's profile = \"${it.list[0]._id}\""
-                        )
-                        setUserProfileVariables(it.list[0])
-                        */
+            /*
+              repository.readUserProfile(repository.getCurrentUserId())
+                  .first{
+                      userProfileListState.clear()
+                      userProfileListState.addAll(it.list)
+                      // When trying to update a user profile that is not saved in the database
+                      // ... the SyncRepository will handle creating a new user profile before
+                      // ... making the updated changes
+                      if (it.list.size > 0){
+                          Log.i(
+                              TAG(),
+                              "UserProfileViewModel: Current user's profile = \"${it.list[0]._id}\""
+                          )
+                          setUserProfileVariables(it.list[0])
+                          */
             repository.getCurrentUserProfileList()
                 .collect { event: ResultsChange<UserProfile> ->
                     when (event) {
@@ -292,16 +292,16 @@ class UserProfileViewModel(
                     true
                 }
         }
-      /*
-    }
+        /*
+      }
 
-    private fun setUserProfileVariables(userProfile: UserProfile){
-        _userProfileFirstName.value = userProfile.firstName
-        _userProfileLastName.value = userProfile.lastName
-        _userProfileBiography.value = userProfile.biography
-        _userProfileLatitude.value = userProfile.location?.latitude!!
-        _userProfileLongitude.value = userProfile.location?.longitude!!
-        */
+      private fun setUserProfileVariables(userProfile: UserProfile){
+          _userProfileFirstName.value = userProfile.firstName
+          _userProfileLastName.value = userProfile.lastName
+          _userProfileBiography.value = userProfile.biography
+          _userProfileLatitude.value = userProfile.location?.latitude!!
+          _userProfileLongitude.value = userProfile.location?.longitude!!
+          */
     }
 
 
@@ -576,11 +576,11 @@ class UserProfileViewModel(
 
     // update user interests' list
     private fun updateUserInterests(interest:String) {
-    viewModelScope.launch {
-        repository.updateUserProfileInterests(
-            interest = interest
-        )
-    }
+        viewModelScope.launch {
+            repository.updateUserProfileInterests(
+                interest = interest
+            )
+        }
     }
 
     //toggle user's industry
@@ -635,7 +635,7 @@ class UserProfileViewModel(
         runBlocking {
             app.currentUser?.delete()
         }
-        }
+    }
     fun readUserProfile(userId: String): Flow<UserProfile?> = flow {
         val realm = repository.getRealmInstance() ?: throw IllegalStateException("Realm instance is null")
         val query = repository.getQuerySpecificUserProfile(realm, userId)
@@ -662,8 +662,8 @@ class UserProfileViewModel(
     fun refreshFriendsList() {
         viewModelScope.launch {
             val currentUserId = repository.getCurrentUserId()
-            repository.readUserProfile(currentUserId).collect { userProfileResults ->
-                userProfileResults.list.firstOrNull()?.let { userProfile ->
+            repository.readUserProfiles().collect { profilesChange ->
+                profilesChange.list.find { it.ownerId == currentUserId }?.let { userProfile ->
                     _friendsList.value = userProfile.friends
                 }
             }
@@ -672,6 +672,3 @@ class UserProfileViewModel(
 
 
 }
-
-
-
