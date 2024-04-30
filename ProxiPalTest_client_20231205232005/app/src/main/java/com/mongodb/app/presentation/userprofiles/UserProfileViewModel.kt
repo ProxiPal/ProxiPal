@@ -659,6 +659,17 @@ class UserProfileViewModel(
         }
     }
 
+    fun refreshFriendsList() {
+        viewModelScope.launch {
+            val currentUserId = repository.getCurrentUserId()
+            repository.readUserProfile(currentUserId).collect { userProfileResults ->
+                userProfileResults.list.firstOrNull()?.let { userProfile ->
+                    _friendsList.value = userProfile.friends
+                }
+            }
+        }
+    }
+
 
 }
 

@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
 
+//ALL ADDED BY GEORGE FU
 data class FriendRequestUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
@@ -37,7 +38,7 @@ class FriendRequestViewModel(private val repository: SyncRepository) : ViewModel
         fetchFriendRequests()
         fetchUsers()
     }
-
+    //checks the database for friend requests
     private fun fetchFriendRequests() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
@@ -57,7 +58,7 @@ class FriendRequestViewModel(private val repository: SyncRepository) : ViewModel
             }
         }
     }
-
+    //fetches the users in the database
     private fun fetchUsers() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
@@ -75,13 +76,13 @@ class FriendRequestViewModel(private val repository: SyncRepository) : ViewModel
         }
     }
 
-
+    //this is what happens when the friend request button is clicked.
     fun onSendFriendRequestButtonClicked(receiverUserId: String) {
         viewModelScope.launch {
             if (receiverUserId.isEmpty()) {
                 _feedback.emit("Please enter a valid User ID.")
             } else {
-                val userExists = repository.isUserIdValid(receiverUserId) // This should be an existing method in your repository
+                val userExists = repository.isUserIdValid(receiverUserId)
                 if (!userExists) {
                     _feedback.emit("No user found with this ID.")
                 } else {
@@ -102,18 +103,21 @@ class FriendRequestViewModel(private val repository: SyncRepository) : ViewModel
 
 
 
-    fun respondToFriendRequest(requestId: String, accepted: Boolean) {
+    fun respondToFriendRequest(requestId: String, accepted: Boolean, updateFriendsList: () -> Unit) {
         viewModelScope.launch {
             if (accepted) {
                 repository.respondToFriendRequest(requestId, true).also {
                     // Add each user to the other's friend list upon acceptance
                     repository.addUserToFriendList(requestId)
+                    // After updating the friends list in the repository, update the UI
+                    updateFriendsList()
                 }
             } else {
                 repository.respondToFriendRequest(requestId, false)
             }
         }
     }
+
     fun clearFeedback() {
         viewModelScope.launch {
             _feedback.emit("")

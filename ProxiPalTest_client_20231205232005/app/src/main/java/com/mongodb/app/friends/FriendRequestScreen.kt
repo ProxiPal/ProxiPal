@@ -11,6 +11,7 @@ import com.mongodb.app.friends.FriendshipRequest
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 
 
+//ALL ADDED BY GEORGE FU
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FriendRequestScreen(friendRequestViewModel: FriendRequestViewModel, userProfileViewModel: UserProfileViewModel) {
@@ -66,13 +67,13 @@ fun FriendRequestItem(
     ) {
         Text(senderName, modifier = Modifier.weight(1f))
         Button(onClick = {
-            friendRequestViewModel.respondToFriendRequest(request._id, true)
+            friendRequestViewModel.respondToFriendRequest(request._id, true, userProfileViewModel::refreshFriendsList)
         }) {
             Text("Accept")
         }
         Spacer(modifier = Modifier.width(8.dp))
         Button(onClick = {
-            friendRequestViewModel.respondToFriendRequest(request._id, false)
+            friendRequestViewModel.respondToFriendRequest(request._id, false, {})
         }) {
             Text("Decline")
         }
