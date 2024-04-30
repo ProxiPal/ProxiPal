@@ -39,6 +39,7 @@ Contributions:
 - Kevin Kubota (all user profile UI, except for navigation between screens)
 - Marco Pacini (location related tasks only)
 - Vichet Chim (user's interest/industry)
+- George Fu (User's filter choices and adding friends)
  */
 
 
