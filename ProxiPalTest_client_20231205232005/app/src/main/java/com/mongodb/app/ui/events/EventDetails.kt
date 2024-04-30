@@ -225,10 +225,10 @@ fun EventDetailsScreen(
                         var showAnnouncementDialog by remember { mutableStateOf(false) }
                         var announcement by remember {mutableStateOf("")}
                         val announcementList = event!!.announcement
-                        Column(){
+                        Column(modifier = Modifier.fillMaxSize()){
                         LazyColumn(
-//                            modifier = Modifier.fillMaxSize(),
-                            modifier = Modifier.padding(paddingValues)
+                            modifier = Modifier.weight(1f),
+//                            contentPadding = PaddingValues(16.dp)
                         ){
                             items(announcementList) {    announcement ->
                                 AnnouncementCard(announcement = announcement)
