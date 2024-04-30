@@ -237,14 +237,16 @@ fun EventDetailsScreen(
                             }
 
                         }
-                        Button(
-                            onClick = {showAnnouncementDialog = true},
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                        )   {
-                            Text("New Announcement")
-                        }
+                            if (eventsViewModel.isCurrentUserEventOwner(event!!)){
+                            Button(
+                                onClick = {showAnnouncementDialog = true},
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            )   {
+                                Text("New Announcement")
+                                }
+                            }
                         }
 
                         if (showAnnouncementDialog) {
