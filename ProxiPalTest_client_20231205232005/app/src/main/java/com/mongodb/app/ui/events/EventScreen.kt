@@ -34,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHost
+import androidx.navigation.NavHostController
 
 
 import androidx.navigation.NavType
@@ -42,6 +43,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.mongodb.app.domain.Event
 import com.mongodb.app.navigation.Routes
+import com.mongodb.app.ui.components.ProxiPalBottomAppBar
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
 import org.mongodb.kbson.ObjectId
@@ -52,7 +54,7 @@ import org.mongodb.kbson.serialization.Bson
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EventScreen(eventsViewModel: EventsViewModel, navigateToEvent: (String) -> Unit, navigateToCreateEvent: () -> Unit) {
+fun EventScreen(eventsViewModel: EventsViewModel, navController: NavHostController, navigateToEvent: (String) -> Unit, navigateToCreateEvent: () -> Unit) {
     val myEventList by eventsViewModel.myEventList.collectAsState()
     val otherEventList by eventsViewModel.otherEventList.collectAsState()
     Scaffold(
@@ -73,6 +75,9 @@ fun EventScreen(eventsViewModel: EventsViewModel, navigateToEvent: (String) -> U
                     }
                 }
             )
+        },
+        bottomBar = {
+            ProxiPalBottomAppBar(navController)
         }
     ) { paddingValues ->
         LazyColumn(

@@ -118,6 +118,7 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
         composable(route = Routes.EventScreen.route) {
             EventScreen(
                 eventsViewModel = eventsViewModel,
+                navController = navController,
                 navigateToEvent = { eventId ->
                     navController.navigate(Routes.EventDetails.createRoute(eventId))
                 }

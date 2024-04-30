@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Place
@@ -98,11 +99,19 @@ fun ProxiPalBottomAppBar(navController: NavHostController) {
             selectedContentColor = Color.White
         )
         BottomNavigationItem(
+            icon={ Icon(Icons.Filled.Event, contentDescription = "Navigate to events")},
+            label = {Text("Events")},
+            selected = false,
+            onClick= {navController.navigate((Routes.EventScreen.route))},
+            selectedContentColor = Color.White
+        )
+        BottomNavigationItem(
             icon = { Icon(Icons.Filled.Favorite, contentDescription = "Navigate to friends") },
             label = { Text("Friends") },
             selected = false,
             onClick = { navController.navigate((Routes.EventScreen.route))   },
             selectedContentColor = Color.White
         )
+
     }
 }
