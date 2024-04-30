@@ -89,7 +89,7 @@ import java.util.Locale
 //}
 
 @Composable
-fun CreateEventBody(navigateBack: () -> Unit, eventsViewModel: EventsViewModel) {
+fun CreateEventBody(navigateBack: () -> Unit, eventsViewModel: EventsViewModel, onConfirm:() -> Unit) {
     var eventName by remember { mutableStateOf("") }
     var eventDescription by remember { mutableStateOf("") }
     val context = LocalContext.current
@@ -185,7 +185,7 @@ fun CreateEventBody(navigateBack: () -> Unit, eventsViewModel: EventsViewModel) 
                 Text(text = "Cancel")
             }
             val duration = "$durationHours h $durationMinutes m"
-            TextButton(onClick = { eventsViewModel.addEvent(eventName, eventDescription, date, time, duration , location) }) {
+            TextButton(onClick = { eventsViewModel.addEvent(eventName, eventDescription, date, time, duration , location); onConfirm()}) {
                 Text(text = "Confirm")
             }
         }
@@ -212,7 +212,7 @@ fun LocationInputDialog(
     var address1 by remember { mutableStateOf("") }
     var address2 by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("") }
-    var country by remember { mutableStateOf("") }
+    var state by remember { mutableStateOf("") }
     var zip by remember { mutableStateOf("") }
 
     AlertDialog(
@@ -241,9 +241,9 @@ fun LocationInputDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
-                    value = country,
-                    onValueChange = { country = it },
-                    label = { Text("Country") },
+                    value = state,
+                    onValueChange = { state = it },
+                    label = { Text("State") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
@@ -257,7 +257,7 @@ fun LocationInputDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    val fullAddress = "$address1, $address2, $city, $country, $zip"
+                    val fullAddress = "$address1, $address2, $city, $state, $zip"
                     onSaveLocation(fullAddress)
                 }
             ) {

@@ -129,6 +129,9 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
             CreateEventBody(
                 navigateBack = {navController.popBackStack()},
                 eventsViewModel = eventsViewModel)
+            {
+                navController.popBackStack()
+            }
         }
         composable(
             route = Routes.EventDetails.route,
@@ -148,6 +151,9 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
             backStackEntry ->
             val eventId = backStackEntry.arguments?.getString(Routes.EditEvent.EVENT_ID_KEY)
             EditEventBody(navigateBack = { navController.popBackStack() }, eventsViewModel = eventsViewModel, eventId =eventId )
+            {
+                navController.popBackStack()
+            }
         }
 
 

@@ -33,7 +33,8 @@ import com.mongodb.app.domain.Event
 fun EditEventBody(
     navigateBack: () -> Unit,
     eventsViewModel: EventsViewModel,
-    eventId: String?
+    eventId: String?,
+    onConfirm:() -> Unit
 ) {
 
     var event by remember { mutableStateOf<Event?>(null) }
@@ -166,7 +167,8 @@ fun EditEventBody(
                             location
                         )
                     }
-                }
+                ;
+                onConfirm()}
             ) {
                 Text(text = "Save")
             }
