@@ -17,4 +17,6 @@ sealed class Routes(val route: String) {
 
     object FriendListScreen : Routes("friendlist")
     object FriendRequestScreen : Routes("friendrequestscreen")
+    object MessagesScreen: Routes("messagesscreen")
+
 }

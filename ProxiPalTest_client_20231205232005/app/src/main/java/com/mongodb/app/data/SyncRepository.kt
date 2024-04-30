@@ -3,6 +3,7 @@ package com.mongodb.app.data
 import android.util.Log
 import com.mongodb.app.TAG
 import com.mongodb.app.app
+import com.mongodb.app.data.blocking_censoring.IBlockingCensoringRealm
 import com.mongodb.app.data.messages.IConversationsRealm
 import com.mongodb.app.data.messages.IMessagesRealm
 import com.mongodb.app.data.messages.SHOULD_PRINT_REALM_CONFIG_INFO
@@ -54,6 +55,7 @@ Contributions:
 - Kevin Kubota (Review #1: added functions relating to user profiles, see below)
 - Kevin Kubota (Review #3: Implemented functions for friend conversations and messages;
 ... This mainly includes everything in the regions named "Messages" and "Conversations")
+- Kevin Kubota (Review #4: Added database functions related to user blocking and text censoring)
 - Marco Pacini (location related tasks only)
  */
 
@@ -81,7 +83,9 @@ fun RealmList<String>.toObjectIdList(): RealmList<ObjectId>{
     val realmList: RealmList<ObjectId> = realmListOf()
     for (string in this){
         try{
-            realmList.add(string.toObjectId())
+            if (string.isNotBlank() && string.isNotEmpty()){
+                realmList.add(string.toObjectId())
+            }
         }
         catch (e: Exception){
             Log.e(
@@ -288,7 +292,7 @@ interface SyncRepository {
  */
 class RealmSyncRepository(
     onSyncError: (session: SyncSession, error: SyncException) -> Unit
-) : SyncRepository, IMessagesRealm, IConversationsRealm {
+) : SyncRepository, IMessagesRealm, IConversationsRealm, IBlockingCensoringRealm {
 
     private val realm: Realm
     private val config: SyncConfiguration
@@ -542,6 +546,10 @@ class RealmSyncRepository(
             // it will be updated by the connect screen
             this.location = CustomGeoPoint(0.0,0.0)
             //this.interests.add("")
+
+            // Initialize a newly created account with no users yet blocked
+            this.usersBlocked = realmListOf(String.empty)
+            this.hasTextCensoringEnabled = false
         }
         realm.write {
             copyToRealm(userProfile, updatePolicy = UpdatePolicy.ALL)
@@ -888,6 +896,46 @@ class RealmSyncRepository(
     // endregion Conversations
 
 
+
+    // region BlockingCensoring
+    override suspend fun updateUsersBlocked(userId: ObjectId, shouldBlock: Boolean) {
+        // Queries inside write transaction are live objects
+        // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
+        val frozenObject = getCurrentUserProfile(realm).find()
+        val frozenFirst = (if (frozenObject.size > 0) frozenObject.first() else null) ?: return
+        realm.write{
+            val liveObject = findLatest(frozenFirst)
+            // Use .toHexString() over .toString()
+            val userIdString = userId.toHexString()
+
+            if (liveObject != null){
+                // Block the user
+                if (shouldBlock && !liveObject.usersBlocked.contains(userIdString)){
+                    liveObject.usersBlocked.add(userIdString)
+                }
+                // Unblock the user
+                else if (!shouldBlock && liveObject.usersBlocked.contains(userIdString)){
+                    liveObject.usersBlocked.remove(userIdString)
+                }
+            }
+        }
+    }
+
+    override suspend fun updateTextCensoringState(userId: ObjectId) {
+        // Queries inside write transaction are live objects
+        // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()
+        val frozenObject = getCurrentUserProfile(realm).find()
+        val frozenFirst = (if (frozenObject.size > 0) frozenObject.first() else null) ?: return
+        realm.write{
+            val liveObject = findLatest(frozenFirst)
+            if (liveObject != null){
+                liveObject.hasTextCensoringEnabled = !liveObject.hasTextCensoringEnabled
+            }
+        }
+    }
+    // endregion BlockingCensoring
+    
+    
     override suspend fun updateUserProfileInterests(interest:String) {
         // Queries inside write transaction are live objects
         // Queries outside would be frozen objects and require a call to the mutable realm's .findLatest()

@@ -231,6 +231,7 @@ class UserProfileViewModel(
                                     // ... the SyncRepository will handle creating a new user profile before
                                     // ... making the updated changes
                                 }
+
                                 1 -> {
                                     // Load the saved profile details
                                     _userProfileFirstName.value = event.list[0].firstName
@@ -266,6 +267,11 @@ class UserProfileViewModel(
                                     _userProfileIndustries = event.list[0].industries.toList().toMutableList()
                                     _friendsList.value = event.list[0].friends.map { it.toString() }
 
+
+                                else -> {
+                                    // Load the saved profile details
+                                    setUserProfileVariables(event.list[0])
+
                                 }
                             }
                         }
@@ -293,6 +299,7 @@ class UserProfileViewModel(
                     true
                 }
         }
+
         /*
       }
 
@@ -305,6 +312,27 @@ class UserProfileViewModel(
           */
     }
 
+    }
+
+    /**
+     * Loads the specified user profile parameter
+     */
+    private fun setUserProfileVariables(userProfile: UserProfile){
+        _userProfileFirstName.value = userProfile.firstName
+        _userProfileLastName.value = userProfile.lastName
+        _userProfileBiography.value = userProfile.biography
+        _userProfileLatitude.value = userProfile.location?.latitude!!
+        _userProfileLongitude.value = userProfile.location?.longitude!!
+
+
+        _userProfileInstagramHandle.value = userProfile.instagramHandle
+        _userProfileTwitterHandle.value = userProfile.twitterHandle
+        _userProfileLinktreeHandle.value = userProfile.linktreeHandle
+        _userProfilelinkedinHandle.value = userProfile.linkedinHandle
+
+        _userProfileInterests = userProfile.interests.toList().toMutableList()
+        _userProfileIndustries = userProfile.industries.toList().toMutableList()
+    }
 
     /**
      * Updates the current user's user profile, if it exists

@@ -23,6 +23,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <application
         android:name=".TemplateApp"
         android:allowBackup="true"
@@ -38,6 +40,12 @@
             android:exported="false" />
         <activity
             android:name=".LanguageTranslationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AccessibilityActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DarkModeActivity"
             android:exported="false" />
         <activity
             android:name=".ComposeItemActivity"
@@ -65,6 +73,9 @@
             android:screenOrientation="fullSensor" />
         <activity
             android:name=".ui.messages.MessagesScreen"
+            android:screenOrientation="fullSensor" />
+        <activity
+            android:name=".ui.blocking_censoring.BlockUsersUI"
             android:screenOrientation="fullSensor" />
         <activity
             android:name=".ComposeLoginActivity"

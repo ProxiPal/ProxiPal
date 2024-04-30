@@ -21,9 +21,14 @@ import com.mongodb.app.home.ScreenSettings
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.ui.tasks.ConnectWithOthersScreen
 import com.mongodb.app.location.LocationPermissionScreen
+import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
+import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
+import com.mongodb.app.presentation.blocking_censoring.FetchCensoredTextThread
+import com.mongodb.app.presentation.messages.MessagesViewModel
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.screens.FriendRequestScreen
 import com.mongodb.app.tutorial.OnboardingScreen
+import com.mongodb.app.ui.messages.MessagesScreenLayout
 import com.mongodb.app.ui.userprofiles.IndustryScreen
 import com.mongodb.app.ui.userprofiles.InterestScreen
 
@@ -36,11 +41,35 @@ import io.realm.kotlin.mongodb.sync.SyncSession
 
 // Contribution: Marco Pacini
 // Vichet Chim - added first time login
+// - Kevin Kubota (updated navigation to user profile screen and set up navigation to messages screen)
+
+
 /**
  * Navigation graph for the different screens in Proxipal
  */
 @Composable
+
 fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: UserProfileViewModel, homeViewModel: HomeViewModel, friendRequestViewModel: FriendRequestViewModel) {
+
+fun NavigationGraph(
+    toolbarViewModel: ToolbarViewModel,
+    userProfileViewModel: UserProfileViewModel,
+    homeViewModel: HomeViewModel,
+    messagesViewModel: MessagesViewModel,
+    blockingViewModel: BlockingViewModel,
+    censoringViewModel: CensoringViewModel
+) {
+
+    // For messages screen navigation
+    // TODO These values are hardcoded for now
+    val usersInvolved = sortedSetOf(
+        // Gmail account
+        "65e96193c6e205c32b0915cc",
+        // Student account
+        "6570119696faac878ad696a5"
+    )
+
+
     var state by remember{ mutableStateOf(false)}
     val navController = rememberNavController()
     //APRIL
@@ -118,6 +147,7 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
         composable(Routes.AdvancedScreenSettings.route){
             AdvancedScreenSettings(navController)
         }
+
         composable(Routes.FriendListScreen.route) {
             Friendslist(
                 navController = navController,
@@ -127,6 +157,17 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
         }
         composable(Routes.FriendRequestScreen.route) {
             FriendRequestScreen(friendRequestViewModel = friendRequestViewModel,userProfileViewModel = userProfileViewModel)
+        }
+
+
+        composable(Routes.MessagesScreen.route){
+            MessagesScreenLayout(
+                navController = navController,
+                messagesViewModel = messagesViewModel,
+                conversationUsersInvolved = usersInvolved,
+                blockingViewModel = blockingViewModel,
+                censoringViewModel = censoringViewModel
+            )
         }
 
     }
