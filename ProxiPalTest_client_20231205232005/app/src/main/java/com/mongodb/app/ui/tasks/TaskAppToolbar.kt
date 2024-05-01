@@ -68,7 +68,8 @@ fun TaskAppToolbar(viewModel: ToolbarViewModel, navController: NavHostController
                 },
                 colors = IconButtonDefaults.iconButtonColors(contentColor = Color.White)
             ) {
-                Icon(Icons.Outlined.Settings, contentDescription = null)
+                Icon(Icons.Outlined.Settings,
+                    contentDescription = "settings screen icon button")
             }
 
             // Log out
