@@ -35,6 +35,7 @@ import com.mongodb.app.R
 import com.mongodb.app.AllowNotificationsActivity
 import com.mongodb.app.LanguageActivity
 import com.mongodb.app.PrivacyPolicyActivity
+import com.mongodb.app.domain.UserProfile
 import com.mongodb.app.navigation.Routes
 
 //This is the code to edit the settings screen.
@@ -81,7 +82,7 @@ fun ScreenSettings(navController: NavHostController) {
 
                 ){
                     SettingsItem("Profile Info") {
-                        Toast.makeText(context, "Profile Info clicked!", Toast.LENGTH_SHORT).show()
+                        navController.navigate(Routes.HomeScreen.route)
                     }
                     SettingsItem("Language") {
                         val intent = Intent(context, LanguageActivity::class.java)
