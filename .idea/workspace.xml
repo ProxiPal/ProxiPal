@@ -5,16 +5,6 @@
       <config />
     </shared>
     <layouts>
-      <layout url="file://$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/layout/activity_accessibility.xml">
-        <config>
-          <theme>@style/Theme.App</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/layout/activity_dark_mode.xml">
-        <config>
-          <theme>@style/Theme.App</theme>
-        </config>
-      </layout>
       <layout url="file://$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/layout/activity_language.xml">
         <config>
           <theme>@style/Theme.App</theme>
@@ -152,7 +142,6 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.cidr.known.project.marker": "true",
-    "android.gradle.sync.needed": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "git-widget-placeholder": "Accessibility",
