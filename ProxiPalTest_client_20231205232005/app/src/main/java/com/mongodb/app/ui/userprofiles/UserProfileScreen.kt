@@ -26,6 +26,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
@@ -49,6 +50,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
@@ -61,12 +63,10 @@ import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.userprofiles.USER_PROFILE_EDIT_MODE_MAXIMUM_LINE_AMOUNT
 import com.mongodb.app.data.userprofiles.USER_PROFILE_ROW_HEADER_WEIGHT
+import com.mongodb.app.friends.FriendRequestViewModel
 import com.mongodb.app.home.HomeScreen
 import com.mongodb.app.home.HomeViewModel
 import com.mongodb.app.navigation.NavigationGraph
-import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
-import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
-import com.mongodb.app.presentation.messages.MessagesViewModel
 import com.mongodb.app.presentation.tasks.ToolbarEvent
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.presentation.userprofiles.AddUserProfileEvent
@@ -115,31 +115,12 @@ class UserProfileScreen : ComponentActivity() {
         ToolbarViewModel.factory(repository, this)
     }
 
-    private val messagesViewModel: MessagesViewModel by viewModels {
-        MessagesViewModel.factory(
-            repository = repository,
-            messagesRealm = repository,
-            conversationsRealm = repository,
-            this
-        )
+    //april2
+    private val friendRequestViewModel: FriendRequestViewModel by viewModels {
+        FriendRequestViewModel.factory(repository)
     }
 
-    private val blockingViewModel: BlockingViewModel by viewModels {
-        BlockingViewModel.factory(
-            repository = repository,
-            blockingCensoringRealm = repository,
-            this
-        )
-    }
 
-    private val censoringViewModel: CensoringViewModel by viewModels {
-        CensoringViewModel.factory(
-            repository = repository,
-            blockingCensoringRealm = repository,
-            shouldReadCensoredTextOnInit = true,
-            this
-        )
-    }
 
     /*
     ===== Functions =====
@@ -196,27 +177,10 @@ class UserProfileScreen : ComponentActivity() {
         userProfileViewModel.updateRepository(
             newRepository = repository
         )
-        messagesViewModel.updateRepository(
-            newRepository = repository
-        )
-        blockingViewModel.updateRepositories(
-            newRepository = repository
-        )
-        censoringViewModel.updateRepositories(
-            newRepository = repository,
-            newBlockingCensoringRealm = repository
-        )
 
         setContent {
             MyApplicationTheme {
-                NavigationGraph(
-                    toolbarViewModel,
-                    userProfileViewModel,
-                    homeViewModel = HomeViewModel(repository = repository),
-                    messagesViewModel = messagesViewModel,
-                    blockingViewModel = blockingViewModel,
-                    censoringViewModel = censoringViewModel
-                )
+                NavigationGraph(toolbarViewModel, userProfileViewModel, homeViewModel = HomeViewModel(repository = repository), friendRequestViewModel = friendRequestViewModel)
             }
         }
     }
@@ -232,7 +196,6 @@ class UserProfileScreen : ComponentActivity() {
 /*
 ===== Functions =====
  */
-
 
 /**
  * Displays the entire user profile screen
@@ -648,3 +611,22 @@ fun DeleteConfirmationDialog(
         }
     }
 }
+
+
+
+
+
+
+//@Preview(showBackground = true)
+//@Composable
+//fun UserProfileEditButtonsPreview(){
+//    MyApplicationTheme {
+//        UserProfileEditButtons(
+//            isEditingUserProfile = true,
+//            onEditButtonClick = {},
+//            onDiscardEditButtonClick = {},
+//            onDeleteAccountConfirmed = {},
+//            toolbarViewModel =
+//        )
+//    }
+//}

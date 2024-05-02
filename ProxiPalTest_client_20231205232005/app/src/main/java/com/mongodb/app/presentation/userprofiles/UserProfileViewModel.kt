@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.flow
 
 
 /*
@@ -88,7 +89,10 @@ class UserProfileViewModel(
     private val _selectedIndustries = mutableStateOf<List<String>>(emptyList())
     private val _otherFilters = mutableStateOf<List<String>>(emptyList())
 
+    //april
+    private val _currentUserId = mutableStateOf("")
 
+    private val _friendsList = MutableStateFlow<List<String>>(emptyList())
 
     /*
     ===== Properties =====
@@ -148,11 +152,14 @@ class UserProfileViewModel(
     val selectedIndustries: State<List<String>> = _selectedIndustries
     val otherFilters: State<List<String>> = _otherFilters
 
+    val currentUserId: State<String> = _currentUserId
 
+    val friendsList: StateFlow<List<String>> = _friendsList.asStateFlow()
 
 
 
     init {
+        getCurrentUserId()
         getUserProfile()
         loadUserFilterSelections()
     }
@@ -194,21 +201,21 @@ class UserProfileViewModel(
      */
     private fun getUserProfile(){
         viewModelScope.launch {
-          /*
-            repository.readUserProfile(repository.getCurrentUserId())
-                .first{
-                    userProfileListState.clear()
-                    userProfileListState.addAll(it.list)
-                    // When trying to update a user profile that is not saved in the database
-                    // ... the SyncRepository will handle creating a new user profile before
-                    // ... making the updated changes
-                    if (it.list.size > 0){
-                        Log.i(
-                            TAG(),
-                            "UserProfileViewModel: Current user's profile = \"${it.list[0]._id}\""
-                        )
-                        setUserProfileVariables(it.list[0])
-                        */
+            /*
+              repository.readUserProfile(repository.getCurrentUserId())
+                  .first{
+                      userProfileListState.clear()
+                      userProfileListState.addAll(it.list)
+                      // When trying to update a user profile that is not saved in the database
+                      // ... the SyncRepository will handle creating a new user profile before
+                      // ... making the updated changes
+                      if (it.list.size > 0){
+                          Log.i(
+                              TAG(),
+                              "UserProfileViewModel: Current user's profile = \"${it.list[0]._id}\""
+                          )
+                          setUserProfileVariables(it.list[0])
+                          */
             repository.getCurrentUserProfileList()
                 .collect { event: ResultsChange<UserProfile> ->
                     when (event) {
@@ -223,13 +230,46 @@ class UserProfileViewModel(
                                     // ... the SyncRepository will handle creating a new user profile before
                                     // ... making the updated changes
                                 }
+                                1 -> {
+                                    // Load the saved profile details
+                                    _userProfileFirstName.value = event.list[0].firstName
+                                    _userProfileLastName.value = event.list[0].lastName
+                                    _userProfileBiography.value = event.list[0].biography
+                                    _userProfileLatitude.value = event.list[0].location?.latitude!!
+                                    _userProfileLongitude.value = event.list[0].location?.longitude!!
+
+                                    _userProfileInstagramHandle.value = event.list[0].instagramHandle
+                                    _userProfileTwitterHandle.value = event.list[0].twitterHandle
+                                    _userProfileLinktreeHandle.value = event.list[0].linktreeHandle
+                                    _userProfilelinkedinHandle.value = event.list[0].linkedinHandle
+
+                                    _userProfileInterests = event.list[0].interests.toList().toMutableList()
+                                    _userProfileIndustries = event.list[0].industries.toList().toMutableList()
+                                    _friendsList.value = event.list[0].friends.map { it.toString() }
+
+                                }
                                 else -> {
                                     // Load the saved profile details
-                                    setUserProfileVariables(event.list[0])
+                                    _userProfileFirstName.value = event.list[0].firstName
+                                    _userProfileLastName.value = event.list[0].lastName
+                                    _userProfileBiography.value = event.list[0].biography
+                                    _userProfileLatitude.value = event.list[0].location?.latitude!!
+                                    _userProfileLongitude.value = event.list[0].location?.longitude!!
+
+                                    _userProfileInstagramHandle.value = event.list[0].instagramHandle
+                                    _userProfileTwitterHandle.value = event.list[0].twitterHandle
+                                    _userProfileLinktreeHandle.value = event.list[0].linktreeHandle
+                                    _userProfilelinkedinHandle.value = event.list[0].linkedinHandle
+
+                                    _userProfileInterests = event.list[0].interests.toList().toMutableList()
+                                    _userProfileIndustries = event.list[0].industries.toList().toMutableList()
+                                    _friendsList.value = event.list[0].friends.map { it.toString() }
+
                                 }
                             }
                         }
                         is UpdatedResults -> {
+                            //april
                             if (event.deletions.isNotEmpty() && userProfileListState.isNotEmpty()) {
                                 event.deletions.reversed().forEach {
                                     userProfileListState.removeAt(it)
@@ -252,26 +292,18 @@ class UserProfileViewModel(
                     true
                 }
         }
+        /*
+      }
+
+      private fun setUserProfileVariables(userProfile: UserProfile){
+          _userProfileFirstName.value = userProfile.firstName
+          _userProfileLastName.value = userProfile.lastName
+          _userProfileBiography.value = userProfile.biography
+          _userProfileLatitude.value = userProfile.location?.latitude!!
+          _userProfileLongitude.value = userProfile.location?.longitude!!
+          */
     }
 
-    /**
-     * Loads the specified user profile parameter
-     */
-    private fun setUserProfileVariables(userProfile: UserProfile){
-        _userProfileFirstName.value = userProfile.firstName
-        _userProfileLastName.value = userProfile.lastName
-        _userProfileBiography.value = userProfile.biography
-        _userProfileLatitude.value = userProfile.location?.latitude!!
-        _userProfileLongitude.value = userProfile.location?.longitude!!
-
-        _userProfileInstagramHandle.value = userProfile.instagramHandle
-        _userProfileTwitterHandle.value = userProfile.twitterHandle
-        _userProfileLinktreeHandle.value = userProfile.linktreeHandle
-        _userProfilelinkedinHandle.value = userProfile.linkedinHandle
-
-        _userProfileInterests = userProfile.interests.toList().toMutableList()
-        _userProfileIndustries = userProfile.industries.toList().toMutableList()
-    }
 
     /**
      * Updates the current user's user profile, if it exists
@@ -544,11 +576,11 @@ class UserProfileViewModel(
 
     // update user interests' list
     private fun updateUserInterests(interest:String) {
-    viewModelScope.launch {
-        repository.updateUserProfileInterests(
-            interest = interest
-        )
-    }
+        viewModelScope.launch {
+            repository.updateUserProfileInterests(
+                interest = interest
+            )
+        }
     }
 
     //toggle user's industry
@@ -603,8 +635,40 @@ class UserProfileViewModel(
         runBlocking {
             app.currentUser?.delete()
         }
+    }
+    fun readUserProfile(userId: String): Flow<UserProfile?> = flow {
+        val realm = repository.getRealmInstance() ?: throw IllegalStateException("Realm instance is null")
+        val query = repository.getQuerySpecificUserProfile(realm, userId)
+        emit(query.find().firstOrNull())
+    }
+    private fun getCurrentUserId() {
+        viewModelScope.launch {
+            _currentUserId.value = repository.getCurrentUserId()
+        }
+    }
+
+    fun removeFriend(friendUserId: String) {
+        viewModelScope.launch {
+            val currentUserId = repository.getCurrentUserId()
+
+            // Use the updated repository method
+            repository.removeFriendBidirectional(currentUserId, friendUserId)
+
+            // Update UI state if necessary
+            _friendsList.value = _friendsList.value.filterNot { it == friendUserId }
+        }
+    }
+
+    fun refreshFriendsList() {
+        viewModelScope.launch {
+            val currentUserId = repository.getCurrentUserId()
+            repository.readUserProfiles().collect { profilesChange ->
+                profilesChange.list.find { it.ownerId == currentUserId }?.let { userProfile ->
+                    _friendsList.value = userProfile.friends
+                }
+            }
         }
     }
 
 
-
+}
