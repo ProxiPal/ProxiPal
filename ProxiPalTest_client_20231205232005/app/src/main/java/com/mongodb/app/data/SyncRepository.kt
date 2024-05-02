@@ -313,6 +313,10 @@ class RealmSyncRepository(
         }
     }
 
+    // Vichet Chim - Database functions for Events
+    private fun getValidIdString(idString:String): String {
+        return idString.removePrefix("BsonObjectId(").removeSuffix(")")
+    }
     override suspend fun addEvent(eventName:String, eventDescription:String, eventDate:String, eventTime:String, eventDuration:String, eventLocation: String){
         val event= Event().apply{
             name = eventName
@@ -329,9 +333,9 @@ class RealmSyncRepository(
         }
     }
 
+
     override suspend fun updateEvent(eventId:String, eventName:String, eventDescription:String, eventDate:String, eventTime:String, eventDuration:String, eventLocation:String) {
-        val validIdString = eventId.removePrefix("BsonObjectId(").removeSuffix(")")
-        val objectId = ObjectId(validIdString)
+        val objectId = ObjectId(getValidIdString(eventId))
         realm.write{
             val liveEvent = query<Event>("_id == $0", objectId).find().first()
             liveEvent.name = eventName
@@ -345,8 +349,7 @@ class RealmSyncRepository(
     }
 
     override suspend fun joinEvent(eventId:String){
-        val validIdString = eventId.removePrefix("BsonObjectId(").removeSuffix(")")
-        val objectId = ObjectId(validIdString)
+        val objectId = ObjectId(getValidIdString(eventId))
         realm.write{
             val liveEvent = query<Event>("_id == $0", objectId).find().first()
             liveEvent.attendeeIds.add(currentUser.id)
@@ -354,8 +357,7 @@ class RealmSyncRepository(
     }
 
     override suspend fun leaveEvent(eventId:String){
-        val validIdString = eventId.removePrefix("BsonObjectId(").removeSuffix(")")
-        val objectId = ObjectId(validIdString)
+        val objectId = ObjectId(getValidIdString(eventId))
         realm.write{
             val liveEvent = query<Event>("_id == $0", objectId).find().first()
             liveEvent.attendeeIds.remove(currentUser.id)
@@ -363,8 +365,7 @@ class RealmSyncRepository(
     }
 
     override suspend fun addAnnouncement(eventId:String, newAnnouncement:String){
-        val validIdString = eventId.removePrefix("BsonObjectId(").removeSuffix(")")
-        val objectId = ObjectId(validIdString)
+        val objectId = ObjectId(getValidIdString(eventId))
         realm.write{
             val liveEvent = query<Event>("_id == $0", objectId).find().first()
             liveEvent.announcement.add(newAnnouncement)
@@ -373,8 +374,7 @@ class RealmSyncRepository(
 
 
     override suspend fun getEventAttendees(eventId: String) : List<UserProfile> {
-        val validIdString = eventId.removePrefix("BsonObjectId(").removeSuffix(")")
-        val objectId = ObjectId(validIdString)
+        val objectId = ObjectId(getValidIdString(eventId))
         val event = realm.query<Event>("_id == $0", objectId).find().first()
 
         val attendeeIds = event.attendeeIds
@@ -391,8 +391,7 @@ class RealmSyncRepository(
     override fun isEventAttendee(event:Event): Boolean = event.attendeeIds.contains(currentUser.id)
 
     override suspend fun getEventById(eventId: String): Flow<ResultsChange<Event>> {
-        val validIdString = eventId.removePrefix("BsonObjectId(").removeSuffix(")")
-        val objectId = ObjectId(validIdString)
+        val objectId = ObjectId(getValidIdString(eventId))
         return realm.query<Event>("_id == $0", objectId).asFlow()
     }
     override suspend fun getMyEventList(): Flow<ResultsChange<Event>> {
@@ -410,6 +409,8 @@ class RealmSyncRepository(
             //.sort(Pair("date", Sort.ASCENDING))
             .asFlow()
     }
+
+    // End of database functions for Events
 
 
     override suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType) {

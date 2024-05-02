@@ -100,7 +100,7 @@ fun ProxiPalBottomAppBar(navController: NavHostController) {
         )
         BottomNavigationItem(
             icon={ Icon(Icons.Filled.Event, contentDescription = "Navigate to events")},
-            label = {Text("Events")},
+            label = {Text(text = stringResource(id = R.string.events))},
             selected = false,
             onClick= {navController.navigate((Routes.EventScreen.route))},
             selectedContentColor = Color.White
@@ -109,7 +109,7 @@ fun ProxiPalBottomAppBar(navController: NavHostController) {
             icon = { Icon(Icons.Filled.Favorite, contentDescription = "Navigate to friends") },
             label = { Text("Friends") },
             selected = false,
-            onClick = { navController.navigate((Routes.EventScreen.route))   },
+            onClick = {    },
             selectedContentColor = Color.White
         )
 

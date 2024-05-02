@@ -47,6 +47,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -55,10 +56,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mongodb.app.R
 import com.mongodb.app.domain.Event
 import com.mongodb.app.location.UserProfileCard
 import com.mongodb.app.ui.theme.MyApplicationTheme
@@ -73,7 +76,7 @@ fun EventDetailsScreen(
     navigateToEdit: (String) -> Unit
 ) {
     var event by remember { mutableStateOf<Event?>(null) }
-    var selectedTab by remember { mutableStateOf(0) }
+    var selectedTab by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(eventId) {
         eventId?.let {
@@ -84,7 +87,7 @@ fun EventDetailsScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(text = "Event Details", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
+                title = { Text(text = stringResource(id = R.string.event_details), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
                 navigationIcon = {
                     IconButton(onClick = navigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -116,19 +119,19 @@ fun EventDetailsScreen(
                 }
             ) {
                 Tab(
-                    text = { Text("Details") },
+                    text = { Text(text = stringResource(id = R.string.details)) },
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 }
                 )
                 event?.let {eventData->
                     if (eventsViewModel.isCurrentUserEventAttendee(eventData)){
                         Tab(
-                            text = { Text("Announcement") },
+                            text = { Text(text = stringResource(id = R.string.announcement)) },
                             selected = selectedTab == 1,
                             onClick = { selectedTab = 1 }
                         )
                         Tab(
-                            text = { Text("Attendees") },
+                            text = { Text(text = stringResource(id = R.string.attendees)) },
                             selected = selectedTab == 2,
                             onClick = { selectedTab = 2 }
                         )
@@ -209,7 +212,7 @@ fun EventDetailsScreen(
                                 .fillMaxWidth()
                                 .padding(16.dp)
                         ) {
-                            Text("Leave Event")
+                            Text(text = stringResource(id = R.string.leave_event))
                         }
                         } else{
                             Button(
@@ -218,7 +221,7 @@ fun EventDetailsScreen(
                                     .fillMaxWidth()
                                     .padding(16.dp)
                             ) {
-                                Text("Join Event")
+                                Text(text = stringResource(id = R.string.join_event))
                             }
                         }
 
@@ -245,7 +248,7 @@ fun EventDetailsScreen(
                                     .fillMaxWidth()
                                     .padding(16.dp)
                             )   {
-                                Text("New Announcement")
+                                Text(text = stringResource(id = R.string.new_announcement))
                                 }
                             }
                         }
@@ -272,7 +275,7 @@ fun EventDetailsScreen(
                         val attendeesList = eventsViewModel.getEventAttendeesList(eventId)
                         // Display attendees
                         Text(
-                            text = "Attendees",
+                            text = stringResource(id = R.string.attendees),
                             modifier = Modifier.padding(16.dp)
                         )
                         LazyColumn(
@@ -291,7 +294,7 @@ fun EventDetailsScreen(
             } ?: run {
                 // Display a loading state or error message if the event data is not available
                 Text(
-                    text = "Loading event...",
+                    text = stringResource(id = R.string.loading_event),
                     modifier = Modifier.padding(16.dp)
                 )
             }
@@ -327,7 +330,7 @@ fun newAnnouncementDialog(
     var announcement by remember{ mutableStateOf("")}
     AlertDialog(
         onDismissRequest = onCancel,
-        title = {Text(text = "Enter Announcement")},
+        title = {Text(text = stringResource(id = R.string.enter_announcement))},
         text = {
             Column(
                 modifier = Modifier.padding(horizontal =20.dp)
@@ -337,7 +340,7 @@ fun newAnnouncementDialog(
                     modifier  = Modifier
                         .fillMaxWidth()
                         .heightIn(min = 150.dp),
-                    label = {Text("Announcement")},
+                    label = {Text(text = stringResource(id = R.string.announcement))},
                     maxLines = 5)
             }
         },
@@ -345,14 +348,14 @@ fun newAnnouncementDialog(
             Button(
                 onClick = {onConfirmation(announcement)})
             {
-                Text(text = "Confirm")
+                Text(text = stringResource(id = R.string.confirm))
             }
                 },
         dismissButton = {
             Button(
                 onClick = onCancel
             ) {
-                Text("Cancel")
+                Text(text = stringResource(id = R.string.cancel))
             }
         }
             )
@@ -362,75 +365,6 @@ fun newAnnouncementDialog(
 
 
 
-//@Composable
-//fun LocationInputDialog(
-//    onSaveLocation: (String) -> Unit,
-//    onCancel: () -> Unit
-//) {
-//    var address1 by remember { mutableStateOf("") }
-//    var address2 by remember { mutableStateOf("") }
-//    var city by remember { mutableStateOf("") }
-//    var country by remember { mutableStateOf("") }
-//    var zip by remember { mutableStateOf("") }
-//
-//    AlertDialog(
-//        onDismissRequest = onCancel,
-//        title = {
-//            Text(text = "Enter Location")
-//        },
-//        text = {
-//            Column {
-//                OutlinedTextField(
-//                    value = address1,
-//                    onValueChange = { address1 = it },
-//                    label = { Text("Address Line 1") },
-//                    modifier = Modifier.fillMaxWidth()
-//                )
-//                OutlinedTextField(
-//                    value = address2,
-//                    onValueChange = { address2 = it },
-//                    label = { Text("Address Line 2") },
-//                    modifier = Modifier.fillMaxWidth()
-//                )
-//                OutlinedTextField(
-//                    value = city,
-//                    onValueChange = { city = it },
-//                    label = { Text("City") },
-//                    modifier = Modifier.fillMaxWidth()
-//                )
-//                OutlinedTextField(
-//                    value = country,
-//                    onValueChange = { country = it },
-//                    label = { Text("Country") },
-//                    modifier = Modifier.fillMaxWidth()
-//                )
-//                OutlinedTextField(
-//                    value = zip,
-//                    onValueChange = { zip = it },
-//                    label = { Text("ZIP Code") },
-//                    modifier = Modifier.fillMaxWidth()
-//                )
-//            }
-//        },
-//        confirmButton = {
-//            TextButton(
-//                onClick = {
-//                    val fullAddress = "$address1, $address2, $city, $country, $zip"
-//                    onSaveLocation(fullAddress)
-//                }
-//            ) {
-//                Text(text = "Save")
-//            }
-//        },
-//        dismissButton = {
-//            TextButton(
-//                onClick = onCancel
-//            ) {
-//                Text(text = "Cancel")
-//            }
-//        }
-//    )
-//}
 
 
 //@Composable

@@ -25,8 +25,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mongodb.app.R
 import com.mongodb.app.domain.Event
 
 @Composable
@@ -81,17 +83,17 @@ fun EditEventBody(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "Edit Event", fontSize = 30.sp)
+            Text(text = stringResource(id = R.string.edit_event), fontSize = 30.sp)
             OutlinedTextField(
                 value = eventName,
                 onValueChange = { eventName = it },
-                label = { Text(text = "Event Name") },
+                label = { Text(text = stringResource(id = R.string.event_name)) },
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = eventDescription,
                 onValueChange = { eventDescription = it },
-                label = { Text(text = "Event Description") },
+                label = { Text(text = stringResource(id = R.string.event_description)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 150.dp),
@@ -102,7 +104,7 @@ fun EditEventBody(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Location:",
+                    text = stringResource(id = R.string.location),
                     fontSize = 18.sp,
                 )
                 TextButton(
@@ -124,7 +126,7 @@ fun EditEventBody(
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Duration:",
+                    text = stringResource(id = R.string.duration),
                     fontSize = 18.sp,
                     modifier = Modifier.padding(end = 8.dp)
                 )
@@ -134,7 +136,7 @@ fun EditEventBody(
                     modifier = Modifier.width(60.dp).height(50.dp)
                 )
                 Text(
-                    text = "h",
+                    text = stringResource(id = R.string.hour),
                     fontSize = 18.sp,
                     modifier = Modifier.padding(start = 4.dp, end = 8.dp)
                 )
@@ -144,14 +146,14 @@ fun EditEventBody(
                     modifier = Modifier.width(60.dp).height(50.dp)
                 )
                 Text(
-                    text = "m",
+                    text = stringResource(id = R.string.minute),
                     fontSize = 18.sp,
                     modifier = Modifier.padding(start = 4.dp)
                 )
             }
 
             TextButton(onClick = navigateBack) {
-                Text(text = "Cancel")
+                Text(text = stringResource(id = R.string.cancel))
             }
             val duration = "$durationHours h $durationMinutes m"
             TextButton(
@@ -170,7 +172,7 @@ fun EditEventBody(
                 ;
                 onConfirm()}
             ) {
-                Text(text = "Save")
+                Text(text = stringResource(id = R.string.save))
             }
         }
     }

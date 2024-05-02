@@ -29,9 +29,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.navigation.NavController
 import androidx.navigation.NavHost
 import androidx.navigation.NavHostController
@@ -41,6 +43,7 @@ import androidx.navigation.NavType
 
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.mongodb.app.R
 import com.mongodb.app.domain.Event
 import com.mongodb.app.navigation.Routes
 import com.mongodb.app.ui.components.ProxiPalBottomAppBar
@@ -60,7 +63,7 @@ fun EventScreen(eventsViewModel: EventsViewModel, navController: NavHostControll
     Scaffold(
         topBar = {
             androidx.compose.material3.TopAppBar(
-                title = { Text(text = "Events", color =Color.White) },
+                title = { Text(text = stringResource(id = R.string.events), color =Color.White) },
                 colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Purple200),
                 actions = {
                     IconButton(
@@ -85,7 +88,7 @@ fun EventScreen(eventsViewModel: EventsViewModel, navController: NavHostControll
         ) {
             item {
                 Text(
-                    text = "My Events",
+                    text = stringResource(id = R.string.my_events),
                     modifier = Modifier.padding(16.dp)
                 )
             }
@@ -99,7 +102,7 @@ fun EventScreen(eventsViewModel: EventsViewModel, navController: NavHostControll
             }
             item {
                 Text(
-                    text = "Other Events",
+                    text = stringResource(id = R.string.other_events),
                     modifier = Modifier.padding(16.dp)
                 )
             }

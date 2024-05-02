@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,47 +47,12 @@ import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 import com.google.android.libraries.places.api.model.TypeFilter
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
+import com.mongodb.app.R
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-//@Composable
-//fun CreateEventBody() {
-//    var eventName by remember { mutableStateOf("") }
-//    var eventDescription by remember { mutableStateOf("") }
-//    val context = LocalContext.current
-//
-//    Column(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .padding(25.dp),
-//        verticalArrangement = Arrangement.spacedBy(10.dp),
-//        horizontalAlignment = Alignment.CenterHorizontally
-//    ) {
-//        Text(text = "Create Event", fontSize = 30.sp)
-//        OutlinedTextField(
-//            value = eventName,
-//            onValueChange = { eventName = it },
-//            label = { Text(text = "Event Name") },
-//            modifier=Modifier.fillMaxWidth()
-//        )
-//        OutlinedTextField(
-//            value = eventDescription,
-//            onValueChange = { eventDescription = it },
-//            label = { Text(text = "Event Description") },
-//            modifier=Modifier.fillMaxWidth()
-//        )
-//        Text(text = "Location")
-//        Row(verticalAlignment = Alignment.CenterVertically) {
-//            showDatePicker(context)
-//            showTimePicker(context)
-//        }
-//        TextButton(onClick = { /*TODO*/ }) {
-//            Text(text = "Cancel")
-//        }
-//    }
-//}
 
 @Composable
 fun CreateEventBody(navigateBack: () -> Unit, eventsViewModel: EventsViewModel, onConfirm:() -> Unit) {
@@ -112,17 +78,17 @@ fun CreateEventBody(navigateBack: () -> Unit, eventsViewModel: EventsViewModel, 
             verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "Create Event", fontSize = 30.sp)
+            Text(text = stringResource(id = R.string.create_event), fontSize = 30.sp)
             OutlinedTextField(
                 value = eventName,
                 onValueChange = { eventName = it },
-                label = { Text(text = "Event Name") },
+                label = { Text(text = stringResource(id = R.string.event_name)) },
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = eventDescription,
                 onValueChange = { eventDescription = it },
-                label = { Text(text = "Event Description") },
+                label = { Text(text = stringResource(id = R.string.event_description)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 150.dp),
@@ -133,7 +99,7 @@ fun CreateEventBody(navigateBack: () -> Unit, eventsViewModel: EventsViewModel, 
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Location:",
+                    text = stringResource(id = R.string.location),
                     fontSize = 18.sp,
                 )
                 TextButton(
@@ -142,7 +108,7 @@ fun CreateEventBody(navigateBack: () -> Unit, eventsViewModel: EventsViewModel, 
                     },
                 ) {
                     Text(
-                        text = if (location.isBlank()) "Select Location" else location,
+                        text = if (location.isBlank()) stringResource(id = R.string.select_location) else location,
                         fontSize = 18.sp
                     )
                 }
@@ -153,7 +119,7 @@ fun CreateEventBody(navigateBack: () -> Unit, eventsViewModel: EventsViewModel, 
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Duration:",
+                    text = stringResource(id = R.string.duration),
                     fontSize = 18.sp,
                     modifier = Modifier.padding(end = 8.dp)
                 )
@@ -164,7 +130,7 @@ fun CreateEventBody(navigateBack: () -> Unit, eventsViewModel: EventsViewModel, 
                     modifier = Modifier.width(60.dp).height(50.dp)
                 )
                 Text(
-                    text = "h",
+                    text = stringResource(id = R.string.hour),
                     fontSize = 18.sp,
                     modifier = Modifier.padding(start = 4.dp, end = 8.dp)
                 )
@@ -175,18 +141,18 @@ fun CreateEventBody(navigateBack: () -> Unit, eventsViewModel: EventsViewModel, 
                     modifier = Modifier.width(60.dp).height(50.dp)
                 )
                 Text(
-                    text = "m",
+                    text = stringResource(id = R.string.minute),
                     fontSize = 18.sp,
                     modifier = Modifier.padding(start = 4.dp)
                 )
             }
             
             TextButton(onClick = navigateBack) {
-                Text(text = "Cancel")
+                Text(text = stringResource(id = R.string.cancel))
             }
             val duration = "$durationHours h $durationMinutes m"
             TextButton(onClick = { eventsViewModel.addEvent(eventName, eventDescription, date, time, duration , location); onConfirm()}) {
-                Text(text = "Confirm")
+                Text(text = stringResource(id = R.string.confirm))
             }
         }
     }
@@ -218,38 +184,38 @@ fun LocationInputDialog(
     AlertDialog(
         onDismissRequest = onCancel,
         title = {
-            Text(text = "Enter Location")
+            Text(text = stringResource(id = R.string.enter_location))
         },
         text = {
             Column {
                 OutlinedTextField(
                     value = address1,
                     onValueChange = { address1 = it },
-                    label = { Text("Address Line 1") },
+                    label = { Text(text = stringResource(id = R.string.address1)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = address2,
                     onValueChange = { address2 = it },
-                    label = { Text("Address Line 2") },
+                    label = { Text(text = stringResource(id = R.string.address2)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = city,
                     onValueChange = { city = it },
-                    label = { Text("City") },
+                    label = { Text(text = stringResource(id = R.string.city)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = state,
                     onValueChange = { state = it },
-                    label = { Text("State") },
+                    label = { Text(text = stringResource(id = R.string.state)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = zip,
                     onValueChange = { zip = it },
-                    label = { Text("ZIP Code") },
+                    label = { Text(text = stringResource(id = R.string.zip)) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -261,14 +227,14 @@ fun LocationInputDialog(
                     onSaveLocation(fullAddress)
                 }
             ) {
-                Text(text = "Save")
+                Text(text = stringResource(id = R.string.save))
             }
         },
         dismissButton = {
             TextButton(
                 onClick = onCancel
             ) {
-                Text(text = "Cancel")
+                Text(text = stringResource(id = R.string.cancel))
             }
         }
     )
@@ -302,7 +268,7 @@ fun showDatePicker(context: Context, initialDate: String=""): String {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "Date:",
+            text = stringResource(id = R.string.Date),
             fontSize = 18.sp,
         )
         TextButton(
@@ -358,7 +324,7 @@ fun showTimePicker(context: Context, initialTime:String = ""): String {
     ) {
 
         Text(
-            text = "Time:",
+            text = stringResource(id = R.string.time),
             fontSize = 18.sp,
         )
         TextButton(

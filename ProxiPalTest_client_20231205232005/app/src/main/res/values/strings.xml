@@ -161,10 +161,44 @@
     <string name="great_you_re_all_set">Great! You\'re all set!</string>
     <string name="welcome_to_appname">Welcome to Proxipal!</string>
     <string name="got_it">Got it!</string>
+
+    <!-- Delete Account -->
     <string name="delete_account">Delete Account</string>
     <string name="delete_account_confirmation_message">If you delete your account you will lose all your data. This action cannot be reversed.</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="confirm">Confirm</string>
+
+    <!-- Events -->
+    <string name="event_details">Event Details</string>
+    <string name="details">Details</string>
+    <string name="announcement">Announcement</string>
+    <string name="attendees">Attendees</string>
+    <string name="leave_event">Leave Event</string>
+    <string name="join_event">Join Event</string>
+    <string name="new_announcement">New Announcement</string>
+    <string name="loading_event">Loading Event...</string>
+    <string name="enter_announcement">Enter Announcement</string>
+    <string name="events">Events</string>
+    <string name="my_events">My Events</string>
+    <string name="other_events">Other Events</string>
+    <string name="edit_event">Edit Event</string>
+    <string name="event_name">Event Name</string>
+    <string name="event_description">Event Description</string>
+    <string name="location">Location:</string>
+    <string name="duration">Duration:</string>
+    <string name="hour">h</string>
+    <string name="minute">m</string>
+    <string name="save">Save</string>
+    <string name="create_event">Create Event</string>
+    <string name="select_location">Select Location</string>
+    <string name="enter_location">Enter Location</string>
+    <string name="zip">ZIP Code</string>
+    <string name="state">State</string>
+    <string name="city">City</string>
+    <string name="address2">Address Line 2</string>
+    <string name="address1">Address Line 1</string>
+    <string name="time">Time:</string>
+    <string name="Date">Date:</string>
 
 
 </resources>
