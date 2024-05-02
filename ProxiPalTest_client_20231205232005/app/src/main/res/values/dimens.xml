@@ -14,7 +14,6 @@
     <dimen name="messages_screen_message_container_rounding">10.dp</dimen>
     <dimen name="messages_screen_message_input_padding">4.dp</dimen>
     <dimen name="messages_screen_message_history_message_vertical_padding">8.dp</dimen>
-    <dimen name="messages_screen_user_blocked_notifier_all_padding">8.dp</dimen>
     <dimen name="messages_screen_extras_label_start_padding">4.dp</dimen>
     <dimen name="messages_screen_reply_update_card_all_padding">4.dp</dimen>
     <dimen name="messages_screen_reply_update_row_vertical_padding">4.dp</dimen>

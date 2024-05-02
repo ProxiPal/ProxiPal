@@ -150,7 +150,3 @@ break anything.
 
 EDIT: Emulators have been noted to either not connect with each other or have unreliable connections.
 Physical devices are a must for testing the compass connection code between devices.
-
-## Other user's name doesn't show in topbar in messages screen
-
-It seems deleting the app and restarting the emulator worked
