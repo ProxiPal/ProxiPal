@@ -1,5 +1,8 @@
 package com.mongodb.app
 
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -32,7 +35,7 @@ class UserProfileUITests {
     )
 
     @Test
-    fun inputProfileText(){
+    fun saveProfileEdits(){
         composeTestRule.setContent {
             MyApplicationTheme {
                 UserProfileLayout(
@@ -60,7 +63,7 @@ class UserProfileUITests {
         composeTestRule.onNodeWithTag("userProfileInputRowBiography")
             .assertExists("Biography input row was not found")
 
-        // Input a test name
+        // Input test data
         composeTestRule.onNodeWithTag("userProfileInputRowFirstName")
             .performTextInput("Sam")
         composeTestRule.onNodeWithTag("userProfileInputRowLastName")
@@ -87,5 +90,71 @@ class UserProfileUITests {
             .assertExists("Input row with test last name was not found")
         composeTestRule.onNodeWithText("This is a UI test")
             .assertExists("Input row with test biography was not found")
+
+        composeTestRule.onNodeWithText("Sam")
+            .assertIsDisplayed()
+        composeTestRule.onNodeWithText("Sung")
+            .assertIsDisplayed()
+        composeTestRule.onNodeWithText("This is a UI test")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun discardProfileEdits(){
+        composeTestRule.setContent {
+            MyApplicationTheme {
+                UserProfileLayout(
+                    userProfileViewModel = userProfileViewModel,
+                    toolbarViewModel = toolbarViewModel,
+                    navController = rememberNavController(),
+                    homeViewModel = homeViewModel
+                )
+            }
+        }
+        composeTestRule.onNodeWithTag("userProfileEditButton")
+            .assertExists("Edit/Save button was not found")
+
+        // Start editing the profile
+        composeTestRule.onNodeWithTag("userProfileEditButton")
+            .performClick()
+        composeTestRule.onNodeWithTag("userProfileEditButton")
+            .assertExists("Edit/Save button was not found")
+        composeTestRule.onNodeWithTag("userProfileDiscardButton")
+            .assertExists("Discard edits button was not found")
+        composeTestRule.onNodeWithTag("userProfileInputRowFirstName")
+            .assertExists("First name input row was not found")
+        composeTestRule.onNodeWithTag("userProfileInputRowLastName")
+            .assertExists("Last name input row was not found")
+        composeTestRule.onNodeWithTag("userProfileInputRowBiography")
+            .assertExists("Biography input row was not found")
+
+        // Input test data
+        composeTestRule.onNodeWithTag("userProfileInputRowFirstName")
+            .performTextInput("Sam")
+        composeTestRule.onNodeWithTag("userProfileInputRowLastName")
+            .performTextInput("Sung")
+        composeTestRule.onNodeWithTag("userProfileInputRowBiography")
+            .performTextInput("This is a UI test")
+        composeTestRule.onNodeWithTag("userProfileDiscardButton")
+            .performClick()
+
+        // Inputted information should not be in the UI at this point
+        composeTestRule.onNodeWithTag("userProfileEditButton")
+            .assertExists("Edit/Save button was not found")
+        composeTestRule.onNodeWithTag("userProfileEditButton")
+            .performClick()
+        composeTestRule.onNodeWithTag("userProfileInputRowFirstName")
+            .assertExists("First name input row was not found")
+        composeTestRule.onNodeWithTag("userProfileInputRowLastName")
+            .assertExists("Last name input row was not found")
+        composeTestRule.onNodeWithTag("userProfileInputRowBiography")
+            .assertExists("Biography input row was not found")
+
+        composeTestRule.onNodeWithText("Sam")
+            .assertIsNotDisplayed()
+        composeTestRule.onNodeWithText("Sung")
+            .assertIsNotDisplayed()
+        composeTestRule.onNodeWithText("This is a UI test")
+            .assertIsNotDisplayed()
     }
 }
