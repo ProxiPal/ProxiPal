@@ -24,10 +24,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -87,6 +83,10 @@ class UserProfileViewModel(
     private val _selectedInterests = mutableStateOf<List<String>>(emptyList())
     private val _selectedIndustries = mutableStateOf<List<String>>(emptyList())
     private val _otherFilters = mutableStateOf<List<String>>(emptyList())
+
+    private val _currentFirstName = mutableStateOf("")
+    private val _currentLastName = mutableStateOf("")
+    private val _currentBiography = mutableStateOf("")
 
 
 
@@ -271,6 +271,10 @@ class UserProfileViewModel(
 
         _userProfileInterests = userProfile.interests.toList().toMutableList()
         _userProfileIndustries = userProfile.industries.toList().toMutableList()
+
+        _currentFirstName.value = userProfile.firstName
+        _currentLastName.value = userProfile.lastName
+        _currentBiography.value = userProfile.biography
     }
 
     /**
@@ -455,7 +459,10 @@ class UserProfileViewModel(
      */
     fun discardUserProfileChanges(){
         _isEditingUserProfile.value = false
-        getUserProfile()
+//        getUserProfile()
+        _userProfileFirstName.value = _currentFirstName.value
+        _userProfileLastName.value = _currentLastName.value
+        _userProfileBiography.value = _currentBiography.value
     }
 
     @Deprecated(
