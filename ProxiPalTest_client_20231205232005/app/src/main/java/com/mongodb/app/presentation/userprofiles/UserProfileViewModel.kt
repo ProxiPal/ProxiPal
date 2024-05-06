@@ -49,7 +49,7 @@ sealed class AddUserProfileEvent {
 }
 
 class UserProfileViewModel(
-    var repository: SyncRepository,
+    private var repository: SyncRepository,
     val userProfileListState: SnapshotStateList<UserProfile> = mutableStateListOf()
 ) : ViewModel() {
     /*
