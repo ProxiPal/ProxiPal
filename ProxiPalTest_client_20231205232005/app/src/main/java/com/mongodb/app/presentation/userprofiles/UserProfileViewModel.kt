@@ -24,10 +24,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -50,7 +46,7 @@ sealed class AddUserProfileEvent {
 }
 
 class UserProfileViewModel(
-    private var repository: SyncRepository,
+    var repository: SyncRepository,
     val userProfileListState: SnapshotStateList<UserProfile> = mutableStateListOf()
 ) : ViewModel() {
     /*
@@ -91,6 +87,10 @@ class UserProfileViewModel(
 
     //april
     private val _currentUserId = mutableStateOf("")
+    private val _currentFirstName = mutableStateOf("")
+    private val _currentLastName = mutableStateOf("")
+    private val _currentBiography = mutableStateOf("")
+
 
     private val _friendsList = MutableStateFlow<List<String>>(emptyList())
 
@@ -304,6 +304,28 @@ class UserProfileViewModel(
           */
     }
 
+    /**
+     * Loads the specified user profile parameter
+     */
+    private fun setUserProfileVariables(userProfile: UserProfile){
+        _userProfileFirstName.value = userProfile.firstName
+        _userProfileLastName.value = userProfile.lastName
+        _userProfileBiography.value = userProfile.biography
+        _userProfileLatitude.value = userProfile.location?.latitude!!
+        _userProfileLongitude.value = userProfile.location?.longitude!!
+
+        _userProfileInstagramHandle.value = userProfile.instagramHandle
+        _userProfileTwitterHandle.value = userProfile.twitterHandle
+        _userProfileLinktreeHandle.value = userProfile.linktreeHandle
+        _userProfilelinkedinHandle.value = userProfile.linkedinHandle
+
+        _userProfileInterests = userProfile.interests.toList().toMutableList()
+        _userProfileIndustries = userProfile.industries.toList().toMutableList()
+
+        _currentFirstName.value = userProfile.firstName
+        _currentLastName.value = userProfile.lastName
+        _currentBiography.value = userProfile.biography
+    }
 
     /**
      * Updates the current user's user profile, if it exists
@@ -487,7 +509,10 @@ class UserProfileViewModel(
      */
     fun discardUserProfileChanges(){
         _isEditingUserProfile.value = false
-        getUserProfile()
+//        getUserProfile()
+        _userProfileFirstName.value = _currentFirstName.value
+        _userProfileLastName.value = _currentLastName.value
+        _userProfileBiography.value = _currentBiography.value
     }
 
     @Deprecated(
