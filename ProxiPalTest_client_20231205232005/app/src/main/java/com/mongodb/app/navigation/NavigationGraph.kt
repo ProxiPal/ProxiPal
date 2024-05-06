@@ -1,7 +1,6 @@
 package com.mongodb.app.navigation
 
 import ProfileSetupScaffold
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,7 +13,6 @@ import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.friends.FriendRequestViewModel
 import com.mongodb.app.friends.Friendslist
-import com.mongodb.app.TAG
 import com.mongodb.app.home.AdvancedScreenSettings
 import com.mongodb.app.home.FilterScreen
 import com.mongodb.app.home.HomeScreen
@@ -32,7 +30,6 @@ import com.mongodb.app.ui.userprofiles.InterestScreen
 import com.mongodb.app.ui.userprofiles.UserProfileLayout
 import io.realm.kotlin.mongodb.exceptions.SyncException
 import io.realm.kotlin.mongodb.sync.SyncSession
-import java.util.SortedSet
 
 
 //TODO add more parameters as needed
@@ -43,18 +40,7 @@ import java.util.SortedSet
  * Navigation graph for the different screens in Proxipal
  */
 @Composable
-fun NavigationGraph(
-    toolbarViewModel: ToolbarViewModel,
-    userProfileViewModel: UserProfileViewModel,
-    homeViewModel: HomeViewModel,
-    messagesViewModel: MessagesViewModel,
-    blockingViewModel: BlockingViewModel,
-    censoringViewModel: CensoringViewModel,
-    friendRequestViewModel: FriendRequestViewModel
-) {
-
-    var currentUserId by remember { mutableStateOf("") }
-
+fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: UserProfileViewModel, homeViewModel: HomeViewModel, friendRequestViewModel: FriendRequestViewModel) {
     var state by remember{ mutableStateOf(false)}
     val navController = rememberNavController()
     //APRIL
@@ -89,7 +75,6 @@ fun NavigationGraph(
                     homeViewModel = homeViewModel,
                     navController = navController
                 )
-                currentUserId = userProfileViewModel.repository.getCurrentUserId()
             }
         }
         composable(Routes.UserInterestsScreen.route){
@@ -135,30 +120,6 @@ fun NavigationGraph(
         }
         composable(Routes.FriendListScreen.route) {
             Friendslist(
-                /*
-        composable(Routes.MessagesScreen.route){
-            // TODO Change these when the friends screen is implemented
-            val tempGmail = "65e96193c6e205c32b0915cc"
-            val tempStudent = "6570119696faac878ad696a5"
-
-            // The ID of the other user being messaged
-            var focusedUserId = ""
-            focusedUserId = if (currentUserId == tempGmail){
-                tempStudent
-            } else{
-                tempGmail
-            }
-            Log.i(
-                TAG(),
-                "NavGraph: Messaging with user = \"$focusedUserId\""
-            )
-
-            val usersInvolved: SortedSet<String> = sortedSetOf()
-            usersInvolved.add(currentUserId)
-            usersInvolved.add(focusedUserId)
-
-            MessagesScreenLayout(
-                */
                 navController = navController,
                 viewModel = userProfileViewModel,
                 friendRequestViewModel = friendRequestViewModel
