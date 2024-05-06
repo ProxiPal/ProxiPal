@@ -22,7 +22,6 @@ import com.mongodb.app.data.compassscreen.UserLocation
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.jetbrains.annotations.VisibleForTesting
 import kotlin.math.atan2
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -195,8 +194,7 @@ class CompassViewModel constructor(
             startLatitude = _userProfileViewModel.userProfileLatitude.value,
             startLongitude = _userProfileViewModel.userProfileLongitude.value,
             endLatitude = matchedUserLocation.value.latitude,
-            endLongitude = matchedUserLocation.value.longitude,
-            shouldUseMetric = SHOULD_USE_METRIC_SYSTEM
+            endLongitude = matchedUserLocation.value.longitude
         )
     }
 
@@ -204,8 +202,7 @@ class CompassViewModel constructor(
      * Calculates the bearing angle, in degrees, between two points
      * (Bearing angle should be 0 degrees in the +y direction and increase clockwise)
      */
-    @VisibleForTesting
-    internal fun calculateBearingBetweenPoints(
+    private fun calculateBearingBetweenPoints(
         startLatitude: Double,
         startLongitude: Double,
         endLatitude: Double,
@@ -239,23 +236,21 @@ class CompassViewModel constructor(
     /**
      * Calculates the distance, in km, between two points
      */
-    @VisibleForTesting
-    internal fun calculateDistanceBetweenPoints(
+    private fun calculateDistanceBetweenPoints(
         startLatitude: Double,
         startLongitude: Double,
         endLatitude: Double,
-        endLongitude: Double,
-        shouldUseMetric: Boolean
+        endLongitude: Double
     ): Double {
         // Using the distance formula
         // Make sure to take into account the actual distance between points
         var deltaLatitude = (endLatitude - startLatitude)
         deltaLatitude *=
-            if (shouldUseMetric) KM_PER_ONE_LATITUDE_DIFF
+            if (SHOULD_USE_METRIC_SYSTEM) KM_PER_ONE_LATITUDE_DIFF
             else MILES_PER_ONE_LATITUDE_DIFF
         var deltaLongitude = (endLongitude - startLongitude)
         deltaLongitude *=
-            if (shouldUseMetric) KM_PER_ONE_LONGITUDE_DIFF
+            if (SHOULD_USE_METRIC_SYSTEM) KM_PER_ONE_LONGITUDE_DIFF
             else MILES_PER_ONE_LONGITUDE_DIFF
         return sqrt(deltaLatitude.pow(2) + deltaLongitude.pow(2))
     }
