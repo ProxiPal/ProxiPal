@@ -46,7 +46,6 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -329,8 +328,7 @@ fun UserProfileBody(
                 remainingCharacterAmount = userProfileViewModel.getRemainingCharacterAmountFirstName(),
                 isInformationExpanded = isCardExpanded,
                 isEditingUserProfile = userProfileViewModel.isEditingUserProfile.value,
-                onTextChange = { userProfileViewModel.setUserProfileFirstName(it) },
-                testTag = "userProfileInputRowFirstName"
+                onTextChange = { userProfileViewModel.setUserProfileFirstName(it) }
             )
             UserProfileLayoutRow(
                 rowInformationHeader = R.string.user_profile_last_name_header,
@@ -338,8 +336,7 @@ fun UserProfileBody(
                 remainingCharacterAmount = userProfileViewModel.getRemainingCharacterAmountLastName(),
                 isInformationExpanded = isCardExpanded,
                 isEditingUserProfile = userProfileViewModel.isEditingUserProfile.value,
-                onTextChange = { userProfileViewModel.setUserProfileLastName(it) },
-                testTag = "userProfileInputRowLastName"
+                onTextChange = { userProfileViewModel.setUserProfileLastName(it) }
             )
             UserProfileLayoutRow(
                 rowInformationHeader = R.string.user_profile_biography_header,
@@ -347,8 +344,7 @@ fun UserProfileBody(
                 remainingCharacterAmount = userProfileViewModel.getRemainingCharacterAmountBiography(),
                 isInformationExpanded = isCardExpanded,
                 isEditingUserProfile = userProfileViewModel.isEditingUserProfile.value,
-                onTextChange = { userProfileViewModel.setUserProfileBiography(it) },
-                testTag = "userProfileInputRowBiography"
+                onTextChange = { userProfileViewModel.setUserProfileBiography(it) }
             )
         }
         Spacer(
@@ -407,7 +403,6 @@ fun UserProfileLayoutRow(
     isInformationExpanded: Boolean,
     isEditingUserProfile: Boolean,
     onTextChange: (String) -> Unit,
-    testTag: String,
     modifier: Modifier = Modifier
 ) {
     // If the supplied row information is empty, use a temporary placeholder instead
@@ -476,10 +471,7 @@ fun UserProfileLayoutRow(
                         imeAction = ImeAction.Done
                     ),
                     // Limit the amount of lines shown when typing in a multi-line text field
-                    maxLines = USER_PROFILE_EDIT_MODE_MAXIMUM_LINE_AMOUNT,
-                    // Allows this to be uniquely identified in tests
-                    modifier = Modifier
-                        .testTag(testTag)
+                    maxLines = USER_PROFILE_EDIT_MODE_MAXIMUM_LINE_AMOUNT
                 )
             }
         }
@@ -496,8 +488,7 @@ fun UserProfileLayoutRowPreview() {
             remainingCharacterAmount = 99,
             isInformationExpanded = false,
             isEditingUserProfile = false,
-            onTextChange = {},
-            testTag = ""
+            onTextChange = {}
         )
     }
 }
@@ -521,9 +512,7 @@ fun UserProfileEditButtons(
             .fillMaxWidth()
     ) {
         Button(
-            onClick = onEditButtonClick,
-            modifier = Modifier
-                .testTag("userProfileEditButton")
+            onClick = onEditButtonClick
         ) {
             Text(
                 // Set the text depending on if the user is currently editing their profile
@@ -539,9 +528,7 @@ fun UserProfileEditButtons(
         // Only display the edit canceling button when editing the user profile
         if (isEditingUserProfile){
             Button(
-                onClick = onDiscardEditButtonClick,
-                modifier = Modifier
-                    .testTag("userProfileDiscardButton")
+                onClick = onDiscardEditButtonClick
             ){
                 Text(
                     text = stringResource(id = R.string.user_profile_cancel_editing_message)
