@@ -320,8 +320,8 @@ class RealmSyncRepository(
             UserProfile::class,
             CustomGeoPoint::class,
             FriendMessage::class,
-            FriendConversation::class)
-            FriendshipRequest::class) //april
+            FriendConversation::class,
+            FriendshipRequest::class)
 
         config = SyncConfiguration.Builder(currentUser, schemaSet)
             .schemaVersion(1)

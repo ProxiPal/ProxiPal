@@ -54,7 +54,8 @@ fun NavigationGraph(
     homeViewModel: HomeViewModel,
     messagesViewModel: MessagesViewModel,
     blockingViewModel: BlockingViewModel,
-    censoringViewModel: CensoringViewModel
+    censoringViewModel: CensoringViewModel,
+    friendRequestViewModel: FriendRequestViewModel
 ) {
 
     // For messages screen navigation
@@ -66,100 +67,113 @@ fun NavigationGraph(
         "6570119696faac878ad696a5"
     )
 
-fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: UserProfileViewModel, homeViewModel: HomeViewModel, friendRequestViewModel: FriendRequestViewModel) {
-    var state by remember{ mutableStateOf(false)}
-    val navController = rememberNavController()
-    //APRIL
-    val syncErrorHandling: (SyncSession, SyncException) -> Unit = { session, error ->
-        println("Sync error: ${error.message}")
-    }
-    //APRIL
-    val repository: SyncRepository = RealmSyncRepository(syncErrorHandling)
+        var state by remember { mutableStateOf(false) }
+        val navController = rememberNavController()
+        //APRIL
+        val syncErrorHandling: (SyncSession, SyncException) -> Unit = { session, error ->
+            println("Sync error: ${error.message}")
+        }
+        //APRIL
+        val repository: SyncRepository = RealmSyncRepository(syncErrorHandling)
 
-    var startDest = Routes.UserProfileScreen.route
-    if (userProfileViewModel.userProfileListState.isEmpty()){
-        startDest = Routes.OnboardingScreen.route
-    }
-    NavHost(navController = navController, startDestination = startDest) {
-        composable(Routes.UserProfileScreen.route) {
-            //checks if its the user's first time login in, added by Vichet Chim
-            if (userProfileViewModel.userProfileListState.isEmpty()){
-                state = true
+        var startDest = Routes.UserProfileScreen.route
+        if (userProfileViewModel.userProfileListState.isEmpty()) {
+            startDest = Routes.OnboardingScreen.route
+        }
+        NavHost(navController = navController, startDestination = startDest) {
+            composable(Routes.UserProfileScreen.route) {
+                //checks if its the user's first time login in, added by Vichet Chim
+                if (userProfileViewModel.userProfileListState.isEmpty()) {
+                    state = true
+                }
+                if (state) { // displays user setup screens
+                    ProfileSetupScaffold(
+                        userProfileViewModel = userProfileViewModel,
+                        toolbarViewModel = toolbarViewModel,
+                        navController = navController,
+                        onPreviousClicked = { /*TODO*/ },
+                        onNextClicked = { navController.navigate(Routes.UserInterestsScreen.route) })
+                } else {
+                    UserProfileLayout(
+                        userProfileViewModel = userProfileViewModel,
+                        toolbarViewModel = toolbarViewModel,
+                        homeViewModel = homeViewModel,
+                        navController = navController
+                    )
+                }
             }
-            if (state){ // displays user setup screens
-                ProfileSetupScaffold(
+            composable(Routes.UserInterestsScreen.route) {
+                InterestScreen(userProfileViewModel = userProfileViewModel,
+                    onPreviousClicked = { navController.popBackStack() },
+                    onNextClicked = { navController.navigate(Routes.UserIndustriesScreen.route) })
+            }
+            composable(Routes.UserIndustriesScreen.route) {
+                IndustryScreen(userProfileViewModel = userProfileViewModel,
+                    onPreviousClicked = { navController.popBackStack() },
+                    onNextClicked = {
+                        state = false;navController.popBackStack();navController.popBackStack()
+                    }) //end of user setup screen
+            }
+            composable(Routes.ConnectWithOthersScreen.route) {
+                ConnectWithOthersScreen(
+                    toolbarViewModel = toolbarViewModel,
+                    navController = navController,
+                    userProfileViewModel = userProfileViewModel
+                )
+            }
+            composable(Routes.LocationPermissionsScreen.route) {
+                LocationPermissionScreen(navController)
+            }
+            //march7
+            composable(Routes.HomeScreen.route) {
+                HomeScreen(
+                    navController = navController,
+                    viewModel = homeViewModel,
+                    userProfileViewModel = userProfileViewModel
+                )
+            }
+            composable(Routes.ScreenSettings.route) {
+                ScreenSettings(navController = navController)
+            }
+            composable(Routes.FilterScreen.route) {
+                FilterScreen(
+                    navController = navController,
+                    viewModel = userProfileViewModel
+                ) //march17
+            }
+            composable(Routes.OnboardingScreen.route) {
+                OnboardingScreen(
                     userProfileViewModel = userProfileViewModel,
                     toolbarViewModel = toolbarViewModel,
                     navController = navController,
-                    onPreviousClicked = { /*TODO*/ },
-                    onNextClicked = { navController.navigate(Routes.UserInterestsScreen.route) })
-            }
-            else {
-                UserProfileLayout(
-                    userProfileViewModel = userProfileViewModel,
-                    toolbarViewModel = toolbarViewModel,
-                    homeViewModel = homeViewModel,
-                    navController = navController
+                    homeViewModel = homeViewModel
                 )
             }
-        }
-        composable(Routes.UserInterestsScreen.route){
-            InterestScreen(userProfileViewModel = userProfileViewModel,
-                onPreviousClicked = { navController.popBackStack() },
-                onNextClicked = {navController.navigate(Routes.UserIndustriesScreen.route)})
-        }
-        composable(Routes.UserIndustriesScreen.route){
-            IndustryScreen(userProfileViewModel = userProfileViewModel,
-                onPreviousClicked = { navController.popBackStack() },
-                onNextClicked = {state = false;navController.popBackStack();navController.popBackStack()}) //end of user setup screen
-        }
-        composable(Routes.ConnectWithOthersScreen.route) {
-            ConnectWithOthersScreen(
-                toolbarViewModel = toolbarViewModel,
-                navController = navController,
-                userProfileViewModel = userProfileViewModel
-            )
-        }
-        composable(Routes.LocationPermissionsScreen.route) {
-            LocationPermissionScreen(navController)
-        }
-        //march7
-        composable(Routes.HomeScreen.route) {
-            HomeScreen(navController = navController, viewModel = homeViewModel, userProfileViewModel = userProfileViewModel)
-        }
-        composable(Routes.ScreenSettings.route){
-            ScreenSettings(navController = navController)
-        }
-        composable(Routes.FilterScreen.route) {
-            FilterScreen(navController = navController, viewModel = userProfileViewModel) //march17
-        }
-        composable(Routes.OnboardingScreen.route){
-            OnboardingScreen(
-                userProfileViewModel = userProfileViewModel,
-                toolbarViewModel = toolbarViewModel,
-                navController = navController,
-                homeViewModel = homeViewModel
+            composable(Routes.AdvancedScreenSettings.route) {
+                AdvancedScreenSettings(navController)
+            }
+            composable(Routes.MessagesScreen.route) {
+                MessagesScreenLayout(
+                    navController = navController,
+                    messagesViewModel = messagesViewModel,
+                    conversationUsersInvolved = usersInvolved,
+                    blockingViewModel = blockingViewModel,
+                    censoringViewModel = censoringViewModel
                 )
-        }
-        composable(Routes.AdvancedScreenSettings.route){
-            AdvancedScreenSettings(navController)
-        }
-        composable(Routes.MessagesScreen.route){
-            MessagesScreenLayout(
-        composable(Routes.FriendListScreen.route) {
-            Friendslist(
-                navController = navController,
-                messagesViewModel = messagesViewModel,
-                conversationUsersInvolved = usersInvolved,
-                blockingViewModel = blockingViewModel,
-                censoringViewModel = censoringViewModel
-                viewModel = userProfileViewModel,
-                friendRequestViewModel = friendRequestViewModel
-            )
-        }
-        composable(Routes.FriendRequestScreen.route) {
-            FriendRequestScreen(friendRequestViewModel = friendRequestViewModel,userProfileViewModel = userProfileViewModel)
-        }
+            }
+            composable(Routes.FriendListScreen.route) {
+                Friendslist(
+                    navController = navController,
+                    viewModel = userProfileViewModel,
+                    friendRequestViewModel = friendRequestViewModel
+                )
+            }
+            composable(Routes.FriendRequestScreen.route) {
+                FriendRequestScreen(
+                    friendRequestViewModel = friendRequestViewModel,
+                    userProfileViewModel = userProfileViewModel
+                )
+            }
 
+        }
     }
-}

@@ -125,6 +125,7 @@ class UserProfileScreen : ComponentActivity() {
             conversationsRealm = repository,
             this
         )
+    }
     //april2
     private val friendRequestViewModel: FriendRequestViewModel by viewModels {
         FriendRequestViewModel.factory(repository)
@@ -221,9 +222,11 @@ class UserProfileScreen : ComponentActivity() {
                     homeViewModel = HomeViewModel(repository = repository),
                     messagesViewModel = messagesViewModel,
                     blockingViewModel = blockingViewModel,
-                    censoringViewModel = censoringViewModel
+                    censoringViewModel = censoringViewModel,
+                    friendRequestViewModel = friendRequestViewModel
+
                 )
-                NavigationGraph(toolbarViewModel, userProfileViewModel, homeViewModel = HomeViewModel(repository = repository), friendRequestViewModel = friendRequestViewModel)
+
             }
         }
     }
