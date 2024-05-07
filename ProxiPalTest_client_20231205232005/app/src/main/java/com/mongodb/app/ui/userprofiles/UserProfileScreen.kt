@@ -26,7 +26,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
@@ -50,7 +49,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
@@ -63,7 +61,6 @@ import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.userprofiles.USER_PROFILE_EDIT_MODE_MAXIMUM_LINE_AMOUNT
 import com.mongodb.app.data.userprofiles.USER_PROFILE_ROW_HEADER_WEIGHT
-import com.mongodb.app.friends.FriendRequestViewModel
 import com.mongodb.app.home.HomeScreen
 import com.mongodb.app.home.HomeViewModel
 import com.mongodb.app.navigation.NavigationGraph
@@ -125,9 +122,6 @@ class UserProfileScreen : ComponentActivity() {
             conversationsRealm = repository,
             this
         )
-    //april2
-    private val friendRequestViewModel: FriendRequestViewModel by viewModels {
-        FriendRequestViewModel.factory(repository)
     }
 
     private val blockingViewModel: BlockingViewModel by viewModels {
@@ -223,7 +217,6 @@ class UserProfileScreen : ComponentActivity() {
                     blockingViewModel = blockingViewModel,
                     censoringViewModel = censoringViewModel
                 )
-                NavigationGraph(toolbarViewModel, userProfileViewModel, homeViewModel = HomeViewModel(repository = repository), friendRequestViewModel = friendRequestViewModel)
             }
         }
     }

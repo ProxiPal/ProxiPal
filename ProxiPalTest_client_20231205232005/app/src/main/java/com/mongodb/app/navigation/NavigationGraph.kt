@@ -9,10 +9,6 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.mongodb.app.data.RealmSyncRepository
-import com.mongodb.app.data.SyncRepository
-import com.mongodb.app.friends.FriendRequestViewModel
-import com.mongodb.app.friends.Friendslist
 import com.mongodb.app.home.AdvancedScreenSettings
 import com.mongodb.app.home.FilterScreen
 import com.mongodb.app.home.HomeScreen
@@ -26,15 +22,12 @@ import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
 import com.mongodb.app.presentation.blocking_censoring.FetchCensoredTextThread
 import com.mongodb.app.presentation.messages.MessagesViewModel
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
-import com.mongodb.app.screens.FriendRequestScreen
 import com.mongodb.app.tutorial.OnboardingScreen
 import com.mongodb.app.ui.messages.MessagesScreenLayout
 import com.mongodb.app.ui.userprofiles.IndustryScreen
 import com.mongodb.app.ui.userprofiles.InterestScreen
 
 import com.mongodb.app.ui.userprofiles.UserProfileLayout
-import io.realm.kotlin.mongodb.exceptions.SyncException
-import io.realm.kotlin.mongodb.sync.SyncSession
 
 
 //TODO add more parameters as needed
@@ -66,16 +59,8 @@ fun NavigationGraph(
         "6570119696faac878ad696a5"
     )
 
-fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: UserProfileViewModel, homeViewModel: HomeViewModel, friendRequestViewModel: FriendRequestViewModel) {
     var state by remember{ mutableStateOf(false)}
     val navController = rememberNavController()
-    //APRIL
-    val syncErrorHandling: (SyncSession, SyncException) -> Unit = { session, error ->
-        println("Sync error: ${error.message}")
-    }
-    //APRIL
-    val repository: SyncRepository = RealmSyncRepository(syncErrorHandling)
-
     var startDest = Routes.UserProfileScreen.route
     if (userProfileViewModel.userProfileListState.isEmpty()){
         startDest = Routes.OnboardingScreen.route
@@ -146,20 +131,12 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
         }
         composable(Routes.MessagesScreen.route){
             MessagesScreenLayout(
-        composable(Routes.FriendListScreen.route) {
-            Friendslist(
                 navController = navController,
                 messagesViewModel = messagesViewModel,
                 conversationUsersInvolved = usersInvolved,
                 blockingViewModel = blockingViewModel,
                 censoringViewModel = censoringViewModel
-                viewModel = userProfileViewModel,
-                friendRequestViewModel = friendRequestViewModel
             )
         }
-        composable(Routes.FriendRequestScreen.route) {
-            FriendRequestScreen(friendRequestViewModel = friendRequestViewModel,userProfileViewModel = userProfileViewModel)
-        }
-
     }
 }
