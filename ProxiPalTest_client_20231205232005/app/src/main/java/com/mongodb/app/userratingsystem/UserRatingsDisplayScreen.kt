@@ -22,13 +22,13 @@ fun UserRatingsDisplayScreen(userProfileViewModel: UserProfileViewModel) {
     ) {
         UserRatingCard(
             title = "Likes",
-            count = userProfileViewModel.userRatings.getOrElse(0) { 0 },
+            count = userProfileViewModel.userLikes.value,
             backgroundColor = Color.Green
         )
         Spacer(modifier = Modifier.width(4.dp))
         UserRatingCard(
             title = "Dislikes",
-            count = userProfileViewModel.userRatings.getOrElse(1) { 0 },
+            count = userProfileViewModel.userDislikes.value,
             backgroundColor = Color.Red
         )
     }

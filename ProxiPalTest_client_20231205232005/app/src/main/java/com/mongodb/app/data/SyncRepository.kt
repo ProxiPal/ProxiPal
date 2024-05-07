@@ -1031,9 +1031,9 @@ class RealmSyncRepository(
                 findLatest(userProfile)?.let { liveUserProfile ->
                     if (!liveUserProfile.usersThatRatedMe.contains(currentUser.id)) {
                         if (ratingGiven) {
-                            liveUserProfile.ratings[0]++
+                            liveUserProfile.userLikes++
                         } else {
-                            liveUserProfile.ratings[1]++
+                            liveUserProfile.userDislikes++
                         }
                         liveUserProfile.usersThatRatedMe.add(currentUser.id)
                     }

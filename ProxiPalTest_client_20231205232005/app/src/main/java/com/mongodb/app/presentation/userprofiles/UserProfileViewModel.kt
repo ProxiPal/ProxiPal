@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -88,9 +89,9 @@ class UserProfileViewModel(
     private val _selectedIndustries = mutableStateOf<List<String>>(emptyList())
     private val _otherFilters = mutableStateOf<List<String>>(emptyList())
 
-    // Stores the ratings that other users have given this user. Added by Marco.
-    // List of size 2; first element is likes and second element is dislikes.
-    private var _userRatings: MutableList<Int> = mutableListOf(0,0)
+    // Stores the ratings that other users have given this user. Added by Marco
+    private var _userLikes: MutableState<Int> = mutableIntStateOf(0)
+    private var _userDislikes: MutableState<Int> = mutableIntStateOf(0)
 
     // Contains a list of userId's that have rated the current user. Added by Marco.
     private var _usersThatRatedMe: MutableList<String> = mutableListOf()
@@ -155,9 +156,12 @@ class UserProfileViewModel(
     val selectedIndustries: State<List<String>> = _selectedIndustries
     val otherFilters: State<List<String>> = _otherFilters
 
-    // for rating system, first element is likes second is dislikes, added by Marco
-    val userRatings: List<Int>
-        get() = _userRatings
+    // for rating system added by Marco
+    val userLikes: State<Int>
+        get() = _userLikes
+
+    val userDislikes: State<Int>
+        get() = _userDislikes
 
     val usersThatRatedMe: List<String>
         get() = _usersThatRatedMe
@@ -253,7 +257,8 @@ class UserProfileViewModel(
                                     _userProfileInterests = event.list[0].interests.toList().toMutableList()
                                     _userProfileIndustries = event.list[0].industries.toList().toMutableList()
 
-                                    _userRatings = event.list[0].ratings
+                                    _userLikes.value = event.list[0].userLikes
+                                    _userDislikes.value = event.list[0].userDislikes
                                     _usersThatRatedMe = event.list[0].usersThatRatedMe
 
                                 }
@@ -273,7 +278,8 @@ class UserProfileViewModel(
                                     _userProfileInterests = event.list[0].interests.toList().toMutableList()
                                     _userProfileIndustries = event.list[0].industries.toList().toMutableList()
 
-                                    _userRatings = event.list[0].ratings
+                                    _userLikes.value = event.list[0].userLikes
+                                    _userDislikes.value = event.list[0].userDislikes
                                     _usersThatRatedMe = event.list[0].usersThatRatedMe
 
                                 }
@@ -651,6 +657,10 @@ class UserProfileViewModel(
         viewModelScope.launch {
             repository.rateOtherUser(otherUserOwnerId = otherUserOwnerId, ratingGiven = ratingGiven)
         }
+    }
+
+    fun getCurrentUserId(): String{
+        return repository.getCurrentUserId()
     }
 
 }
