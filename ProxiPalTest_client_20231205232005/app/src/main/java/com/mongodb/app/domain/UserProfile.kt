@@ -1,11 +1,13 @@
 package com.mongodb.app.domain
 
 import com.mongodb.app.location.CustomGeoPoint
+
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmList
+import org.mongodb.kbson.ObjectId
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
-import org.mongodb.kbson.ObjectId
+import kotlin.random.Random
 
 
 /*
@@ -50,6 +52,9 @@ class UserProfile : RealmObject {
     var selectedInterests : RealmList<String> = realmListOf()
     var selectedIndustries : RealmList<String> = realmListOf()
     var otherFilters : RealmList<String> = realmListOf()
+
+    var friends: RealmList<String> = realmListOf()
+
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
