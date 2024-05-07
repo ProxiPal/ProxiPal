@@ -34,6 +34,7 @@ import com.mongodb.app.domain.Event
 @Composable
 fun EditEventBody(
     navigateBack: () -> Unit,
+    navigateToEvents:() -> Unit,
     eventsViewModel: EventsViewModel,
     eventId: String?,
     onConfirm:() -> Unit
@@ -151,7 +152,9 @@ fun EditEventBody(
                     modifier = Modifier.padding(start = 4.dp)
                 )
             }
-
+            TextButton(onClick = { event?.let { eventsViewModel.deleteEvent(it) };navigateToEvents()}) {
+                Text(text = stringResource(id = R.string.delete))
+            }
             TextButton(onClick = navigateBack) {
                 Text(text = stringResource(id = R.string.cancel))
             }

@@ -115,6 +115,8 @@ interface SyncRepository {
     suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType)
 
     suspend fun updateSubscriptionsEvents(subscriptionType: SubscriptionType)
+
+    suspend fun deleteEvent(event:Event)
     /**
      * Deletes a given task.
      */
@@ -433,6 +435,13 @@ class RealmSyncRepository(
             }
             add(query, subscriptionType.name)
         }
+    }
+
+    override suspend fun deleteEvent(event:Event){
+        realm.write{
+            delete(findLatest(event)!!)
+        }
+        realm.subscriptions.waitForSynchronization(10.seconds)
     }
 
 
@@ -894,6 +903,8 @@ class MockRepository : SyncRepository {
     override suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType) = Unit
 
     override suspend fun updateSubscriptionsEvents(subscriptionType: SubscriptionType) = Unit
+
+    override suspend fun deleteEvent(event:Event) = Unit
     override suspend fun deleteTask(task: Item) = Unit
     override fun isTaskMine(task: Item): Boolean = task.owner_id == MOCK_OWNER_ID_MINE
 

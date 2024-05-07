@@ -176,6 +176,16 @@ class EventsViewModel(
         }
     }
 
+    fun deleteEvent(event: Event) {
+        CoroutineScope(Dispatchers.IO).launch {
+            if (repository.isEventOwner(event)) {
+                runCatching {
+                    repository.deleteEvent(event)
+                }
+            }
+        }
+    }
+
 
 
     companion object {

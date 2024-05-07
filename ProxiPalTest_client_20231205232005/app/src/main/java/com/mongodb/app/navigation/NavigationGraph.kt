@@ -151,7 +151,7 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
         ) {
             backStackEntry ->
             val eventId = backStackEntry.arguments?.getString(Routes.EditEvent.EVENT_ID_KEY)
-            EditEventBody(navigateBack = { navController.popBackStack() }, eventsViewModel = eventsViewModel, eventId =eventId )
+            EditEventBody(navigateBack = { navController.popBackStack() },navigateToEvents={ navController.navigate(Routes.EventScreen.route)}, eventsViewModel = eventsViewModel, eventId =eventId )
             {
                 navController.popBackStack()
             }
