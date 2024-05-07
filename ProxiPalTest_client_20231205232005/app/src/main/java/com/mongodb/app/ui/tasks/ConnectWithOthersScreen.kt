@@ -49,6 +49,7 @@ import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.components.ProxiPalBottomAppBar
 import com.mongodb.app.ui.components.ProxipalTopAppBarWithBackButton
+import com.mongodb.app.ui.report.ReportViewModel
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
 import com.mongodb.app.ui.theme.Purple500
@@ -68,7 +69,8 @@ fun ConnectWithOthersScreen (
     toolbarViewModel: ToolbarViewModel,
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    userProfileViewModel: UserProfileViewModel
+    userProfileViewModel: UserProfileViewModel,
+    reportViewModel: ReportViewModel
 ){
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -80,7 +82,7 @@ fun ConnectWithOthersScreen (
         }
 
     ) {
-        LocationUpdatesScreen(userProfileViewModel = userProfileViewModel)
+        LocationUpdatesScreen(userProfileViewModel = userProfileViewModel, reportViewModel = reportViewModel)
     }
 }
 

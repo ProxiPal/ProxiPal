@@ -48,6 +48,7 @@ import com.mongodb.app.location.UserProfileDisplayList
 import com.mongodb.app.navigation.Routes
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
+import com.mongodb.app.ui.report.ReportViewModel
 import com.mongodb.app.ui.tasks.ConnectWithOthersScreen
 import com.mongodb.app.ui.theme.Blue
 import com.mongodb.app.ui.theme.MyApplicationTheme
@@ -96,6 +97,7 @@ fun AppOnboarding(
     toolbarViewModel: ToolbarViewModel,
     navController: NavHostController,
     homeViewModel: HomeViewModel,
+    reportViewModel: ReportViewModel,
     modifier: Modifier = Modifier
 )
 {
@@ -154,7 +156,8 @@ fun AppOnboarding(
                 ConnectWithOthersScreen(
                     toolbarViewModel = toolbarViewModel,
                     navController = navController,
-                    userProfileViewModel = userProfileViewModel
+                    userProfileViewModel = userProfileViewModel,
+                    reportViewModel = reportViewModel
                 )
                 CircleToBottomAppBar(circleOffset)
             }
@@ -201,6 +204,7 @@ fun OnboardingScreen(
     toolbarViewModel: ToolbarViewModel,
     navController: NavHostController,
     homeViewModel: HomeViewModel,
+    reportViewModel: ReportViewModel,
     modifier: Modifier = Modifier
 ) {
     Surface(color = Color.White) {
@@ -213,7 +217,8 @@ fun OnboardingScreen(
                 userProfileViewModel = userProfileViewModel,
                 toolbarViewModel = toolbarViewModel,
                 navController = navController,
-                homeViewModel = homeViewModel
+                homeViewModel = homeViewModel,
+                reportViewModel = reportViewModel
             )
         }
     }

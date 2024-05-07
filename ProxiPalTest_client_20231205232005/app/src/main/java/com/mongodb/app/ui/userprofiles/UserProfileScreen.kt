@@ -74,6 +74,7 @@ import com.mongodb.app.ui.components.MultiLineText
 import com.mongodb.app.ui.components.ProxiPalBottomAppBar
 import com.mongodb.app.ui.components.SingleLineText
 import com.mongodb.app.ui.events.EventsViewModel
+import com.mongodb.app.ui.report.ReportViewModel
 import com.mongodb.app.ui.tasks.TaskAppToolbar
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import kotlinx.coroutines.launch
@@ -194,7 +195,7 @@ class UserProfileScreen : ComponentActivity() {
 
         setContent {
             MyApplicationTheme {
-                NavigationGraph(toolbarViewModel, userProfileViewModel, homeViewModel = HomeViewModel(repository = repository), eventsViewModel = EventsViewModel(repository = repository))
+                NavigationGraph(toolbarViewModel, userProfileViewModel, homeViewModel = HomeViewModel(repository = repository), eventsViewModel = EventsViewModel(repository = repository), reportViewModel = ReportViewModel(repository=repository))
             }
         }
     }

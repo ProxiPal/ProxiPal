@@ -1,8 +1,5 @@
 package com.mongodb.app.location
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.ScrollableState
-import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,14 +11,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Text
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -30,6 +23,9 @@ import androidx.compose.ui.unit.dp
 import com.mongodb.app.R
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.domain.UserProfile
+import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
+import com.mongodb.app.ui.report.ReportDropDownMenu
+import com.mongodb.app.ui.report.ReportViewModel
 
 // Contribution: Marco Pacini
 /**
@@ -37,7 +33,7 @@ import com.mongodb.app.domain.UserProfile
  * as they are queried from a specified radius around the current device
  */
 @Composable
-fun UserProfileDisplayList(userProfiles: List<UserProfile>, isLookingForUsers: Boolean) {
+fun UserProfileDisplayList(userProfiles: List<UserProfile>, isLookingForUsers: Boolean, reportViewModel: ReportViewModel) {
     if (isLookingForUsers){
         if (userProfiles.isEmpty()){
             Box(Modifier.fillMaxSize()){
@@ -60,7 +56,7 @@ fun UserProfileDisplayList(userProfiles: List<UserProfile>, isLookingForUsers: B
                     contentPadding = PaddingValues(16.dp)
                 ) {
                     items(userProfiles) { userProfile ->
-                        UserProfileCard(userProfile, onItemClick = { /*TODO*/ })
+                        UserProfileCard(userProfile, onItemClick = { /*TODO*/ }, reportViewModel = reportViewModel )
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
@@ -71,7 +67,7 @@ fun UserProfileDisplayList(userProfiles: List<UserProfile>, isLookingForUsers: B
 
 // A card to display a single user profile in a clean UI
 @Composable
-fun UserProfileCard(userProfile: UserProfile, onItemClick: (UserProfile) -> Unit) {
+fun UserProfileCard(userProfile: UserProfile, onItemClick: (UserProfile) -> Unit, reportViewModel: ReportViewModel) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -91,6 +87,7 @@ fun UserProfileCard(userProfile: UserProfile, onItemClick: (UserProfile) -> Unit
                 text = userProfile.biography,
                 style = MaterialTheme.typography.bodySmall
             )
+            ReportDropDownMenu(reportedUser = userProfile._id.toString(),reportViewModel = reportViewModel)
         }
     }
 }
@@ -113,20 +110,20 @@ fun EmptyListCard() {
     }
 }
 
-@Preview
+//@Preview
 @Composable
-fun PreviewUserProfileDisplayList() {
+fun PreviewUserProfileDisplayList(reportViewModel:ReportViewModel) {
     val sampleUserProfiles = (1..10).map { index ->
         MockRepository.getMockUserProfile(index)
     }.toList()
 
-    UserProfileDisplayList(userProfiles = sampleUserProfiles, true)
+    UserProfileDisplayList(userProfiles = sampleUserProfiles, true, reportViewModel = reportViewModel)
 }
 
-@Preview
+//@Preview
 @Composable
-fun PreviewEmptyUserProfileDisplayList() {
+fun PreviewEmptyUserProfileDisplayList(reportViewModel:ReportViewModel) {
     val sampleUserProfiles = listOf<UserProfile>()
 
-    UserProfileDisplayList(userProfiles = sampleUserProfiles, true)
+    UserProfileDisplayList(userProfiles = sampleUserProfiles, true, reportViewModel = reportViewModel)
 }

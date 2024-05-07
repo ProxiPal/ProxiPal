@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import com.mongodb.app.R
 import com.mongodb.app.domain.Event
 import com.mongodb.app.location.UserProfileCard
+import com.mongodb.app.ui.report.ReportViewModel
 import com.mongodb.app.ui.theme.MyApplicationTheme
 
 
@@ -73,7 +74,9 @@ fun EventDetailsScreen(
     eventId: String?,
     eventsViewModel: EventsViewModel,
     navigateBack: () -> Unit,
+    reportViewModel: ReportViewModel,
     navigateToEdit: (String) -> Unit
+
 ) {
     var event by remember { mutableStateOf<Event?>(null) }
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -284,7 +287,7 @@ fun EventDetailsScreen(
                             contentPadding = PaddingValues(16.dp)
                         ) {
                             items(attendeesList) { userProfile ->
-                                UserProfileCard(userProfile, onItemClick = { /*TODO*/ })
+                                UserProfileCard(userProfile, onItemClick = { /*TODO*/ }, reportViewModel = reportViewModel)
                                 Spacer(modifier = Modifier.height(16.dp))
                             }
                         }

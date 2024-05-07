@@ -200,5 +200,13 @@
     <string name="time">Time:</string>
     <string name="Date">Date:</string>
 
+    <!-- Report -->
+    <string name="report">Report</string>
+    <string name="spam">Spam</string>
+    <string name="inappropriate">Inappropriate Content</string>
+    <string name="harassment">Harassment</string>
+    <string name="comments">Additional comments (optional):</string>
+    <string name="reportuser">Report User</string>
+    <string name="report_subheading">Please select a reason for reporting:</string>
 
 </resources>

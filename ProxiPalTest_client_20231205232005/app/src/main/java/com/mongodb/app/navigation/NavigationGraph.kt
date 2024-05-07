@@ -28,6 +28,7 @@ import com.mongodb.app.ui.events.EventDetailsScreen
 import com.mongodb.app.ui.events.EventScreen
 import com.mongodb.app.ui.events.EventsViewModel
 import com.mongodb.app.ui.events.SharedViewModel
+import com.mongodb.app.ui.report.ReportViewModel
 import com.mongodb.app.ui.userprofiles.IndustryScreen
 import com.mongodb.app.ui.userprofiles.InterestScreen
 
@@ -42,7 +43,7 @@ import com.mongodb.app.ui.userprofiles.UserProfileLayout
  * Navigation graph for the different screens in Proxipal
  */
 @Composable
-fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: UserProfileViewModel, homeViewModel: HomeViewModel, eventsViewModel: EventsViewModel) {
+fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: UserProfileViewModel, homeViewModel: HomeViewModel, eventsViewModel: EventsViewModel, reportViewModel: ReportViewModel) {
     var state by remember{ mutableStateOf(false)}
     val navController = rememberNavController()
     val sharedViewModel:SharedViewModel = viewModel()
@@ -87,7 +88,8 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
             ConnectWithOthersScreen(
                 toolbarViewModel = toolbarViewModel,
                 navController = navController,
-                userProfileViewModel = userProfileViewModel
+                userProfileViewModel = userProfileViewModel,
+                reportViewModel = reportViewModel
             )
         }
         composable(Routes.LocationPermissionsScreen.route) {
@@ -108,7 +110,8 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
                 userProfileViewModel = userProfileViewModel,
                 toolbarViewModel = toolbarViewModel,
                 navController = navController,
-                homeViewModel = homeViewModel
+                homeViewModel = homeViewModel,
+                reportViewModel = reportViewModel
                 )
         }
         composable(Routes.AdvancedScreenSettings.route){
@@ -139,10 +142,14 @@ fun NavigationGraph(toolbarViewModel: ToolbarViewModel, userProfileViewModel: Us
             arguments = listOf(navArgument(Routes.EventDetails.EVENT_ID_KEY) { type = NavType.StringType })
         ) { backStackEntry ->
             val eventId = backStackEntry.arguments?.getString(Routes.EventDetails.EVENT_ID_KEY)
-            EventDetailsScreen(eventId = eventId, eventsViewModel = eventsViewModel, navigateBack = { navController.popBackStack() }) {
-                eventId1  -> navController.navigate(Routes.EditEvent.createRoute(eventId1))
+            EventDetailsScreen(
+                eventId = eventId,
+                eventsViewModel =eventsViewModel ,
+                navigateBack = {navController.popBackStack() },
+                reportViewModel = reportViewModel,
+                navigateToEdit = {eventId1 -> navController.navigate(Routes.EditEvent.createRoute(eventId1))}
 
-            }
+            )
         }
 
         composable(
