@@ -170,8 +170,7 @@ fun LocationUpdatesContent(usePreciseLocation: Boolean, userProfileViewModel: Us
             )
         }
         UserProfileDisplayList(userProfiles = userProfileViewModel.nearbyUserProfiles, isLookingForUsers)
-        RateUserPopup(otherUserOwnerId = userProfileViewModel.getCurrentUserId(), userProfileViewModel = userProfileViewModel) {
-        }
+        //RateUserPopup(otherUserOwnerId = userProfileViewModel.getCurrentUserId(), userProfileViewModel = userProfileViewModel)
     }
 }
 

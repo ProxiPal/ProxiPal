@@ -12,6 +12,7 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,19 +25,26 @@ import androidx.compose.ui.window.Dialog
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.theme.Purple200
+import kotlinx.coroutines.delay
 
 @Composable
 fun RateUserPopup(
     otherUserOwnerId: String,
-    userProfileViewModel: UserProfileViewModel,
-    onClosePopup: () -> Unit
+    userProfileViewModel: UserProfileViewModel
 ) {
     val (ratingGiven, setRatingGiven) = remember { mutableStateOf(false) }
+    val (popupVisible, setPopupVisible) = remember { mutableStateOf(true) }
+
+    if (!popupVisible) {
+        // If popup is not visible, return empty composable
+        return
+    }
 
     Dialog(
         onDismissRequest = {
             if (!ratingGiven) {
-                onClosePopup()
+                // Close the popup if no rating is given
+                setPopupVisible(false)
             }
         }
     ) {
@@ -56,7 +64,8 @@ fun RateUserPopup(
                         onClick = {
                             userProfileViewModel.rateOtherUser(otherUserOwnerId, ratingGiven = true)
                             setRatingGiven(true)
-                            onClosePopup()
+                            // Close the popup after rating
+                            setPopupVisible(false)
                         },
                         enabled = !ratingGiven,
                         colors = ButtonDefaults.buttonColors(backgroundColor = Purple200)
@@ -68,7 +77,8 @@ fun RateUserPopup(
                         onClick = {
                             userProfileViewModel.rateOtherUser(otherUserOwnerId, ratingGiven = false)
                             setRatingGiven(true)
-                            onClosePopup()
+                            // Close the popup after rating
+                            setPopupVisible(false)
                         },
                         enabled = !ratingGiven,
                         colors = ButtonDefaults.buttonColors(backgroundColor = Purple200)
@@ -82,15 +92,14 @@ fun RateUserPopup(
 }
 
 
+
 @Preview
 @Composable
 fun RateUserPopupPreview() {
     val repository = MockRepository()
     var isPopupVisible by remember { mutableStateOf(true) }
     if (isPopupVisible) {
-        RateUserPopup(otherUserOwnerId = "otherUserId", userProfileViewModel = UserProfileViewModel(repository)) {
-            isPopupVisible = false
-        }
+        RateUserPopup(otherUserOwnerId = "otherUserId", userProfileViewModel = UserProfileViewModel(repository))
     }
 }
 
