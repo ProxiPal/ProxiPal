@@ -13,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import com.mongodb.app.TAG
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.SyncRepository
+import com.mongodb.app.data.messages.MessagesData
 import com.mongodb.app.friends.FriendRequestViewModel
 import com.mongodb.app.friends.Friendslist
 import com.mongodb.app.home.AdvancedScreenSettings
@@ -150,25 +151,13 @@ fun NavigationGraph(
             AdvancedScreenSettings(navController)
         }
         composable(Routes.MessagesScreen.route) {
-            // TODO Change these when the friends screen is implemented
-            val tempGmail = "65e96193c6e205c32b0915cc"
-            val tempStudent = "6570119696faac878ad696a5"
-
-            // The ID of the other user being messaged
-            var focusedUserId = ""
-            focusedUserId = if (currentUserId == tempGmail) {
-                tempStudent
-            } else {
-                tempGmail
-            }
-            Log.i(
-                TAG(),
-                "NavGraph: Messaging with user = \"$focusedUserId\""
-            )
-
             val usersInvolved: SortedSet<String> = sortedSetOf()
             usersInvolved.add(currentUserId)
-            usersInvolved.add(focusedUserId)
+            usersInvolved.add(MessagesData.userIdInFocus.value)
+            Log.i(
+                TAG(),
+                "Start messages screen between $currentUserId && ${MessagesData.userIdInFocus.value}"
+            )
 
             MessagesScreenLayout(
                 navController = navController,
@@ -191,6 +180,5 @@ fun NavigationGraph(
                 userProfileViewModel = userProfileViewModel
             )
         }
-
     }
 }

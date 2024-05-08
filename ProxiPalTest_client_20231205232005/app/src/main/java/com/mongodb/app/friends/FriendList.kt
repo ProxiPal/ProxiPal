@@ -21,12 +21,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.navigation.NavHostController
+import com.mongodb.app.data.messages.MessagesData
+import com.mongodb.app.navigation.NavigationGraph
 
 //ALL ADDED BY GEORGE FU
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Friendslist(
-    navController: NavController,
+    navController: NavHostController,
     viewModel: UserProfileViewModel,
     friendRequestViewModel: FriendRequestViewModel
 ) {
@@ -67,7 +70,9 @@ fun Friendslist(
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent
                     ),
-                    modifier = Modifier.fillMaxWidth().padding(start = 50.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 50.dp)
                 )
             },
             colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -93,14 +98,18 @@ fun Friendslist(
 
         LazyColumn {
             items(friends) { friend ->
-                FriendItem(friend = friend, viewModel = viewModel)
+                FriendItem(friend = friend, viewModel = viewModel, navController = navController)
             }
         }
     }
 }
 
 @Composable
-fun FriendItem(friend: String, viewModel: UserProfileViewModel) {
+fun FriendItem(
+    friend: String,
+    viewModel: UserProfileViewModel,
+    navController: NavHostController
+) {
     var showMenu by remember { mutableStateOf(false) }
 
     Card(
@@ -129,6 +138,13 @@ fun FriendItem(friend: String, viewModel: UserProfileViewModel) {
                 expanded = showMenu,
                 onDismissRequest = { showMenu = false }
             ) {
+                DropdownMenuItem(
+                    text = { Text("Start messaging") },
+                    onClick = {
+                        MessagesData.updateUserIdInFocus(friend)
+                        navController.navigate(Routes.MessagesScreen.route)
+                    }
+                )
                 DropdownMenuItem(
                     text = { Text("Delete Friend") },
                     onClick = {

@@ -1,5 +1,7 @@
 package com.mongodb.app.data.messages
 
+import androidx.compose.runtime.mutableStateOf
+
 
 /*
 Contributions:
@@ -24,3 +26,17 @@ const val LONG_MESSAGE_CHARACTER_THRESHOLD = 10
  * How many users maximum can be in a conversation at once
  */
 const val MAX_USERS_PER_CONVERSATION = 2
+
+class MessagesData {
+    companion object{
+        private val _userIdInFocus = mutableStateOf("")
+        val userIdInFocus
+            get() = _userIdInFocus
+
+        fun updateUserIdInFocus(userId: String){
+            if (userId.isNotEmpty() && userId.isNotBlank()){
+                userIdInFocus.value = userId
+            }
+        }
+    }
+}
