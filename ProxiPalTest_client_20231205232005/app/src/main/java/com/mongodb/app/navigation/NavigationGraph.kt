@@ -1,6 +1,7 @@
 package com.mongodb.app.navigation
 
 import ProfileSetupScaffold
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -9,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.mongodb.app.TAG
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.friends.FriendRequestViewModel
@@ -35,6 +37,7 @@ import com.mongodb.app.ui.userprofiles.InterestScreen
 import com.mongodb.app.ui.userprofiles.UserProfileLayout
 import io.realm.kotlin.mongodb.exceptions.SyncException
 import io.realm.kotlin.mongodb.sync.SyncSession
+import java.util.SortedSet
 
 
 //TODO add more parameters as needed
@@ -58,122 +61,136 @@ fun NavigationGraph(
     friendRequestViewModel: FriendRequestViewModel
 ) {
 
-    // For messages screen navigation
-    // TODO These values are hardcoded for now
-    val usersInvolved = sortedSetOf(
-        // Gmail account
-        "65e96193c6e205c32b0915cc",
-        // Student account
-        "6570119696faac878ad696a5"
-    )
+    var currentUserId by remember { mutableStateOf("") }
 
-        var state by remember { mutableStateOf(false) }
-        val navController = rememberNavController()
-        //APRIL
-        val syncErrorHandling: (SyncSession, SyncException) -> Unit = { session, error ->
-            println("Sync error: ${error.message}")
-        }
-        //APRIL
-        val repository: SyncRepository = RealmSyncRepository(syncErrorHandling)
+    var state by remember { mutableStateOf(false) }
+    val navController = rememberNavController()
+    //APRIL
+    val syncErrorHandling: (SyncSession, SyncException) -> Unit = { session, error ->
+        println("Sync error: ${error.message}")
+    }
+    //APRIL
+    val repository: SyncRepository = RealmSyncRepository(syncErrorHandling)
 
-        var startDest = Routes.UserProfileScreen.route
-        if (userProfileViewModel.userProfileListState.isEmpty()) {
-            startDest = Routes.OnboardingScreen.route
-        }
-        NavHost(navController = navController, startDestination = startDest) {
-            composable(Routes.UserProfileScreen.route) {
-                //checks if its the user's first time login in, added by Vichet Chim
-                if (userProfileViewModel.userProfileListState.isEmpty()) {
-                    state = true
-                }
-                if (state) { // displays user setup screens
-                    ProfileSetupScaffold(
-                        userProfileViewModel = userProfileViewModel,
-                        toolbarViewModel = toolbarViewModel,
-                        navController = navController,
-                        onPreviousClicked = { /*TODO*/ },
-                        onNextClicked = { navController.navigate(Routes.UserInterestsScreen.route) })
-                } else {
-                    UserProfileLayout(
-                        userProfileViewModel = userProfileViewModel,
-                        toolbarViewModel = toolbarViewModel,
-                        homeViewModel = homeViewModel,
-                        navController = navController
-                    )
-                }
+    var startDest = Routes.UserProfileScreen.route
+    if (userProfileViewModel.userProfileListState.isEmpty()) {
+        startDest = Routes.OnboardingScreen.route
+    }
+    NavHost(navController = navController, startDestination = startDest) {
+        composable(Routes.UserProfileScreen.route) {
+            //checks if its the user's first time login in, added by Vichet Chim
+            if (userProfileViewModel.userProfileListState.isEmpty()) {
+                state = true
             }
-            composable(Routes.UserInterestsScreen.route) {
-                InterestScreen(userProfileViewModel = userProfileViewModel,
-                    onPreviousClicked = { navController.popBackStack() },
-                    onNextClicked = { navController.navigate(Routes.UserIndustriesScreen.route) })
-            }
-            composable(Routes.UserIndustriesScreen.route) {
-                IndustryScreen(userProfileViewModel = userProfileViewModel,
-                    onPreviousClicked = { navController.popBackStack() },
-                    onNextClicked = {
-                        state = false;navController.popBackStack();navController.popBackStack()
-                    }) //end of user setup screen
-            }
-            composable(Routes.ConnectWithOthersScreen.route) {
-                ConnectWithOthersScreen(
-                    toolbarViewModel = toolbarViewModel,
-                    navController = navController,
-                    userProfileViewModel = userProfileViewModel
-                )
-            }
-            composable(Routes.LocationPermissionsScreen.route) {
-                LocationPermissionScreen(navController)
-            }
-            //march7
-            composable(Routes.HomeScreen.route) {
-                HomeScreen(
-                    navController = navController,
-                    viewModel = homeViewModel,
-                    userProfileViewModel = userProfileViewModel
-                )
-            }
-            composable(Routes.ScreenSettings.route) {
-                ScreenSettings(navController = navController)
-            }
-            composable(Routes.FilterScreen.route) {
-                FilterScreen(
-                    navController = navController,
-                    viewModel = userProfileViewModel
-                ) //march17
-            }
-            composable(Routes.OnboardingScreen.route) {
-                OnboardingScreen(
+            if (state) { // displays user setup screens
+                ProfileSetupScaffold(
                     userProfileViewModel = userProfileViewModel,
                     toolbarViewModel = toolbarViewModel,
                     navController = navController,
-                    homeViewModel = homeViewModel
+                    onPreviousClicked = { /*TODO*/ },
+                    onNextClicked = { navController.navigate(Routes.UserInterestsScreen.route) })
+            } else {
+                UserProfileLayout(
+                    userProfileViewModel = userProfileViewModel,
+                    toolbarViewModel = toolbarViewModel,
+                    homeViewModel = homeViewModel,
+                    navController = navController
                 )
+                currentUserId = userProfileViewModel.repository.getCurrentUserId()
             }
-            composable(Routes.AdvancedScreenSettings.route) {
-                AdvancedScreenSettings(navController)
-            }
-            composable(Routes.MessagesScreen.route) {
-                MessagesScreenLayout(
-                    navController = navController,
-                    messagesViewModel = messagesViewModel,
-                    conversationUsersInvolved = usersInvolved,
-                    blockingViewModel = blockingViewModel,
-                    censoringViewModel = censoringViewModel
-                )
-            }
-            composable(Routes.FriendListScreen.route) {
-                Friendslist(
-                    navController = navController,
-                    viewModel = userProfileViewModel,
-                    friendRequestViewModel = friendRequestViewModel
-                )
-            }
-            composable(Routes.FriendRequestScreen.route) {
-                FriendRequestScreen(
-                    friendRequestViewModel = friendRequestViewModel,
-                    userProfileViewModel = userProfileViewModel
-                )
-            }
-
         }
+        composable(Routes.UserInterestsScreen.route) {
+            InterestScreen(userProfileViewModel = userProfileViewModel,
+                onPreviousClicked = { navController.popBackStack() },
+                onNextClicked = { navController.navigate(Routes.UserIndustriesScreen.route) })
+        }
+        composable(Routes.UserIndustriesScreen.route) {
+            IndustryScreen(userProfileViewModel = userProfileViewModel,
+                onPreviousClicked = { navController.popBackStack() },
+                onNextClicked = {
+                    state = false;navController.popBackStack();navController.popBackStack()
+                }) //end of user setup screen
+        }
+        composable(Routes.ConnectWithOthersScreen.route) {
+            ConnectWithOthersScreen(
+                toolbarViewModel = toolbarViewModel,
+                navController = navController,
+                userProfileViewModel = userProfileViewModel
+            )
+        }
+        composable(Routes.LocationPermissionsScreen.route) {
+            LocationPermissionScreen(navController)
+        }
+        //march7
+        composable(Routes.HomeScreen.route) {
+            HomeScreen(
+                navController = navController,
+                viewModel = homeViewModel,
+                userProfileViewModel = userProfileViewModel
+            )
+        }
+        composable(Routes.ScreenSettings.route) {
+            ScreenSettings(navController = navController)
+        }
+        composable(Routes.FilterScreen.route) {
+            FilterScreen(
+                navController = navController,
+                viewModel = userProfileViewModel
+            ) //march17
+        }
+        composable(Routes.OnboardingScreen.route) {
+            OnboardingScreen(
+                userProfileViewModel = userProfileViewModel,
+                toolbarViewModel = toolbarViewModel,
+                navController = navController,
+                homeViewModel = homeViewModel
+            )
+        }
+        composable(Routes.AdvancedScreenSettings.route) {
+            AdvancedScreenSettings(navController)
+        }
+        composable(Routes.MessagesScreen.route) {
+            // TODO Change these when the friends screen is implemented
+            val tempGmail = "65e96193c6e205c32b0915cc"
+            val tempStudent = "6570119696faac878ad696a5"
+
+            // The ID of the other user being messaged
+            var focusedUserId = ""
+            focusedUserId = if (currentUserId == tempGmail) {
+                tempStudent
+            } else {
+                tempGmail
+            }
+            Log.i(
+                TAG(),
+                "NavGraph: Messaging with user = \"$focusedUserId\""
+            )
+
+            val usersInvolved: SortedSet<String> = sortedSetOf()
+            usersInvolved.add(currentUserId)
+            usersInvolved.add(focusedUserId)
+
+            MessagesScreenLayout(
+                navController = navController,
+                messagesViewModel = messagesViewModel,
+                conversationUsersInvolved = usersInvolved,
+                blockingViewModel = blockingViewModel,
+                censoringViewModel = censoringViewModel
+            )
+        }
+        composable(Routes.FriendListScreen.route) {
+            Friendslist(
+                navController = navController,
+                viewModel = userProfileViewModel,
+                friendRequestViewModel = friendRequestViewModel
+            )
+        }
+        composable(Routes.FriendRequestScreen.route) {
+            FriendRequestScreen(
+                friendRequestViewModel = friendRequestViewModel,
+                userProfileViewModel = userProfileViewModel
+            )
+        }
+
     }
+}
