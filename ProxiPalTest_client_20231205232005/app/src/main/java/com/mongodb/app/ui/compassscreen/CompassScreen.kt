@@ -3,16 +3,19 @@
 package com.mongodb.app.ui.compassscreen
 
 import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -42,7 +46,6 @@ import com.mongodb.app.ui.components.SingleButtonRow
 import com.mongodb.app.ui.components.SingleTextRow
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
-import com.mongodb.app.ui.userprofiles.UserProfileScreen
 
 
 /*
@@ -51,6 +54,7 @@ Contributions:
  */
 
 
+// region Functions
 /**
  * Displays the screen that points matching users toward each other
  */
@@ -92,7 +96,43 @@ fun CompassScreenLayout(
             "CompassPermissionHandler",
             "1 or more permissions are not granted"
         )
-        compassPermissionHandler.requestPermissions()
+        CompassPermissionsGrantLayout(
+            compassPermissionHandler = compassPermissionHandler
+        )
+    }
+}
+
+@Composable
+fun CompassPermissionsGrantLayout(
+    compassPermissionHandler: CompassPermissionHandler,
+    modifier: Modifier = Modifier
+){
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .fillMaxSize()
+    ){
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+        ){
+            Text(
+                text = "Some permissions need to be granted to use the compass " +
+                        "feature",
+                softWrap = true,
+                textAlign = TextAlign.Center
+                )
+        }
+        Spacer(
+            modifier = Modifier
+                .padding(start = 4.dp)
+        )
+        Button(
+            onClick = { compassPermissionHandler.requestPermissions() }
+        ) {
+            Text(text = "Retry")
+        }
     }
 }
 
@@ -310,21 +350,45 @@ fun CompassScreenCurrentLocations(
         }
     }
 }
+// endregion Functions
 
+
+// region Previews
 @Preview(showBackground = true)
 @Composable
 fun CompassScreenLayoutPreview() {
     MyApplicationTheme {
         val repository = MockRepository()
-        val compassViewModel = CompassViewModel(repository = repository)
+        val activity = ComponentActivity()
+        val compassViewModel = CompassViewModel(repository)
+        val compassPermissionHandler = CompassPermissionHandler(
+            repository,
+            activity,
+            compassViewModel
+        )
         CompassScreenLayout(
             compassViewModel = compassViewModel,
-            compassPermissionHandler = CompassPermissionHandler(
-                repository = repository,
-                activity = UserProfileScreen(),
-                compassViewModel = compassViewModel
-            ),
+            compassPermissionHandler = compassPermissionHandler,
             navController = rememberNavController()
         )
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun CompassPermissionsGrantLayoutPreview(){
+    MyApplicationTheme {
+        val repository = MockRepository()
+        val activity = ComponentActivity()
+        val compassViewModel = CompassViewModel(repository)
+        val compassPermissionHandler = CompassPermissionHandler(
+            repository,
+            activity,
+            compassViewModel
+        )
+        CompassPermissionsGrantLayout(
+            compassPermissionHandler
+        )
+    }
+}
+// endregion Previews

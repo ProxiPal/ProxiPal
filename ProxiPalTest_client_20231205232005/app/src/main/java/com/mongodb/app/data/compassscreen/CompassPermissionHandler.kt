@@ -1,5 +1,6 @@
 package com.mongodb.app.data.compassscreen
 
+import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
@@ -149,7 +150,6 @@ class CompassPermissionHandler(
     }
 
     private fun requestPermissionsNormal(){
-        Log.e("PermissionHandler", "Start normal")
         ActivityCompat.requestPermissions(
             activity,
             NORMAL_COMPASS_SCREEN_PERMISSIONS,
@@ -159,10 +159,9 @@ class CompassPermissionHandler(
     }
 
     private fun requestPermissionsDangerous(){
-        Log.e("PermissionHandler", "Start dangerous")
         ActivityCompat.requestPermissions(
             activity,
-            DANGEROUS_COMPASS_SCREEN_PERMISSIONS,
+            arrayOf(ACCESS_FINE_LOCATION),
             COMPASS_PERMISSION_REQUEST_CODE
         )
         Log.e("PermissionHandler", "End dangerous")
