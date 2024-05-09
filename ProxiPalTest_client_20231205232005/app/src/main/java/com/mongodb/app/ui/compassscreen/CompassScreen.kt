@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.mongodb.app.R
@@ -110,6 +111,7 @@ fun CompassScreenLayout(
             CompassScreenBodyContent(
                 compassViewModel = compassViewModel,
                 compassNearbyAPI = compassPermissionHandler.compassNearbyAPI,
+                compassPermissionHandler = compassPermissionHandler,
                 navController = navController,
                 modifier = Modifier
                     .padding(innerPadding)
@@ -200,6 +202,7 @@ fun CompassScreenTopBar(
 fun CompassScreenBodyContent(
     compassViewModel: CompassViewModel,
     compassNearbyAPI: CompassNearbyAPI,
+    compassPermissionHandler: CompassPermissionHandler,
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
@@ -209,6 +212,11 @@ fun CompassScreenBodyContent(
         // TODO Remove this later; Right now is for temporarily and quickly showing compass updating
         compassNearbyAPI.updateConnectionType(CompassConnectionType.MEETING)
     }
+    val onCancelButtonClick = {
+        compassPermissionHandler.endSetup()
+        navController.navigate(Routes.FriendListScreen.route)
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -235,7 +243,7 @@ fun CompassScreenBodyContent(
                 CompassScreenReturnButton(
                     compassNearbyAPI = compassNearbyAPI,
                     onButtonClick = {
-                        navController.navigate(Routes.FriendListScreen.route)
+                        onCancelButtonClick()
 //                        compassNearbyAPI.updateConnectionType(CompassConnectionType.OFFLINE)
                     }
                 )
@@ -252,7 +260,7 @@ fun CompassScreenBodyContent(
                 CompassScreenReturnButton(
                     compassNearbyAPI = compassNearbyAPI,
                     onButtonClick = {
-                        navController.navigate(Routes.FriendListScreen.route)
+                        onCancelButtonClick()
 //                        onBackButtonClick()
                     }
                 )
@@ -268,7 +276,7 @@ fun CompassScreenBodyContent(
                 CompassScreenReturnButton(
                     compassNearbyAPI = compassNearbyAPI,
                     onButtonClick = {
-                        navController.navigate(Routes.FriendListScreen.route)
+                        onCancelButtonClick()
 //                        onBackButtonClick()
                     }
                 )
