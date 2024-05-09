@@ -46,6 +46,7 @@ fun ScreenSettings(navController: NavHostController) {
     val context = LocalContext.current
     val gradientColors = listOf(Color(0xFFFFAA33), Color(0xFFFFD700))
 
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
