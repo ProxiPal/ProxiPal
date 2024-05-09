@@ -2,8 +2,11 @@
 
 package com.mongodb.app.ui.compassscreen
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.annotation.RequiresPermission
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -60,6 +63,9 @@ Contributions:
  * Displays the screen that points matching users toward each other
  */
 @OptIn(ExperimentalMaterial3Api::class)
+@RequiresPermission(
+    anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
+)
 @Composable
 fun CompassScreenLayout(
     compassViewModel: CompassViewModel,
@@ -88,15 +94,6 @@ fun CompassScreenLayout(
                     .padding(innerPadding)
             )
         }
-//    else{
-//        Log.e(
-//            "CompassPermissionHandler",
-//            "1 or more permissions are not granted"
-//        )
-//        CompassPermissionsGrantLayout(
-//            compassPermissionHandler = compassPermissionHandler
-//        )
-//    }
 }
 
 @Composable
@@ -371,6 +368,7 @@ fun CompassScreenCurrentLocations(
 
 
 // region Previews
+@SuppressLint("MissingPermission")
 @Preview(showBackground = true)
 @Composable
 fun CompassScreenLayoutPreview() {

@@ -1,17 +1,23 @@
 package com.mongodb.app.navigation
 
 import ProfileSetupScaffold
+import android.Manifest
+import android.content.pm.PackageManager
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.core.app.ActivityCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.SyncRepository
+import com.mongodb.app.data.compassscreen.COMPASS_PERMISSION_REQUEST_CODE
 import com.mongodb.app.data.compassscreen.CompassPermissionHandler
+import com.mongodb.app.data.compassscreen.DANGEROUS_COMPASS_SCREEN_PERMISSIONS
 import com.mongodb.app.data.messages.MessagesData
 import com.mongodb.app.friends.FriendRequestViewModel
 import com.mongodb.app.friends.Friendslist
@@ -179,6 +185,35 @@ fun NavigationGraph(
             )
         }
         composable(Routes.CompassScreen.route){
+            if (ActivityCompat.checkSelfPermission(
+                    compassPermissionHandler.activity,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                    compassPermissionHandler.activity,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+//                return@composable
+                Log.i(
+                    "NavGraph",
+                    "Permissions not granted; Requesting them now"
+                )
+                ActivityCompat.requestPermissions(
+                    compassPermissionHandler.activity,
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ),
+                    COMPASS_PERMISSION_REQUEST_CODE
+                )
+            }
             CompassScreenLayout(
                 compassViewModel = compassViewModel,
                 compassPermissionHandler = compassPermissionHandler,
