@@ -14,11 +14,7 @@ import android.net.wifi.p2p.WifiP2pManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.mongodb.app.TAG
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.net.ServerSocket
+import com.mongodb.app.data.compassscreen.COMPASS_PERMISSION_REQUEST_CODE
 
 
 /*
@@ -77,19 +73,6 @@ class WiFiDirectBroadcastReceiver(
     /*
     ===== Functions =====
      */
-    /**
-     * A temporary infinite loop for testing the peer discovery and connection abilities
-     */
-    fun tempCheckForPeers(){
-        CoroutineScope(Dispatchers.Main).launch {
-            while (true){
-                discoverPeers()
-                requestPeers()
-                delay(8000)
-            }
-        }
-    }
-
     @SuppressLint("MissingPermission")
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != null){
@@ -225,8 +208,16 @@ class WiFiDirectBroadcastReceiver(
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
             Log.i(
-                TAG(),
-                "WiFiDirectBroadcastReceiver: Permissions not granted"
+                "WiFiDirectBroadcastReceiver",
+                "Permissions not granted; Requesting them now"
+            )
+            ActivityCompat.requestPermissions(
+                activity,
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.NEARBY_WIFI_DEVICES
+                ),
+                COMPASS_PERMISSION_REQUEST_CODE
             )
             return
         }

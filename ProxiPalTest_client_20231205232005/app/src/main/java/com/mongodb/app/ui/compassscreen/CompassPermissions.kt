@@ -39,6 +39,9 @@ Contributions:
  * Displays the screen for the user to accept or deny permissions needed for communicating
  * with their matched user. Should show this screen first, if necessary, before CompassScreen
  */
+@Deprecated(
+    message = "Not currently being updated (or in use)"
+)
 class CompassPermissions : ComponentActivity() {
     /*
     ===== Functions =====

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SpeechRecognitionActivity">
+
+
+    <!--creating a simple image view for mic-->
+    <ImageView
+        android:id="@+id/idIVMic"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="100dp"
+        android:src="@drawable/microphone"
+        />
+
+    <!--creating text view on below line-->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/idIVMic"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:text="Click on Mic to speak"
+        android:textAlignment="center"
+        android:textAllCaps="false"
+        android:textColor="@color/black"
+        android:textSize="30sp" />
+
+    <!--creating a text view for displaying
+        output on below line-->
+    <TextView
+        android:id="@+id/idTVOutput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/idIVMic"
+        android:layout_marginTop="70dp"
+        android:gravity="center"
+        android:text="Waiting for audio.."
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:inputType="none"
+        android:textIsSelectable="true"
+        android:textSize="35sp" />
+
+</RelativeLayout>

@@ -49,12 +49,14 @@
     <!--    Start compass screen strings -->
     <!--    The "%.3f" formats the measurements to 3 decimal places -->
     <string name="compass_screen_bearing_message">Bearing angle (in degrees): %.3f</string>
-    <string name="compass_screen_distance_message">Distance from match (in km): %.3f</string>
-    <string name="compass_screen_top_bar_header">Match found!</string>
+    <string name="compass_screen_distance_message_metric">Distance from match (in km): %.3f</string>
+    <string name="compass_screen_distance_message_imperial">Distance from match (in mi): %.3f</string>
+    <string name="compass_screen_top_bar_header">Compass data</string>
     <string name="compass_screen_awaiting_connection_message">Waiting for match to accept connection</string>
     <string name="compass_screen_canceled_connection_message">The connection was dropped</string>
     <string name="compass_screen_return_button">Return</string>
     <string name="compass_screen_cancel_button">Cancel</string>
+    <string name="compass_screen_refresh_button">Refresh location data</string>
 <!--    End compass screen strings-->
 <!--    Start compass permissions screen strings -->
     <string name="compass_permissions_required_permissions_list">Required permissions: %s</string>
@@ -85,7 +87,22 @@
     <string name="messages_screen_message_reference_invalid">\{null\}</string>
     <string name="messages_screen_message_reference_short">\"%s\"</string>
     <string name="messages_screen_message_reference_long">\"%s…\"</string>
+    <string name="messages_screen_user_blocked_notifier">You cannot view your message history with this user. Unblock them first to continue messaging.</string>
 <!--    End messages screen strings-->
+<!--    Start of blocking/censoring strings -->
+    <string name="blocking_contextual_menu_block_user">Block</string>
+    <string name="blocking_contextual_menu_unblock_user">Unblock</string>
+    <string name="blocking_alert_block_title">Block \"%s\"?</string>
+    <string name="blocking_alert_unblock_title">Unblock \"%s\"?</string>
+    <string name="blocking_alert_block_text">Are you sure you want to block this user? You will no longer see your message history with this user.</string>
+    <string name="blocking_alert_unblock_text">Are you sure you want to unblock this user?</string>
+    <string name="blocking_alert_cancel">Cancel</string>
+    <string name="blocking_alert_confirm">Confirm</string>
+    <string name="blocking_snackbar_block_text">User has been blocked</string>
+    <string name="blocking_snackbar_unblock_text">User has been unblocked</string>
+    <string name="censoring_enable_text_censoring">Censor</string>
+    <string name="censoring_disable_text_censoring">Uncensor</string>
+<!--    End of blocking/censoring strings -->
 
     <!-- NewFriendRequestNotificationService strings
          Programmer:Brian Poon 2/21/24   -->
@@ -188,4 +205,8 @@
     <string name="confirm">Confirm</string>
 
 
+<!--    Start of friends list strings -->
+    <string name="friends_list_navigate_to_compass_screen">See compass</string>
+    <string name="friends_list_navigate_to_messages_screen">Message</string>
+<!--    End of friends list strings -->
 </resources>

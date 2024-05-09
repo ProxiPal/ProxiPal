@@ -1,10 +1,6 @@
 package com.mongodb.app.ui.messages
 
-import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.MoreVert
@@ -57,32 +54,33 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.mongodb.app.R
 import com.mongodb.app.TAG
-import com.mongodb.app.data.MockRepository
-import com.mongodb.app.data.RealmSyncRepository
+import com.mongodb.app.data.blocking_censoring.MockBlockingCensoringData
 import com.mongodb.app.data.messages.LONG_MESSAGE_CHARACTER_THRESHOLD
 import com.mongodb.app.data.messages.MESSAGE_WIDTH_WEIGHT
 import com.mongodb.app.data.messages.MessagesUserAction
-import com.mongodb.app.data.messages.MockConversationRepository
-import com.mongodb.app.data.messages.MockMessagesRepository
 import com.mongodb.app.domain.FriendMessage
+import com.mongodb.app.navigation.Routes
+import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
+import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
+import com.mongodb.app.presentation.blocking_censoring.censor
 import com.mongodb.app.presentation.messages.MessagesViewModel
+import com.mongodb.app.ui.blocking_censoring.CensoringContextualMenu
 import com.mongodb.app.ui.theme.MessageColorMine
 import com.mongodb.app.ui.theme.MessageColorOther
 import com.mongodb.app.ui.theme.MessageInputBackgroundColor
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
-import kotlinx.coroutines.launch
-import java.util.Calendar
-import java.util.Date
 import java.util.SortedSet
 
 
 /*
 Contributions:
-- Kevin Kubota (everything in this file, except for potential screen navigation logic)
+- Kevin Kubota (Review #3: everything in this file, except for potential screen navigation logic)
+- Kevin Kubota (Review #4: updated UI to allow user blocking and text censoring)
  */
 
 
@@ -92,76 +90,77 @@ val String.Companion.empty: String
 // endregion Extensions
 
 
-class MessagesScreen : ComponentActivity() {
-    // region Variables
-    private val repository = RealmSyncRepository { _, _ ->
-        lifecycleScope.launch {
-        }
-    }
-
-    private val messagesViewModel: MessagesViewModel by viewModels {
-        MessagesViewModel.factory(
-            repository = repository,
-            messagesRealm = repository,
-            conversationsRealm = repository,
-            this
-        )
-    }
-    // endregion Variables
-
-
-    // region Functions
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        // TODO These values are hardcoded for now
-        val usersInvolved = sortedSetOf(
-            // Gmail account
-            "65e96193c6e205c32b0915cc",
-            // Student account
-            "6570119696faac878ad696a5"
-        )
-
-        setContent {
-            MessagesScreenLayout(
-                messagesViewModel = messagesViewModel,
-                conversationUsersInvolved = usersInvolved
-            )
-        }
-    }
-    // endregion Functions
-}
-
-
 // region Functions
 /**
  * Displays the entire messages screen
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessagesScreenLayout(
+    navController: NavHostController,
     messagesViewModel: MessagesViewModel,
     conversationUsersInvolved: SortedSet<String>,
+    blockingViewModel: BlockingViewModel,
+    censoringViewModel: CensoringViewModel,
     modifier: Modifier = Modifier
 ) {
     messagesViewModel.updateUsersInvolved(
         usersInvolved = conversationUsersInvolved
     )
+    blockingViewModel.updateUserInFocus(
+        userIdInFocus = messagesViewModel.otherUserProfileId.value
+    )
+    censoringViewModel.updateShouldCensorTextState()
 
     Scaffold(
         topBar = {
             MessagesTopBar(
-                messagesViewModel = messagesViewModel
+                navController = navController,
+                messagesViewModel = messagesViewModel,
+                censoringViewModel = censoringViewModel,
             )
         },
         modifier = modifier
         // Pad the body of content so it does not get cut off by the scaffold top bar
     ) { innerPadding ->
-        MessagesBodyContent(
-            messagesViewModel = messagesViewModel,
+        // If the current user has the other user blocked, show a different UI
+        // However, do not show this for the blocked user for privacy reasons
+        // ... (Do not want users to know someone has blocked them)
+        if (blockingViewModel.isUserInFocusBlocked){
+            MessagesBlockedNotifier(
+                modifier = Modifier
+                    .padding(innerPadding)
+            )
+        }
+        else{
+            MessagesBodyContent(
+                messagesViewModel = messagesViewModel,
+                censoringViewModel = censoringViewModel,
+                modifier = Modifier
+                    .padding(innerPadding)
+            )
+        }
+    }
+}
+
+@Composable
+fun MessagesBlockedNotifier(
+    modifier: Modifier = Modifier
+){
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+    ){
+        Row(
             modifier = Modifier
-                .padding(innerPadding)
-        )
+                .fillMaxWidth()
+                .padding(
+                    all = dimensionResource(id = R.dimen.messages_screen_user_blocked_notifier_all_padding)
+                )
+        ){
+            Text(
+                text = stringResource(id = R.string.messages_screen_user_blocked_notifier)
+            )
+        }
     }
 }
 
@@ -171,16 +170,28 @@ fun MessagesScreenLayout(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessagesTopBar(
+    navController: NavHostController,
     messagesViewModel: MessagesViewModel,
+    censoringViewModel: CensoringViewModel,
     modifier: Modifier = Modifier
 ) {
-    // Back button is automatically handled by the navigation code (?)
-    // ... so it's not programmed here
     CenterAlignedTopAppBar(
         title = {
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
             ) {
+                // Back button
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .clickable {
+                            navController.navigate(Routes.FriendListScreen.route)
+                        }
+                )
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -199,6 +210,9 @@ fun MessagesTopBar(
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
+                CensoringContextualMenu(
+                    censoringViewModel = censoringViewModel
+                )
             }
         },
         colors = TopAppBarDefaults.smallTopAppBarColors(
@@ -214,6 +228,7 @@ fun MessagesTopBar(
 @Composable
 fun MessagesBodyContent(
     messagesViewModel: MessagesViewModel,
+    censoringViewModel: CensoringViewModel,
     modifier: Modifier = Modifier
 ) {
     if (messagesViewModel.isDeletingMessage()) {
@@ -260,7 +275,8 @@ fun MessagesBodyContent(
                     SingleMessageContainer(
                         friendMessage = friendMessage,
                         isSenderMe = messagesViewModel.isMessageMine(friendMessage),
-                        messagesViewModel = messagesViewModel
+                        messagesViewModel = messagesViewModel,
+                        censoringViewModel = censoringViewModel
                     )
                     // If the sent message is the last in the list
                     // ... or in other words the first ever message sent
@@ -321,6 +337,7 @@ fun SingleMessageContainer(
     friendMessage: FriendMessage,
     isSenderMe: Boolean,
     messagesViewModel: MessagesViewModel,
+    censoringViewModel: CensoringViewModel,
     modifier: Modifier = Modifier
 ) {
     val rowArrangement =
@@ -360,6 +377,7 @@ fun SingleMessageContainer(
                 SingleMessage(
                     message = friendMessage.message,
                     isSenderMe = isSenderMe,
+                    censoringViewModel = censoringViewModel,
                     modifier = Modifier
                 )
                 Row(
@@ -406,6 +424,7 @@ fun SingleMessageContainer(
 fun SingleMessage(
     message: String,
     isSenderMe: Boolean,
+    censoringViewModel: CensoringViewModel,
     modifier: Modifier = Modifier
 ) {
     val messageShape =
@@ -438,7 +457,11 @@ fun SingleMessage(
         modifier = modifier
     ) {
         Text(
-            text = message,
+            text = if (censoringViewModel.isCensoringText.value){
+                message.censor(censoringViewModel.profanityListAll)
+            } else{
+                message
+                  },
             style = MaterialTheme.typography.bodyLarge,
             softWrap = true,
             overflow = TextOverflow.Clip,
@@ -685,7 +708,6 @@ fun MessagesDeleteAlert(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessagesInputRow(
     messagesViewModel: MessagesViewModel,
@@ -770,50 +792,16 @@ fun MessagesInputRow(
 @Composable
 fun TimePreview() {
     MyApplicationTheme {
-        // There are many established ways online to get the system time as a number
-        // ... but using Calendar.getInstance() might be the most common answer
         Column {
-            // Note, numerical values are in milliseconds, not seconds
-            // Dates are in PDT, but millisecond times are in GMT (?)
-
-//            // This works
-//            Text(
-//                text = "Timestamp = \n\"${Timestamp(System.currentTimeMillis())}\""
-//            )
-//            Text(
-//                text = "System time = \n\"${System.currentTimeMillis()}\""
-//            )
-
-//            // This works too
-//            Text(
-//                text = "Current date time = \n\"${java.util.Date()}\""
-//            )
-//            Text(
-//                text = "Current timestamp = \n\"${java.util.Date().time}\""
-//            )
-
-//            // This works too
-//            Text(
-//                text = "Local date time = \n\"${LocalDateTime.now()}\""
-//            )
-
-//            // This works too
-//            Text(
-//                text = "Instant time = \n\"${Instant.now().epochSecond}\""
-//            )
-//            Text(
-//                text = "Instant ms time = \n\"${Instant.now().toEpochMilli()}\""
-//            )
-
-            // This works too
+            val epochTime = MockBlockingCensoringData.mockMessagesViewModel.getEpochTime()
             Text(
-                text = "Calendar date time = \n\"${Calendar.getInstance().time}\""
+                text = "Epoch = \n\"${epochTime}\""
             )
             Text(
-                text = "Calendar time = \n\"${Calendar.getInstance().timeInMillis}\""
+                text = "Local = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getLocalDate(epochTime)}\""
             )
             Text(
-                text = "Calendar date from time = \n\"${Date(Calendar.getInstance().timeInMillis)}\""
+                text = "Universal = \n\"${MockBlockingCensoringData.mockMessagesViewModel.getUniversalDate(epochTime)}\""
             )
         }
     }
@@ -823,16 +811,16 @@ fun TimePreview() {
 @Composable
 fun MessagesScreenLayoutPreview() {
     MyApplicationTheme {
-        val mockSyncRepository = MockRepository()
-        val mockMessagesRepository = MockMessagesRepository()
-        val mockConversationRepository = MockConversationRepository()
         MessagesScreenLayout(
+            navController = rememberNavController(),
             messagesViewModel = MessagesViewModel(
-                repository = mockSyncRepository,
-                messagesRepository = mockMessagesRepository,
-                conversationsRepository = mockConversationRepository
+                repository = MockBlockingCensoringData.mockRepository,
+                messagesRepository = MockBlockingCensoringData.mockMessagesRepository,
+                conversationsRepository = MockBlockingCensoringData.mockConversationRepository
             ),
-            conversationUsersInvolved = sortedSetOf(String.empty)
+            conversationUsersInvolved = sortedSetOf(String.empty),
+            blockingViewModel = MockBlockingCensoringData.mockBlockingViewModel,
+            censoringViewModel = MockBlockingCensoringData.mockCensoringViewModel
         )
     }
 }
@@ -842,42 +830,33 @@ fun MessagesScreenLayoutPreview() {
 fun SingleMessageContainerPreview() {
     MyApplicationTheme {
         Column {
-            val messagesViewModel = MessagesViewModel(
-                MockRepository(), MockMessagesRepository(), MockConversationRepository()
+            val testMessages = listOf(
+                stringResource(id = R.string.user_profile_test_string),
+                stringResource(id = R.string.user_profile_test_string),
+                "a",
+                "z"
             )
-            SingleMessageContainer(
-                friendMessage = FriendMessage().apply {
-                    message =
-                        stringResource(id = R.string.user_profile_test_string)
-                },
-                isSenderMe = false,
-                messagesViewModel = messagesViewModel
-            )
-            SingleMessageContainer(
-                friendMessage = FriendMessage().apply {
-                    message =
-                        stringResource(id = R.string.user_profile_test_string)
-                },
-                isSenderMe = true,
-                messagesViewModel = messagesViewModel
-            )
-            SingleMessageContainer(
-                friendMessage = FriendMessage().apply {
-                    message =
-                        "a"
-                },
-                isSenderMe = false,
-                messagesViewModel = messagesViewModel
-            )
-            SingleMessageContainer(
-                friendMessage = FriendMessage().apply {
-                    message =
-                        "z"
-                },
-                isSenderMe = true,
-                messagesViewModel = messagesViewModel
-            )
+
+            for (index in testMessages.indices){
+                SingleMessageContainer(
+                    friendMessage = FriendMessage().apply {
+                        message = testMessages[index]
+                    },
+                    // Make every 2nd message mine
+                    isSenderMe = index % 2 == 1,
+                    messagesViewModel = MockBlockingCensoringData.mockMessagesViewModel,
+                    censoringViewModel = MockBlockingCensoringData.mockCensoringViewModel
+                )
+            }
         }
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
+fun MessagesBlockedNotifierPreview(){
+    MyApplicationTheme {
+        MessagesBlockedNotifier()
     }
 }
 // endregion PreviewFunctions

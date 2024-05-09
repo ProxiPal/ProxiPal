@@ -5,12 +5,32 @@
       <config />
     </shared>
     <layouts>
+      <layout url="file://$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/layout/activity_accessibility.xml">
+        <config>
+          <theme>@style/Theme.App</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/layout/activity_language.xml">
         <config>
           <theme>@style/Theme.App</theme>
         </config>
       </layout>
+      <layout url="file://$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/layout/activity_language_identification.xml">
+        <config>
+          <theme>@style/Theme.App</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/layout/activity_privacy_policy.xml">
+        <config>
+          <theme>@style/Theme.App</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/layout/activity_settings.xml">
+        <config>
+          <theme>@style/Theme.App</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/layout/activity_speech_recognition.xml">
         <config>
           <theme>@style/Theme.App</theme>
         </config>
@@ -28,8 +48,7 @@
   <component name="ChangeListManager">
     <list default="true" id="12f788ab-0aea-4cd4-aef2-ea7f8311b508" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/ui/userprofiles/UserProfileScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/ui/userprofiles/UserProfileScreen.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/values/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/layout/activity_speech_recognition.xml" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/layout/activity_speech_recognition.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,7 +58,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[C:\Users\VICHET\.android\avd\Pixel_7_API_34.avd]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[C:\Users\brian\.android\avd\Pixel_6_Pro_API_34_1.avd]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$/ProxiPal2">
       <ProjectState />
@@ -111,10 +130,11 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="resourceFile" />
-        <option value="valueResourceFile" />
         <option value="Class" />
-        <option value="Kotlin Class" />
         <option value="Kotlin File" />
+        <option value="valueResourceFile" />
+        <option value="layoutResourceFile" />
+        <option value="Kotlin Class" />
       </list>
     </option>
   </component>
@@ -140,9 +160,10 @@
     "RunOnceActivity.cidr.known.project.marker": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "Functional-and-UI-Adjustments",
     "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/brian/OneDrive/Documents/GitHub/ProxiPal/ProxiPalTest_client_20231205232005/app/src/main/res/drawable",
+    "last_directory_selection": "C:/Users/brian/OneDrive/Documents/GitHub/ProxiPal/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app",
+    "last_opened_file_path": "C:/Users/brian/AndroidStudioProjects/SpeechToText57",
     "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle"
   }
 }]]></component>

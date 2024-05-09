@@ -101,8 +101,9 @@ class CompassNearbyAPI constructor(
             )
             payload.asBytes()?.let {
                 // The byte array sent should only have 2 elements (latitude, longitude)
-                compassViewModel.updateMatchedUserLatitude(it[0].toDouble())
-                compassViewModel.updateMatchedUserLongitude(it[1].toDouble())
+                compassViewModel.updateFocusedUserLocation(
+                    it[0].toDouble(), it[1].toDouble()
+                )
             }
         }
 

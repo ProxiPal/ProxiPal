@@ -1,17 +1,15 @@
 package com.mongodb.app.home
 import android.annotation.SuppressLint
+import android.app.ActivityOptions
 import android.content.Intent
-import android.service.autofill.OnClickAction
-import android.view.LayoutInflater
-import android.widget.TextView
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -29,29 +28,31 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavHostController
-import com.mongodb.app.R
-import com.mongodb.app.AllowNotificationsActivity
-import com.mongodb.app.LanguageActivity
+import com.mongodb.app.AccessibilityActivity
 import com.mongodb.app.LanguageIdentificationActivity
 import com.mongodb.app.LanguageTranslationActivity
-import com.mongodb.app.PrivacyPolicyActivity
-import com.mongodb.app.navigation.Routes
+import com.mongodb.app.DarkModeActivity
+import com.mongodb.app.SpeechRecognitionActivity
 
 //This is the code to edit the settings screen.
 @Composable
 fun AdvancedScreenSettings(navController: NavHostController) {
     val context = LocalContext.current
+    val gradientColors = listOf(Color(0xFFFFAA33), Color(0xFFFFD700))
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxSize()
-            .background(Color(0xFFFFAA33))
+            .background(brush = Brush.verticalGradient(gradientColors))
             .padding(5.dp)
     ) {
-        Column {
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState()) // Add vertical scrolling
+                .padding(horizontal = 16.dp)
+        ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth(),
@@ -62,11 +63,16 @@ fun AdvancedScreenSettings(navController: NavHostController) {
                     },
                     modifier = Modifier.weight(1f, fill = false)
                 ) {
-                    Icon(
-                        Icons.Filled.ArrowBack,
-                        contentDescription = "Back Arrow",
-                        tint = Color.White
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Back Arrow",
+                            tint = Color.White
+                        )
+                    }
                 }
                 Text(
                     text = "Advanced",
@@ -77,34 +83,38 @@ fun AdvancedScreenSettings(navController: NavHostController) {
                 )
                 Spacer(modifier = Modifier.weight(1f, fill = false))
             }
-            Row {
-                Column (modifier = Modifier
-                    .fillMaxHeight()
-
-                ){
-                    SettingsItem("Language Identification") {
-                        val intent = Intent(context, LanguageIdentificationActivity::class.java)
-                        context.startActivity(intent)
-                    }
-                    SettingsItem("Language Translation") {
-                        val intent = Intent(context, LanguageTranslationActivity::class.java)
-                        context.startActivity(intent)
-                    }
-                }
+            SettingsItem("Language Identification") {
+                val intent = Intent(context, LanguageIdentificationActivity::class.java)
+                context.startActivity(intent)
+            }
+            SettingsItem("Language Translation") {
+                val intent = Intent(context, LanguageTranslationActivity::class.java)
+                context.startActivity(intent)
+            }
+            SettingsItem("Text To Speech") {
+                val intent = Intent(context, AccessibilityActivity::class.java)
+                context.startActivity(intent)
+            }
+            SettingsItem("Speech Recognition") {
+                val intent = Intent(context, SpeechRecognitionActivity::class.java)
+                context.startActivity(intent)
             }
         }
     }
 }
+
 @Composable
 private fun SettingsItem(settingName: String, onClick: () -> Unit) {
-
-    Divider(color = Color.White, thickness = 1.dp)
+    Divider(
+        color = Color.White,
+        thickness = 2.dp,
+        modifier = Modifier.padding(vertical = 8.dp)
+    )
     Row(
         modifier = Modifier.clickable(onClick = onClick)
             .fillMaxWidth()
             .padding(vertical = 30.dp),
         verticalAlignment = Alignment.CenterVertically
-
     ) {
         Icon(
             imageVector = Icons.Default.Info,
@@ -116,27 +126,6 @@ private fun SettingsItem(settingName: String, onClick: () -> Unit) {
             text = settingName,
             color = Color.White,
             fontSize = 40.sp,
-            )
+        )
     }
 }
-
-// used for line breaks in rows
-@SuppressLint("ModifierFactoryUnreferencedReceiver")
-private fun Modifier.bottomBorder(strokeWidth: Dp, color: Color) = composed(
-    factory = {
-        val density = LocalDensity.current
-        val strokeWidthPx = density.run { strokeWidth.toPx() }
-
-        Modifier.drawBehind {
-            val width = size.width
-            val height = size.height - strokeWidthPx/2
-
-            drawLine(
-                color = color,
-                start = Offset(x = 0f, y = height),
-                end = Offset(x = width , y = height),
-                strokeWidth = strokeWidthPx
-            )
-        }
-    }
-)

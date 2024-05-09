@@ -7,7 +7,7 @@ import io.realm.kotlin.types.RealmList
 import org.mongodb.kbson.ObjectId
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
-
+import kotlin.random.Random
 
 
 /*
@@ -21,12 +21,19 @@ Contributions:
  * The user profile object that gets added and saved to the database
  */
 class UserProfile : RealmObject {
+    // Written by Kevin Kubota
     @PrimaryKey
     var _id: ObjectId = ObjectId()
     var firstName: String = ""
     var lastName: String = ""
     var biography: String = ""
     var ownerId: String = ""
+    /**
+     * List of user IDs which are blocked by the current user
+     */
+    var usersBlocked: RealmList<String> = realmListOf()
+    var hasTextCensoringEnabled: Boolean = false
+
 
     // Added by Marco Pacini, stores latitude and longitude
     var location: CustomGeoPoint? = null
@@ -52,6 +59,8 @@ class UserProfile : RealmObject {
     var userDislikes: Int = 0
     // stores the list of userId's that have already rated this user
     var usersThatRatedMe: RealmList<String> = realmListOf()
+    var friends: RealmList<String> = realmListOf()
+
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
@@ -61,6 +70,7 @@ class UserProfile : RealmObject {
         if (this.lastName != other.lastName) return false
         if (this.biography != other.biography) return false
         if (this.ownerId != other.ownerId) return false
+        if (this.hasTextCensoringEnabled != other.hasTextCensoringEnabled) return false
         return true
     }
 
@@ -70,6 +80,17 @@ class UserProfile : RealmObject {
         result = 31 * result + lastName.hashCode()
         result = 31 * result + biography.hashCode()
         result = 31 * result + ownerId.hashCode()
+        result = 31 * result + hasTextCensoringEnabled.hashCode()
         return result
+    }
+
+    /**
+     * Checks whether another user is blocked by the current user
+     */
+    fun isUserBlocked(userIdToCheck: String): Boolean{
+        if (userIdToCheck.isBlank() || userIdToCheck.isEmpty()){
+            return false
+        }
+        return usersBlocked.contains(userIdToCheck)
     }
 }
