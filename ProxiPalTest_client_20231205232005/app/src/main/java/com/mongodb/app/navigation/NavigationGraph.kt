@@ -171,7 +171,8 @@ fun NavigationGraph(
             Friendslist(
                 navController = navController,
                 viewModel = userProfileViewModel,
-                friendRequestViewModel = friendRequestViewModel
+                friendRequestViewModel = friendRequestViewModel,
+                blockingViewModel = blockingViewModel
             )
         }
         composable(Routes.FriendRequestScreen.route) {

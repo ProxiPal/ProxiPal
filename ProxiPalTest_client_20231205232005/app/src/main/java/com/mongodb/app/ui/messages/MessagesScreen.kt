@@ -116,9 +116,7 @@ fun MessagesScreenLayout(
             MessagesTopBar(
                 navController = navController,
                 messagesViewModel = messagesViewModel,
-                blockingViewModel = blockingViewModel,
                 censoringViewModel = censoringViewModel,
-                userIdInFocus = messagesViewModel.otherUserProfileId.value
             )
         },
         modifier = modifier
@@ -174,10 +172,7 @@ fun MessagesBlockedNotifier(
 fun MessagesTopBar(
     navController: NavHostController,
     messagesViewModel: MessagesViewModel,
-    blockingViewModel: BlockingViewModel,
     censoringViewModel: CensoringViewModel,
-    /* The other user's ID involved in the current conversation */
-    userIdInFocus: String,
     modifier: Modifier = Modifier
 ) {
     CenterAlignedTopAppBar(

@@ -1,29 +1,56 @@
 package com.mongodb.app.friends
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Mail
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.mongodb.app.navigation.Routes
-import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import android.widget.Toast
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.ui.Alignment
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Mail
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SmallTopAppBar
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.mongodb.app.R
 import com.mongodb.app.data.messages.MessagesData
-import com.mongodb.app.navigation.NavigationGraph
+import com.mongodb.app.navigation.Routes
+import com.mongodb.app.presentation.blocking_censoring.BlockingAction
+import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
+import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
+import com.mongodb.app.ui.blocking_censoring.BlockingAlert
 
 //ALL ADDED BY GEORGE FU
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,7 +58,8 @@ import com.mongodb.app.navigation.NavigationGraph
 fun Friendslist(
     navController: NavHostController,
     viewModel: UserProfileViewModel,
-    friendRequestViewModel: FriendRequestViewModel
+    friendRequestViewModel: FriendRequestViewModel,
+    blockingViewModel: BlockingViewModel
 ) {
     val context = LocalContext.current
     val searchText = remember { mutableStateOf(TextFieldValue()) }
@@ -98,7 +126,12 @@ fun Friendslist(
 
         LazyColumn {
             items(friendIds) { friendId ->
-                FriendItem(friendId = friendId, viewModel = viewModel, navController = navController)
+                FriendItem(
+                    friendId = friendId,
+                    viewModel = viewModel,
+                    blockingViewModel = blockingViewModel,
+                    navController = navController
+                )
             }
         }
     }
@@ -108,10 +141,12 @@ fun Friendslist(
 fun FriendItem(
     friendId: String,
     viewModel: UserProfileViewModel,
+    blockingViewModel: BlockingViewModel,
     navController: NavHostController
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val friendName = viewModel.getFriendNameFromFriendId(friendId)
+    val isUserBlocked = blockingViewModel.isUserBlocked(friendId)
 
     Card(
         modifier = Modifier
@@ -139,11 +174,38 @@ fun FriendItem(
                 expanded = showMenu,
                 onDismissRequest = { showMenu = false }
             ) {
+                if (!isUserBlocked){
+                    DropdownMenuItem(
+                        text = { Text("Start messaging") },
+                        onClick = {
+                            showMenu = false
+                            MessagesData.updateUserIdInFocus(friendId)
+                            navController.navigate(Routes.MessagesScreen.route)
+                        }
+                    )
+                }
                 DropdownMenuItem(
-                    text = { Text("Start messaging") },
+                    text = {
+                        Text(
+                            text =
+                            if (isUserBlocked) stringResource(id = R.string.blocking_contextual_menu_unblock_user)
+                            else stringResource(id = R.string.blocking_contextual_menu_block_user)
+                        )
+                           },
                     onClick = {
-                        MessagesData.updateUserIdInFocus(friendId)
-                        navController.navigate(Routes.MessagesScreen.route)
+                        showMenu = false
+                        if (isUserBlocked){
+                            blockingViewModel.unblockUserStart(
+                                userIdToUnblock = friendId
+                            )
+                            blockingViewModel.unblockUser()
+                        }
+                        else{
+                            blockingViewModel.blockUserStart(
+                                userIdToBlock = friendId
+                            )
+                            blockingViewModel.blockUser()
+                        }
                     }
                 )
                 DropdownMenuItem(

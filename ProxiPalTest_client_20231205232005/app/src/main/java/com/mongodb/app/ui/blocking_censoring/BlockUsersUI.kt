@@ -39,6 +39,9 @@ Contributions:
 /**
  * Provides the option for blocking another user
  */
+@Deprecated(
+    message = "Functionality merged with contextual menu in FriendList.kt UI"
+)
 @Composable
 fun BlockingContextualMenu(
     userId: String,
@@ -116,6 +119,10 @@ fun BlockingContextualMenu(
     }
 }
 
+@Deprecated(
+    message = "Unused because user will suddenly become unblocked when canceling or " +
+            "dismissing the alert dialog that first asks about unblocking the user"
+)
 /**
  * Shows an alert dialog when the user is about to (un)block another user
  */
