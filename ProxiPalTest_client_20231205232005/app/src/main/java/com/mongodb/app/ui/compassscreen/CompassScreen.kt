@@ -4,7 +4,6 @@ package com.mongodb.app.ui.compassscreen
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.annotation.RequiresPermission
 import androidx.annotation.StringRes
@@ -36,13 +35,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.mongodb.app.R
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.compassscreen.CompassConnectionType
 import com.mongodb.app.data.compassscreen.CompassPermissionHandler
+import com.mongodb.app.data.compassscreen.SHOULD_USE_METRIC_SYSTEM
 import com.mongodb.app.navigation.Routes
 import com.mongodb.app.presentation.compassscreen.CompassNearbyAPI
 import com.mongodb.app.presentation.compassscreen.CompassViewModel
@@ -75,6 +74,8 @@ fun CompassScreenLayout(
 ) {
     compassViewModel.refreshUserProfileInstances()
 
+    // Calling startSetup() causes the rapid infinite device connection code bug
+    // Limiting its calls is the current solution to prevent infinite function calls
     if (!compassPermissionHandler.isDoingDeviceConnection.value){
         compassPermissionHandler.startSetup()
     }
@@ -96,6 +97,9 @@ fun CompassScreenLayout(
         }
 }
 
+@Deprecated(
+    message = "No longer in use; ActivityCompat.requestPermissions() is used instead"
+)
 @Composable
 fun CompassPermissionsGrantLayout(
     compassPermissionHandler: CompassPermissionHandler,
@@ -195,7 +199,11 @@ fun CompassScreenBodyContent(
                     measurement = compassViewModel.bearing.value
                 )
                 CompassScreenMeasurementText(
-                    measurementText = R.string.compass_screen_distance_message,
+                    measurementText = if (SHOULD_USE_METRIC_SYSTEM){
+                        R.string.compass_screen_distance_message_metric
+                                                                   } else {
+                        R.string.compass_screen_distance_message_imperial
+                                                                          },
                     measurement = compassViewModel.distance.value
                 )
                 CompassScreenCurrentLocations(
@@ -221,7 +229,7 @@ fun CompassScreenBodyContent(
                         modifier = Modifier
                     ) {
                         Text(
-                            text = "Refresh data"
+                            text = stringResource(id = R.string.compass_screen_refresh_button)
                         )
                     }
                 }
