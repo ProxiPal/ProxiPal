@@ -176,15 +176,15 @@ fun FriendItem(
                 expanded = showMenu,
                 onDismissRequest = { showMenu = false }
             ) {
-                DropdownMenuItem(
-                    text = {
-                        Text(stringResource(id = R.string.friends_list_navigate_to_compass_screen))
-                           },
-                    onClick = {
-                        navController.navigate(Routes.CompassScreen.route)
-                    }
-                )
                 if (!isUserBlocked){
+                    DropdownMenuItem(
+                        text = {
+                            Text(stringResource(id = R.string.friends_list_navigate_to_compass_screen))
+                        },
+                        onClick = {
+                            navController.navigate(Routes.CompassScreen.route)
+                        }
+                    )
                     DropdownMenuItem(
                         text = {
                             Text(stringResource(id = R.string.friends_list_navigate_to_messages_screen))
