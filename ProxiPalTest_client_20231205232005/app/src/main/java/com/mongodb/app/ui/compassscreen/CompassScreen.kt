@@ -2,20 +2,6 @@
 
 package com.mongodb.app.ui.compassscreen
 
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
-import android.content.Context
-import android.content.IntentFilter
-import android.content.pm.PackageManager
-import android.net.wifi.p2p.WifiP2pManager
-import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
-import androidx.annotation.CallSuper
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -42,26 +28,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
 import com.mongodb.app.R
-import com.mongodb.app.TAG
 import com.mongodb.app.data.MockRepository
-import com.mongodb.app.data.RealmSyncRepository
-import com.mongodb.app.data.compassscreen.ALL_NEARBY_API_PERMISSIONS
-import com.mongodb.app.data.compassscreen.ALL_NEARBY_API_PERMISSIONS_ARRAY
-import com.mongodb.app.data.compassscreen.ALL_WIFIP2P_PERMISSIONS
 import com.mongodb.app.data.compassscreen.CompassConnectionType
 import com.mongodb.app.presentation.compassscreen.CompassNearbyAPI
 import com.mongodb.app.presentation.compassscreen.CompassViewModel
-import com.mongodb.app.presentation.compassscreen.WiFiDirectBroadcastReceiver
-import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.components.SingleButtonRow
 import com.mongodb.app.ui.components.SingleTextRow
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
-import kotlinx.coroutines.launch
 
 
 /*
@@ -70,282 +45,6 @@ Contributions:
  */
 
 
-class CompassScreen : ComponentActivity() {
-    /*
-    ===== Variables =====
-     */
-    private val repository = RealmSyncRepository { _, _ ->
-        lifecycleScope.launch {
-        }
-    }
-
-    private val compassViewModel: CompassViewModel by viewModels {
-        CompassViewModel.factory(repository, this)
-    }
-
-    // TODO May need to use UserProfileViewModel instance created in UserProfileScreen instead of this
-    private val userProfileViewModel: UserProfileViewModel by viewModels{
-        UserProfileViewModel.factory(repository, this)
-    }
-
-
-    // region NearbyAPI
-    private lateinit var compassNearbyAPI: CompassNearbyAPI
-
-    /**
-     * Request code for verifying call to [requestPermissions]
-     */
-    private val REQUEST_CODE_REQUIRED_PERMISSIONS = 1
-    // endregion NearbyAPI
-
-
-    // region WifiP2P
-//    private val manager: WifiP2pManager? by lazy(LazyThreadSafetyMode.NONE) {
-//        getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager?
-//    }
-
-    private lateinit var channel: WifiP2pManager.Channel
-    private lateinit var manager: WifiP2pManager
-
-    private var receiver: WiFiDirectBroadcastReceiver? = null
-
-    private val intentFilter = IntentFilter().apply {
-        addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION)
-        addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION)
-        addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)
-        addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)
-
-        // These may not be necessary
-        addAction(BluetoothDevice.ACTION_FOUND)
-        addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
-        addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
-    }
-    // endregion WifiP2P
-
-
-    /*
-    ===== Functions =====
-     */
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        Log.i(
-            TAG(),
-            "CompassScreen: Start of OnCreate()"
-        )
-
-        // Needed when working with either the Nearby API or Wifi P2P Direct
-        verifyPermissions2()
-
-        // Need to update repository when a configuration change occurs
-        // ... otherwise app will crash when trying to access Realm after it has closed
-        compassViewModel.updateRepository(
-            newRepository = repository
-        )
-
-        compassViewModel.setViewModels(userProfileViewModel)
-
-
-        // region NearbyAPI
-        compassNearbyAPI = CompassNearbyAPI(
-            userId = repository.getCurrentUserId(),
-            packageName = packageName
-        )
-        // Need to create connections client in compass screen communication class
-        compassNearbyAPI.setConnectionsClient(this)
-        compassNearbyAPI.setCompassViewModel(compassViewModel)
-        // endregion NearbyAPI
-
-
-        // region WifiP2P
-        manager = getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager
-        channel = manager.initialize(this, mainLooper, null)
-        // endregion WifiP2P
-
-
-        setContent {
-            MyApplicationTheme {
-                CompassScreenLayout(
-                    compassViewModel = compassViewModel,
-                    compassNearbyAPI = compassNearbyAPI
-                )
-            }
-        }
-    }
-
-    @CallSuper
-    override fun onStart() {
-        super.onStart()
-
-
-        // region NearbyAPI
-        // This screen is entered only when the matched user accepts the connection
-        // ... so as soon as this screen is shown, start the connection process
-        compassNearbyAPI.updateConnectionType(CompassConnectionType.WAITING)
-
-        // TODO Temporarily and quickly allow showing compass updating
-        compassNearbyAPI.updateConnectionType(CompassConnectionType.MEETING)
-        // endregion NearbyAPI
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-
-        // region WifiP2P
-        // Register the broadcast receiver with the intent values to be matched
-        receiver = WiFiDirectBroadcastReceiver(manager, channel, this)
-        registerReceiver(receiver, intentFilter)
-
-        receiver?.discoverPeers()
-        receiver?.requestPeers()
-
-        receiver?.tempCheckForPeers()
-        // endregion WifiP2P
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-
-        // region WifiP2P
-        // Unregister the broadcast receiver
-        unregisterReceiver(receiver)
-        // endregion WifiP2P
-    }
-
-    @Deprecated("Deprecated in Java")
-    @CallSuper
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        // If user does not grant any required app permissions, show error that app cannot function without them
-        val errMsg = "Cannot start without required permissions"
-        if (requestCode == REQUEST_CODE_REQUIRED_PERMISSIONS) {
-            grantResults.forEach {
-                if (it == PackageManager.PERMISSION_DENIED) {
-                    Toast.makeText(this, errMsg, Toast.LENGTH_LONG).show()
-                    finish()
-                    return
-                }
-            }
-            recreate()
-        }
-    }
-
-    @CallSuper
-    override fun onStop() {
-        // region NearbyAPI
-        compassNearbyAPI.updateConnectionType(CompassConnectionType.OFFLINE)
-        // Release all assets when the Nearby API is no longer necessary
-        compassNearbyAPI.releaseAssets()
-        // endregion NearbyAPI
-
-
-        super.onStop()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        // Repository must be closed to free resources
-        repository.close()
-    }
-
-    @Deprecated(
-        message = "This does not work 100%; " +
-                "\"Missing required permissions, aborting call to <advertisingFunctionName> ...\""
-    )
-    private fun verifyPermissions(){
-        // Ask for permissions before allowing device connections
-        // Check that the required permissions are allowed by the user
-        var hasAllPermissionsGranted = true
-        for (permission in ALL_NEARBY_API_PERMISSIONS) {
-            if (ContextCompat.checkSelfPermission(this, permission)
-                != PackageManager.PERMISSION_GRANTED
-            ) {
-                hasAllPermissionsGranted = false
-                break
-            }
-        }
-        // Ask user to grant permissions if they are not allowed already
-        if (!hasAllPermissionsGranted) {
-            Log.i(
-                TAG(),
-                "CompassScreen: Not all permissions are granted, asking now"
-            )
-            ActivityCompat.requestPermissions(
-                this, ALL_NEARBY_API_PERMISSIONS_ARRAY, REQUEST_CODE_REQUIRED_PERMISSIONS
-            )
-        }
-        else{
-            Log.i(
-                TAG(),
-                "CompassScreen: It seems permissions are already granted, but asking anyway"
-            )
-            ActivityCompat.requestPermissions(
-                this, ALL_NEARBY_API_PERMISSIONS_ARRAY, REQUEST_CODE_REQUIRED_PERMISSIONS
-            )
-        }
-    }
-
-    private fun verifyPermissions2(){
-        // TODO Should show permission rationale with shouldShowRequestPermissionRationale()
-        val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()){
-                isGranted: Boolean ->
-            Log.i(
-                TAG(),
-                "CompassScreen: Permission launcher granted? = \"$isGranted\""
-            )
-        }
-
-        for (permission in ALL_NEARBY_API_PERMISSIONS + ALL_WIFIP2P_PERMISSIONS){
-            when {
-                ContextCompat.checkSelfPermission(this, permission)
-                        == PackageManager.PERMISSION_GRANTED -> {
-                    Log.i(
-                        TAG(),
-                        "CompassScreen: Permission granted = \"$permission\""
-                    )
-                }
-
-                ActivityCompat.shouldShowRequestPermissionRationale(
-                    this, permission
-                ) -> {
-                    Log.i(
-                        TAG(),
-                        "CompassScreen: Permission denied = \"$permission\""
-                    )
-                    // Show some UI for rationale behind requesting a permission here
-                }
-
-                else -> {
-                    Log.i(
-                        TAG(),
-                        "CompassScreen: Permission unasked = \"$permission\""
-                    )
-                    requestPermissionLauncher.launch(
-                        permission
-                    )
-                    val temp = (ContextCompat.checkSelfPermission(this, permission)
-                    == PackageManager.PERMISSION_GRANTED)
-                    Log.i(
-                        TAG(),
-                        "CompassScreen: Permission after asking = \"$temp\""
-                    )
-                }
-            }
-        }
-    }
-}
-
-
-/*
-===== Functions =====
- */
 /**
  * Displays the screen that points matching users toward each other
  */
@@ -356,6 +55,8 @@ fun CompassScreenLayout(
     compassNearbyAPI: CompassNearbyAPI,
     modifier: Modifier = Modifier
 ) {
+    compassViewModel.refreshUserProfileInstances()
+
     Scaffold(
         topBar = {
             CompassScreenTopBar()
@@ -561,7 +262,9 @@ fun CompassScreenCurrentLocations(
                 .fillMaxWidth()
         ) {
             Text(
-                text = "Current location:\n${compassViewModel.getCurrentUserLocation()}"
+                text = "Current location:\n" +
+                        "\tLat. ${compassViewModel.currentUserLocation.first}\n" +
+                        "\tLong. ${compassViewModel.currentUserLocation.second}"
             )
         }
         Row(
@@ -569,7 +272,9 @@ fun CompassScreenCurrentLocations(
                 .fillMaxWidth()
         ) {
             Text(
-                text = "Match location:\n${compassViewModel.getMatchedUserLocation()}"
+                text = "Match location:\n" +
+                        "\tLat. ${compassViewModel.focusedUserLocation.first}\n" +
+                        "\tLong. ${compassViewModel.focusedUserLocation.second}"
             )
         }
     }

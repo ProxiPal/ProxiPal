@@ -27,10 +27,13 @@ import com.mongodb.app.location.LocationPermissionScreen
 import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
 import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
 import com.mongodb.app.presentation.blocking_censoring.FetchCensoredTextThread
+import com.mongodb.app.presentation.compassscreen.CompassNearbyAPI
+import com.mongodb.app.presentation.compassscreen.CompassViewModel
 import com.mongodb.app.presentation.messages.MessagesViewModel
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.screens.FriendRequestScreen
 import com.mongodb.app.tutorial.OnboardingScreen
+import com.mongodb.app.ui.compassscreen.CompassScreenLayout
 import com.mongodb.app.ui.messages.MessagesScreenLayout
 import com.mongodb.app.ui.userprofiles.IndustryScreen
 import com.mongodb.app.ui.userprofiles.InterestScreen
@@ -59,7 +62,9 @@ fun NavigationGraph(
     messagesViewModel: MessagesViewModel,
     blockingViewModel: BlockingViewModel,
     censoringViewModel: CensoringViewModel,
-    friendRequestViewModel: FriendRequestViewModel
+    friendRequestViewModel: FriendRequestViewModel,
+    compassViewModel: CompassViewModel,
+    compassNearbyAPI: CompassNearbyAPI
 ) {
 
     var currentUserId by remember { mutableStateOf("") }
@@ -179,6 +184,12 @@ fun NavigationGraph(
             FriendRequestScreen(
                 friendRequestViewModel = friendRequestViewModel,
                 userProfileViewModel = userProfileViewModel
+            )
+        }
+        composable(Routes.CompassScreen.route){
+            CompassScreenLayout(
+                compassViewModel = compassViewModel,
+                compassNearbyAPI = compassNearbyAPI
             )
         }
     }

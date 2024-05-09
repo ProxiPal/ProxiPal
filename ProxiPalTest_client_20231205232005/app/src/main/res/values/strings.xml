@@ -50,7 +50,7 @@
     <!--    The "%.3f" formats the measurements to 3 decimal places -->
     <string name="compass_screen_bearing_message">Bearing angle (in degrees): %.3f</string>
     <string name="compass_screen_distance_message">Distance from match (in km): %.3f</string>
-    <string name="compass_screen_top_bar_header">Match found!</string>
+    <string name="compass_screen_top_bar_header">Direction to friend</string>
     <string name="compass_screen_awaiting_connection_message">Waiting for match to accept connection</string>
     <string name="compass_screen_canceled_connection_message">The connection was dropped</string>
     <string name="compass_screen_return_button">Return</string>
