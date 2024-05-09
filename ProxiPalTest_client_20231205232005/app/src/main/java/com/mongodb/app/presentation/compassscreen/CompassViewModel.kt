@@ -57,8 +57,6 @@ class CompassViewModel constructor(
     private val _connectionType: MutableState<CompassConnectionType> =
         mutableStateOf(CompassConnectionType.OFFLINE)
 
-    private lateinit var _userProfileViewModel: UserProfileViewModel
-
 
     /*
     ===== Properties =====
@@ -112,13 +110,6 @@ class CompassViewModel constructor(
         newRepository: SyncRepository
     ) {
         repository = newRepository
-    }
-
-    /**
-     * Function to set view model instances. Should be called immediately after initialization
-     */
-    fun setViewModels(userProfileViewModel: UserProfileViewModel) {
-        _userProfileViewModel = userProfileViewModel
     }
 
     /**

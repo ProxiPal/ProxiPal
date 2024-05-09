@@ -13,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import com.mongodb.app.TAG
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.SyncRepository
+import com.mongodb.app.data.compassscreen.CompassPermissionHandler
 import com.mongodb.app.data.messages.MessagesData
 import com.mongodb.app.friends.FriendRequestViewModel
 import com.mongodb.app.friends.Friendslist
@@ -21,23 +22,20 @@ import com.mongodb.app.home.FilterScreen
 import com.mongodb.app.home.HomeScreen
 import com.mongodb.app.home.HomeViewModel
 import com.mongodb.app.home.ScreenSettings
-import com.mongodb.app.presentation.tasks.ToolbarViewModel
-import com.mongodb.app.ui.tasks.ConnectWithOthersScreen
 import com.mongodb.app.location.LocationPermissionScreen
 import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
 import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
-import com.mongodb.app.presentation.blocking_censoring.FetchCensoredTextThread
-import com.mongodb.app.presentation.compassscreen.CompassNearbyAPI
 import com.mongodb.app.presentation.compassscreen.CompassViewModel
 import com.mongodb.app.presentation.messages.MessagesViewModel
+import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.screens.FriendRequestScreen
 import com.mongodb.app.tutorial.OnboardingScreen
 import com.mongodb.app.ui.compassscreen.CompassScreenLayout
 import com.mongodb.app.ui.messages.MessagesScreenLayout
+import com.mongodb.app.ui.tasks.ConnectWithOthersScreen
 import com.mongodb.app.ui.userprofiles.IndustryScreen
 import com.mongodb.app.ui.userprofiles.InterestScreen
-
 import com.mongodb.app.ui.userprofiles.UserProfileLayout
 import io.realm.kotlin.mongodb.exceptions.SyncException
 import io.realm.kotlin.mongodb.sync.SyncSession
@@ -64,7 +62,7 @@ fun NavigationGraph(
     censoringViewModel: CensoringViewModel,
     friendRequestViewModel: FriendRequestViewModel,
     compassViewModel: CompassViewModel,
-    compassNearbyAPI: CompassNearbyAPI
+    compassPermissionHandler: CompassPermissionHandler
 ) {
 
     var currentUserId by remember { mutableStateOf("") }
@@ -189,7 +187,7 @@ fun NavigationGraph(
         composable(Routes.CompassScreen.route){
             CompassScreenLayout(
                 compassViewModel = compassViewModel,
-                compassNearbyAPI = compassNearbyAPI,
+                compassPermissionHandler = compassPermissionHandler,
                 navController = navController
             )
         }

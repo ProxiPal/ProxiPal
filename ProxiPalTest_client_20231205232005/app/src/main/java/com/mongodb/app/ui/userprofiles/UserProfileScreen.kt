@@ -3,19 +3,12 @@
 package com.mongodb.app.ui.userprofiles
 
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
-import android.content.pm.PackageManager
-import android.net.wifi.p2p.WifiP2pManager
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.CallSuper
 import androidx.annotation.StringRes
@@ -34,7 +27,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
@@ -59,11 +51,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -72,9 +61,7 @@ import com.mongodb.app.R
 import com.mongodb.app.TAG
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
-import com.mongodb.app.data.compassscreen.ALL_NEARBY_API_PERMISSIONS
-import com.mongodb.app.data.compassscreen.ALL_WIFIP2P_PERMISSIONS
-import com.mongodb.app.data.compassscreen.CompassConnectionType
+import com.mongodb.app.data.compassscreen.CompassPermissionHandler
 import com.mongodb.app.data.userprofiles.USER_PROFILE_EDIT_MODE_MAXIMUM_LINE_AMOUNT
 import com.mongodb.app.data.userprofiles.USER_PROFILE_ROW_HEADER_WEIGHT
 import com.mongodb.app.friends.FriendRequestViewModel
@@ -83,9 +70,7 @@ import com.mongodb.app.home.HomeViewModel
 import com.mongodb.app.navigation.NavigationGraph
 import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
 import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
-import com.mongodb.app.presentation.compassscreen.CompassNearbyAPI
 import com.mongodb.app.presentation.compassscreen.CompassViewModel
-import com.mongodb.app.presentation.compassscreen.WiFiDirectBroadcastReceiver
 import com.mongodb.app.presentation.messages.MessagesViewModel
 import com.mongodb.app.presentation.tasks.ToolbarEvent
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
@@ -106,24 +91,8 @@ Contributions:
 
 
 class UserProfileScreen : ComponentActivity() {
-    /*
-    ===== Variables =====
-     */
-    private val repository = RealmSyncRepository { _, error ->
-        // Sync errors come from a background thread so route the Toast through the UI thread
-        lifecycleScope.launch {
-            // Catch write permission errors and notify user. This is just a 2nd line of defense
-            // since we prevent users from modifying someone else's tasks
-            // TODO the SDK does not have an enum for this type of error yet so make sure to update this once it has been added
-            if (error.message?.contains("CompensatingWrite") == true) {
-                Toast.makeText(
-                    this@UserProfileScreen, getString(R.string.user_profile_permissions_warning),
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
-            }
-        }
-    }
+    // region Variables
+    private val repository = RealmSyncRepository { _, _ -> }
 
     private val userProfileViewModel: UserProfileViewModel by viewModels {
         UserProfileViewModel.factory(repository, this)
@@ -170,44 +139,11 @@ class UserProfileScreen : ComponentActivity() {
         )
     }
 
-
-    // region NearbyAPI
-    private lateinit var compassNearbyAPI: CompassNearbyAPI
-
-    /**
-     * Request code for verifying call to [requestPermissions]
-     */
-    private val REQUEST_CODE_REQUIRED_PERMISSIONS = 1
-    // endregion NearbyAPI
+    private lateinit var compassPermissionHandler: CompassPermissionHandler
+    // endregion Variables
 
 
-    // region WifiP2P
-//    private val manager: WifiP2pManager? by lazy(LazyThreadSafetyMode.NONE) {
-//        getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager?
-//    }
-
-    private lateinit var channel: WifiP2pManager.Channel
-    private lateinit var manager: WifiP2pManager
-
-    private var receiver: WiFiDirectBroadcastReceiver? = null
-
-    private val intentFilter = IntentFilter().apply {
-        addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION)
-        addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION)
-        addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)
-        addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)
-
-        // These may not be necessary
-        addAction(BluetoothDevice.ACTION_FOUND)
-        addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
-        addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
-    }
-    // endregion WifiP2P
-
-
-    /*
-    ===== Functions =====
-     */
+    // region Functions
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -252,36 +188,11 @@ class UserProfileScreen : ComponentActivity() {
         }
         // endregion ViewModel events
 
-
-        // Needed when working with either the Nearby API or Wifi P2P Direct
-        verifyPermissions()
-
         // Need to update repository when a configuration change occurs
         // ... otherwise app will crash when trying to access Realm after it has closed
         compassViewModel.updateRepository(
             newRepository = repository
         )
-
-        compassViewModel.setViewModels(userProfileViewModel)
-
-        // region NearbyAPI
-        compassNearbyAPI = CompassNearbyAPI(
-            userId = repository.getCurrentUserId(),
-            packageName = packageName
-        )
-        // Need to create connections client in compass screen communication class
-        compassNearbyAPI.setConnectionsClient(this)
-        compassNearbyAPI.setCompassViewModel(compassViewModel)
-        // endregion NearbyAPI
-
-        // region WifiP2P
-        manager = getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager
-        channel = manager.initialize(this, mainLooper, null)
-        // endregion WifiP2P
-
-
-        // Need to update repository when a configuration change occurs
-        // ... otherwise app will crash when trying to access Realm after it has closed
         userProfileViewModel.updateRepository(
             newRepository = repository
         )
@@ -296,6 +207,14 @@ class UserProfileScreen : ComponentActivity() {
             newBlockingCensoringRealm = repository
         )
 
+        compassPermissionHandler = CompassPermissionHandler(
+            repository = repository,
+            userProfileScreen = this,
+            compassViewModel = compassViewModel
+        )
+        compassPermissionHandler.onCreate()
+
+
         setContent {
             MyApplicationTheme {
                 NavigationGraph(
@@ -307,151 +226,44 @@ class UserProfileScreen : ComponentActivity() {
                     censoringViewModel = censoringViewModel,
                     friendRequestViewModel = friendRequestViewModel,
                     compassViewModel = compassViewModel,
-                    compassNearbyAPI = compassNearbyAPI
+                    compassPermissionHandler = compassPermissionHandler
                 )
             }
         }
     }
 
-    // region MostlyDeviceConnectionUseCase
     @CallSuper
     override fun onStart() {
         super.onStart()
-
-        // region NearbyAPI
-        // This screen is entered only when the matched user accepts the connection
-        // ... so as soon as this screen is shown, start the connection process
-        compassNearbyAPI.updateConnectionType(CompassConnectionType.WAITING)
-
-        // TODO Temporarily and quickly allow showing compass updating
-        compassNearbyAPI.updateConnectionType(CompassConnectionType.MEETING)
-        // endregion NearbyAPI
+        compassPermissionHandler.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-
-
-        // region WifiP2P
-        // Register the broadcast receiver with the intent values to be matched
-        receiver = WiFiDirectBroadcastReceiver(manager, channel, this)
-        registerReceiver(receiver, intentFilter)
-
-        receiver?.discoverPeers()
-        receiver?.requestPeers()
-
-        receiver?.tempCheckForPeers()
-        // endregion WifiP2P
+        compassPermissionHandler.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-
-
-        // region WifiP2P
-        // Unregister the broadcast receiver
-        unregisterReceiver(receiver)
-        // endregion WifiP2P
-    }
-
-    @Deprecated("Deprecated in Java")
-    @CallSuper
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        // If user does not grant any required app permissions, show error that app cannot function without them
-        val errMsg = "Cannot start without required permissions"
-        if (requestCode == REQUEST_CODE_REQUIRED_PERMISSIONS) {
-            grantResults.forEach {
-                if (it == PackageManager.PERMISSION_DENIED) {
-                    Toast.makeText(this, errMsg, Toast.LENGTH_LONG).show()
-                    finish()
-                    return
-                }
-            }
-            recreate()
-        }
+        compassPermissionHandler.onPause()
     }
 
     @CallSuper
     override fun onStop() {
-        // region NearbyAPI
-        compassNearbyAPI.updateConnectionType(CompassConnectionType.OFFLINE)
-        // Release all assets when the Nearby API is no longer necessary
-        compassNearbyAPI.releaseAssets()
-        // endregion NearbyAPI
-
-
+        compassPermissionHandler.onStop()
         super.onStop()
     }
 
-    private fun verifyPermissions(){
-        // TODO Should show permission rationale with shouldShowRequestPermissionRationale()
-        val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()){
-                isGranted: Boolean ->
-            Log.i(
-                TAG(),
-                "CompassScreen: Permission launcher granted? = \"$isGranted\""
-            )
-        }
-
-        for (permission in ALL_NEARBY_API_PERMISSIONS + ALL_WIFIP2P_PERMISSIONS){
-            when {
-                ContextCompat.checkSelfPermission(this, permission)
-                        == PackageManager.PERMISSION_GRANTED -> {
-                    Log.i(
-                        TAG(),
-                        "CompassScreen: Permission granted = \"$permission\""
-                    )
-                }
-
-                ActivityCompat.shouldShowRequestPermissionRationale(
-                    this, permission
-                ) -> {
-                    Log.i(
-                        TAG(),
-                        "CompassScreen: Permission denied = \"$permission\""
-                    )
-                    // Show some UI for rationale behind requesting a permission here
-                }
-
-                else -> {
-                    Log.i(
-                        TAG(),
-                        "CompassScreen: Permission unasked = \"$permission\""
-                    )
-                    requestPermissionLauncher.launch(
-                        permission
-                    )
-                    val temp = (ContextCompat.checkSelfPermission(this, permission)
-                            == PackageManager.PERMISSION_GRANTED)
-                    Log.i(
-                        TAG(),
-                        "CompassScreen: Permission after asking = \"$temp\""
-                    )
-                }
-            }
-        }
-    }
-    // endregion MostlyDeviceConnectionUseCase
-
     override fun onDestroy() {
         super.onDestroy()
-
         // Repository must be closed to free resources
         repository.close()
     }
+    // endregion Functions
 }
 
 
-/*
-===== Functions =====
- */
-
-
+// region Functions
 /**
  * Displays the entire user profile screen
  */
@@ -481,26 +293,6 @@ fun UserProfileLayout(
             )
             HomeScreen(navController = navController, viewModel = homeViewModel, userProfileViewModel = userProfileViewModel)
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun UserProfileLayoutPreview() {
-    MyApplicationTheme {
-        val repository = MockRepository()
-        val userProfiles = (1..30).map { index ->
-            MockRepository.getMockUserProfile(index)
-        }.toMutableStateList()
-        UserProfileLayout(
-            userProfileViewModel = UserProfileViewModel(
-                repository = repository,
-                userProfileListState = userProfiles
-            ),
-            toolbarViewModel = ToolbarViewModel(repository),
-            navController = rememberNavController(),
-            homeViewModel = HomeViewModel(repository = repository)
-        )
     }
 }
 
@@ -593,25 +385,6 @@ fun UserProfileBody(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun UserProfileBodyPreview() {
-    MyApplicationTheme {
-        val repository = MockRepository()
-        val userProfiles = (1..30).map { index ->
-            MockRepository.getMockUserProfile(index)
-        }.toMutableStateList()
-
-        UserProfileBody(
-            userProfileViewModel = UserProfileViewModel(
-                repository = repository,
-                userProfileListState = userProfiles,
-            ),
-            toolbarViewModel = ToolbarViewModel(repository=repository)
-        )
-    }
-}
-
 /**
  * Displays a single row of information in the user profile screen
  */
@@ -700,22 +473,6 @@ fun UserProfileLayoutRow(
                 )
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun UserProfileLayoutRowPreview() {
-    MyApplicationTheme {
-        UserProfileLayoutRow(
-            rowInformationHeader = R.string.user_profile_first_name_header,
-            rowInformation = stringResource(id = R.string.app_name),
-            remainingCharacterAmount = 99,
-            isInformationExpanded = false,
-            isEditingUserProfile = false,
-            onTextChange = {},
-            testTag = ""
-        )
     }
 }
 
@@ -878,3 +635,62 @@ fun DeleteConfirmationDialog(
         }
     }
 }
+// endregion Functions
+
+
+// region Previews
+@Preview(showBackground = true)
+@Composable
+fun UserProfileLayoutPreview() {
+    MyApplicationTheme {
+        val repository = MockRepository()
+        val userProfiles = (1..30).map { index ->
+            MockRepository.getMockUserProfile(index)
+        }.toMutableStateList()
+        UserProfileLayout(
+            userProfileViewModel = UserProfileViewModel(
+                repository = repository,
+                userProfileListState = userProfiles
+            ),
+            toolbarViewModel = ToolbarViewModel(repository),
+            navController = rememberNavController(),
+            homeViewModel = HomeViewModel(repository = repository)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UserProfileBodyPreview() {
+    MyApplicationTheme {
+        val repository = MockRepository()
+        val userProfiles = (1..30).map { index ->
+            MockRepository.getMockUserProfile(index)
+        }.toMutableStateList()
+
+        UserProfileBody(
+            userProfileViewModel = UserProfileViewModel(
+                repository = repository,
+                userProfileListState = userProfiles,
+            ),
+            toolbarViewModel = ToolbarViewModel(repository=repository)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UserProfileLayoutRowPreview() {
+    MyApplicationTheme {
+        UserProfileLayoutRow(
+            rowInformationHeader = R.string.user_profile_first_name_header,
+            rowInformation = stringResource(id = R.string.app_name),
+            remainingCharacterAmount = 99,
+            isInformationExpanded = false,
+            isEditingUserProfile = false,
+            onTextChange = {},
+            testTag = ""
+        )
+    }
+}
+// endregion Previews

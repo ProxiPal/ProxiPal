@@ -33,6 +33,7 @@ import androidx.navigation.compose.rememberNavController
 import com.mongodb.app.R
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.compassscreen.CompassConnectionType
+import com.mongodb.app.data.compassscreen.CompassPermissionHandler
 import com.mongodb.app.navigation.Routes
 import com.mongodb.app.presentation.compassscreen.CompassNearbyAPI
 import com.mongodb.app.presentation.compassscreen.CompassViewModel
@@ -40,6 +41,7 @@ import com.mongodb.app.ui.components.SingleButtonRow
 import com.mongodb.app.ui.components.SingleTextRow
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
+import com.mongodb.app.ui.userprofiles.UserProfileScreen
 
 
 /*
@@ -55,7 +57,7 @@ Contributions:
 @Composable
 fun CompassScreenLayout(
     compassViewModel: CompassViewModel,
-    compassNearbyAPI: CompassNearbyAPI,
+    compassPermissionHandler: CompassPermissionHandler,
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
@@ -70,7 +72,7 @@ fun CompassScreenLayout(
     ) { innerPadding ->
         CompassScreenBodyContent(
             compassViewModel = compassViewModel,
-            compassNearbyAPI = compassNearbyAPI,
+            compassNearbyAPI = compassPermissionHandler.compassNearbyAPI,
             navController = navController,
             modifier = Modifier
                 .padding(innerPadding)
@@ -301,9 +303,10 @@ fun CompassScreenLayoutPreview() {
         val compassViewModel = CompassViewModel(repository = repository)
         CompassScreenLayout(
             compassViewModel = compassViewModel,
-            compassNearbyAPI = CompassNearbyAPI(
-                userId = "fakeUserId",
-                packageName = "fakePackageName"
+            compassPermissionHandler = CompassPermissionHandler(
+                repository = repository,
+                userProfileScreen = UserProfileScreen(),
+                compassViewModel = compassViewModel
             ),
             navController = rememberNavController()
         )

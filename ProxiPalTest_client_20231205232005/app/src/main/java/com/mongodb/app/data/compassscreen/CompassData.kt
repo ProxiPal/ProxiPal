@@ -92,3 +92,8 @@ val ALL_WIFIP2P_PERMISSIONS = listOf(
     Manifest.permission.CHANGE_NETWORK_STATE,
     Manifest.permission.INTERNET
 )
+
+/**
+ * Request code for verifying call to [requestPermissions]
+ */
+val REQUEST_CODE_REQUIRED_PERMISSIONS = 1
