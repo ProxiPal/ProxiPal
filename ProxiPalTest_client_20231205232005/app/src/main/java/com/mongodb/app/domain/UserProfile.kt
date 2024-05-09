@@ -53,6 +53,12 @@ class UserProfile : RealmObject {
     var selectedIndustries : RealmList<String> = realmListOf()
     var otherFilters : RealmList<String> = realmListOf()
 
+    // Added by Marco Pacini.
+    // Stores the ratings that other users have given this user
+    var userLikes: Int = 0
+    var userDislikes: Int = 0
+    // stores the list of userId's that have already rated this user
+    var usersThatRatedMe: RealmList<String> = realmListOf()
     var friends: RealmList<String> = realmListOf()
 
 

@@ -38,6 +38,7 @@ import com.mongodb.app.ui.theme.Purple200
 import com.mongodb.app.ui.theme.Purple500
 import com.mongodb.app.ui.theme.Purple700
 import com.mongodb.app.ui.theme.Teal200
+import com.mongodb.app.userratingsystem.RateUserPopup
 import java.util.concurrent.TimeUnit
 
 // Contribution: Marco Pacini
@@ -169,6 +170,7 @@ fun LocationUpdatesContent(usePreciseLocation: Boolean, userProfileViewModel: Us
             )
         }
         UserProfileDisplayList(userProfiles = userProfileViewModel.nearbyUserProfiles, isLookingForUsers)
+        //RateUserPopup(otherUserOwnerId = userProfileViewModel.getCurrentUserId(), userProfileViewModel = userProfileViewModel)
     }
 }
 

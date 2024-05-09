@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -90,6 +91,13 @@ class UserProfileViewModel(
     private val _selectedIndustries = mutableStateOf<List<String>>(emptyList())
     private val _otherFilters = mutableStateOf<List<String>>(emptyList())
 
+    // Stores the ratings that other users have given this user. Added by Marco
+    private var _userLikes: MutableState<Int> = mutableIntStateOf(0)
+    private var _userDislikes: MutableState<Int> = mutableIntStateOf(0)
+
+    // Contains a list of userId's that have rated the current user. Added by Marco.
+    private var _usersThatRatedMe: MutableList<String> = mutableListOf()
+
     //april
     private val _currentUserId = mutableStateOf("")
 
@@ -158,6 +166,16 @@ class UserProfileViewModel(
     val selectedInterests: State<List<String>> = _selectedInterests
     val selectedIndustries: State<List<String>> = _selectedIndustries
     val otherFilters: State<List<String>> = _otherFilters
+
+    // for rating system added by Marco
+    val userLikes: State<Int>
+        get() = _userLikes
+
+    val userDislikes: State<Int>
+        get() = _userDislikes
+
+    val usersThatRatedMe: List<String>
+        get() = _usersThatRatedMe
 
     val currentUserId: State<String> = _currentUserId
 
@@ -278,6 +296,10 @@ class UserProfileViewModel(
           _currentFirstName.value = userProfile.firstName
           _currentLastName.value = userProfile.lastName
           _currentBiography.value = userProfile.biography
+        
+          _userLikes.value = userProfile.userLikes
+          _userDislikes.value = userProfile.userDislikes
+          _usersThatRatedMe = userProfile.usersThatRatedMe
     }
 
 
@@ -302,9 +324,6 @@ class UserProfileViewModel(
     /**
      * Updates the user profile's location
      */
-
-
-
     fun setUserProfileLocation(latitude: Double, longitude: Double){
         _userProfileLatitude.value = latitude
         _userProfileLongitude.value = longitude
@@ -615,6 +634,22 @@ class UserProfileViewModel(
             app.currentUser?.delete()
         }
     }
+
+    /**
+     * Rates another user, taking their ownerID as input and a rating given by the current user
+     */
+    fun rateOtherUser(otherUserOwnerId: String, ratingGiven: Boolean){
+        viewModelScope.launch {
+            repository.rateOtherUser(otherUserOwnerId = otherUserOwnerId, ratingGiven = ratingGiven)
+        }
+    }
+
+    fun returnCurrentUserId(): String{
+        return repository.getCurrentUserId()
+    }
+
+}
+
     fun readUserProfile(userId: String): Flow<UserProfile?> = flow {
         val realm = repository.getRealmInstance() ?: throw IllegalStateException("Realm instance is null")
         val query = repository.getQuerySpecificUserProfile(realm, userId)

@@ -249,13 +249,9 @@ interface SyncRepository {
      */
     fun getNearbyUserProfileList(userLatitude: Double, userLongitude: Double, radiusInKilometers: Double, selectedInterests: List<String> = emptyList(), selectedIndustries: List<String> = emptyList(), otherFilters: List<String> = emptyList()): Flow<ResultsChange<UserProfile>>
     // endregion location
-
-
+  
     // endregion Functions
   
-  
-
-
     suspend fun updateUserProfileInterests(interest:String)
 
     suspend fun updateUserProfileIndustries(industry:String)
@@ -267,6 +263,18 @@ interface SyncRepository {
     //march17 George Fu
     suspend fun updateUserSelectedFilters(selectedInterests: List<String>, selectedIndustries: List<String>, otherFilters: List<String>)
     suspend fun clearUserSelectedFilters()
+
+    //region User Rating System
+
+    /**
+     * Updates another user's rating score when the current user rates them.
+     *
+     * Takes in the other user's ownerId as input and adds the current user's ownerId
+     * to the list of users that have rated them already (so they cannot rate them more than once).
+     *
+     * ratingGiven is true for like and false for dislike.
+     */
+    suspend fun rateOtherUser(otherUserOwnerId: String, ratingGiven: Boolean)
 
     //april2
     suspend fun sendFriendRequest(senderId: String, receiverFriendId: String)
@@ -290,7 +298,8 @@ interface SyncRepository {
     suspend fun addUserToFriendList(requestId: String)
 
     suspend fun removeFriendBidirectional(userId: String, friendId: String)
-
+    
+    // endregion Functions
 }
 
 
@@ -664,8 +673,6 @@ class RealmSyncRepository(
                 twitterHandle = "empty",
                 linktreeHandle = "empty",
                 linkedinHandle = "empty"
-
-
             )
             return
         }
@@ -710,7 +717,7 @@ class RealmSyncRepository(
 
         //return realm.query<UserProfile>(query, currentUser.id).find().asFlow()
 
-        // TODO: TESTING THE NEARBY USER LIST DISPLAY WITH BELOW STATEMENT SHOULD SHOW ALL USERS IN DATABASE
+        // TODO: The below statement just displays all users in the database for testing purposes
         return realm.query<UserProfile>("ownerId != $0", currentUser.id).find().asFlow()
     }
 
@@ -1110,6 +1117,30 @@ class RealmSyncRepository(
         }
     }
 
+    // region rating system
+
+    // takes the other user's ID and the current user's rating (true for like, false for dislike)
+    // and rates the other user
+    override suspend fun rateOtherUser(otherUserOwnerId: String, ratingGiven: Boolean) {
+        val otherUserProfile = getQuerySpecificUserProfile(realm = realm, ownerId = otherUserOwnerId)
+            .find()
+            .firstOrNull()
+
+        otherUserProfile?.let { userProfile ->
+            realm.write {
+                findLatest(userProfile)?.let { liveUserProfile ->
+                    if (!liveUserProfile.usersThatRatedMe.contains(currentUser.id)) {
+                        if (ratingGiven) {
+                            liveUserProfile.userLikes++
+                        } else {
+                            liveUserProfile.userDislikes++
+                        }
+                        liveUserProfile.usersThatRatedMe.add(currentUser.id)
+                    }
+                }
+            }
+        }
+    }
     //april2
     override suspend fun sendFriendRequest(senderId: String,receiverFriendId: String) {
         try {
@@ -1197,7 +1228,6 @@ class RealmSyncRepository(
     }
 
 
-
 }
 
 /**
@@ -1267,6 +1297,7 @@ class MockRepository : SyncRepository {
     override suspend fun updateUserSelectedFilters(selectedInterests: List<String>, selectedIndustries: List<String>, otherFilters: List<String>) = Unit
     override suspend fun clearUserSelectedFilters() = Unit
 
+    override suspend fun rateOtherUser(otherUserOwnerId: String, ratingGiven: Boolean) = Unit
     //april
     override suspend fun sendFriendRequest(senderId: String, receiverFriendId: String) = Unit
     override suspend fun respondToFriendRequest(requestId: String, accepted: Boolean) = Unit
@@ -1288,7 +1319,6 @@ class MockRepository : SyncRepository {
     override suspend fun addUserToFriendList(requestId: String) = Unit
 
     override suspend fun removeFriendBidirectional(userId: String, friendId: String) = Unit
-
 
     companion object {
         const val MOCK_OWNER_ID_MINE = "A"
