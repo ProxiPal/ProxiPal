@@ -88,12 +88,14 @@ class CompassPermissionHandler(
         // region NearbyAPI
         _compassNearbyAPI = CompassNearbyAPI(
             userId = repository.getCurrentUserId(),
-            packageName = activity.packageName
+            packageName = activity.packageName,
+            activity = activity
         )
         // Need to create connections client in compass screen communication class
         _compassNearbyAPI.setConnectionsClient(activity)
         _compassNearbyAPI.setCompassViewModel(compassViewModel)
         // endregion NearbyAPI
+
 
         // region WifiP2P
         manager = activity.getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager
@@ -223,8 +225,15 @@ class CompassPermissionHandler(
     }
 
     fun refresh(){
+        // region NearbyAPI
+        onStart()
+        // endregion NearbyAPI
+
+
+        // region WifiP2P
         receiver?.discoverPeers()
         receiver?.requestPeers()
+        // endregion WifiP2P
     }
     // endregion Functions
 }

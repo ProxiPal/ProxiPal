@@ -198,8 +198,7 @@ class CompassNearbyAPI constructor(
                         "CompassCommunication: Requesting connection..."
                     )
                     connectionsClient.requestConnection(
-//                userId,
-                        "Device A",
+                        userId,
                         endpointId,
                         connectionLifecycleCallback
                     )
@@ -274,13 +273,12 @@ class CompassNearbyAPI constructor(
     private fun startAdvertising() {
         Log.i(
             TAG(),
-            "CompassCommunication: Start of advertising"
+            "CompassCommunication: Start of advertising()"
         )
         val options = AdvertisingOptions.Builder().setStrategy(strategy).build()
         // Advertising may fail, so need to handle cases if it does
         connectionsClient.startAdvertising(
-//            userId,
-            "Device A",
+            userId,
             packageName,
             connectionLifecycleCallback,
             options
@@ -293,7 +291,7 @@ class CompassNearbyAPI constructor(
     private fun startDiscovery() {
         Log.i(
             TAG(),
-            "CompassCommunication: Start of discovery"
+            "CompassCommunication: Start of discovery()"
         )
         val options = DiscoveryOptions.Builder().setStrategy(strategy).build()
         connectionsClient.startDiscovery(
@@ -331,27 +329,19 @@ class CompassNearbyAPI constructor(
 //        }
         _connectionType.value = newConnectionType
         compassViewModel.updateConnectionType(newConnectionType)
+        Log.i(
+            TAG(),
+            "CompassCommunication: Now ${connectionType.value}"
+        )
         when (connectionType.value) {
             CompassConnectionType.OFFLINE -> {
-                Log.i(
-                    TAG(),
-                    "CompassCommunication: Now OFFLINE"
-                )
                 disconnect()
             }
             CompassConnectionType.WAITING -> {
-                Log.i(
-                    TAG(),
-                    "CompassCommunication: Now WAITING"
-                )
                 startDiscovery()
                 startAdvertising()
             }
             CompassConnectionType.MEETING -> {
-                Log.i(
-                    TAG(),
-                    "CompassCommunication: Now MEETING"
-                )
             }
         }
     }
