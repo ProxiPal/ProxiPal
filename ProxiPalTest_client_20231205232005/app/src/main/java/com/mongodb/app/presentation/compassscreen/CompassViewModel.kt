@@ -1,6 +1,7 @@
 package com.mongodb.app.presentation.compassscreen
 
 import android.os.Bundle
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableDoubleStateOf
@@ -10,6 +11,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
+import com.mongodb.app.TAG
 import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.compassscreen.CompassConnectionType
 import com.mongodb.app.data.compassscreen.KM_PER_ONE_LATITUDE_DIFF
@@ -135,6 +137,11 @@ class CompassViewModel constructor(
                 if (it.list.size > 0){
                     _focusedUserProfile = it.list[0]
                 }
+                Log.e(
+                    TAG(),
+                    "Focus ID = \"${MessagesData.userIdInFocus.value}\"; " +
+                            "Size = \"${it.list.size}\""
+                )
                 true
             }
         }

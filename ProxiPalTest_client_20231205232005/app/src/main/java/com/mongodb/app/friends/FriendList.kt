@@ -147,6 +147,8 @@ fun FriendItem(
     var showMenu by remember { mutableStateOf(false) }
     val friendName = viewModel.getFriendNameFromFriendId(friendId)
     val isUserBlocked = blockingViewModel.isUserBlocked(friendId)
+    // This friend ID needs to be accessed by the compass and messages screens
+    MessagesData.updateUserIdInFocus(friendId)
 
     Card(
         modifier = Modifier
@@ -185,7 +187,6 @@ fun FriendItem(
                         text = { Text("Start messaging") },
                         onClick = {
                             showMenu = false
-                            MessagesData.updateUserIdInFocus(friendId)
                             navController.navigate(Routes.MessagesScreen.route)
                         }
                     )

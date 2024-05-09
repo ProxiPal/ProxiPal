@@ -310,7 +310,6 @@ class UserProfileScreen : ComponentActivity() {
                     compassViewModel = compassViewModel,
                     compassNearbyAPI = compassNearbyAPI
                 )
-
             }
         }
     }
