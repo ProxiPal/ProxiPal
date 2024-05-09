@@ -11,6 +11,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.mongodb.app.TAG
@@ -26,10 +27,13 @@ import com.mongodb.app.ui.userprofiles.UserProfileScreen
  */
 class CompassPermissionHandler(
     private val repository: SyncRepository,
-    private val activity: ComponentActivity,
+    val activity: ComponentActivity,
     private val compassViewModel: CompassViewModel
 ) {
     // region Variables
+
+
+    val isDoingDeviceConnection = mutableStateOf(false)
 
 
     // region NearbyAPI
@@ -71,9 +75,11 @@ class CompassPermissionHandler(
         onCreate()
         onStart()
         onResume()
+        isDoingDeviceConnection.value = true
     }
 
     fun endSetup(){
+        isDoingDeviceConnection.value = false
         onPause()
         onStop()
     }
@@ -117,8 +123,6 @@ class CompassPermissionHandler(
 
         receiver?.discoverPeers()
         receiver?.requestPeers()
-
-        receiver?.tempCheckForPeers()
         // endregion WifiP2P
     }
 
@@ -161,7 +165,7 @@ class CompassPermissionHandler(
     private fun requestPermissionsDangerous(){
         ActivityCompat.requestPermissions(
             activity,
-            arrayOf(ACCESS_FINE_LOCATION),
+            DANGEROUS_COMPASS_SCREEN_PERMISSIONS,
             COMPASS_PERMISSION_REQUEST_CODE
         )
         Log.e("PermissionHandler", "End dangerous")
@@ -216,6 +220,11 @@ class CompassPermissionHandler(
                 }
             }
         }
+    }
+
+    fun refresh(){
+        receiver?.discoverPeers()
+        receiver?.requestPeers()
     }
     // endregion Functions
 }

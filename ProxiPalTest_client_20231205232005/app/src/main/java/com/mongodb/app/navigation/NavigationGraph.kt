@@ -1,7 +1,6 @@
 package com.mongodb.app.navigation
 
 import ProfileSetupScaffold
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -10,7 +9,6 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.mongodb.app.TAG
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.compassscreen.CompassPermissionHandler

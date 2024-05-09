@@ -14,11 +14,6 @@ import android.net.wifi.p2p.WifiP2pManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.mongodb.app.TAG
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.net.ServerSocket
 
 
 /*
@@ -77,19 +72,6 @@ class WiFiDirectBroadcastReceiver(
     /*
     ===== Functions =====
      */
-    /**
-     * A temporary infinite loop for testing the peer discovery and connection abilities
-     */
-    fun tempCheckForPeers(){
-        CoroutineScope(Dispatchers.Main).launch {
-            while (true){
-                discoverPeers()
-                requestPeers()
-                delay(8000)
-            }
-        }
-    }
-
     @SuppressLint("MissingPermission")
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != null){

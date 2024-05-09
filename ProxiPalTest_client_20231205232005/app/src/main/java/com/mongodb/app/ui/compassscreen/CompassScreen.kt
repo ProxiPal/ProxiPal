@@ -69,13 +69,9 @@ fun CompassScreenLayout(
 ) {
     compassViewModel.refreshUserProfileInstances()
 
-    if (compassPermissionHandler.areAllPermissionsGranted()){
-        Log.e(
-            "CompassPermissionHandler",
-            "All permissions are granted"
-        )
+    if (!compassPermissionHandler.isDoingDeviceConnection.value){
         compassPermissionHandler.startSetup()
-
+    }
         Scaffold(
             topBar = {
                 CompassScreenTopBar()
@@ -92,16 +88,15 @@ fun CompassScreenLayout(
                     .padding(innerPadding)
             )
         }
-    }
-    else{
-        Log.e(
-            "CompassPermissionHandler",
-            "1 or more permissions are not granted"
-        )
-        CompassPermissionsGrantLayout(
-            compassPermissionHandler = compassPermissionHandler
-        )
-    }
+//    else{
+//        Log.e(
+//            "CompassPermissionHandler",
+//            "1 or more permissions are not granted"
+//        )
+//        CompassPermissionsGrantLayout(
+//            compassPermissionHandler = compassPermissionHandler
+//        )
+//    }
 }
 
 @Composable
@@ -120,8 +115,7 @@ fun CompassPermissionsGrantLayout(
                 .fillMaxWidth()
         ){
             Text(
-                text = "Some permissions need to be granted to use the compass " +
-                        "feature",
+                text = "Some permissions need to be granted to use the compass feature",
                 softWrap = true,
                 textAlign = TextAlign.Center
                 )
@@ -219,6 +213,21 @@ fun CompassScreenBodyContent(
 //                        compassNearbyAPI.updateConnectionType(CompassConnectionType.OFFLINE)
                     }
                 )
+                // Refresh button
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ){
+                    Button(
+                        onClick = { compassPermissionHandler.refresh() },
+                        modifier = Modifier
+                    ) {
+                        Text(
+                            text = "Refresh data"
+                        )
+                    }
+                }
             }
             // Connection is not yet established with matched user
             // Show button to go back
