@@ -68,14 +68,12 @@ import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
 import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
 import com.mongodb.app.presentation.blocking_censoring.censor
 import com.mongodb.app.presentation.messages.MessagesViewModel
-import com.mongodb.app.ui.blocking_censoring.BlockingContextualMenu
+import com.mongodb.app.ui.blocking_censoring.CensoringContextualMenu
 import com.mongodb.app.ui.theme.MessageColorMine
 import com.mongodb.app.ui.theme.MessageColorOther
 import com.mongodb.app.ui.theme.MessageInputBackgroundColor
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
-import java.util.Calendar
-import java.util.Date
 import java.util.SortedSet
 
 
@@ -217,9 +215,7 @@ fun MessagesTopBar(
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
-                BlockingContextualMenu(
-                    userId = userIdInFocus,
-                    blockingViewModel = blockingViewModel,
+                CensoringContextualMenu(
                     censoringViewModel = censoringViewModel
                 )
             }
