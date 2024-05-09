@@ -196,8 +196,7 @@ fun MessagesTopBar(
                     contentDescription = null,
                     modifier = Modifier
                         .clickable {
-                            // TODO Need to change this to navigate to friends screen instead
-                            navController.navigate(Routes.UserProfileScreen.route)
+                            navController.navigate(Routes.FriendListScreen.route)
                         }
                 )
                 Column(
