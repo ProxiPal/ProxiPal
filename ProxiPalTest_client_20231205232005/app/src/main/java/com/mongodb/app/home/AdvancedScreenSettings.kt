@@ -30,6 +30,7 @@ import com.mongodb.app.AccessibilityActivity
 import com.mongodb.app.LanguageIdentificationActivity
 import com.mongodb.app.LanguageTranslationActivity
 import com.mongodb.app.DarkModeActivity
+import com.mongodb.app.SpeechRecognitionActivity
 
 //This is the code to edit the settings screen.
 @Composable
@@ -86,10 +87,9 @@ fun AdvancedScreenSettings(navController: NavHostController) {
                         val intent = Intent(context, AccessibilityActivity::class.java)
                         context.startActivity(intent)
                     }
-                    SettingsItem("Dark Mode") {
-                        val intent = Intent(context, DarkModeActivity::class.java)
+                    SettingsItem("Speech Recognition") {
+                        val intent = Intent(context, SpeechRecognitionActivity::class.java)
                         context.startActivity(intent)
-
                     }
                 }
             }

@@ -81,7 +81,7 @@ fun ScreenSettings(navController: NavHostController) {
 
                 ){
                     SettingsItem("Profile Info") {
-                        Toast.makeText(context, "Profile Info clicked!", Toast.LENGTH_SHORT).show()
+                        navController.navigate(Routes.UserProfileScreen.route)
                     }
                     SettingsItem("Language") {
                         val intent = Intent(context, LanguageActivity::class.java)
