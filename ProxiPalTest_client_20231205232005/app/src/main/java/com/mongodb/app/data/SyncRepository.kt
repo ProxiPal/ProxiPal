@@ -1176,8 +1176,8 @@ class RealmSyncRepository(
                 val receiverProfile = query<UserProfile>("ownerId == $0", request.receiverFriendId).first().find()
                 if (senderProfile != null && receiverProfile != null) {
                     // Update both users' friend lists
-                    senderProfile.friends.add(receiverProfile.firstName + " " + receiverProfile.lastName)
-                    receiverProfile.friends.add(senderProfile.firstName + " " + senderProfile.lastName)
+                    senderProfile.friends.add(receiverProfile.ownerId)
+                    receiverProfile.friends.add(senderProfile.ownerId)
                 } else {
                     Log.e("FriendTest", "One of the user profiles is null: senderProfile=$senderProfile, receiverProfile=$receiverProfile")
                 }

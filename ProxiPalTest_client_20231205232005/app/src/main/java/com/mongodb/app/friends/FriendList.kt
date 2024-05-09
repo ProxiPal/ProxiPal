@@ -37,7 +37,7 @@ fun Friendslist(
     val searchText = remember { mutableStateOf(TextFieldValue()) }
     val feedback by friendRequestViewModel.feedback.collectAsState(initial = "")
     val currentUserId by viewModel.currentUserId
-    val friends by viewModel.friendsList.collectAsState()
+    val friendIds by viewModel.friendIdsList.collectAsState()
 
 
 
@@ -97,8 +97,8 @@ fun Friendslist(
         Text("Your User ID: $currentUserId", modifier = Modifier.padding(16.dp))
 
         LazyColumn {
-            items(friends) { friend ->
-                FriendItem(friend = friend, viewModel = viewModel, navController = navController)
+            items(friendIds) { friendId ->
+                FriendItem(friendId = friendId, viewModel = viewModel, navController = navController)
             }
         }
     }
@@ -106,11 +106,12 @@ fun Friendslist(
 
 @Composable
 fun FriendItem(
-    friend: String,
+    friendId: String,
     viewModel: UserProfileViewModel,
     navController: NavHostController
 ) {
     var showMenu by remember { mutableStateOf(false) }
+    val friendName = viewModel.getFriendNameFromFriendId(friendId)
 
     Card(
         modifier = Modifier
@@ -128,7 +129,7 @@ fun FriendItem(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = friend,
+                text = friendName,
                 modifier = Modifier.weight(1f)
             )
             IconButton(onClick = { showMenu = !showMenu }) {
@@ -141,7 +142,7 @@ fun FriendItem(
                 DropdownMenuItem(
                     text = { Text("Start messaging") },
                     onClick = {
-                        MessagesData.updateUserIdInFocus(friend)
+                        MessagesData.updateUserIdInFocus(friendId)
                         navController.navigate(Routes.MessagesScreen.route)
                     }
                 )
@@ -149,7 +150,7 @@ fun FriendItem(
                     text = { Text("Delete Friend") },
                     onClick = {
                         showMenu = false
-                        viewModel.removeFriend(friend)
+                        viewModel.removeFriend(friendId)
                     }
                 )
             }
