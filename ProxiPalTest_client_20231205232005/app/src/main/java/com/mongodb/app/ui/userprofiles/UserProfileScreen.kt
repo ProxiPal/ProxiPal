@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -47,11 +48,15 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key.Companion.Window
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
@@ -263,7 +268,11 @@ fun UserProfileLayout(
         bottomBar = { ProxiPalBottomAppBar(navController) },
         modifier = modifier
     ) { innerPadding ->
-        Column {
+        Column (
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .height((calculateScreenHeight()+100).dp)
+        ){
             UserProfileBody(
                 contentPadding = innerPadding,
                 userProfileViewModel = userProfileViewModel,
@@ -273,6 +282,16 @@ fun UserProfileLayout(
             HomeScreen(navController = navController, viewModel = homeViewModel, userProfileViewModel = userProfileViewModel)
         }
     }
+}
+
+/**
+ * Added by Marco to calculate screen height in order to specify a height for the column layout
+ * so that vertical scroll is functional.
+ */
+@Composable
+fun calculateScreenHeight(): Int {
+    val screenHeight = LocalConfiguration.current.screenHeightDp
+    return screenHeight
 }
 
 /**
