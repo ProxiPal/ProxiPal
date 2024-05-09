@@ -51,6 +51,7 @@ import com.mongodb.app.presentation.blocking_censoring.BlockingAction
 import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.blocking_censoring.BlockingAlert
+import com.mongodb.app.userratingsystem.RateUserPopup
 
 //ALL ADDED BY GEORGE FU
 @OptIn(ExperimentalMaterial3Api::class)
@@ -145,6 +146,7 @@ fun FriendItem(
     navController: NavHostController
 ) {
     var showMenu by remember { mutableStateOf(false) }
+    var showRatingPopup by remember { mutableStateOf(false) }
     val friendName = viewModel.getFriendNameFromFriendId(friendId)
     val isUserBlocked = blockingViewModel.isUserBlocked(friendId)
     // This friend ID needs to be accessed by the compass and messages screens
@@ -226,7 +228,16 @@ fun FriendItem(
                         viewModel.removeFriend(friendId)
                     }
                 )
+                DropdownMenuItem(
+                    text = { Text("Rate User") },
+                    onClick = {
+                        showRatingPopup = true
+                    }
+                )
             }
         }
+    }
+    if (showRatingPopup){
+        RateUserPopup(otherUserOwnerId = friendId, userProfileViewModel = viewModel, onClose = {showRatingPopup = false})
     }
 }

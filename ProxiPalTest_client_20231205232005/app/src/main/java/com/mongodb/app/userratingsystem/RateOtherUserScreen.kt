@@ -27,10 +27,14 @@ import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.theme.Purple200
 import kotlinx.coroutines.delay
 
+/**
+ * Popup allowing the current user to rate another user by taking in the other user's owner id as input
+ */
 @Composable
 fun RateUserPopup(
     otherUserOwnerId: String,
-    userProfileViewModel: UserProfileViewModel
+    userProfileViewModel: UserProfileViewModel,
+    onClose: () -> Unit = {} // Callback function to be invoked when popup is closed
 ) {
     val (ratingGiven, setRatingGiven) = remember { mutableStateOf(false) }
     val (popupVisible, setPopupVisible) = remember { mutableStateOf(true) }
@@ -45,6 +49,7 @@ fun RateUserPopup(
             if (!ratingGiven) {
                 // Close the popup if no rating is given
                 setPopupVisible(false)
+                onClose()
             }
         }
     ) {
@@ -66,6 +71,7 @@ fun RateUserPopup(
                             setRatingGiven(true)
                             // Close the popup after rating
                             setPopupVisible(false)
+                            onClose()
                         },
                         enabled = !ratingGiven,
                         colors = ButtonDefaults.buttonColors(backgroundColor = Purple200)
@@ -79,6 +85,7 @@ fun RateUserPopup(
                             setRatingGiven(true)
                             // Close the popup after rating
                             setPopupVisible(false)
+                            onClose()
                         },
                         enabled = !ratingGiven,
                         colors = ButtonDefaults.buttonColors(backgroundColor = Purple200)
@@ -97,9 +104,6 @@ fun RateUserPopup(
 @Composable
 fun RateUserPopupPreview() {
     val repository = MockRepository()
-    var isPopupVisible by remember { mutableStateOf(true) }
-    if (isPopupVisible) {
-        RateUserPopup(otherUserOwnerId = "otherUserId", userProfileViewModel = UserProfileViewModel(repository))
-    }
+    RateUserPopup(otherUserOwnerId = "otherUserId", userProfileViewModel = UserProfileViewModel(repository))
 }
 
