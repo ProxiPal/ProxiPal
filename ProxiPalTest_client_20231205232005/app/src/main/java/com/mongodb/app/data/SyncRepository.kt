@@ -331,7 +331,7 @@ class RealmSyncRepository(
             this.ownerId = currentUser.id
         }
         realm.write{
-            copyToRealm(report,updatePolicy = UpdatePolicy.ALL)
+            copyToRealm(report)
         }
     }
 

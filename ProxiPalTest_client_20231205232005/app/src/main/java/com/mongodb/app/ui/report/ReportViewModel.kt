@@ -24,7 +24,7 @@ class ReportViewModel(
 
     // function to add a report to database
     fun addReport(userReported: String, reasons: List<String>, comment: String) {
-        viewModelScope.launch(){
+        CoroutineScope(Dispatchers.IO).launch(){
             runCatching {
                 repository.addReport(reportedUser = userReported, reasonsList = reasons,comment =comment)
 
