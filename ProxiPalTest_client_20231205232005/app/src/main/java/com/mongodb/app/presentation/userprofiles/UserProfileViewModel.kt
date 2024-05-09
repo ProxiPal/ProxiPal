@@ -648,8 +648,6 @@ class UserProfileViewModel(
         return repository.getCurrentUserId()
     }
 
-}
-
     fun readUserProfile(userId: String): Flow<UserProfile?> = flow {
         val realm = repository.getRealmInstance() ?: throw IllegalStateException("Realm instance is null")
         val query = repository.getQuerySpecificUserProfile(realm, userId)
