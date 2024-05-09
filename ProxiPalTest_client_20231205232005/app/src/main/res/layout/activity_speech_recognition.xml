@@ -28,7 +28,7 @@
         android:textAlignment="center"
         android:textAllCaps="false"
         android:textColor="@color/black"
-        android:textSize="18sp" />
+        android:textSize="30sp" />
 
     <!--creating a text view for displaying
         output on below line-->
@@ -39,11 +39,11 @@
         android:layout_below="@id/idIVMic"
         android:layout_marginTop="70dp"
         android:gravity="center"
-        android:text="Output will appear here"
+        android:text="Waiting for audio.."
         android:textAlignment="center"
         android:textColor="@color/black"
         android:inputType="none"
         android:textIsSelectable="true"
-        android:textSize="20sp" />
+        android:textSize="35sp" />
 
 </RelativeLayout>
