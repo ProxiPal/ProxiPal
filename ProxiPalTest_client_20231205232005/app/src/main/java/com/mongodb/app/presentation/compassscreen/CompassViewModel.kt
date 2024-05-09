@@ -129,11 +129,6 @@ class CompassViewModel constructor(
                 if (it.list.size > 0){
                     _focusedUserProfile = it.list[0]
                 }
-                Log.e(
-                    TAG(),
-                    "Focus ID = \"${MessagesData.userIdInFocus.value}\"; " +
-                            "Size = \"${it.list.size}\""
-                )
                 true
             }
         }

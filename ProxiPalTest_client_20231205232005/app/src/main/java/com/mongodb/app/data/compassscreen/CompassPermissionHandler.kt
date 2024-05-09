@@ -144,11 +144,28 @@ class CompassPermissionHandler(
     }
 
     fun requestPermissions(){
+        requestPermissionsNormal()
+        requestPermissionsDangerous()
+    }
+
+    private fun requestPermissionsNormal(){
+        Log.e("PermissionHandler", "Start normal")
         ActivityCompat.requestPermissions(
             activity,
-            COMPASS_SCREEN_PERMISSIONS,
+            NORMAL_COMPASS_SCREEN_PERMISSIONS,
             COMPASS_PERMISSION_REQUEST_CODE
         )
+        Log.e("PermissionHandler", "End normal")
+    }
+
+    private fun requestPermissionsDangerous(){
+        Log.e("PermissionHandler", "Start dangerous")
+        ActivityCompat.requestPermissions(
+            activity,
+            DANGEROUS_COMPASS_SCREEN_PERMISSIONS,
+            COMPASS_PERMISSION_REQUEST_CODE
+        )
+        Log.e("PermissionHandler", "End dangerous")
     }
 
     private fun verifyPermissions(){

@@ -80,9 +80,14 @@ val ALL_WIFIP2P_PERMISSIONS = listOf(
     Manifest.permission.CHANGE_NETWORK_STATE,
     Manifest.permission.INTERNET
 )
+// endregion Outdated
 
-val COMPASS_SCREEN_PERMISSIONS = arrayOf(
+val DANGEROUS_COMPASS_SCREEN_PERMISSIONS = arrayOf(
     Manifest.permission.ACCESS_FINE_LOCATION,
+    Manifest.permission.ACCESS_COARSE_LOCATION,
+)
+
+val NORMAL_COMPASS_SCREEN_PERMISSIONS = arrayOf(
     Manifest.permission.BLUETOOTH_ADVERTISE,
     Manifest.permission.BLUETOOTH_CONNECT,
     Manifest.permission.BLUETOOTH_SCAN,
@@ -91,12 +96,13 @@ val COMPASS_SCREEN_PERMISSIONS = arrayOf(
     Manifest.permission.ACCESS_WIFI_STATE,
     Manifest.permission.CHANGE_WIFI_STATE,
     Manifest.permission.NEARBY_WIFI_DEVICES,
-    Manifest.permission.ACCESS_COARSE_LOCATION,
     Manifest.permission.ACCESS_NETWORK_STATE,
     Manifest.permission.CHANGE_NETWORK_STATE,
     Manifest.permission.INTERNET
 )
-// endregion Outdated
+
+val COMPASS_SCREEN_PERMISSIONS =
+    NORMAL_COMPASS_SCREEN_PERMISSIONS + DANGEROUS_COMPASS_SCREEN_PERMISSIONS
 
 /**
  * The code a permission needs to be for it to be considered granted

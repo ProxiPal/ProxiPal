@@ -661,11 +661,7 @@ class UserProfileViewModel(
             viewModelScope.launch {
                 repository.readUserProfile(friendId).first {
                     if (it.list.size > 0){
-                        Log.i( "UPVM", "Friend \"${it.list[0].firstName}\" found with ID \"$friendId\"")
                         friendIdsToNames[friendId] = it.list[0].firstName + " " + it.list[0].lastName
-                    }
-                    else{
-                        Log.e( "UPVM", "Friend not found with ID \"$friendId\"")
                     }
                     true
                 }

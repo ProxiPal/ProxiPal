@@ -157,10 +157,6 @@ fun NavigationGraph(
             val usersInvolved: SortedSet<String> = sortedSetOf()
             usersInvolved.add(currentUserId)
             usersInvolved.add(MessagesData.userIdInFocus.value)
-            Log.i(
-                TAG(),
-                "Start messages screen between $currentUserId && ${MessagesData.userIdInFocus.value}"
-            )
 
             MessagesScreenLayout(
                 navController = navController,
