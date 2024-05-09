@@ -134,7 +134,7 @@ class AllowNotificationsActivity : ComponentActivity() {
 }
 
 @Composable
-fun BackButton(onClick: () -> Unit) {
+private fun BackButton(onClick: () -> Unit) {
     IconButton(
         onClick = onClick,
         modifier = Modifier.size(48.dp)
