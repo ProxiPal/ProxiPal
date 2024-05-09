@@ -96,6 +96,11 @@ class UserProfileViewModel(
     private val _friendIdsToNames = mutableMapOf<String, String>()
     private val _friendIdsList = MutableStateFlow<List<String>>(emptyList())
 
+    private val _currentFirstName = mutableStateOf("")
+    private val _currentLastName = mutableStateOf("")
+    private val _currentBiography = mutableStateOf("")
+
+
     /*
     ===== Properties =====
      */
@@ -269,6 +274,10 @@ class UserProfileViewModel(
           viewModelScope.launch{
               getFriendNamesFromFriendIds(_friendIdsList.value)
           }
+
+          _currentFirstName.value = userProfile.firstName
+          _currentLastName.value = userProfile.lastName
+          _currentBiography.value = userProfile.biography
     }
 
 
@@ -454,7 +463,10 @@ class UserProfileViewModel(
      */
     fun discardUserProfileChanges(){
         _isEditingUserProfile.value = false
-        getUserProfile()
+//        getUserProfile()
+        _userProfileFirstName.value = _currentFirstName.value
+        _userProfileLastName.value = _currentLastName.value
+        _userProfileBiography.value = _currentBiography.value
     }
 
     @Deprecated(

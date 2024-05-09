@@ -16,6 +16,7 @@ import com.mongodb.app.data.toObjectId
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.jetbrains.annotations.VisibleForTesting
 import java.util.regex.Pattern
 
 
@@ -34,6 +35,7 @@ val Char.Companion.censored: Char
 /**
  * Censors a string using a list of text to hide from the original string
  */
+@VisibleForTesting
 fun String.censor(profanityList: MutableList<String>): String{
     val stringBuilder = StringBuilder()
     for (index in indices){
@@ -54,10 +56,11 @@ fun String.censor(profanityList: MutableList<String>): String{
         stringBuilder.censorShort(profanityPhrase)
         stringBuilder.censorLong(profanityPhrase)
     }
-    Log.i(
-        TAG(),
-        "Censored \"${this}\" to \"${stringBuilder}\""
-    )
+    // Cannot use Logs in tests
+//    Log.i(
+//        TAG(),
+//        "Censored \"${this}\" to \"${stringBuilder}\""
+//    )
     return stringBuilder.toString()
 }
 
