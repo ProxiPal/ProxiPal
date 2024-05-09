@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.CallSuper
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,7 +27,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
@@ -47,10 +47,10 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
@@ -61,6 +61,7 @@ import com.mongodb.app.R
 import com.mongodb.app.TAG
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.RealmSyncRepository
+import com.mongodb.app.data.compassscreen.CompassPermissionHandler
 import com.mongodb.app.data.userprofiles.USER_PROFILE_EDIT_MODE_MAXIMUM_LINE_AMOUNT
 import com.mongodb.app.data.userprofiles.USER_PROFILE_ROW_HEADER_WEIGHT
 import com.mongodb.app.friends.FriendRequestViewModel
@@ -69,6 +70,7 @@ import com.mongodb.app.home.HomeViewModel
 import com.mongodb.app.navigation.NavigationGraph
 import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
 import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
+import com.mongodb.app.presentation.compassscreen.CompassViewModel
 import com.mongodb.app.presentation.messages.MessagesViewModel
 import com.mongodb.app.presentation.tasks.ToolbarEvent
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
@@ -89,26 +91,8 @@ Contributions:
 
 
 class UserProfileScreen : ComponentActivity() {
-    /*
-    ===== Variables =====
-     */
-
-
-    private val repository = RealmSyncRepository { _, error ->
-        // Sync errors come from a background thread so route the Toast through the UI thread
-        lifecycleScope.launch {
-            // Catch write permission errors and notify user. This is just a 2nd line of defense
-            // since we prevent users from modifying someone else's tasks
-            // TODO the SDK does not have an enum for this type of error yet so make sure to update this once it has been added
-            if (error.message?.contains("CompensatingWrite") == true) {
-                Toast.makeText(
-                    this@UserProfileScreen, getString(R.string.user_profile_permissions_warning),
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
-            }
-        }
-    }
+    // region Variables
+    private val repository = RealmSyncRepository { _, _ -> }
 
     private val userProfileViewModel: UserProfileViewModel by viewModels {
         UserProfileViewModel.factory(repository, this)
@@ -148,16 +132,22 @@ class UserProfileScreen : ComponentActivity() {
         )
     }
 
-    /*
-    ===== Functions =====
-     */
+    private val compassViewModel: CompassViewModel by viewModels {
+        CompassViewModel.factory(
+            repository = repository,
+            this
+        )
+    }
+
+    private lateinit var compassPermissionHandler: CompassPermissionHandler
+    // endregion Variables
+
+
+    // region Functions
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // region ViewModel events
-        lifecycleScope.launch {
-        }
-
         lifecycleScope.launch {
             userProfileViewModel.addUserProfileEvent
                 .collect { fabEvent ->
@@ -200,6 +190,9 @@ class UserProfileScreen : ComponentActivity() {
 
         // Need to update repository when a configuration change occurs
         // ... otherwise app will crash when trying to access Realm after it has closed
+        compassViewModel.updateRepository(
+            newRepository = repository
+        )
         userProfileViewModel.updateRepository(
             newRepository = repository
         )
@@ -214,6 +207,12 @@ class UserProfileScreen : ComponentActivity() {
             newBlockingCensoringRealm = repository
         )
 
+        compassPermissionHandler = CompassPermissionHandler(
+            repository = repository,
+            activity = this,
+            compassViewModel = compassViewModel
+        )
+
         setContent {
             MyApplicationTheme {
                 NavigationGraph(
@@ -223,10 +222,10 @@ class UserProfileScreen : ComponentActivity() {
                     messagesViewModel = messagesViewModel,
                     blockingViewModel = blockingViewModel,
                     censoringViewModel = censoringViewModel,
-                    friendRequestViewModel = friendRequestViewModel
-
+                    friendRequestViewModel = friendRequestViewModel,
+                    compassViewModel = compassViewModel,
+                    compassPermissionHandler = compassPermissionHandler
                 )
-
             }
         }
     }
@@ -235,15 +234,13 @@ class UserProfileScreen : ComponentActivity() {
         super.onDestroy()
         // Repository must be closed to free resources
         repository.close()
+        compassPermissionHandler.endSetup()
     }
+    // endregion Functions
 }
 
 
-/*
-===== Functions =====
- */
-
-
+// region Functions
 /**
  * Displays the entire user profile screen
  */
@@ -273,26 +270,6 @@ fun UserProfileLayout(
             )
             HomeScreen(navController = navController, viewModel = homeViewModel, userProfileViewModel = userProfileViewModel)
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun UserProfileLayoutPreview() {
-    MyApplicationTheme {
-        val repository = MockRepository()
-        val userProfiles = (1..30).map { index ->
-            MockRepository.getMockUserProfile(index)
-        }.toMutableStateList()
-        UserProfileLayout(
-            userProfileViewModel = UserProfileViewModel(
-                repository = repository,
-                userProfileListState = userProfiles
-            ),
-            toolbarViewModel = ToolbarViewModel(repository),
-            navController = rememberNavController(),
-            homeViewModel = HomeViewModel(repository = repository)
-        )
     }
 }
 
@@ -338,7 +315,8 @@ fun UserProfileBody(
                 remainingCharacterAmount = userProfileViewModel.getRemainingCharacterAmountFirstName(),
                 isInformationExpanded = isCardExpanded,
                 isEditingUserProfile = userProfileViewModel.isEditingUserProfile.value,
-                onTextChange = { userProfileViewModel.setUserProfileFirstName(it) }
+                onTextChange = { userProfileViewModel.setUserProfileFirstName(it) },
+                testTag = "userProfileInputRowFirstName"
             )
             UserProfileLayoutRow(
                 rowInformationHeader = R.string.user_profile_last_name_header,
@@ -346,7 +324,8 @@ fun UserProfileBody(
                 remainingCharacterAmount = userProfileViewModel.getRemainingCharacterAmountLastName(),
                 isInformationExpanded = isCardExpanded,
                 isEditingUserProfile = userProfileViewModel.isEditingUserProfile.value,
-                onTextChange = { userProfileViewModel.setUserProfileLastName(it) }
+                onTextChange = { userProfileViewModel.setUserProfileLastName(it) },
+                testTag = "userProfileInputRowLastName"
             )
             UserProfileLayoutRow(
                 rowInformationHeader = R.string.user_profile_biography_header,
@@ -354,7 +333,8 @@ fun UserProfileBody(
                 remainingCharacterAmount = userProfileViewModel.getRemainingCharacterAmountBiography(),
                 isInformationExpanded = isCardExpanded,
                 isEditingUserProfile = userProfileViewModel.isEditingUserProfile.value,
-                onTextChange = { userProfileViewModel.setUserProfileBiography(it) }
+                onTextChange = { userProfileViewModel.setUserProfileBiography(it) },
+                testTag = "userProfileInputRowBiography"
             )
         }
         Spacer(
@@ -382,25 +362,6 @@ fun UserProfileBody(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun UserProfileBodyPreview() {
-    MyApplicationTheme {
-        val repository = MockRepository()
-        val userProfiles = (1..30).map { index ->
-            MockRepository.getMockUserProfile(index)
-        }.toMutableStateList()
-
-        UserProfileBody(
-            userProfileViewModel = UserProfileViewModel(
-                repository = repository,
-                userProfileListState = userProfiles,
-            ),
-            toolbarViewModel = ToolbarViewModel(repository=repository)
-        )
-    }
-}
-
 /**
  * Displays a single row of information in the user profile screen
  */
@@ -413,6 +374,7 @@ fun UserProfileLayoutRow(
     isInformationExpanded: Boolean,
     isEditingUserProfile: Boolean,
     onTextChange: (String) -> Unit,
+    testTag: String,
     modifier: Modifier = Modifier
 ) {
     // If the supplied row information is empty, use a temporary placeholder instead
@@ -481,25 +443,13 @@ fun UserProfileLayoutRow(
                         imeAction = ImeAction.Done
                     ),
                     // Limit the amount of lines shown when typing in a multi-line text field
-                    maxLines = USER_PROFILE_EDIT_MODE_MAXIMUM_LINE_AMOUNT
+                    maxLines = USER_PROFILE_EDIT_MODE_MAXIMUM_LINE_AMOUNT,
+                    // Allows this to be uniquely identified in tests
+                    modifier = Modifier
+                        .testTag(testTag)
                 )
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun UserProfileLayoutRowPreview() {
-    MyApplicationTheme {
-        UserProfileLayoutRow(
-            rowInformationHeader = R.string.user_profile_first_name_header,
-            rowInformation = stringResource(id = R.string.app_name),
-            remainingCharacterAmount = 99,
-            isInformationExpanded = false,
-            isEditingUserProfile = false,
-            onTextChange = {}
-        )
     }
 }
 
@@ -522,7 +472,9 @@ fun UserProfileEditButtons(
             .fillMaxWidth()
     ) {
         Button(
-            onClick = onEditButtonClick
+            onClick = onEditButtonClick,
+            modifier = Modifier
+                .testTag("userProfileEditButton")
         ) {
             Text(
                 // Set the text depending on if the user is currently editing their profile
@@ -538,7 +490,9 @@ fun UserProfileEditButtons(
         // Only display the edit canceling button when editing the user profile
         if (isEditingUserProfile){
             Button(
-                onClick = onDiscardEditButtonClick
+                onClick = onDiscardEditButtonClick,
+                modifier = Modifier
+                    .testTag("userProfileDiscardButton")
             ){
                 Text(
                     text = stringResource(id = R.string.user_profile_cancel_editing_message)
@@ -658,3 +612,62 @@ fun DeleteConfirmationDialog(
         }
     }
 }
+// endregion Functions
+
+
+// region Previews
+@Preview(showBackground = true)
+@Composable
+fun UserProfileLayoutPreview() {
+    MyApplicationTheme {
+        val repository = MockRepository()
+        val userProfiles = (1..30).map { index ->
+            MockRepository.getMockUserProfile(index)
+        }.toMutableStateList()
+        UserProfileLayout(
+            userProfileViewModel = UserProfileViewModel(
+                repository = repository,
+                userProfileListState = userProfiles
+            ),
+            toolbarViewModel = ToolbarViewModel(repository),
+            navController = rememberNavController(),
+            homeViewModel = HomeViewModel(repository = repository)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UserProfileBodyPreview() {
+    MyApplicationTheme {
+        val repository = MockRepository()
+        val userProfiles = (1..30).map { index ->
+            MockRepository.getMockUserProfile(index)
+        }.toMutableStateList()
+
+        UserProfileBody(
+            userProfileViewModel = UserProfileViewModel(
+                repository = repository,
+                userProfileListState = userProfiles,
+            ),
+            toolbarViewModel = ToolbarViewModel(repository=repository)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UserProfileLayoutRowPreview() {
+    MyApplicationTheme {
+        UserProfileLayoutRow(
+            rowInformationHeader = R.string.user_profile_first_name_header,
+            rowInformation = stringResource(id = R.string.app_name),
+            remainingCharacterAmount = 99,
+            isInformationExpanded = false,
+            isEditingUserProfile = false,
+            onTextChange = {},
+            testTag = ""
+        )
+    }
+}
+// endregion Previews

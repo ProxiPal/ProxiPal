@@ -2,10 +2,7 @@ package com.mongodb.app.ui.blocking_censoring
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
 import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -13,8 +10,6 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,9 +26,7 @@ import com.mongodb.app.R
 import com.mongodb.app.data.blocking_censoring.MockBlockingCensoringData
 import com.mongodb.app.presentation.blocking_censoring.BlockingAction
 import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
-import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
 import com.mongodb.app.ui.theme.MyApplicationTheme
-import com.mongodb.app.ui.theme.Purple200
 import kotlinx.coroutines.launch
 
 
@@ -43,39 +36,16 @@ Contributions:
  */
 
 
-@Deprecated(
-    message = "Not currently in use; Use BlockingContextualMenu function instead"
-)
-@Composable
-fun BlockUsersLayout(
-    blockingViewModel: BlockingViewModel,
-    censoringViewModel: CensoringViewModel,
-    /* The other user's ID involved in the current conversation */
-    userIdInFocus: String,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-    ){
-        BlockingContextualMenu(
-            userId = userIdInFocus,
-            blockingViewModel = blockingViewModel,
-            censoringViewModel = censoringViewModel
-        )
-        CensoringTestButtons(
-            censoringViewModel = censoringViewModel
-        )
-    }
-}
-
 /**
- * The main [Composable] function for setting up the block/unblock user contextual menu
+ * Provides the option for blocking another user
  */
+@Deprecated(
+    message = "Functionality merged with contextual menu in FriendList.kt UI"
+)
 @Composable
 fun BlockingContextualMenu(
     userId: String,
     blockingViewModel: BlockingViewModel,
-    censoringViewModel: CensoringViewModel,
     modifier: Modifier = Modifier
 ) {
     var isContextualMenuOpen by rememberSaveable { mutableStateOf(false) }
@@ -122,20 +92,6 @@ fun BlockingContextualMenu(
                     }
                 }
             )
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        text =
-                        if (!censoringViewModel.isCensoringText.value) stringResource(id = R.string.censoring_enable_text_censoring)
-                        else stringResource(id = R.string.censoring_disable_text_censoring)
-                    )
-                },
-                onClick = {
-                    isContextualMenuOpen = false
-                    censoringViewModel.toggleShouldCensorText()
-                },
-                modifier = modifier
-            )
         }
     }
 
@@ -163,6 +119,10 @@ fun BlockingContextualMenu(
     }
 }
 
+@Deprecated(
+    message = "Unused because user will suddenly become unblocked when canceling or " +
+            "dismissing the alert dialog that first asks about unblocking the user"
+)
 /**
  * Shows an alert dialog when the user is about to (un)block another user
  */
@@ -232,87 +192,15 @@ fun BlockingAlert(
     )
 }
 
-/**
- * Shows a temporary switch to toggle between censoring and showing all texts
- */
-@Deprecated(
-    message = "May use eventually, but for now the action to censor text is in a contextual menu in " +
-            "the top app bar of the messages screen"
-)
-@Composable
-fun SwitchToggleTextCensoring(
-    switchToggleState: Boolean,
-    onSwitchToggle: (() -> Unit),
-    modifier: Modifier = Modifier
-){
-    Row(
-        modifier = modifier
-    ){
-        Switch(
-            checked = switchToggleState,
-            onCheckedChange = {
-                onSwitchToggle()
-            },
-            colors = SwitchDefaults.colors(
-                checkedTrackColor = Purple200
-            )
-        )
-    }
-}
-
-/**
- * Shows buttons to quickly test loading list of text from a URL and censoring test strings
- */
-@Deprecated(
-    message = "This is for testing purposes only; Do not use this in the final product"
-)
-@Composable
-fun CensoringTestButtons(
-    censoringViewModel: CensoringViewModel,
-    modifier: Modifier = Modifier
-){
-    Column(
-        modifier = modifier
-    ) {
-        Button(
-            onClick = { censoringViewModel.readCensoredTextList() }
-        ) {
-            Text(
-                text = "Read censored text list"
-            )
-        }
-        Button(
-            onClick = { censoringViewModel.testTextCensoring() }
-        ) {
-            Text(
-                text = "Test text censoring"
-            )
-        }
-    }
-}
-
 
 // region Previews
-@Composable
-@Preview(showBackground = true)
-fun BlockUsersLayoutPreview() {
-    MyApplicationTheme {
-        BlockUsersLayout(
-            blockingViewModel = MockBlockingCensoringData.mockBlockingViewModel,
-            censoringViewModel = MockBlockingCensoringData.mockCensoringViewModel,
-            userIdInFocus = "placeholder"
-        )
-    }
-}
-
 @Composable
 @Preview(showBackground = true)
 fun BlockingContextualMenuPreview() {
     MyApplicationTheme {
         BlockingContextualMenu(
             userId = stringResource(id = R.string.user_profile_test_string),
-            blockingViewModel = MockBlockingCensoringData.mockBlockingViewModel,
-            censoringViewModel = MockBlockingCensoringData.mockCensoringViewModel
+            blockingViewModel = MockBlockingCensoringData.mockBlockingViewModel
         )
     }
 }
@@ -328,17 +216,6 @@ fun BlockingAlertPreview() {
             onDismissButtonClick = {},
             onConfirmButtonClick = {},
             blockingViewModel = MockBlockingCensoringData.mockBlockingViewModel
-        )
-    }
-}
-
-@Composable
-@Preview(showBackground = true)
-fun SwitchToggleTextCensoringPreview(){
-    MyApplicationTheme {
-        SwitchToggleTextCensoring(
-            switchToggleState = false,
-            onSwitchToggle = { /*TODO*/ }
         )
     }
 }

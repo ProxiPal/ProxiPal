@@ -42,10 +42,14 @@ const val SHOULD_USE_METRIC_SYSTEM: Boolean = true
  */
 const val MS_BETWEEN_LOCATION_UPDATES: Long = 2000
 
+/*
+These are used in the project, but are used in parts of code that is not currently being updated
+ */
+// region Outdated
 /**
  * Necessary "dangerous" permissions for using Nearby API and connecting with another device
  */
-val DANGEROUS_NEARBY_API_PERMISSIONS = listOf(
+private val DANGEROUS_NEARBY_API_PERMISSIONS = listOf(
     Manifest.permission.ACCESS_FINE_LOCATION,
     Manifest.permission.BLUETOOTH_ADVERTISE,
     Manifest.permission.BLUETOOTH_CONNECT,
@@ -55,7 +59,7 @@ val DANGEROUS_NEARBY_API_PERMISSIONS = listOf(
 /**
  * Necessary plain permissions for using Nearby API and connecting with another device
  */
-val SAFE_NEARBY_API_PERMISSIONS = listOf(
+private val SAFE_NEARBY_API_PERMISSIONS = listOf(
     Manifest.permission.BLUETOOTH,
     Manifest.permission.BLUETOOTH_ADMIN,
     Manifest.permission.ACCESS_WIFI_STATE,
@@ -69,11 +73,21 @@ val SAFE_NEARBY_API_PERMISSIONS = listOf(
  */
 val ALL_NEARBY_API_PERMISSIONS = SAFE_NEARBY_API_PERMISSIONS + DANGEROUS_NEARBY_API_PERMISSIONS
 
-/**
- * Same as [ALL_NEARBY_API_PERMISSIONS] but as an array instead of a list
- */
-val ALL_NEARBY_API_PERMISSIONS_ARRAY = arrayOf(
+val ALL_WIFIP2P_PERMISSIONS = listOf(
+    Manifest.permission.ACCESS_WIFI_STATE,
+    Manifest.permission.CHANGE_WIFI_STATE,
+    Manifest.permission.ACCESS_NETWORK_STATE,
+    Manifest.permission.CHANGE_NETWORK_STATE,
+    Manifest.permission.INTERNET
+)
+// endregion Outdated
+
+val DANGEROUS_COMPASS_SCREEN_PERMISSIONS = arrayOf(
     Manifest.permission.ACCESS_FINE_LOCATION,
+    Manifest.permission.ACCESS_COARSE_LOCATION,
+)
+
+val NORMAL_COMPASS_SCREEN_PERMISSIONS = arrayOf(
     Manifest.permission.BLUETOOTH_ADVERTISE,
     Manifest.permission.BLUETOOTH_CONNECT,
     Manifest.permission.BLUETOOTH_SCAN,
@@ -82,13 +96,15 @@ val ALL_NEARBY_API_PERMISSIONS_ARRAY = arrayOf(
     Manifest.permission.ACCESS_WIFI_STATE,
     Manifest.permission.CHANGE_WIFI_STATE,
     Manifest.permission.NEARBY_WIFI_DEVICES,
-    Manifest.permission.ACCESS_COARSE_LOCATION,
-)
-
-val ALL_WIFIP2P_PERMISSIONS = listOf(
-    Manifest.permission.ACCESS_WIFI_STATE,
-    Manifest.permission.CHANGE_WIFI_STATE,
     Manifest.permission.ACCESS_NETWORK_STATE,
     Manifest.permission.CHANGE_NETWORK_STATE,
     Manifest.permission.INTERNET
 )
+
+val COMPASS_SCREEN_PERMISSIONS =
+    NORMAL_COMPASS_SCREEN_PERMISSIONS + DANGEROUS_COMPASS_SCREEN_PERMISSIONS
+
+/**
+ * The code a permission needs to be for it to be considered granted
+ */
+val COMPASS_PERMISSION_REQUEST_CODE = 101

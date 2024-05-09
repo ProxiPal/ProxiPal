@@ -36,7 +36,7 @@
     <string name="user_profile_permissions_warning">Sólo puedes modificar o eliminar un perfil de usuario que te pertenezca.</string>
 
     <string name="compass_screen_bearing_message">Ángulo de rodamiento (en grados): %.3f</string>
-    <string name="compass_screen_distance_message">Distancia desde el partido (en km): %.3f</string>
+    <string name="compass_screen_distance_message_metric">Distancia desde el partido (en km): %.3f</string>
     <string name="compass_screen_cancel_message">Cancelar partido</string>
     <string name="compass_screen_top_bar_header">¡Coincidencia encontrada!</string>
     <string name="compass_screen_awaiting_connection_message">Esperando a que la coincidencia acepte la conexión</string>

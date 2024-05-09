@@ -1,6 +1,7 @@
 package com.mongodb.app.presentation.userprofiles
 
 import android.os.Bundle
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableDoubleStateOf
@@ -50,7 +51,7 @@ sealed class AddUserProfileEvent {
 }
 
 class UserProfileViewModel(
-    private var repository: SyncRepository,
+    var repository: SyncRepository,
     val userProfileListState: SnapshotStateList<UserProfile> = mutableStateListOf()
 ) : ViewModel() {
     /*
@@ -92,7 +93,13 @@ class UserProfileViewModel(
     //april
     private val _currentUserId = mutableStateOf("")
 
-    private val _friendsList = MutableStateFlow<List<String>>(emptyList())
+    private val _friendIdsToNames = mutableMapOf<String, String>()
+    private val _friendIdsList = MutableStateFlow<List<String>>(emptyList())
+
+    private val _currentFirstName = mutableStateOf("")
+    private val _currentLastName = mutableStateOf("")
+    private val _currentBiography = mutableStateOf("")
+
 
     /*
     ===== Properties =====
@@ -154,7 +161,9 @@ class UserProfileViewModel(
 
     val currentUserId: State<String> = _currentUserId
 
-    val friendsList: StateFlow<List<String>> = _friendsList.asStateFlow()
+    val friendIdsToNames: MutableMap<String, String>
+        get() = _friendIdsToNames
+    val friendIdsList: StateFlow<List<String>> = _friendIdsList.asStateFlow()
 
 
 
@@ -201,21 +210,6 @@ class UserProfileViewModel(
      */
     private fun getUserProfile(){
         viewModelScope.launch {
-            /*
-              repository.readUserProfile(repository.getCurrentUserId())
-                  .first{
-                      userProfileListState.clear()
-                      userProfileListState.addAll(it.list)
-                      // When trying to update a user profile that is not saved in the database
-                      // ... the SyncRepository will handle creating a new user profile before
-                      // ... making the updated changes
-                      if (it.list.size > 0){
-                          Log.i(
-                              TAG(),
-                              "UserProfileViewModel: Current user's profile = \"${it.list[0]._id}\""
-                          )
-                          setUserProfileVariables(it.list[0])
-                          */
             repository.getCurrentUserProfileList()
                 .collect { event: ResultsChange<UserProfile> ->
                     when (event) {
@@ -230,41 +224,8 @@ class UserProfileViewModel(
                                     // ... the SyncRepository will handle creating a new user profile before
                                     // ... making the updated changes
                                 }
-                                1 -> {
-                                    // Load the saved profile details
-                                    _userProfileFirstName.value = event.list[0].firstName
-                                    _userProfileLastName.value = event.list[0].lastName
-                                    _userProfileBiography.value = event.list[0].biography
-                                    _userProfileLatitude.value = event.list[0].location?.latitude!!
-                                    _userProfileLongitude.value = event.list[0].location?.longitude!!
-
-                                    _userProfileInstagramHandle.value = event.list[0].instagramHandle
-                                    _userProfileTwitterHandle.value = event.list[0].twitterHandle
-                                    _userProfileLinktreeHandle.value = event.list[0].linktreeHandle
-                                    _userProfilelinkedinHandle.value = event.list[0].linkedinHandle
-
-                                    _userProfileInterests = event.list[0].interests.toList().toMutableList()
-                                    _userProfileIndustries = event.list[0].industries.toList().toMutableList()
-                                    _friendsList.value = event.list[0].friends.map { it.toString() }
-
-                                }
                                 else -> {
-                                    // Load the saved profile details
-                                    _userProfileFirstName.value = event.list[0].firstName
-                                    _userProfileLastName.value = event.list[0].lastName
-                                    _userProfileBiography.value = event.list[0].biography
-                                    _userProfileLatitude.value = event.list[0].location?.latitude!!
-                                    _userProfileLongitude.value = event.list[0].location?.longitude!!
-
-                                    _userProfileInstagramHandle.value = event.list[0].instagramHandle
-                                    _userProfileTwitterHandle.value = event.list[0].twitterHandle
-                                    _userProfileLinktreeHandle.value = event.list[0].linktreeHandle
-                                    _userProfilelinkedinHandle.value = event.list[0].linkedinHandle
-
-                                    _userProfileInterests = event.list[0].interests.toList().toMutableList()
-                                    _userProfileIndustries = event.list[0].industries.toList().toMutableList()
-                                    _friendsList.value = event.list[0].friends.map { it.toString() }
-
+                                    setUserProfileVariables(event.list[0])
                                 }
                             }
                         }
@@ -292,7 +253,6 @@ class UserProfileViewModel(
                     true
                 }
         }
-        /*
       }
 
       private fun setUserProfileVariables(userProfile: UserProfile){
@@ -301,7 +261,23 @@ class UserProfileViewModel(
           _userProfileBiography.value = userProfile.biography
           _userProfileLatitude.value = userProfile.location?.latitude!!
           _userProfileLongitude.value = userProfile.location?.longitude!!
-          */
+
+          _userProfileInstagramHandle.value = userProfile.instagramHandle
+          _userProfileTwitterHandle.value = userProfile.twitterHandle
+          _userProfileLinktreeHandle.value = userProfile.linktreeHandle
+          _userProfilelinkedinHandle.value = userProfile.linkedinHandle
+
+          _userProfileInterests = userProfile.interests.toList().toMutableList()
+          _userProfileIndustries = userProfile.industries.toList().toMutableList()
+          _friendIdsList.value = userProfile.friends.map { it.toString() }
+          // Friend names list set here
+          viewModelScope.launch{
+              getFriendNamesFromFriendIds(_friendIdsList.value)
+          }
+
+          _currentFirstName.value = userProfile.firstName
+          _currentLastName.value = userProfile.lastName
+          _currentBiography.value = userProfile.biography
     }
 
 
@@ -487,7 +463,10 @@ class UserProfileViewModel(
      */
     fun discardUserProfileChanges(){
         _isEditingUserProfile.value = false
-        getUserProfile()
+//        getUserProfile()
+        _userProfileFirstName.value = _currentFirstName.value
+        _userProfileLastName.value = _currentLastName.value
+        _userProfileBiography.value = _currentBiography.value
     }
 
     @Deprecated(
@@ -655,7 +634,8 @@ class UserProfileViewModel(
             repository.removeFriendBidirectional(currentUserId, friendUserId)
 
             // Update UI state if necessary
-            _friendsList.value = _friendsList.value.filterNot { it == friendUserId }
+            _friendIdsList.value = _friendIdsList.value.filterNot { it == friendUserId }
+            getFriendNamesFromFriendIds(_friendIdsList.value)
         }
     }
 
@@ -664,11 +644,35 @@ class UserProfileViewModel(
             val currentUserId = repository.getCurrentUserId()
             repository.readUserProfiles().collect { profilesChange ->
                 profilesChange.list.find { it.ownerId == currentUserId }?.let { userProfile ->
-                    _friendsList.value = userProfile.friends
+                    _friendIdsList.value = userProfile.friends
+                    getFriendNamesFromFriendIds(_friendIdsList.value)
                 }
             }
         }
     }
 
+    /**
+     * Converts list of friend IDs to list of their respective names
+     */
+    private suspend fun getFriendNamesFromFriendIds(friendIdsList: List<String>) {
+        friendIdsToNames.clear()
+        friendIdsList.forEach {
+            friendId ->
+            viewModelScope.launch {
+                repository.readUserProfile(friendId).first {
+                    if (it.list.size > 0){
+                        friendIdsToNames[friendId] = it.list[0].firstName + " " + it.list[0].lastName
+                    }
+                    true
+                }
+            }
+        }
+    }
 
+    fun getFriendNameFromFriendId(friendId: String): String {
+        if (friendIdsToNames.containsKey(friendId)){
+            return friendIdsToNames[friendId]!!
+        }
+        return "(null)"
+    }
 }

@@ -68,14 +68,12 @@ import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
 import com.mongodb.app.presentation.blocking_censoring.CensoringViewModel
 import com.mongodb.app.presentation.blocking_censoring.censor
 import com.mongodb.app.presentation.messages.MessagesViewModel
-import com.mongodb.app.ui.blocking_censoring.BlockingContextualMenu
+import com.mongodb.app.ui.blocking_censoring.CensoringContextualMenu
 import com.mongodb.app.ui.theme.MessageColorMine
 import com.mongodb.app.ui.theme.MessageColorOther
 import com.mongodb.app.ui.theme.MessageInputBackgroundColor
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.ui.theme.Purple200
-import java.util.Calendar
-import java.util.Date
 import java.util.SortedSet
 
 
@@ -118,9 +116,7 @@ fun MessagesScreenLayout(
             MessagesTopBar(
                 navController = navController,
                 messagesViewModel = messagesViewModel,
-                blockingViewModel = blockingViewModel,
                 censoringViewModel = censoringViewModel,
-                userIdInFocus = messagesViewModel.otherUserProfileId.value
             )
         },
         modifier = modifier
@@ -176,10 +172,7 @@ fun MessagesBlockedNotifier(
 fun MessagesTopBar(
     navController: NavHostController,
     messagesViewModel: MessagesViewModel,
-    blockingViewModel: BlockingViewModel,
     censoringViewModel: CensoringViewModel,
-    /* The other user's ID involved in the current conversation */
-    userIdInFocus: String,
     modifier: Modifier = Modifier
 ) {
     CenterAlignedTopAppBar(
@@ -196,8 +189,7 @@ fun MessagesTopBar(
                     contentDescription = null,
                     modifier = Modifier
                         .clickable {
-                            // TODO Need to change this to navigate to friends screen instead
-                            navController.navigate(Routes.UserProfileScreen.route)
+                            navController.navigate(Routes.FriendListScreen.route)
                         }
                 )
                 Column(
@@ -218,9 +210,7 @@ fun MessagesTopBar(
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
-                BlockingContextualMenu(
-                    userId = userIdInFocus,
-                    blockingViewModel = blockingViewModel,
+                CensoringContextualMenu(
                     censoringViewModel = censoringViewModel
                 )
             }
