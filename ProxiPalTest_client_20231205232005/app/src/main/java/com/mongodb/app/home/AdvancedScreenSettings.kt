@@ -87,10 +87,6 @@ fun AdvancedScreenSettings(navController: NavHostController) {
                         val intent = Intent(context, AccessibilityActivity::class.java)
                         context.startActivity(intent)
                     }
-                    SettingsItem("Dark Mode") {
-                        val intent = Intent(context, DarkModeActivity::class.java)
-                        context.startActivity(intent)
-                    }
                     SettingsItem("Speech Recognition") {
                         val intent = Intent(context, SpeechRecognitionActivity::class.java)
                         context.startActivity(intent)

@@ -7,7 +7,6 @@
     tools:context=".SpeechRecognitionActivity">
 
 
-
     <!--creating a simple image view for mic-->
     <ImageView
         android:id="@+id/idIVMic"
