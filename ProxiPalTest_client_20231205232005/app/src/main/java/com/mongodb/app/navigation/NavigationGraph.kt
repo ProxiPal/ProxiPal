@@ -32,6 +32,7 @@ import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.screens.FriendRequestScreen
 import com.mongodb.app.tutorial.OnboardingScreen
 import com.mongodb.app.ui.compassscreen.CompassScreenLayout
+import com.mongodb.app.ui.compassscreen.CompassScreenLayoutPermissionCheck
 import com.mongodb.app.ui.messages.MessagesScreenLayout
 import com.mongodb.app.ui.tasks.ConnectWithOthersScreen
 import com.mongodb.app.ui.userprofiles.IndustryScreen
@@ -181,7 +182,7 @@ fun NavigationGraph(
             )
         }
         composable(Routes.CompassScreen.route){
-            CompassScreenLayout(
+            CompassScreenLayoutPermissionCheck(
                 compassViewModel = compassViewModel,
                 compassPermissionHandler = compassPermissionHandler,
                 navController = navController

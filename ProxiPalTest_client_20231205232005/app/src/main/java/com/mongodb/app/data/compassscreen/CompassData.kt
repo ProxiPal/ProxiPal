@@ -82,12 +82,12 @@ val ALL_WIFIP2P_PERMISSIONS = listOf(
 )
 // endregion Outdated
 
-val DANGEROUS_COMPASS_SCREEN_PERMISSIONS = arrayOf(
-    Manifest.permission.ACCESS_FINE_LOCATION,
+val DANGEROUS_COMPASS_SCREEN_PERMISSIONS = listOf(
     Manifest.permission.ACCESS_COARSE_LOCATION,
+    Manifest.permission.ACCESS_FINE_LOCATION
 )
 
-val NORMAL_COMPASS_SCREEN_PERMISSIONS = arrayOf(
+val NORMAL_COMPASS_SCREEN_PERMISSIONS = listOf(
     Manifest.permission.BLUETOOTH_ADVERTISE,
     Manifest.permission.BLUETOOTH_CONNECT,
     Manifest.permission.BLUETOOTH_SCAN,

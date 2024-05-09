@@ -2,6 +2,7 @@
 
 package com.mongodb.app.ui.compassscreen
 
+import android.Manifest
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.annotation.StringRes
@@ -39,6 +40,8 @@ import com.mongodb.app.R
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.compassscreen.CompassConnectionType
 import com.mongodb.app.data.compassscreen.CompassPermissionHandler
+import com.mongodb.app.data.compassscreen.DANGEROUS_COMPASS_SCREEN_PERMISSIONS
+import com.mongodb.app.location.PermissionBox
 import com.mongodb.app.navigation.Routes
 import com.mongodb.app.presentation.compassscreen.CompassNearbyAPI
 import com.mongodb.app.presentation.compassscreen.CompassViewModel
@@ -55,6 +58,28 @@ Contributions:
 
 
 // region Functions
+@Composable
+fun CompassScreenLayoutPermissionCheck(
+    compassViewModel: CompassViewModel,
+    compassPermissionHandler: CompassPermissionHandler,
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+){
+    val permissions = DANGEROUS_COMPASS_SCREEN_PERMISSIONS
+    // Requires at least coarse permission
+    PermissionBox(
+        permissions = permissions,
+        requiredPermissions = listOf(permissions.first()),
+        modifier = modifier
+    ) {
+        CompassScreenLayout(
+            compassViewModel = compassViewModel,
+            compassPermissionHandler = compassPermissionHandler,
+            navController = navController
+        )
+    }
+}
+
 /**
  * Displays the screen that points matching users toward each other
  */
@@ -68,11 +93,11 @@ fun CompassScreenLayout(
 ) {
     compassViewModel.refreshUserProfileInstances()
 
-    if (compassPermissionHandler.areAllPermissionsGranted()){
-        Log.e(
-            "CompassPermissionHandler",
-            "All permissions are granted"
-        )
+//    if (compassPermissionHandler.areAllPermissionsGranted()){
+//        Log.e(
+//            "CompassPermissionHandler",
+//            "All permissions are granted"
+//        )
         compassPermissionHandler.startSetup()
 
         Scaffold(
@@ -90,18 +115,21 @@ fun CompassScreenLayout(
                     .padding(innerPadding)
             )
         }
-    }
-    else{
-        Log.e(
-            "CompassPermissionHandler",
-            "1 or more permissions are not granted"
-        )
-        CompassPermissionsGrantLayout(
-            compassPermissionHandler = compassPermissionHandler
-        )
-    }
+//    }
+//    else{
+//        Log.e(
+//            "CompassPermissionHandler",
+//            "1 or more permissions are not granted"
+//        )
+//        CompassPermissionsGrantLayout(
+//            compassPermissionHandler = compassPermissionHandler
+//        )
+//    }
 }
 
+@Deprecated(
+    message = "Using PermissionBox composable function to ask/check for permissions instead"
+)
 @Composable
 fun CompassPermissionsGrantLayout(
     compassPermissionHandler: CompassPermissionHandler,

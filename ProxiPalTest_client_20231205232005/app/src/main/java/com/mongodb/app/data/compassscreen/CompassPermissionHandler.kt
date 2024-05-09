@@ -152,7 +152,7 @@ class CompassPermissionHandler(
     private fun requestPermissionsNormal(){
         ActivityCompat.requestPermissions(
             activity,
-            NORMAL_COMPASS_SCREEN_PERMISSIONS,
+            NORMAL_COMPASS_SCREEN_PERMISSIONS.toTypedArray(),
             COMPASS_PERMISSION_REQUEST_CODE
         )
         Log.e("PermissionHandler", "End normal")
