@@ -24,7 +24,7 @@ import com.mongodb.app.ui.userprofiles.UserProfileScreen
  */
 class CompassPermissionHandler(
     private val repository: SyncRepository,
-    private val userProfileScreen: UserProfileScreen,
+    private val activity: UserProfileScreen,
     private val compassViewModel: CompassViewModel
 ) {
     // region Variables
@@ -65,24 +65,36 @@ class CompassPermissionHandler(
 
     fun onCreate(){
         // Needed when working with either the Nearby API or Wifi P2P Direct
-        verifyPermissions()
+        if (!areAllPermissionsGranted()){
+            requestPermissions()
+            Log.e(
+                "CompassPermissionHandler",
+                "All permissions are granted"
+            )
+        }
+        else{
+            Log.e(
+                "CompassPermissionHandler",
+                "1 or more permissions are not granted"
+            )
+        }
 
         // region NearbyAPI
         _compassNearbyAPI = CompassNearbyAPI(
             userId = repository.getCurrentUserId(),
-            packageName = userProfileScreen.packageName
+            packageName = activity.packageName
         )
         // Need to create connections client in compass screen communication class
-        _compassNearbyAPI.setConnectionsClient(userProfileScreen)
+        _compassNearbyAPI.setConnectionsClient(activity)
         _compassNearbyAPI.setCompassViewModel(compassViewModel)
         // endregion NearbyAPI
 
         // region WifiP2P
-        manager = userProfileScreen
+        manager = activity
             .getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager
         channel = manager.initialize(
-            userProfileScreen,
-            userProfileScreen.mainLooper,
+            activity,
+            activity.mainLooper,
             null)
         // endregion WifiP2P
     }
@@ -101,8 +113,8 @@ class CompassPermissionHandler(
     fun onResume(){
         // region WifiP2P
         // Register the broadcast receiver with the intent values to be matched
-        receiver = WiFiDirectBroadcastReceiver(manager, channel, userProfileScreen)
-        userProfileScreen.registerReceiver(receiver, intentFilter)
+        receiver = WiFiDirectBroadcastReceiver(manager, channel, activity)
+        activity.registerReceiver(receiver, intentFilter)
 
         receiver?.discoverPeers()
         receiver?.requestPeers()
@@ -114,7 +126,7 @@ class CompassPermissionHandler(
     fun onPause(){
         // region WifiP2P
         // Unregister the broadcast receiver
-        userProfileScreen.unregisterReceiver(receiver)
+        activity.unregisterReceiver(receiver)
         // endregion WifiP2P
     }
 
@@ -126,9 +138,24 @@ class CompassPermissionHandler(
         // endregion NearbyAPI
     }
 
+    private fun areAllPermissionsGranted(): Boolean{
+        return COMPASS_SCREEN_PERMISSIONS.all{
+            permission ->
+            ContextCompat.checkSelfPermission(activity, permission) == PackageManager.PERMISSION_GRANTED
+        }
+    }
+
+    private fun requestPermissions(){
+        ActivityCompat.requestPermissions(
+            activity,
+            COMPASS_SCREEN_PERMISSIONS,
+            COMPASS_PERMISSION_REQUEST_CODE
+        )
+    }
+
     private fun verifyPermissions(){
         // TODO Should show permission rationale with shouldShowRequestPermissionRationale()
-        val requestPermissionLauncher = userProfileScreen
+        val requestPermissionLauncher = activity
             .registerForActivityResult(ActivityResultContracts.RequestPermission()){
                 isGranted: Boolean ->
             Log.i(
@@ -139,7 +166,7 @@ class CompassPermissionHandler(
 
         for (permission in ALL_NEARBY_API_PERMISSIONS + ALL_WIFIP2P_PERMISSIONS){
             when {
-                ContextCompat.checkSelfPermission(userProfileScreen, permission)
+                ContextCompat.checkSelfPermission(activity, permission)
                         == PackageManager.PERMISSION_GRANTED -> {
                     Log.i(
                         TAG(),
@@ -148,7 +175,7 @@ class CompassPermissionHandler(
                 }
 
                 ActivityCompat.shouldShowRequestPermissionRationale(
-                    userProfileScreen, permission
+                    activity, permission
                 ) -> {
                     Log.i(
                         TAG(),
@@ -166,7 +193,7 @@ class CompassPermissionHandler(
                         permission
                     )
                     val temp = (ContextCompat.checkSelfPermission(
-                        userProfileScreen, permission)
+                        activity, permission)
                             == PackageManager.PERMISSION_GRANTED)
                     Log.i(
                         TAG(),

@@ -209,7 +209,7 @@ class UserProfileScreen : ComponentActivity() {
 
         compassPermissionHandler = CompassPermissionHandler(
             repository = repository,
-            userProfileScreen = this,
+            activity = this,
             compassViewModel = compassViewModel
         )
         compassPermissionHandler.onCreate()
