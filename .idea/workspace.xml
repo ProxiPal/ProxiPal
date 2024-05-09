@@ -5,6 +5,11 @@
       <config />
     </shared>
     <layouts>
+      <layout url="file://$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/layout/activity_accessibility.xml">
+        <config>
+          <theme>@style/Theme.App</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/layout/activity_language.xml">
         <config>
           <theme>@style/Theme.App</theme>
@@ -43,7 +48,7 @@
   <component name="ChangeListManager">
     <list default="true" id="12f788ab-0aea-4cd4-aef2-ea7f8311b508" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/PrivacyPolicyActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app/PrivacyPolicyActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/layout/activity_speech_recognition.xml" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/layout/activity_speech_recognition.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
