@@ -28,9 +28,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.mongodb.app.R
 import com.mongodb.app.data.MockRepository
 import com.mongodb.app.data.compassscreen.CompassConnectionType
+import com.mongodb.app.navigation.Routes
 import com.mongodb.app.presentation.compassscreen.CompassNearbyAPI
 import com.mongodb.app.presentation.compassscreen.CompassViewModel
 import com.mongodb.app.ui.components.SingleButtonRow
@@ -53,6 +56,7 @@ Contributions:
 fun CompassScreenLayout(
     compassViewModel: CompassViewModel,
     compassNearbyAPI: CompassNearbyAPI,
+    navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
     compassViewModel.refreshUserProfileInstances()
@@ -67,6 +71,7 @@ fun CompassScreenLayout(
         CompassScreenBodyContent(
             compassViewModel = compassViewModel,
             compassNearbyAPI = compassNearbyAPI,
+            navController = navController,
             modifier = Modifier
                 .padding(innerPadding)
         )
@@ -109,6 +114,7 @@ fun CompassScreenTopBar(
 fun CompassScreenBodyContent(
     compassViewModel: CompassViewModel,
     compassNearbyAPI: CompassNearbyAPI,
+    navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
     val onBackButtonClick = {
@@ -143,7 +149,8 @@ fun CompassScreenBodyContent(
                 CompassScreenReturnButton(
                     compassNearbyAPI = compassNearbyAPI,
                     onButtonClick = {
-                        compassNearbyAPI.updateConnectionType(CompassConnectionType.OFFLINE)
+                        navController.navigate(Routes.FriendListScreen.route)
+//                        compassNearbyAPI.updateConnectionType(CompassConnectionType.OFFLINE)
                     }
                 )
             }
@@ -158,7 +165,10 @@ fun CompassScreenBodyContent(
                 )
                 CompassScreenReturnButton(
                     compassNearbyAPI = compassNearbyAPI,
-                    onButtonClick = { onBackButtonClick() }
+                    onButtonClick = {
+                        navController.navigate(Routes.FriendListScreen.route)
+//                        onBackButtonClick()
+                    }
                 )
             }
             // The current or matched user canceled the connection
@@ -171,7 +181,10 @@ fun CompassScreenBodyContent(
                 )
                 CompassScreenReturnButton(
                     compassNearbyAPI = compassNearbyAPI,
-                    onButtonClick = { onBackButtonClick() }
+                    onButtonClick = {
+                        navController.navigate(Routes.FriendListScreen.route)
+//                        onBackButtonClick()
+                    }
                 )
             }
         }
@@ -291,7 +304,8 @@ fun CompassScreenLayoutPreview() {
             compassNearbyAPI = CompassNearbyAPI(
                 userId = "fakeUserId",
                 packageName = "fakePackageName"
-            )
+            ),
+            navController = rememberNavController()
         )
     }
 }

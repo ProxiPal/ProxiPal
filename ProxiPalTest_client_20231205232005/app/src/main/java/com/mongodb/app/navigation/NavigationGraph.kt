@@ -189,7 +189,8 @@ fun NavigationGraph(
         composable(Routes.CompassScreen.route){
             CompassScreenLayout(
                 compassViewModel = compassViewModel,
-                compassNearbyAPI = compassNearbyAPI
+                compassNearbyAPI = compassNearbyAPI,
+                navController = navController
             )
         }
     }
