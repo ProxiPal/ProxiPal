@@ -212,8 +212,6 @@ class UserProfileScreen : ComponentActivity() {
             activity = this,
             compassViewModel = compassViewModel
         )
-        compassPermissionHandler.onCreate()
-
 
         setContent {
             MyApplicationTheme {
@@ -232,32 +230,11 @@ class UserProfileScreen : ComponentActivity() {
         }
     }
 
-    @CallSuper
-    override fun onStart() {
-        super.onStart()
-        compassPermissionHandler.onStart()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        compassPermissionHandler.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        compassPermissionHandler.onPause()
-    }
-
-    @CallSuper
-    override fun onStop() {
-        compassPermissionHandler.onStop()
-        super.onStop()
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         // Repository must be closed to free resources
         repository.close()
+        compassPermissionHandler.endSetup()
     }
     // endregion Functions
 }

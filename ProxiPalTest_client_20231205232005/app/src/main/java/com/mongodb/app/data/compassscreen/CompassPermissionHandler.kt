@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.net.wifi.p2p.WifiP2pManager
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -24,7 +25,7 @@ import com.mongodb.app.ui.userprofiles.UserProfileScreen
  */
 class CompassPermissionHandler(
     private val repository: SyncRepository,
-    private val activity: UserProfileScreen,
+    private val activity: ComponentActivity,
     private val compassViewModel: CompassViewModel
 ) {
     // region Variables
@@ -63,22 +64,20 @@ class CompassPermissionHandler(
 
     // endregion Variables
 
-    fun onCreate(){
-        // Needed when working with either the Nearby API or Wifi P2P Direct
-        if (!areAllPermissionsGranted()){
-            requestPermissions()
-            Log.e(
-                "CompassPermissionHandler",
-                "All permissions are granted"
-            )
-        }
-        else{
-            Log.e(
-                "CompassPermissionHandler",
-                "1 or more permissions are not granted"
-            )
-        }
 
+    // region Functions
+    fun startSetup(){
+        onCreate()
+        onStart()
+        onResume()
+    }
+
+    fun endSetup(){
+        onPause()
+        onStop()
+    }
+
+    private fun onCreate(){
         // region NearbyAPI
         _compassNearbyAPI = CompassNearbyAPI(
             userId = repository.getCurrentUserId(),
@@ -90,8 +89,7 @@ class CompassPermissionHandler(
         // endregion NearbyAPI
 
         // region WifiP2P
-        manager = activity
-            .getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager
+        manager = activity.getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager
         channel = manager.initialize(
             activity,
             activity.mainLooper,
@@ -99,7 +97,7 @@ class CompassPermissionHandler(
         // endregion WifiP2P
     }
 
-    fun onStart(){
+    private fun onStart(){
         // region NearbyAPI
         // This screen is entered only when the matched user accepts the connection
         // ... so as soon as this screen is shown, start the connection process
@@ -110,7 +108,7 @@ class CompassPermissionHandler(
         // endregion NearbyAPI
     }
 
-    fun onResume(){
+    private fun onResume(){
         // region WifiP2P
         // Register the broadcast receiver with the intent values to be matched
         receiver = WiFiDirectBroadcastReceiver(manager, channel, activity)
@@ -123,14 +121,14 @@ class CompassPermissionHandler(
         // endregion WifiP2P
     }
 
-    fun onPause(){
+    private fun onPause(){
         // region WifiP2P
         // Unregister the broadcast receiver
         activity.unregisterReceiver(receiver)
         // endregion WifiP2P
     }
 
-    fun onStop(){
+    private fun onStop(){
         // region NearbyAPI
         compassNearbyAPI.updateConnectionType(CompassConnectionType.OFFLINE)
         // Release all assets when the Nearby API is no longer necessary
@@ -138,14 +136,14 @@ class CompassPermissionHandler(
         // endregion NearbyAPI
     }
 
-    private fun areAllPermissionsGranted(): Boolean{
+    fun areAllPermissionsGranted(): Boolean{
         return COMPASS_SCREEN_PERMISSIONS.all{
             permission ->
             ContextCompat.checkSelfPermission(activity, permission) == PackageManager.PERMISSION_GRANTED
         }
     }
 
-    private fun requestPermissions(){
+    fun requestPermissions(){
         ActivityCompat.requestPermissions(
             activity,
             COMPASS_SCREEN_PERMISSIONS,
@@ -203,4 +201,5 @@ class CompassPermissionHandler(
             }
         }
     }
+    // endregion Functions
 }

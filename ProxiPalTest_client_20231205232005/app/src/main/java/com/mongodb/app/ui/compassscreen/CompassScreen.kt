@@ -2,6 +2,7 @@
 
 package com.mongodb.app.ui.compassscreen
 
+import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -63,20 +64,35 @@ fun CompassScreenLayout(
 ) {
     compassViewModel.refreshUserProfileInstances()
 
-    Scaffold(
-        topBar = {
-            CompassScreenTopBar()
-        },
-        modifier = modifier
-        // Pad the body of content so it does not get cut off by the scaffold top bar
-    ) { innerPadding ->
-        CompassScreenBodyContent(
-            compassViewModel = compassViewModel,
-            compassNearbyAPI = compassPermissionHandler.compassNearbyAPI,
-            navController = navController,
-            modifier = Modifier
-                .padding(innerPadding)
+    if (compassPermissionHandler.areAllPermissionsGranted()){
+        Log.e(
+            "CompassPermissionHandler",
+            "All permissions are granted"
         )
+        compassPermissionHandler.startSetup()
+
+        Scaffold(
+            topBar = {
+                CompassScreenTopBar()
+            },
+            modifier = modifier
+            // Pad the body of content so it does not get cut off by the scaffold top bar
+        ) { innerPadding ->
+            CompassScreenBodyContent(
+                compassViewModel = compassViewModel,
+                compassNearbyAPI = compassPermissionHandler.compassNearbyAPI,
+                navController = navController,
+                modifier = Modifier
+                    .padding(innerPadding)
+            )
+        }
+    }
+    else{
+        Log.e(
+            "CompassPermissionHandler",
+            "1 or more permissions are not granted"
+        )
+        compassPermissionHandler.requestPermissions()
     }
 }
 
@@ -305,7 +321,7 @@ fun CompassScreenLayoutPreview() {
             compassViewModel = compassViewModel,
             compassPermissionHandler = CompassPermissionHandler(
                 repository = repository,
-                userProfileScreen = UserProfileScreen(),
+                activity = UserProfileScreen(),
                 compassViewModel = compassViewModel
             ),
             navController = rememberNavController()
