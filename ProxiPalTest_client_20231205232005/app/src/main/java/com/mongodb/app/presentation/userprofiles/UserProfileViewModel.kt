@@ -307,6 +307,11 @@ class UserProfileViewModel(
      * Updates the current user's user profile, if it exists
      */
     private fun setUserProfile(){
+        // Update the last-set profile variables
+        _currentFirstName.value = userProfileFirstName.value
+        _currentLastName.value = userProfileLastName.value
+        _currentBiography.value = userProfileBiography.value
+
         viewModelScope.launch {
             repository.updateUserProfile(
                 firstName = userProfileFirstName.value,
