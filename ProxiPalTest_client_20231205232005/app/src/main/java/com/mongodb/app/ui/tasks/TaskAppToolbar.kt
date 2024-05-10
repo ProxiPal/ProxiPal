@@ -30,11 +30,11 @@ import kotlinx.coroutines.launch
 
 @ExperimentalMaterial3Api
 @Composable
-fun TaskAppToolbar(viewModel: ToolbarViewModel, navController: NavHostController) {
+fun TaskAppToolbar(viewModel: ToolbarViewModel, navController: NavHostController, title: String = stringResource(R.string.app_name)) {
     TopAppBar(
         title = {
             Text(
-                text = stringResource(R.string.app_name),
+                text = title,
                 color = Color.White
             )
         },

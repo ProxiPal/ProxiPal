@@ -20,6 +20,7 @@ import com.mongodb.app.data.compassscreen.CompassPermissionHandler
 import com.mongodb.app.data.compassscreen.DANGEROUS_COMPASS_SCREEN_PERMISSIONS
 import com.mongodb.app.data.messages.MessagesData
 import com.mongodb.app.friends.FriendRequestViewModel
+import com.mongodb.app.friends.FriendsListLayout
 import com.mongodb.app.friends.Friendslist
 import com.mongodb.app.home.AdvancedScreenSettings
 import com.mongodb.app.home.FilterScreen
@@ -34,6 +35,7 @@ import com.mongodb.app.presentation.messages.MessagesViewModel
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.screens.FriendRequestScreen
+import com.mongodb.app.screens.FriendRequestScreenLayout
 import com.mongodb.app.tutorial.OnboardingScreen
 import com.mongodb.app.ui.compassscreen.CompassScreenLayout
 import com.mongodb.app.ui.messages.MessagesScreenLayout
@@ -171,17 +173,20 @@ fun NavigationGraph(
             )
         }
         composable(Routes.FriendListScreen.route) {
-            Friendslist(
+            FriendsListLayout(
                 navController = navController,
                 viewModel = userProfileViewModel,
                 friendRequestViewModel = friendRequestViewModel,
-                blockingViewModel = blockingViewModel
+                blockingViewModel = blockingViewModel,
+                toolbarViewModel = toolbarViewModel
             )
         }
         composable(Routes.FriendRequestScreen.route) {
-            FriendRequestScreen(
+            FriendRequestScreenLayout(
                 friendRequestViewModel = friendRequestViewModel,
-                userProfileViewModel = userProfileViewModel
+                viewModel = userProfileViewModel,
+                navController = navController,
+                toolbarViewModel = toolbarViewModel
             )
         }
         composable(Routes.CompassScreen.route){

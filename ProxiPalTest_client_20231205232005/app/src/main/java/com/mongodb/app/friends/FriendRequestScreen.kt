@@ -2,13 +2,50 @@ package com.mongodb.app.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.mongodb.app.friends.FriendRequestViewModel
 import com.mongodb.app.friends.FriendshipRequest
+import com.mongodb.app.friends.Friendslist
+import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
+import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
+import com.mongodb.app.ui.components.ProxiPalBottomAppBar
+import com.mongodb.app.ui.components.ProxipalTopAppBarWithBackButton
+import com.mongodb.app.ui.tasks.TaskAppToolbar
+import com.mongodb.app.ui.userprofiles.calculateScreenHeight
+
+// Added by Marco to implement the app bars, and a back button
+@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@Composable
+fun FriendRequestScreenLayout(
+    navController: NavHostController,
+    viewModel: UserProfileViewModel,
+    friendRequestViewModel: FriendRequestViewModel
+){
+    Scaffold(
+        topBar = {
+            // This top bar is used because it already has logging out of account implemented
+            ProxipalTopAppBarWithBackButton(navController = navController, title = "Friend Requests")
+        },
+        bottomBar = { ProxiPalBottomAppBar(navController) }
+    ) { innerPadding ->
+        Column (
+            Modifier.padding(innerPadding)
+        ){
+            FriendRequestScreen(
+                friendRequestViewModel = friendRequestViewModel,
+                userProfileViewModel = viewModel
+            )
+        }
+    }
+}
 
 
 //ALL ADDED BY GEORGE FU
@@ -18,26 +55,18 @@ fun FriendRequestScreen(friendRequestViewModel: FriendRequestViewModel, userProf
     val uiState by friendRequestViewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
-    Scaffold(
-        topBar = {
-            SmallTopAppBar(
-                title = { Text(text = "Friend Requests") }
-            )
-        }
-    ) { padding ->
-        Column(modifier = Modifier.padding(padding)) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator()
-            } else if (uiState.error != null) {
-                Text("Error: ${uiState.error}")
-            } else {
-                uiState.friendRequests.forEach { request ->
-                    FriendRequestItem(
-                        request = request,
-                        friendRequestViewModel = friendRequestViewModel,
-                        userProfileViewModel = userProfileViewModel
-                    )
-                }
+    Column() {
+        if (uiState.isLoading) {
+            CircularProgressIndicator()
+        } else if (uiState.error != null) {
+            Text("Error: ${uiState.error}")
+        } else {
+            uiState.friendRequests.forEach { request ->
+                FriendRequestItem(
+                    request = request,
+                    friendRequestViewModel = friendRequestViewModel,
+                    userProfileViewModel = userProfileViewModel
+                )
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.mongodb.app.friends
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -7,11 +8,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.MoreVert
@@ -24,6 +29,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -46,12 +52,51 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.mongodb.app.R
 import com.mongodb.app.data.messages.MessagesData
+import com.mongodb.app.home.HomeScreen
 import com.mongodb.app.navigation.Routes
 import com.mongodb.app.presentation.blocking_censoring.BlockingAction
 import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
+import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.blocking_censoring.BlockingAlert
+import com.mongodb.app.ui.components.ProxiPalBottomAppBar
+import com.mongodb.app.ui.tasks.TaskAppToolbar
+import com.mongodb.app.ui.userprofiles.UserProfileBody
+import com.mongodb.app.ui.userprofiles.calculateScreenHeight
 import com.mongodb.app.userratingsystem.RateUserPopup
+import com.mongodb.app.userratingsystem.UserRatingsDisplayScreen
+
+// FriendsListLayout added by Marco to implement app bars
+@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@Composable
+fun FriendsListLayout(
+    navController: NavHostController,
+    viewModel: UserProfileViewModel,
+    friendRequestViewModel: FriendRequestViewModel,
+    blockingViewModel: BlockingViewModel,
+    toolbarViewModel: ToolbarViewModel
+){
+    Scaffold(
+        topBar = {
+            // This top bar is used because it already has logging out of account implemented
+            TaskAppToolbar(viewModel = toolbarViewModel, navController = navController, title = "Friends")
+        },
+        bottomBar = { ProxiPalBottomAppBar(navController) }
+    ) { innerPadding ->
+        Column (
+            Modifier.padding(innerPadding)
+        ){
+            Friendslist(
+                navController = navController,
+                viewModel = viewModel,
+                friendRequestViewModel = friendRequestViewModel,
+                blockingViewModel = blockingViewModel,
+                toolbarViewModel = toolbarViewModel
+            )
+        }
+    }
+}
 
 //ALL ADDED BY GEORGE FU
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,7 +105,8 @@ fun Friendslist(
     navController: NavHostController,
     viewModel: UserProfileViewModel,
     friendRequestViewModel: FriendRequestViewModel,
-    blockingViewModel: BlockingViewModel
+    blockingViewModel: BlockingViewModel,
+    toolbarViewModel: ToolbarViewModel
 ) {
     val context = LocalContext.current
     val searchText = remember { mutableStateOf(TextFieldValue()) }
@@ -78,7 +124,7 @@ fun Friendslist(
         }
     }
 
-    Column {
+    Column (Modifier){
         SmallTopAppBar(
             title = { Text("Friends List") },
             navigationIcon = {
