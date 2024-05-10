@@ -211,10 +211,7 @@ fun NavigationGraph(
                 )
                 ActivityCompat.requestPermissions(
                     compassPermissionHandler.activity,
-                    arrayOf(
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                    ),
+                    DANGEROUS_COMPASS_SCREEN_PERMISSIONS,
                     COMPASS_PERMISSION_REQUEST_CODE
                 )
             }

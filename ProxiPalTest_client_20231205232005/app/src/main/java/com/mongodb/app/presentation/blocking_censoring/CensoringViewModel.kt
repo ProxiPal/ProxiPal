@@ -11,6 +11,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import com.mongodb.app.TAG
 import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.blocking_censoring.CensoringData
+import com.mongodb.app.data.blocking_censoring.CensoringData.Companion.fileReadingDelayMs
 import com.mongodb.app.data.blocking_censoring.IBlockingCensoringRealm
 import com.mongodb.app.data.toObjectId
 import kotlinx.coroutines.delay
@@ -56,11 +57,6 @@ fun String.censor(profanityList: MutableList<String>): String{
         stringBuilder.censorShort(profanityPhrase)
         stringBuilder.censorLong(profanityPhrase)
     }
-    // Cannot use Logs in tests
-//    Log.i(
-//        TAG(),
-//        "Censored \"${this}\" to \"${stringBuilder}\""
-//    )
     return stringBuilder.toString()
 }
 
@@ -168,11 +164,6 @@ class CensoringViewModel (
     // region Variables
     private val _profanityListAll: MutableList<String> = mutableListOf()
     private val _isCensoringText = mutableStateOf(false)
-
-    /**
-     * How many milliseconds to wait between attempts of reading files from URLs
-     */
-    private val _fileReadingDelayMs: Long = 1000
     // endregion Variables
 
 
@@ -207,7 +198,7 @@ class CensoringViewModel (
     /**
      * Attempts to read a list of keyphrases to censor messages in the messages screen
      */
-    fun readCensoredTextList(){
+    private fun readCensoredTextList(){
         profanityListAll.clear()
         FetchCensoredTextThread.getInstance().start()
         viewModelScope.launch {
@@ -215,13 +206,13 @@ class CensoringViewModel (
             val loopLimit = 10
             var loopIter = 0
             while (shouldKeepReReading && loopIter < loopLimit){
-                delay(_fileReadingDelayMs)
+                delay(fileReadingDelayMs)
                 while (!FetchCensoredTextThread.getInstance().isDoneFetchingData.value){
                     Log.i(
                         TAG(),
                         "CensoringViewModel: Waiting for fetched data"
                     )
-                    delay(_fileReadingDelayMs)
+                    delay(fileReadingDelayMs)
                 }
                 // Lists of profanity from .txt and .csv have been read successfully
                 if (FetchCensoredTextThread.getInstance().dataTxt.size > 0

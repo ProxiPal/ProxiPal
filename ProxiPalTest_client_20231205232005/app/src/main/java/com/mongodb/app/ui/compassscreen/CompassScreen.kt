@@ -62,6 +62,7 @@ Contributions:
  * Displays the screen that points matching users toward each other
  */
 @OptIn(ExperimentalMaterial3Api::class)
+// Permissions here should be the same as those listed as dangerous in CompassData.kt
 @RequiresPermission(
     anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
 )

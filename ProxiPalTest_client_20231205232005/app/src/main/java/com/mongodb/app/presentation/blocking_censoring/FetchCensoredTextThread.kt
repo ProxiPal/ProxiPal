@@ -2,6 +2,10 @@ package com.mongodb.app.presentation.blocking_censoring
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
+import com.mongodb.app.data.blocking_censoring.CensoringData.Companion.delimitersCsv
+import com.mongodb.app.data.blocking_censoring.CensoringData.Companion.httpUrlConnectionTimeout
+import com.mongodb.app.data.blocking_censoring.CensoringData.Companion.urlCsv
+import com.mongodb.app.data.blocking_censoring.CensoringData.Companion.urlTxt
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -26,10 +30,6 @@ class FetchCensoredTextThread : Thread(){
     val isDoneFetchingData = mutableStateOf(true)
     val dataTxt: MutableList<String> = mutableListOf()
     val dataCsv: MutableList<String> = mutableListOf()
-    private val _urlTxt = "https://raw.githubusercontent.com/dsojevic/profanity-list/main/en.txt"
-    private val _urlCsv = "https://raw.githubusercontent.com/surge-ai/profanity/main/profanity_en.csv"
-    private val _httpUrlConnectionTimeout = 60000
-    private val _delimitersCsv = ','
     // endregion Variables
 
 
@@ -72,11 +72,11 @@ class FetchCensoredTextThread : Thread(){
 
         // Try reading .txt from a URL
         try{
-            url = URL(_urlTxt)
+            url = URL(urlTxt)
             httpURLConnection = url.openConnection() as HttpURLConnection
 //            httpsURLConnection = url.openConnection() as HttpsURLConnection
             // Set the timeout to 1 minute
-            httpURLConnection.connectTimeout = _httpUrlConnectionTimeout
+            httpURLConnection.connectTimeout = httpUrlConnectionTimeout
             inputStream = httpURLConnection.inputStream
             inputStreamReader = InputStreamReader(inputStream)
             bufferedReader = BufferedReader(inputStreamReader)
@@ -86,8 +86,8 @@ class FetchCensoredTextThread : Thread(){
                 // If the phrase is a number, don't censor (should only censor offensive words, not numbers)
                 if (currentLine.toDoubleOrNull() != null){
                     Log.i(
-                        "TAG()",
-                        "FetchCensoredTextThread: Skipping number = \"$currentLine\""
+                        "FetchCensoredTextThread",
+                        "Skipping number = \"$currentLine\""
                     )
                     currentLine = bufferedReader.readLine()
                     continue
@@ -102,16 +102,16 @@ class FetchCensoredTextThread : Thread(){
         }
         catch (e: Exception){
             Log.e(
-                "TAG()",
-                "FetchCensoredTextThread: Caught exception \"$e\" while reading .txt from URL"
+                "FetchCensoredTextThread",
+                "Caught exception \"$e\" while reading .txt from URL"
             )
         }
 
         // Try reading .csv from a URL
         try{
-            url = URL(_urlCsv)
+            url = URL(urlCsv)
             httpURLConnection = url.openConnection() as HttpURLConnection
-            httpURLConnection.connectTimeout = _httpUrlConnectionTimeout
+            httpURLConnection.connectTimeout = httpUrlConnectionTimeout
             inputStream = httpURLConnection.inputStream
             inputStreamReader = InputStreamReader(inputStream)
             bufferedReader = BufferedReader(inputStreamReader)
@@ -131,15 +131,15 @@ class FetchCensoredTextThread : Thread(){
 //                val (text, canForm1, canForm2, canForm3, cat1, cat2, cat3, sevRating, sevDesc) = currentLine.split(',', ignoreCase = false, limit = 9)
                 // Split the current line into the keyword/keyphrase to censor and the rest of that row's text
                 val (profanityPhrase, otherCategories) = currentLine.split(
-                    _delimitersCsv,
+                    delimitersCsv,
                     ignoreCase = false,
                     limit = 2
                 )
                 // If the phrase is a number, don't censor (should only censor offensive words, not numbers)
                 if (profanityPhrase.toDoubleOrNull() != null){
                     Log.i(
-                        "TAG()",
-                        "FetchCensoredTextThread: Skipping number = \"$profanityPhrase\""
+                        "FetchCensoredTextThread",
+                        "Skipping number = \"$profanityPhrase\""
                     )
                     currentLine = bufferedReader.readLine()
                     continue
@@ -152,8 +152,8 @@ class FetchCensoredTextThread : Thread(){
         }
         catch (e: Exception){
             Log.e(
-                "TAG()",
-                "FetchCensoredTextThread: Caught exception \"$e\" while reading .csv from URL"
+                "FetchCensoredTextThread",
+                "Caught exception \"$e\" while reading .csv from URL"
             )
         }
 

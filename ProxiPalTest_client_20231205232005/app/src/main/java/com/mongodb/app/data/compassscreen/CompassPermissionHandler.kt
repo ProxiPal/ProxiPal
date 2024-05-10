@@ -1,6 +1,5 @@
 package com.mongodb.app.data.compassscreen
 
-import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
@@ -8,7 +7,6 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.wifi.p2p.WifiP2pManager
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.mutableStateOf
@@ -19,7 +17,6 @@ import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.presentation.compassscreen.CompassNearbyAPI
 import com.mongodb.app.presentation.compassscreen.CompassViewModel
 import com.mongodb.app.presentation.compassscreen.WiFiDirectBroadcastReceiver
-import com.mongodb.app.ui.userprofiles.UserProfileScreen
 
 
 /**
@@ -88,12 +85,14 @@ class CompassPermissionHandler(
         // region NearbyAPI
         _compassNearbyAPI = CompassNearbyAPI(
             userId = repository.getCurrentUserId(),
-            packageName = activity.packageName
+            packageName = activity.packageName,
+            activity = activity
         )
         // Need to create connections client in compass screen communication class
         _compassNearbyAPI.setConnectionsClient(activity)
         _compassNearbyAPI.setCompassViewModel(compassViewModel)
         // endregion NearbyAPI
+
 
         // region WifiP2P
         manager = activity.getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager
@@ -223,8 +222,15 @@ class CompassPermissionHandler(
     }
 
     fun refresh(){
+        // region NearbyAPI
+        onStart()
+        // endregion NearbyAPI
+
+
+        // region WifiP2P
         receiver?.discoverPeers()
         receiver?.requestPeers()
+        // endregion WifiP2P
     }
     // endregion Functions
 }
