@@ -185,8 +185,7 @@ fun NavigationGraph(
             FriendRequestScreenLayout(
                 friendRequestViewModel = friendRequestViewModel,
                 viewModel = userProfileViewModel,
-                navController = navController,
-                toolbarViewModel = toolbarViewModel
+                navController = navController
             )
         }
         composable(Routes.CompassScreen.route){
