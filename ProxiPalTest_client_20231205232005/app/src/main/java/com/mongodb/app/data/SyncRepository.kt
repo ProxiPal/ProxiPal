@@ -886,16 +886,16 @@ class RealmSyncRepository(
         // In case the query result list is empty, check first before calling ".first()"
         val frozenObject = if (frozenObjects.size > 0) frozenObjects.first() else null
         if (frozenObject == null) {
-            Log.i(
+            Log.e(
                 TAG(),
-                "RealmSyncRepository: Could not update conversation with ID = \"${friendConversation._id}\"; " +
-                        "Creating a new conversation object instead"
+                "RealmSyncRepository: Could not update conversation with ID = \"${friendConversation._id}\""
             )
-            // This is more of a safety check
-            // Create a new conversation object if it was somehow deleted before or during the updating process
-            createConversation(
-                usersInvolved = friendConversation.usersInvolved.toSortedSet()
-            )
+            // Do not do this, results in 2 conversation objects being created (MessagesViewModel already creates 1)
+//            // This is more of a safety check
+//            // Create a new conversation object if it was somehow deleted before or during the updating process
+//            createConversation(
+//                usersInvolved = friendConversation.usersInvolved.toSortedSet()
+//            )
             return
         }
         realm.write {
