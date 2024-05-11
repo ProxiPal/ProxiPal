@@ -49,8 +49,6 @@
     <list default="true" id="12f788ab-0aea-4cd4-aef2-ea7f8311b508" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/values-es/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/values-es/strings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/values-zh/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/values-zh/strings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/values/strings.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -157,13 +155,14 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Android App.APP.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.cidr.known.project.marker": "true",
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "MultiLanguageSupport",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
     "last_directory_selection": "C:/Users/brian/OneDrive/Documents/GitHub/ProxiPal/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app",
