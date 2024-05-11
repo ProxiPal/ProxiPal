@@ -18,4 +18,16 @@ sealed class Routes(val route: String) {
     object CompassScreen: Routes("compassscreen")
     object FriendListScreen : Routes("friendlist")
     object FriendRequestScreen : Routes("friendrequestscreen")
+    object EventDetails : Routes("event_details/{eventId}") {
+        const val EVENT_ID_KEY = "eventId"
+        fun createRoute(eventId: String) = "event_details/$eventId"
+    }
+    object EventScreen:Routes("eventscreen")
+
+    object CreateEvent:Routes("createevent")
+
+    object EditEvent : Routes("event_edit/{eventId}") {
+        const val EVENT_ID_KEY = "eventId"
+        fun createRoute(eventId: String) = "event_edit/$eventId"
+    }
 }

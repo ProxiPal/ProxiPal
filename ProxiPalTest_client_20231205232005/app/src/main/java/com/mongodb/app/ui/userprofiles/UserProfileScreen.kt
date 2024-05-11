@@ -84,6 +84,8 @@ import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
 import com.mongodb.app.ui.components.MultiLineText
 import com.mongodb.app.ui.components.ProxiPalBottomAppBar
 import com.mongodb.app.ui.components.SingleLineText
+import com.mongodb.app.ui.events.EventsViewModel
+import com.mongodb.app.ui.report.ReportViewModel
 import com.mongodb.app.ui.tasks.TaskAppToolbar
 import com.mongodb.app.ui.theme.MyApplicationTheme
 import com.mongodb.app.userratingsystem.UserRatingsDisplayScreen
@@ -230,7 +232,9 @@ class UserProfileScreen : ComponentActivity() {
                     censoringViewModel = censoringViewModel,
                     friendRequestViewModel = friendRequestViewModel,
                     compassViewModel = compassViewModel,
-                    compassPermissionHandler = compassPermissionHandler
+                    compassPermissionHandler = compassPermissionHandler,
+                    eventsViewModel = EventsViewModel(repository=repository),
+                    reportViewModel = ReportViewModel(repository=repository)
                 )
             }
         }

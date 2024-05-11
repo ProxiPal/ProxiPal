@@ -10,9 +10,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.mongodb.app.data.RealmSyncRepository
 import com.mongodb.app.data.SyncRepository
 import com.mongodb.app.data.compassscreen.COMPASS_PERMISSION_REQUEST_CODE
@@ -38,7 +40,13 @@ import com.mongodb.app.screens.FriendRequestScreen
 import com.mongodb.app.screens.FriendRequestScreenLayout
 import com.mongodb.app.tutorial.OnboardingScreen
 import com.mongodb.app.ui.compassscreen.CompassScreenLayout
+import com.mongodb.app.ui.events.CreateEventBody
+import com.mongodb.app.ui.events.EditEventBody
+import com.mongodb.app.ui.events.EventDetailsScreen
+import com.mongodb.app.ui.events.EventScreen
+import com.mongodb.app.ui.events.EventsViewModel
 import com.mongodb.app.ui.messages.MessagesScreenLayout
+import com.mongodb.app.ui.report.ReportViewModel
 import com.mongodb.app.ui.tasks.ConnectWithOthersScreen
 import com.mongodb.app.ui.userprofiles.IndustryScreen
 import com.mongodb.app.ui.userprofiles.InterestScreen
@@ -68,7 +76,9 @@ fun NavigationGraph(
     censoringViewModel: CensoringViewModel,
     friendRequestViewModel: FriendRequestViewModel,
     compassViewModel: CompassViewModel,
-    compassPermissionHandler: CompassPermissionHandler
+    compassPermissionHandler: CompassPermissionHandler,
+    eventsViewModel: EventsViewModel,
+    reportViewModel: ReportViewModel
 ) {
 
     var currentUserId by remember { mutableStateOf("") }
@@ -220,6 +230,51 @@ fun NavigationGraph(
                 compassPermissionHandler = compassPermissionHandler,
                 navController = navController
             )
+        }
+        composable(route = Routes.EventScreen.route) {
+            EventScreen(
+                eventsViewModel = eventsViewModel,
+                navController = navController,
+                navigateToEvent = { eventId ->
+                    navController.navigate(Routes.EventDetails.createRoute(eventId))
+                }
+            ) {
+                navController.navigate(Routes.CreateEvent.route)
+            }
+        }
+        composable(route = Routes.CreateEvent.route){
+            CreateEventBody(
+                navigateBack = {navController.popBackStack()},
+                eventsViewModel = eventsViewModel)
+            {
+                navController.popBackStack()
+            }
+        }
+        composable(
+            route = Routes.EventDetails.route,
+            arguments = listOf(navArgument(Routes.EventDetails.EVENT_ID_KEY) { type = NavType.StringType })
+        ) { backStackEntry ->
+            val eventId = backStackEntry.arguments?.getString(Routes.EventDetails.EVENT_ID_KEY)
+            EventDetailsScreen(
+                eventId = eventId,
+                eventsViewModel =eventsViewModel ,
+                navigateBack = {navController.popBackStack() },
+                reportViewModel = reportViewModel,
+                navigateToEdit = {eventId1 -> navController.navigate(Routes.EditEvent.createRoute(eventId1))}
+
+            )
+        }
+
+        composable(
+            route = Routes.EditEvent.route,
+            arguments = listOf(navArgument(Routes.EventDetails.EVENT_ID_KEY) {type = NavType.StringType})
+        ) {
+                backStackEntry ->
+            val eventId = backStackEntry.arguments?.getString(Routes.EditEvent.EVENT_ID_KEY)
+            EditEventBody(navigateBack = { navController.popBackStack() },navigateToEvents={ navController.navigate(Routes.EventScreen.route)}, eventsViewModel = eventsViewModel, eventId =eventId )
+            {
+                navController.popBackStack()
+            }
         }
     }
 }

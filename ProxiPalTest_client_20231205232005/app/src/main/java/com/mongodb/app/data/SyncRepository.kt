@@ -10,9 +10,11 @@ import com.mongodb.app.data.messages.SHOULD_PRINT_REALM_CONFIG_INFO
 import com.mongodb.app.data.messages.SubscriptionNameAllMessages
 import com.mongodb.app.data.messages.SubscriptionNameMyFriendConversations
 import com.mongodb.app.data.userprofiles.SHOULD_USE_TASKS_ITEMS
+import com.mongodb.app.domain.Event
 import com.mongodb.app.domain.FriendConversation
 import com.mongodb.app.domain.FriendMessage
 import com.mongodb.app.domain.Item
+import com.mongodb.app.domain.Report
 import com.mongodb.app.domain.UserProfile
 import com.mongodb.app.friends.FriendshipRequest
 import com.mongodb.app.location.CustomGeoPoint
@@ -22,6 +24,7 @@ import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.annotations.ExperimentalGeoSpatialApi
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.ext.realmListOf
+import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.mongodb.User
 import io.realm.kotlin.mongodb.exceptions.SyncException
 import io.realm.kotlin.mongodb.subscriptions
@@ -298,7 +301,29 @@ interface SyncRepository {
     suspend fun addUserToFriendList(requestId: String)
 
     suspend fun removeFriendBidirectional(userId: String, friendId: String)
-    
+
+    suspend fun addReport(reportedUser: String, reasonsList: List<String>, comment: String)
+
+    suspend fun addEvent(eventName: String, eventDescription: String, eventDate: String, eventTime: String, eventDuration: String, eventLocation: String)
+
+    suspend fun updateEvent(eventId:String, eventName:String, eventDescription:String, eventDate:String, eventTime:String, eventDuration:String, eventLocation:String)
+
+    suspend fun joinEvent(eventId:String)
+    suspend fun leaveEvent(eventId:String)
+
+    suspend fun addAnnouncement(eventId:String, newAnnouncement:String)
+    suspend fun getEventAttendees(eventId: String) : List<UserProfile>
+    suspend fun getEventById(eventId: String): Flow<ResultsChange<Event>>
+    suspend fun getMyEventList(): Flow<ResultsChange<Event>>
+
+    fun isEventOwner(event: Event): Boolean
+
+    fun isEventAttendee(event:Event): Boolean
+
+    suspend fun getOtherEventList(): Flow<ResultsChange<Event>>
+
+    suspend fun deleteEvent(event:Event)
+
     // endregion Functions
 }
 
@@ -330,7 +355,9 @@ class RealmSyncRepository(
             CustomGeoPoint::class,
             FriendMessage::class,
             FriendConversation::class,
-            FriendshipRequest::class)
+            FriendshipRequest::class,
+            Report::class,
+            Event::class)
 
         config = SyncConfiguration.Builder(currentUser, schemaSet)
             .schemaVersion(1)
@@ -361,6 +388,14 @@ class RealmSyncRepository(
                     add(
                         getQueryFriendshipRequests(realm),
                         "FriendshipRequests")
+                    add(
+                        getQueryEvents(realm),
+                        "Event"
+                    )
+                    add(
+                        getQueryReports(realm),
+                        "Report"
+                    )
 
                 }
 
@@ -397,6 +432,14 @@ class RealmSyncRepository(
                     add(
                         getQueryFriendshipRequests(realm),
                         "FriendshipRequests")
+                    add(
+                        getQueryEvents(realm),
+                        "Event"
+                    )
+                    add(
+                        getQueryReports(realm),
+                        "Report"
+                    )
                 }
             }
             realm.subscriptions.waitForSynchronization()
@@ -477,6 +520,134 @@ class RealmSyncRepository(
             copyToRealm(task)
         }
     }
+
+    // Vichet Chim - Database fuction for Reports
+    override suspend fun addReport(reportedUser: String, reasonsList: List<String>, comment: String) {
+        val reasonRealmList = reasonsList.toRealmList()
+        val report = Report().apply {
+            this.userReported = reportedUser
+            this.reasons = reasonRealmList
+            this.comments = comment
+            this.ownerId = currentUser.id
+        }
+        realm.write{
+            copyToRealm(report)
+        }
+    }
+
+    private fun getQueryReports(realm: Realm): RealmQuery<Report> {
+        return realm.query<Report>()
+    }
+
+    // Vichet Chim - Database functions for Events
+    private fun getValidIdString(idString:String): String {
+        return idString.removePrefix("BsonObjectId(").removeSuffix(")")
+    }
+    override suspend fun addEvent(eventName:String, eventDescription:String, eventDate:String, eventTime:String, eventDuration:String, eventLocation: String){
+        val event= Event().apply{
+            name = eventName
+            description = eventDescription
+            date = eventDate
+            time = eventTime
+            duration = eventDuration
+            location = eventLocation
+            attendeeIds.add(currentUser.id)
+            owner_id = currentUser.id
+        }
+        realm.write{
+            copyToRealm(event)
+        }
+    }
+
+
+    override suspend fun updateEvent(eventId:String, eventName:String, eventDescription:String, eventDate:String, eventTime:String, eventDuration:String, eventLocation:String) {
+        val objectId = ObjectId(getValidIdString(eventId))
+        realm.write{
+            val liveEvent = query<Event>("_id == $0", objectId).find().first()
+            liveEvent.name = eventName
+            liveEvent.description = eventDescription
+            liveEvent.date = eventDate
+            liveEvent.time = eventTime
+            liveEvent.duration = eventDuration
+            liveEvent.location = eventLocation
+        }
+
+    }
+
+    override suspend fun joinEvent(eventId:String){
+        val objectId = ObjectId(getValidIdString(eventId))
+        realm.write{
+            val liveEvent = query<Event>("_id == $0", objectId).find().first()
+            liveEvent.attendeeIds.add(currentUser.id)
+        }
+    }
+
+    override suspend fun leaveEvent(eventId:String){
+        val objectId = ObjectId(getValidIdString(eventId))
+        realm.write{
+            val liveEvent = query<Event>("_id == $0", objectId).find().first()
+            liveEvent.attendeeIds.remove(currentUser.id)
+        }
+    }
+
+    override suspend fun addAnnouncement(eventId:String, newAnnouncement:String){
+        val objectId = ObjectId(getValidIdString(eventId))
+        realm.write{
+            val liveEvent = query<Event>("_id == $0", objectId).find().first()
+            liveEvent.announcement.add(newAnnouncement)
+        }
+    }
+
+
+    override suspend fun getEventAttendees(eventId: String) : List<UserProfile> {
+        val objectId = ObjectId(getValidIdString(eventId))
+        val event = realm.query<Event>("_id == $0", objectId).find().first()
+
+        val attendeeIds = event.attendeeIds
+        val attendees = mutableListOf<UserProfile>()
+        attendeeIds.forEach { attendeeId ->
+            val attendeeProfile = realm.query<UserProfile>("ownerId== $0", attendeeId).find().firstOrNull()
+            if (attendeeProfile != null){
+                attendees.add(attendeeProfile)
+            }
+        }
+        return attendees
+    }
+
+    override fun isEventAttendee(event:Event): Boolean = event.attendeeIds.contains(currentUser.id)
+
+    override suspend fun getEventById(eventId: String): Flow<ResultsChange<Event>> {
+        val objectId = ObjectId(getValidIdString(eventId))
+        return realm.query<Event>("_id == $0", objectId).asFlow()
+    }
+    override suspend fun getMyEventList(): Flow<ResultsChange<Event>> {
+        return realm.query<Event>("attendeeIds CONTAINS $0", currentUser.id)
+            .sort(Pair("date", Sort.ASCENDING))
+            .asFlow()
+    }
+
+    override fun isEventOwner(event: Event): Boolean = event.owner_id == currentUser.id
+
+
+
+    override suspend fun getOtherEventList(): Flow<ResultsChange<Event>> {
+        return realm.query<Event>("NOT attendeeIds CONTAINS $0", currentUser.id)
+            //.sort(Pair("date", Sort.ASCENDING))
+            .asFlow()
+    }
+    override suspend fun deleteEvent(event:Event){
+        realm.write{
+            delete(findLatest(event)!!)
+        }
+        realm.subscriptions.waitForSynchronization(10.seconds)
+    }
+
+    private fun getQueryEvents(realm: Realm): RealmQuery<Event> {
+        return realm.query<Event>()
+    }
+
+    // End of database functions for Events
+
 
 
     override suspend fun updateSubscriptionsItems(subscriptionType: SubscriptionType) {
@@ -1319,6 +1490,34 @@ class MockRepository : SyncRepository {
     override suspend fun addUserToFriendList(requestId: String) = Unit
 
     override suspend fun removeFriendBidirectional(userId: String, friendId: String) = Unit
+
+    // Vichet Chim  - report function
+    override suspend fun addReport(reportedUser: String, reasonsList: List<String>, comment: String) = Unit
+    // Vichet Chim  - event functions
+    override suspend fun addEvent(eventName: String, eventDescription: String, eventDate: String, eventTime: String, eventDuration:String, eventLocation: String) = Unit
+    override suspend fun updateEvent(eventId:String, eventName:String, eventDescription:String, eventDate:String, eventTime:String, eventDuration:String, eventLocation:String) {    }
+
+    override suspend fun joinEvent(eventId:String) {}
+
+    override suspend fun leaveEvent(eventId:String) {}
+
+    override suspend fun addAnnouncement(eventId:String, newAnnouncement:String) {}
+
+    override suspend fun getEventAttendees(eventId: String) : List<UserProfile> {return listOf()}
+
+    override suspend fun getEventById(eventId: String): Flow<ResultsChange<Event>> = flowOf()
+    override suspend fun getMyEventList(): Flow<ResultsChange<Event>> = flowOf()
+
+    override suspend fun getOtherEventList(): Flow<ResultsChange<Event>> = flowOf()
+
+    override fun isEventOwner(event: Event): Boolean {
+        return event.owner_id == MOCK_OWNER_ID_MINE
+    }
+    override fun isEventAttendee(event:Event): Boolean
+    { return event.attendeeIds.contains(MOCK_OWNER_ID_MINE) }
+
+    override suspend fun deleteEvent(event:Event) = Unit
+    // end of event functions
 
     companion object {
         const val MOCK_OWNER_ID_MINE = "A"
