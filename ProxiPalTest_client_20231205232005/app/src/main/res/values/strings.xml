@@ -60,7 +60,7 @@
 <!--    End compass screen strings-->
 <!--    Start compass permissions screen strings -->
     <string name="compass_permissions_required_permissions_list">Required permissions: %s</string>
-    <string name="compass_permissions_required_permissions_rationale">
+    <string name="compass_permissions_required_permissions_rationale" translatable="false">
         These permissions are necessary to make your device discoverable to others nearby and to connect with matching users
     </string>
     <string name="compass_permissions_confirm_permissions_button">Confirm</string>
@@ -84,7 +84,7 @@
     <string name="messages_screen_reply_message_notifier">Replying to message %s</string>
     <string name="messages_screen_replied_message_label">Replied to %s</string>
     <string name="messages_screen_updated_and_replied_message_label">Edited; Replied to %s</string>
-    <string name="messages_screen_message_reference_invalid">\{null\}</string>
+    <string name="messages_screen_message_reference_invalid" translatable="false">\{null\}</string>
     <string name="messages_screen_message_reference_short">\"%s\"</string>
     <string name="messages_screen_message_reference_long">\"%s…\"</string>
     <string name="messages_screen_user_blocked_notifier">You cannot view your message history with this user. Unblock them first to continue messaging.</string>
@@ -133,18 +133,18 @@
     <string name="upload_limit">You can upload up to 3 photos.</string>
     <string name="bio">Bio</string>
     <string name="bio_placeholder">Hi my name is...</string>
-    <string name="bio_length_indicator">%1$d / 100</string>
+    <string name="bio_length_indicator" translatable="false">%1$d / 100</string>
     <string name="dialog_title">Edit %1$s Link</string>
     <string name="invalid_url_error">Invalid URL. Please include http:// or https://</string>
     <string name="url_label">URL</string>
     <string name="ok_button">OK</string>
-    <string name="twitter_content_description">Twitter</string>
-    <string name="linkedin_content_description">LinkedIn</string>
-    <string name="instagram_content_description">Instagram</string>
+    <string name="twitter_content_description" translatable="false">Twitter</string>
+    <string name="linkedin_content_description" translatable="false">LinkedIn</string>
+    <string name="instagram_content_description" translatable="false">Instagram</string>
     <string name="meatball_menu_content_description">Menu</string>
-    <string name="twitter">Twitter</string>
-    <string name="linkedin">LinkedIn</string>
-    <string name="instagram">Instagram</string>
+    <string name="twitter" translatable="false">Twitter</string>
+    <string name="linkedin" translatable="false">LinkedIn</string>
+    <string name="instagram" translatable="false">Instagram</string>
 
     <!-- Connect with Others -->
     <string name="enable_location_updates">Start connecting with nearby users</string>
@@ -154,7 +154,7 @@
     <string name="requires_permissions">Proxipal requires location permissions</string>
 
     <string name="proximity_radius_text">Searching for users within %1$.2f meters</string>
-    <string name="server_client_id">06277155842-cvp1gfmpl2euecgn1bsaaf4c1il2nnpa.apps.googleusercontent.com</string>
+    <string name="server_client_id" translatable="false">06277155842-cvp1gfmpl2euecgn1bsaaf4c1il2nnpa.apps.googleusercontent.com</string>
     <string name="title_activity_reset_password1">ResetPassword1</string>
 
     <!-- Interests -->
@@ -207,6 +207,7 @@
 
 <!--    Start of friends list strings -->
     <string name="friends_list_navigate_to_compass_screen">See compass</string>
-    <string name="friends_list_navigate_to_messages_screen">Message</string>
-<!--    End of friends list strings -->
+    <string name="friends_list_navigate_to_messages_screen" translatable="false">Message</string>
+    <string name="compass_screen_cancel_message" translatable="false">Message</string>
+    <!--    End of friends list strings -->
 </resources>

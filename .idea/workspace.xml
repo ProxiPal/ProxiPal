@@ -48,7 +48,9 @@
   <component name="ChangeListManager">
     <list default="true" id="12f788ab-0aea-4cd4-aef2-ea7f8311b508" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/layout/activity_speech_recognition.xml" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/layout/activity_speech_recognition.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/values-es/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/values-es/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/values-zh/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/values-zh/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/ProxiPalTest_client_20231205232005/app/src/main/res/values/strings.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,7 +60,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[C:\Users\brian\.android\avd\Pixel_6_Pro_API_34_1.avd]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=LocalEmulator, isTemplate=false, identifier=path=C:\Users\brian\.android\avd\Pixel_6_Pro_API_34_1.avd)]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$/ProxiPal2">
       <ProjectState />
@@ -158,10 +160,12 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "Functional-and-UI-Adjustments",
+    "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
     "last_directory_selection": "C:/Users/brian/OneDrive/Documents/GitHub/ProxiPal/ProxiPalTest_client_20231205232005/app/src/main/java/com/mongodb/app",
     "last_opened_file_path": "C:/Users/brian/AndroidStudioProjects/SpeechToText57",
     "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle"
@@ -682,7 +686,7 @@
       <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
       <DebugAllEnabled>false</DebugAllEnabled>
-      <ForceTestExec>false</ForceTestExec>
+      <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
     <configuration name="ProxiPalTest_client_20231205232005:app [signingReport]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
@@ -704,7 +708,7 @@
       <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
       <DebugAllEnabled>false</DebugAllEnabled>
-      <ForceTestExec>false</ForceTestExec>
+      <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
     <configuration name="ProxiPalTest_client_20231205232005:app [testDebugUnitTest]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
@@ -726,7 +730,7 @@
       <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
       <DebugAllEnabled>false</DebugAllEnabled>
-      <ForceTestExec>false</ForceTestExec>
+      <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
     <list>
