@@ -128,15 +128,31 @@ class CompassPermissionHandler(
     private fun onPause(){
         // region WifiP2P
         // Unregister the broadcast receiver
-        activity.unregisterReceiver(receiver)
+        try{
+            activity.unregisterReceiver(receiver)
+        }
+        catch (exception: IllegalArgumentException){
+            Log.e(
+                "CompassPermissionHandler",
+                "Could not successfully end Wifi P2P processes"
+            )
+        }
         // endregion WifiP2P
     }
 
     private fun onStop(){
         // region NearbyAPI
-        compassNearbyAPI.updateConnectionType(CompassConnectionType.OFFLINE)
-        // Release all assets when the Nearby API is no longer necessary
-        compassNearbyAPI.releaseAssets()
+        try{
+            compassNearbyAPI.updateConnectionType(CompassConnectionType.OFFLINE)
+            // Release all assets when the Nearby API is no longer necessary
+            compassNearbyAPI.releaseAssets()
+        }
+        catch (exception: UninitializedPropertyAccessException){
+            Log.e(
+                "CompassPermissionHandler",
+                "Could not successfully end Nearby API processes"
+            )
+        }
         // endregion NearbyAPI
     }
 
