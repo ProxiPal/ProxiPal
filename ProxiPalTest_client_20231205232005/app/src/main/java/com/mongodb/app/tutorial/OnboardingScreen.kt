@@ -169,8 +169,8 @@ fun AppOnboarding(
         }
         else if (currentStep == 3){
             circleOffset = 48
-            EventScreen(eventsViewModel = eventsViewModel, navController = navController)
             Box {
+                EventScreen(eventsViewModel = eventsViewModel, navController = navController)
                 CircleToBottomAppBar(circleOffset)
             }
         }
