@@ -216,20 +216,7 @@ class CensoringViewModel (
      */
     private fun readCensoredTextList(){
         viewModelScope.launch {
-            if (!FetchCensoredTextThread.isProfanityRead.value){
-                Log.i(
-                    TAG(),
-                    "Profanity will be read now"
-                )
-                FetchCensoredTextThread.getInstance().start()
-            }
-            else{
-                Log.i(
-                    TAG(),
-                    "Skipping profanity reading; Current profanity size = \"${profanityListAll.size}\""
-                )
-                return@launch
-            }
+            FetchCensoredTextThread.getInstance().start()
             profanityListAll.clear()
             var shouldKeepReReading = true
             val loopLimit = 10
