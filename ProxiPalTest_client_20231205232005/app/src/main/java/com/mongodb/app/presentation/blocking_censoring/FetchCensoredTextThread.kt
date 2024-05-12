@@ -2,6 +2,7 @@ package com.mongodb.app.presentation.blocking_censoring
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
+import com.mongodb.app.TAG
 import com.mongodb.app.data.blocking_censoring.CensoringData.Companion.delimitersCsv
 import com.mongodb.app.data.blocking_censoring.CensoringData.Companion.httpUrlConnectionTimeout
 import com.mongodb.app.data.blocking_censoring.CensoringData.Companion.urlCsv
@@ -36,12 +37,25 @@ class FetchCensoredTextThread : Thread(){
     // Singleton instance
     companion object{
         private var _instance: FetchCensoredTextThread? = null
+        val isProfanityRead = mutableStateOf(false)
 
         fun getInstance(): FetchCensoredTextThread{
             if (_instance == null){
                 _instance = FetchCensoredTextThread()
             }
             return _instance!!
+        }
+
+        fun endThread(){
+            if (_instance != null){
+                Log.i(
+                    TAG(),
+                    "Thread ended"
+                )
+                _instance!!.interrupt()
+                // To allow renewing the instance
+                _instance = null
+            }
         }
     }
 
@@ -158,6 +172,11 @@ class FetchCensoredTextThread : Thread(){
         }
 
         isDoneFetchingData.value = true
+        isProfanityRead.value = true
+    }
+
+    override fun interrupt() {
+        super.interrupt()
     }
     // endregion Functions
 }

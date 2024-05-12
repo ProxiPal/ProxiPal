@@ -177,8 +177,24 @@ class CensoringViewModel (
 
     init{
         // This boolean condition is only to allow previews to work (error is an illegal thread state)
-        if (shouldReadCensoredTextOnInit){
-            readCensoredTextList()
+        // Only read if the current list of profanity has not already been read and loaded in
+        // This fixes Thread related errors when logging out then logging back in
+        if (shouldReadCensoredTextOnInit && profanityListAll.size == 0){
+            try{
+                readCensoredTextList()
+            }
+            catch (exception: IllegalThreadStateException){
+                Log.e(
+                    "CensoringViewModel",
+                    "There was an error while reading profanity lists from GitHub repositories"
+                )
+            }
+        }
+        else{
+            Log.i(
+                TAG(),
+                "Current profanity size is > 0; Skipping profanity reading"
+            )
         }
     }
 
@@ -199,9 +215,22 @@ class CensoringViewModel (
      * Attempts to read a list of keyphrases to censor messages in the messages screen
      */
     private fun readCensoredTextList(){
-        profanityListAll.clear()
-        FetchCensoredTextThread.getInstance().start()
         viewModelScope.launch {
+            if (!FetchCensoredTextThread.isProfanityRead.value){
+                Log.i(
+                    TAG(),
+                    "Profanity will be read now"
+                )
+                FetchCensoredTextThread.getInstance().start()
+            }
+            else{
+                Log.i(
+                    TAG(),
+                    "Skipping profanity reading; Current profanity size = \"${profanityListAll.size}\""
+                )
+                return@launch
+            }
+            profanityListAll.clear()
             var shouldKeepReReading = true
             val loopLimit = 10
             var loopIter = 0
@@ -253,6 +282,7 @@ class CensoringViewModel (
                 )
             }
 //            testTextCensoring()
+            FetchCensoredTextThread.endThread()
         }
     }
 
