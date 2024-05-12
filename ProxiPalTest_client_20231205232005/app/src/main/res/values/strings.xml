@@ -203,6 +203,7 @@
     <string name="delete_account_confirmation_message">If you delete your account you will lose all your data. This action cannot be reversed.</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="confirm">Confirm</string>
+    <string name="this_is_the_events_screen_here_you_can_see_various_events_associated_with_your_account">This is the events screen, here you can see various events associated with your account</string>
 
 
 <!--    Start of friends list strings -->

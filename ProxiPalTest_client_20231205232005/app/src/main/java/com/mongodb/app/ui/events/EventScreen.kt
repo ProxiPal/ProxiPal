@@ -57,7 +57,7 @@ import org.mongodb.kbson.serialization.Bson
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EventScreen(eventsViewModel: EventsViewModel, navController: NavHostController, navigateToEvent: (String) -> Unit, navigateToCreateEvent: () -> Unit) {
+fun EventScreen(eventsViewModel: EventsViewModel, navController: NavHostController, navigateToEvent: (String) -> Unit = {}, navigateToCreateEvent: () -> Unit = {}) {
     val myEventList by eventsViewModel.myEventList.collectAsState()
     val otherEventList by eventsViewModel.otherEventList.collectAsState()
     Scaffold(

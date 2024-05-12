@@ -163,7 +163,10 @@ fun NavigationGraph(
                 userProfileViewModel = userProfileViewModel,
                 toolbarViewModel = toolbarViewModel,
                 navController = navController,
-                homeViewModel = homeViewModel
+                homeViewModel = homeViewModel,
+                friendRequestViewModel = friendRequestViewModel,
+                blockingViewModel = blockingViewModel,
+                eventsViewModel = eventsViewModel
             )
         }
         composable(Routes.AdvancedScreenSettings.route) {

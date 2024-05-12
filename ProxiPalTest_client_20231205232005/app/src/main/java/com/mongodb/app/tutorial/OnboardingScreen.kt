@@ -43,11 +43,16 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.mongodb.app.R
 import com.mongodb.app.data.MockRepository
+import com.mongodb.app.friends.FriendRequestViewModel
+import com.mongodb.app.friends.FriendsListLayout
 import com.mongodb.app.home.HomeViewModel
 import com.mongodb.app.location.UserProfileDisplayList
 import com.mongodb.app.navigation.Routes
+import com.mongodb.app.presentation.blocking_censoring.BlockingViewModel
 import com.mongodb.app.presentation.tasks.ToolbarViewModel
 import com.mongodb.app.presentation.userprofiles.UserProfileViewModel
+import com.mongodb.app.ui.events.EventScreen
+import com.mongodb.app.ui.events.EventsViewModel
 import com.mongodb.app.ui.tasks.ConnectWithOthersScreen
 import com.mongodb.app.ui.theme.Blue
 import com.mongodb.app.ui.theme.MyApplicationTheme
@@ -96,16 +101,19 @@ fun AppOnboarding(
     toolbarViewModel: ToolbarViewModel,
     navController: NavHostController,
     homeViewModel: HomeViewModel,
-    modifier: Modifier = Modifier
+    friendRequestViewModel: FriendRequestViewModel,
+    blockingViewModel: BlockingViewModel,
+    eventsViewModel: EventsViewModel
 )
 {
     var currentStep by remember { mutableIntStateOf(0) }
     var alertDialogOffset by remember { mutableIntStateOf(80) }
-    var circleOffset by remember { mutableIntStateOf(-132) }
+    var circleOffset by remember { mutableIntStateOf(-146) }
     val steps = listOf(
         stringResource(R.string.welcome_to_appname),
         stringResource(R.string.this_is_the_profile_screen_here_you_can_edit_your_profile_and_add_photos),
         stringResource(R.string.this_is_the_connect_screen_here_you_can_connect_with_nearby_users_and_start_looking_for_friends),
+        stringResource(R.string.this_is_the_events_screen_here_you_can_see_various_events_associated_with_your_account),
         stringResource(R.string.this_is_the_friends_screen_here_you_can_exchange_messages_with_friends),
         stringResource(R.string.great_you_re_all_set)
     )
@@ -149,12 +157,32 @@ fun AppOnboarding(
             }
         }
         else if (currentStep == 2){
-            circleOffset = 0
+            circleOffset = -50
             Box {
                 ConnectWithOthersScreen(
                     toolbarViewModel = toolbarViewModel,
                     navController = navController,
                     userProfileViewModel = userProfileViewModel
+                )
+                CircleToBottomAppBar(circleOffset)
+            }
+        }
+        else if (currentStep == 3){
+            circleOffset = 48
+            EventScreen(eventsViewModel = eventsViewModel, navController = navController)
+            Box {
+                CircleToBottomAppBar(circleOffset)
+            }
+        }
+        else if (currentStep == 4){
+            circleOffset = 146
+            Box {
+                FriendsListLayout(
+                    navController = navController,
+                    viewModel = userProfileViewModel,
+                    friendRequestViewModel = friendRequestViewModel,
+                    blockingViewModel = blockingViewModel,
+                    toolbarViewModel = toolbarViewModel
                 )
                 CircleToBottomAppBar(circleOffset)
             }
@@ -201,6 +229,9 @@ fun OnboardingScreen(
     toolbarViewModel: ToolbarViewModel,
     navController: NavHostController,
     homeViewModel: HomeViewModel,
+    friendRequestViewModel: FriendRequestViewModel,
+    blockingViewModel: BlockingViewModel,
+    eventsViewModel: EventsViewModel,
     modifier: Modifier = Modifier
 ) {
     Surface(color = Color.White) {
@@ -213,7 +244,10 @@ fun OnboardingScreen(
                 userProfileViewModel = userProfileViewModel,
                 toolbarViewModel = toolbarViewModel,
                 navController = navController,
-                homeViewModel = homeViewModel
+                homeViewModel = homeViewModel,
+                friendRequestViewModel = friendRequestViewModel,
+                blockingViewModel = blockingViewModel,
+                eventsViewModel = eventsViewModel
             )
         }
     }
@@ -237,7 +271,7 @@ fun UserProfileLayoutWithCircle() {
                 navController = rememberNavController(),
                 homeViewModel = HomeViewModel(repository)
             )
-            CircleToBottomAppBar(0)
+            CircleToBottomAppBar(146)
         }
     }
 }
